@@ -86,6 +86,18 @@ else
   echo ">> brush assets NOT bundled (BLENDER_WEB_BUNDLE_BRUSHES=0) — sculpt/paint brushes disabled"
 fi
 
+# --- essentials NODE assets -> 5.3/datafiles/assets/nodes ---------------------
+# Blender 5.x modifiers like Array (and Scatter on Surface, Curve to Tube, ...) are geometry-
+# nodes ASSETS loaded from assets/nodes/geometry_nodes_essentials.blend. The blends are git-lfs
+# (auth-gated upstream), so a vendored copy lives in demo/node-assets (taken from the
+# blender-v5.2-release branch, CC0; older asset files load fine in 5.3).
+if [ -d "$ROOT/demo/node-assets/nodes" ]; then
+  mkdir -p "$STAGE/5.3/datafiles/assets/nodes"
+  cp -f "$ROOT"/demo/node-assets/nodes/*.blend "$STAGE/5.3/datafiles/assets/nodes/"
+  cp -f "$ROOT/demo/brush-assets/blender_assets.cats.txt" "$STAGE/5.3/datafiles/assets/" 2>/dev/null || true
+  echo ">> staged essentials node assets ($(ls "$STAGE"/5.3/datafiles/assets/nodes/*.blend | wc -l) blends)"
+fi
+
 # --- assets.tar.zst ----------------------------------------------------------
 echo ">> assets.tar.zst (zstd --ultra -21 -T0)"
 ( cd "$STAGE" && tar -cf "$OUT/assets.tar" 5.3 lib )
