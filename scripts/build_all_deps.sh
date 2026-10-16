@@ -33,7 +33,7 @@ wave() {  # wave <name> <script...>
 }
 
 # Wave 1: no inter-deps.
-wave foundational zlib fmt imath zstd jpeg libdeflate robinmap yamlcpp expat pystring tbb eigen pugixml brotli
+wave foundational zlib fmt imath zstd jpeg libdeflate robinmap yamlcpp expat pystring tbb eigen pugixml brotli opensubdiv
 # Wave 2: depend on wave 1.
 wave mid png minizip openjph tiff
 # Wave 3: FreeType (zlib + png + brotli). Blender's find_package(Freetype) is
