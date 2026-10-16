@@ -23,6 +23,10 @@ newer Blender/Emscripten versions.
   at `BLENDER_REF` from the `Makefile`.
 - C++ changes: commit inside `./blender/` on branch `ipad`, push to
   `GGlukyy/blender`, then update `BLENDER_REF` in the `Makefile` to that commit.
+- **Reference project:** `gessa-ai/blender-web` (GPL, Blender 5.2 LTS, its own WebGPU
+  backend, Chrome-only because of JSPI). When fixing a bug, check how gessa solved the
+  same thing (clone it to `~/ref/gessa`, read-only) and port the *fix*, not their
+  architecture. Credit every borrowed piece in `docs/THIRD_PARTY.md` (file, commit, license).
 - Remote `upstream` = HeyPuter. Before bigger work, check if upstream already
   fixed it (`git fetch upstream`). Good fixes can be offered back as a PR.
 
