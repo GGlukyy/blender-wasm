@@ -48,6 +48,13 @@ newer Blender/Emscripten versions.
 8. Upstream workflow `.github/workflows/build-release.yml` is HeyPuter's release
    build (hours). Leave it untouched; Actions on this fork stay off.
 
+## 3b. Is it our bug or Blender's?
+Before fixing any C++ bug, reproduce the same steps in **desktop Blender** of the same
+version (Lukáš's PC). Bug also on desktop → it is upstream Blender's, not the port's:
+don't fix it here, note it in STATUS.md (Lukáš can report it to Blender). Only bugs that
+are web-only are ours. After the 5.3 rebase (PLAN step R), re-test the whole bug list
+first — alpha-only bugs may be gone.
+
 ## 4. Testing on the iPad
 iPad Safari needs `crossOriginIsolated` (threads) → **HTTPS** + COOP/COEP headers.
 LAN `http://192.168…` will NOT work. Use:
