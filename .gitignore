@@ -49,3 +49,6 @@
 *.a
 /scratchpad/
 .DS_Store
+
+# local outputs (logs, captures)
+/out/
