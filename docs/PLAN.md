@@ -52,6 +52,9 @@ nový shader (počet cache-miss = 0), a Lukáš na iPadu (čistá data webu) pot
 + naše opravy. Konflikty hlavně v existujících souborech GPU modulu / CMake. Pak plný build
 a všechny testy + Lukáš projde na iPadu základní workflow.
 **Proč až teď:** dřív = rebasovat znova; později = víc našich C++ oprav k přenášení.
+**Výjimka (16. 10.):** opravy uvnitř `source/blender/gpu/webgpu/` (nové soubory portu) se
+při rebase přenesou bez konfliktů → ty se smí dělat hned (P2 depth/overlaye). Opravy
+mimo `webgpu/` (zbytek Blenderu) až po R.
 P0/P1 (JS) jsou na verzi nezávislé.
 **Hotovo když:** build z 5.3.0 projde, testy v `scripts/` zelené, Lukáš potvrdí na iPadu.
 
