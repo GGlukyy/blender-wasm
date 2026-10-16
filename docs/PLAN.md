@@ -25,6 +25,15 @@ s desktop Blenderem, najdi overlay shader / vertex format, který se ve WebGPU
 backendu kreslí špatně. Oprava v C++ → rebuild.
 **Hotovo když:** test porovná screenshot s referencí a Lukáš to potvrdí na iPadu.
 
+## P2b 💾 Otevírání .blend z desktopu (riziko poškození — ověřit brzy)
+**Problém (zjištěno z gessa-ai ADR-004):** wasm32 při čtení 64-bit `.blend` (z desktop
+Blenderu) zkracuje 8bajtové adresy bloků na 4 bajty (`>>3`, `BLO_core_bhead.hh`,
+`dna_genfile.cc`). Některé soubory pak kolidují → pád, nebo **tichá korupce dat**.
+**Postup:** ověř, jestli to má i náš fork (HeyPuter). Pokud ano: aspoň detektor kolizí
+(jako gessa patch 0017), dlouhodobě pointer interning. wasm64 NE (Safari ho neumí).
+**Hotovo když:** test otevře sadu .blend souborů z desktopu a buď je načte správně, nebo
+nahlas odmítne — nikdy tiše nepoškodí.
+
 ## P3 🧊 High-poly model — chybí kusy, seká se
 **Problém:** větší model se na iPadu vykreslí jen částečně a seká se.
 **Hypotéza (odhad):** limity WebGPU v Safari (`maxBufferSize`,
