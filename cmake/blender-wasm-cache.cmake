@@ -17,6 +17,8 @@ set(PYTHON_INCLUDE_DIRS  "${CMAKE_SOURCE_DIR}/../wasm-sysroot/include/python3.13
 set(PYTHON_LIBRARY       "${CMAKE_SOURCE_DIR}/../wasm-sysroot/lib/libpython3.13.a" CACHE FILEPATH "")
 set(PYTHON_LIBPATH       "${CMAKE_SOURCE_DIR}/../wasm-sysroot/lib" CACHE PATH "")
 set(WITH_PYTHON_NUMPY    OFF CACHE BOOL "")
+# HOST python: runs codegen scripts (discover_nodes.py etc.), not the wasm one
+set(PYTHON_EXECUTABLE     "/usr/bin/python3" CACHE FILEPATH "")
 
 # --- GPU: WebGPU backend (our gpu/webgpu/), no GL/Vulkan -------------------
 # Headless GHOST (no window); EEVEE renders offscreen through the WebGPU device
@@ -80,3 +82,8 @@ set(CMAKE_INSTALL_PREFIX     "${CMAKE_BINARY_DIR}/install" CACHE PATH "")
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH CACHE STRING "")
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH CACHE STRING "")
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH CACHE STRING "")
+
+# libpython bundles its own expat (pyexpat) next to our libexpat.a; 2 internal
+# symbols (g_reparseDeferralEnabledDefault, _INTERNAL_trim_to_complete_utf8_characters)
+# are defined twice. Both copies are equivalent -> first one wins.
+set(CMAKE_EXE_LINKER_FLAGS "-Wl,--allow-multiple-definition" CACHE STRING "")
