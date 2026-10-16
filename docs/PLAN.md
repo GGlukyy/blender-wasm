@@ -18,6 +18,17 @@ Animation) + Edit mode + Solid/Material/Rendered, přidej je do seedu.
 nový shader (počet cache-miss = 0), a Lukáš na iPadu (čistá data webu) potvrdí,
 že přepnutí je plynulé.
 
+## R 🔄 Rebase na Blender 5.3 (po vydání 5.3, před C++ opravami P2+)
+**Fakt:** náš Blender je `main` z 25. 6. 2026 = **5.3 alpha**. Port je 5 commitů navrch
+(`a565b82de` wasm work, `4665739a0` webgpu backend, `32531c3c5`, `a5a9e21a2`, `6b031d3d4`),
+~13 400 přidaných řádků, ~150 souborů, většinou NOVÉ soubory v `source/blender/gpu/`.
+**Postup:** v `./blender/` větev `ipad-5.3` z tagu `v5.3.0` → `git cherry-pick` těch 5 commitů
++ naše opravy. Konflikty hlavně v existujících souborech GPU modulu / CMake. Pak plný build
+a všechny testy + Lukáš projde na iPadu základní workflow.
+**Proč až teď:** dřív = rebasovat znova; později = víc našich C++ oprav k přenášení.
+P0/P1 (JS) jsou na verzi nezávislé.
+**Hotovo když:** build z 5.3.0 projde, testy v `scripts/` zelené, Lukáš potvrdí na iPadu.
+
 ## P2 🟠 Edit mode — není vidět výběr
 **Problém:** v edit modu se nevykreslí vybrané vrcholy/hrany/plochy (overlay).
 **Postup:** reprodukuj v Chrome (`scripts/editmode_test.mjs`), porovnej screenshot
