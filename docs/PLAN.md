@@ -20,6 +20,17 @@ nejsou vidět“ → stejná třída chyby: (a) body/tlusté čáry overlayů �
 1px body a čáry, Blender je musí rozšiřovat na quady; (b) kurzor „propadne“ objektem →
 čtení depth bufferu (readback) ve WebGPU backendu nevrací správnou hloubku.
 Jedna oprava může vyřešit víc chyb najednou.
+**Srovnání s gessa (Lukáš, Chrome PC, 16. 10.):**
+- tečky vrcholů v edit modu: NEJSOU vidět ani v gessa → bod (a) nevyřešil nikdo, je to náš úkol
+  (emulace velikosti bodů: rozšířit point na quad ve vertex shaderu / instancing, viz jak to
+  řeší Metal/Vulkan backend a `gpu_shader_*point*`).
+- hrany/plochy v edit modu: gessa je ukazuje **jen ve Wireframe**, HeyPuter vůbec → odhad:
+  overlay prohrává depth test se samotným meshem. Podezření: rozsah hloubky GL [-1,1] vs
+  WebGPU [0,1] a z toho špatný depth offset overlayů. Podívej se, jak gessa převádí depth
+  (donor), a porovnej s Vulkan backendem (má stejný [0,1] problém).
+- 3D kurzor: v gessa funguje, ale ne úplně přesně na povrch; v HeyPuter propadne →
+  stejné podezření (depth range + readback). Gessa je donor.
+Pořadí: nejdřív depth (opraví 2 chyby), pak body.
 **Hotovo když:** `scripts/parity_test.mjs` běží, vypíše seznam rozdílů a ten se stane
 task listem pro P2+. Lukáš navíc jednou projde `docs/TEST_CHECKLIST.md`.
 
