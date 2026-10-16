@@ -23,7 +23,7 @@ const cb = page.locator('input[type=checkbox]').first();
 if (await cb.count() && await cb.isVisible().catch(() => false)) await cb.check();
 await page.getByRole("button", { name: /Launch Blender/ }).click();
 let ok = false;
-for (let i = 0; i < 420 && !ok; i++) {
+for (let i = 0; i < Number(process.env.BOOT_S || 420) && !ok; i++) {
   const s = await page.evaluate(() => window.__BGUI__ || {});
   ok = !!s.window;
   if (!ok) await new Promise(r => setTimeout(r, 1000));
