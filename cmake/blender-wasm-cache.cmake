@@ -86,4 +86,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH CACHE STRING "")
 # libpython bundles its own expat (pyexpat) next to our libexpat.a; 2 internal
 # symbols (g_reparseDeferralEnabledDefault, _INTERNAL_trim_to_complete_utf8_characters)
 # are defined twice. Both copies are equivalent -> first one wins.
-set(CMAKE_EXE_LINKER_FLAGS "-Wl,--allow-multiple-definition" CACHE STRING "")
+# + emdawnwebgpu port: provides wgpu* (see source/blender/gpu/CMakeLists.txt)
+# + brotli (FreeType WOFF2/Brotli fonts): FreeType is in libs but brotli was never on the link line
+set(_wl "${CMAKE_SOURCE_DIR}/../wasm-sysroot/lib")
+set(CMAKE_EXE_LINKER_FLAGS "--use-port=emdawnwebgpu -Wl,--allow-multiple-definition ${_wl}/libbrotlidec.a ${_wl}/libbrotlicommon.a" CACHE STRING "")
