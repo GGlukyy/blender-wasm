@@ -8,6 +8,21 @@ i na iPadu přes HTTPS tunel.
 **Hotovo když:** Lukáš pošle screenshot z iPadu s vlastním buildem.
 Zapiš čas buildu a velikost disku do STATUS.md (příště víme, co čekat).
 
+## A 🔬 Automatický „parity“ test (web vs. desktop) — hned po P0
+**Proč:** hlásit chyby po jedné je pomalé a Lukáš nezná všechny funkce. Ať je najde stroj.
+**Postup:** sada skriptů, která udělá STEJNÉ akce v desktop Blenderu (headless, Python,
+screenshot viewportu) i ve web buildu (Playwright, Chrome na PC) a porovná obrázky:
+overlaye (3D kurzor, výběr v edit modu, wireframe, gizmo, obrys), modifikátory,
+UV, materiál, uložení/otevření. Výstup: tabulka ✅/❌ + rozdílové obrázky v `out/parity/`.
+Inspirace: gessa-ai „oracle“ (porovnávání s nativním buildem).
+**Hypotéza k nálezům Lukáše (odhad):** 3D kurzor i výběr v edit modu „fungují, ale
+nejsou vidět“ → stejná třída chyby: (a) body/tlusté čáry overlayů — WebGPU umí jen
+1px body a čáry, Blender je musí rozšiřovat na quady; (b) kurzor „propadne“ objektem →
+čtení depth bufferu (readback) ve WebGPU backendu nevrací správnou hloubku.
+Jedna oprava může vyřešit víc chyb najednou.
+**Hotovo když:** `scripts/parity_test.mjs` běží, vypíše seznam rozdílů a ten se stane
+task listem pro P2+. Lukáš navíc jednou projde `docs/TEST_CHECKLIST.md`.
+
 ## P1 ⚡ Přepnutí workspace bez seknutí (jen JS / data)
 **Problém:** přepnutí Layout → Shading se na iPadu seká. Shadery se překládají
 (GLSL → WGSL přes Tint) až za běhu, protože chybí v seed balíku `wgsl-cache.json`.

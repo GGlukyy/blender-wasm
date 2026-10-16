@@ -8,6 +8,8 @@ Výsledek: 🟡 příprava
   - high-poly model: seká se, chybí části,
   - přepnutí Layout → Shading: dlouhé seknutí,
   - Cycles render: pomalý (mimo plán).
+  - 3D kurzor: neviditelný, při umístění na objekt „propadne“ skrz.
+  - edit mode: výběr funguje (klik zabere), jen není vidět.
 - `Makefile` teď bere Blender z `GGlukyy/blender`.
 
 ## Co dál
