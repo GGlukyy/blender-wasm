@@ -13,6 +13,7 @@ await page.getByRole("button", { name: /Launch Blender/ }).click();
 for (let i = 0; i < 300; i++) { if ((await page.evaluate(() => window.__BGUI__ || {})).window) break; await new Promise(r => setTimeout(r, 1000)); }
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
 await wait(6000);
+await page.keyboard.press("Escape"); await wait(1500);
 const box = await page.locator("#canvas").boundingBox();
 const c = { x: box.x + 600, y: box.y + 400 };
 await page.mouse.move(c.x, c.y);
