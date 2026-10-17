@@ -12,5 +12,15 @@ run touch scripts/touch_win.sh
 run occl scripts/p2_occl_check.sh
 run blend_open scripts/blend_open_win.sh
 run files scripts/files_win.sh
+run utf8 scripts/utf8_win.sh
+run utf8_outliner scripts/utf8_outliner_win.sh
+run templates scripts/templates_win.sh
+run bar scripts/bar_win.sh
+run touch_modal scripts/touch_modal_win.sh
+run touch_loopcut scripts/touch_loopcut_win.sh
+run touch_boxsel scripts/touch_boxsel_win.sh
+run autokbd scripts/autokbd_win.sh
+run hidden scripts/hidden_win.sh
+run editors scripts/editors_win.sh
 run seed_verify scripts/wgsl_seed_win.sh verify
 echo "=== hotovo" | tee -a $L
