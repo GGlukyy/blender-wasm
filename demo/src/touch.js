@@ -119,7 +119,11 @@ export function installTouch(canvas) {
       area = inViewport(e.clientX, e.clientY) ? "view" : "ui";
       /* Let Blender hover-highlight a gizmo under the finger (nav hand/zoom icons, move handles);
        * if one is hot when the drag starts, the drag goes to it (left button) instead of orbiting. */
-      if (area === "view") mouse("mousemove", e.clientX, e.clientY, 0, 0);
+      if (area === "view") {
+        mouse("mousemove", e.clientX, e.clientY, 0, 0);
+        /* 3D gizmo highlight resolves one event late (pending until the next mouse event) → repeat the move. */
+        setTimeout(() => { if (mode === "pending") mouse("mousemove", e.clientX, e.clientY, 0, 0); }, 35);
+      }
       clearTimeout(longTimer);
       longTimer = setTimeout(() => {
         const p = [...pointers.values()][0];
@@ -163,7 +167,7 @@ export function installTouch(canvas) {
 
     if (mode === "pending") {
       /* In a viewport give Blender ~60 ms to hover-highlight a gizmo under the finger before deciding orbit vs gizmo drag. */
-      if (Math.hypot(p.x - p.x0, p.y - p.y0) > MOVE_START_PX && (area !== "view" || performance.now() - p.t0 >= 60)) {
+      if (Math.hypot(p.x - p.x0, p.y - p.y0) > MOVE_START_PX && (area !== "view" || performance.now() - p.t0 >= 80)) {
         clearTimeout(longTimer);
         const gizmoHot = area === "view" && window.Module && window.Module._blender_web_gizmo_hot && window.Module._blender_web_gizmo_hot() === 1;
         const left = area === "ui" || gizmoHot;
