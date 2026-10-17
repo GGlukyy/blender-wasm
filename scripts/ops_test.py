@@ -201,6 +201,15 @@ def _():
         p = '/tmp/x.' + ext; op(p); assert os.path.getsize(p) > 50, ext; res.append(ext)
     return tuple([len(res), 0, 0])
 
+@test('voxel_remesh_warns', (None, None, None))
+def _():
+    # bez OpenVDB nesmí selhat potichu: operátor hlásí chybu (modifikátor: error text v UI, z Pythonu nečitelný)
+    ob = fresh(); ob.data.remesh_voxel_size = 0.1
+    try:
+        bpy.ops.object.voxel_remesh(); raise AssertionError('voxel_remesh nehlásí chybu')
+    except RuntimeError as e:
+        assert 'OpenVDB' in str(e), str(e)
+    return (None, None, None)
 @test('save_reload', (26, 48, 24))
 def _():
     ob = fresh(); edit(ob); bpy.ops.mesh.subdivide(number_cuts=1); bpy.ops.object.mode_set(mode='OBJECT')
