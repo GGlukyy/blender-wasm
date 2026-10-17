@@ -47,6 +47,7 @@
 - [x] (hunt: `scripts/anim_win.sh` PASS — klíč I (9 fcurves), posun G X, scrub šipkami; snímek 1 x=0, snímek 13 x=2,057; out/win/anim.png; regress_all.sh po UV opravě bez FAIL) Lov chyb kolo 9: animace
 - [x] (hunt: `scripts/wsalive_win.sh` PASS — všech 11 workspaces přepnutých Ctrl+PageDown v edit modu kostky žije a Python timer běží) Lov chyb kolo 10: živost workspaces
 - [x] (hunt: `scripts/persist2_win.sh` PASS — .blend uložený do /opfs/home přežije reload stránky, po otevření sedí modifikátor, materiál i pozice) Lov chyb kolo 11: perzistence
+- [x] (hunt: `scripts/stress_test.py` přes ops_test.mjs OPS_PY — 30 opic × subsurf 2 aplikovaný = 236 160 polygonů za 2,1 s, 60 undo pushů 0,2 s, undo/redo funguje do limitu 32 kroků (výchozí Preferences; na desktopu stejně)) Lov chyb kolo 12: zátěž
 
 ## Výkon (až nebude co opravovat)
 - [x] (změřeno 17. 10., `scripts/passes_win.sh` = `?passlog=1`; orbit kostky Solid, passy na snímek ÷208 snímků: WebGPUBackbuffer 11, `&framebuffer.fb` 10 (obojí = kompozice UI regionů, ne viewport), overlay_line_fb 4, overlay_output 4, po 2: Clear Main, smaa_resolve, outline.prepass, dfbl overlay, smaa_edge, smaa_weight; po 1: Opaque.Gbuffer/Deferred, Workbench.Outline, taa_accumulation, overlay_line_on, Clear In Front… = ~48) Rozpad passů: víc než polovina jsou kompozice UI (střídání offscreen region ↔ backbuffer = nutné lámání passů); zisk by dalo jen cachování/slučování kompozice regionů (zásah do upstream UI kódu, nejisté) → neřeším, dokud iPad nepotvrdí, že je to úzké hrdlo (`?perf=1`).
