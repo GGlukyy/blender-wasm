@@ -18,6 +18,8 @@ Výsledek: 🟡 víkend: opraveno ~10 chyb ověřených na PC (viz níže), regr
 - Kompilace pipeline při prvním Material Preview blokuje 6–7 s (jen hláška, ne oprava).
 
 # Víkend — co je nového (17. 10., odpoledne)
+- Kolo 30 (noc): `ops_win.sh` teď 81 testů, všechny PASS (nově multires, Remesh Blocks, sekvencer). Cycles v buildu není (jen EEVEE/Workbench) — známá mezera, ne chyba.
+
 - Noc 17. → 18. 10. (21:45): backlog zkontrolován — zbývají jen položky, které potřebují iPad nebo desktop Blender (z-fighting, OpenVDB, drag&drop parent, Info editor řádek). `startup_win.sh` PASS (seed 198 shaderů, okno naběhlo za 5,6 s). Žádná nová chyba, žádná změna kódu.
 
 - Večer 17. 10. (kola 15–21): nové testy přes UI (Shift+D, merge, delete, G/S/R s číslem, výběr/skrytí, proportional editing, Smart UV dialog, barva materiálu v Material Preview/Rendered), `ops_win.sh` 77 testů. **Žádná nová chyba**, `regress_all.sh` bez FAIL.

@@ -510,10 +510,30 @@ def _():
     out('OPS_TIMING big_blend polys=%d size=%dKB save=%.2fs open=%.2fs' % (n, sz // 1024, ts, to))
     assert ts < 30 and to < 30, (ts, to)
     return (None, None, None)
+@test('multires_subdiv_apply', (None, None, None))
+def _():
+    ob = fresh(); bpy.context.view_layer.objects.active = ob; ob.select_set(True); m = ob.modifiers.new('M', 'MULTIRES')
+    with bpy.context.temp_override(object=ob, active_object=ob):
+        bpy.ops.object.multires_subdivide(modifier='M', mode='CATMULL_CLARK'); bpy.ops.object.multires_subdivide(modifier='M', mode='CATMULL_CLARK')
+    assert m.total_levels == 2, m.total_levels
+    n = len(ob.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.polygons); assert n == 96, n
+    return (None, None, None)
+@test('remesh_blocks_modifier', (None, None, None))
+def _():
+    ob = fresh(); m = ob.modifiers.new('R', 'REMESH'); m.mode = 'BLOCKS'; m.octree_depth = 4
+    n = len(ob.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.polygons); assert n > 6, n
+    return (None, None, None)
+@test('sequencer_add_color_strip', (None, None, None))
+def _():
+    sc = bpy.context.scene; sc.sequence_editor_create()
+    st = sc.sequence_editor.sequences.new_effect(name='c', type='COLOR', channel=1, frame_start=1, length=20) if hasattr(sc.sequence_editor, 'sequences') else sc.sequence_editor.strips.new_effect(name='c', type='COLOR', channel=1, frame_start=1, length=20)
+    assert st.frame_final_duration == 19 or st.frame_final_duration == 20, st.frame_final_duration
+    return (None, None, None)
 # ZNÁMÉ MEZERY buildu (WITH_* vypnuto v cmake/blender-wasm-cache.cmake) — hlásí se jako GAP, nepočítají se jako FAIL.
 GAPS = [
     ('voxel_remesh (OpenVDB)', lambda: (lambda ob: (setattr(ob.modifiers.new('R', 'REMESH'), 'mode', 'VOXEL'), len(ob.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.polygons))[1])(fresh())),
     ('rigid_body (Bullet)', lambda: (fresh(), bpy.ops.rigidbody.object_add())[1]),
+    ('cycles_engine', lambda: (setattr(bpy.context.scene.render, 'engine', 'CYCLES'), True)[1]),
     ('quadriflow_remesh', lambda: (fresh(), bpy.ops.object.quadriflow_remesh())[1]),
 ]
 for name, fn in GAPS:
