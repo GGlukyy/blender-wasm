@@ -408,7 +408,19 @@ const showGpuLost = (reason) => {
   b.innerHTML = "GPU se odpojila (" + reason + "). Obnov stránku — rozdělaná práce je v <code>/opfs/home/_autosave.blend</code> (📁). <button style='margin-left:12px;font-size:16px' onclick='location.reload()'>Obnovit</button>";
   document.body.appendChild(b);
 };
+/* File ▸ Quit / Ctrl+Q: Blender prints "Blender quit" and the runtime halts, leaving the LAST FRAME frozen
+ * on the canvas with no hint. Say so and offer a reload. */
+const showQuit = () => {
+  if (document.getElementById("blender-quit")) return;
+  window.__BLENDER_QUIT__ = true;
+  const b = document.createElement("div");
+  b.id = "blender-quit";
+  b.style.cssText = "position:fixed;left:0;right:0;top:0;z-index:99999;padding:14px 18px;background:#444;color:#fff;font:16px system-ui;text-align:center";
+  b.innerHTML = "Blender skončil (File ▸ Quit / Ctrl+Q). Uložené soubory v 📁 zůstaly; rozdělaná práce je v <code>/opfs/home/_autosave.blend</code>. <button style='margin-left:12px;font-size:16px' onclick='location.reload()'>Spustit znovu</button>";
+  document.body.appendChild(b);
+};
 const scan = (t) => {
+  if (/^Blender quit\b/.test(t.trim())) showQuit();
   if (t.startsWith("WEB_OPEN_URL ")) {
     const u = t.slice(13).trim();
     if (/^https?:\/\//.test(u)) { window.__LAST_OPEN_URL__ = u; window.open(u, "_blank", "noopener"); }

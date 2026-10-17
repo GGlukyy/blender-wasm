@@ -102,6 +102,8 @@
 
 - [x] (PASS: `scripts/gizmo_rs_win.sh` — Rotate gizmo: tah prstem na prstenci otočí objekt (rot Z −0,302 rad) a pohled se neotočí; Scale gizmo: tah prstem na úchytu změní měřítko (1 → 1,95); bod gizma hledá test hoverem přes `blender_web_gizmo_hot`; out/win/gizmo_rotate.png, gizmo_scale.png) Lov chyb kolo 61: Rotate/Scale gizmo prstem (Move už v kole 39)
 
+- [x] (PASS: `scripts/quit_win.sh` — Ctrl+Q: Blender vypsal „Blender quit“, runtime se zastavil a na plátně zůstal ZAMRZLÝ poslední snímek bez jakékoli hlášky (+ PAGEERROR memory access out of bounds); teď šedý pruh „Blender skončil … Spustit znovu“ (`showQuit` v `demo/src/main.js`); `startup_win`, `gpulost_win` PASS) Lov chyb kolo 62: File ▸ Quit / Ctrl+Q
+
 ## Výkon (až nebude co opravovat)
 - [x] (změřeno 18. 10., PC/NVIDIA, `SCENES=ico6_edit,ico7_edit,monkey_sub2_edit scripts/drawtime_win.sh`: překreslení okna v EDIT MODU: kostka 13,4 ms, ico 40k trojúhelníků 18,8 ms, ico 164k = 32,3 ms, opice+Subsurf2 16,1 ms → pro malé herní assety (<20k tris) edit mode drží ~55 FPS na PC, 164k je na hraně; iPad odhadem 2–3× pomalejší, změřit přes `?perf=1`) Cena snímku v edit modu
 - [x] (znovu změřeno po numpy/OIIO/ikonách: `scripts/startup_win.sh` okno nahoře za 5,4 s, bez regrese oproti 5,6 s) Start po víkendových změnách

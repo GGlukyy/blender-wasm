@@ -15,7 +15,8 @@ Výsledek: 🟡 víkend: kola 41–60 hotová na PC (diakritika, šablony, vlasy
 11. **Z plochy (celoobrazovkově):** je horní menu Blenderu (File Edit Render…) celé vidět pod hodinami a spodní lišta nad čárou dole? (kolo 56, odhad)
 12. **Větší UI pro prsty (volitelné):** otevři stránku s `?uiscale=1.3` (nebo Edit ▸ Preferences ▸ Interface ▸ Resolution Scale) — líbí se ti? Panel vpravo je pak užší. Řekni, jestli to má být výchozí.
 13. **Pozor na klávesy z lišty:** platí pro oblast, kam jsi naposledy klepnul (jako kurzor myši). Chceš Tab/G/E ve viewportu → nejdřív klepni do viewportu. Dává to smysl, nebo má lišta sama „skočit“ do viewportu?
-14. Dále stále platí seznam „Co otestovat na iPadu (podle důležitosti)“ níže (dotyk, soubory, výběr, z-fighting, `?perf=1`).
+14. **File ▸ Quit / Ctrl+Q** (kolo 62): dřív zamrzlý obraz bez vysvětlení; teď šedý pruh nahoře „Blender skončil … Spustit znovu". Zkus (Ctrl+Q na klávesnici) — pruh se objeví?
+15. Dále stále platí seznam „Co otestovat na iPadu (podle důležitosti)“ níže (dotyk, soubory, výběr, z-fighting, `?perf=1`).
 
 ## Blocked / otevřené (poctivě)
 - Z-fighting ploch: nereprodukuje se na PC, aplikovaná hypotéza čeká na iPad.
