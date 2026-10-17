@@ -186,6 +186,19 @@ def _():
     bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.mesh.mark_sharp(); bpy.ops.mesh.mark_seam(); bpy.ops.mesh.normals_make_consistent()
     bpy.ops.object.mode_set(mode='OBJECT'); assert len(ob.data.polygons) == 54, len(ob.data.polygons)
     return (None, None, None)
+@test('attributes_vertex_colors_gn_tree', (None, None, None))
+def _():
+    ob = fresh(); me = ob.data
+    ca = me.color_attributes.new('Col', 'BYTE_COLOR', 'CORNER'); assert len(ca.data) == 24
+    for d in ca.data: d.color = (1, 0, 0, 1)
+    fa = me.attributes.new('w', 'FLOAT', 'POINT'); assert len(fa.data) == 8
+    nt = bpy.data.node_groups.new('G', 'GeometryNodeTree')
+    nt.interface.new_socket('Geometry', in_out='INPUT', socket_type='NodeSocketGeometry'); nt.interface.new_socket('Geometry', in_out='OUTPUT', socket_type='NodeSocketGeometry')
+    gi = nt.nodes.new('NodeGroupInput'); go = nt.nodes.new('NodeGroupOutput'); sm = nt.nodes.new('GeometryNodeSubdivisionSurface')
+    nt.links.new(gi.outputs[0], sm.inputs[0]); nt.links.new(sm.outputs[0], go.inputs[0])
+    m = ob.modifiers.new('GN', 'NODES'); m.node_group = nt
+    n = len(ob.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.polygons); assert n == 24, n
+    return (None, None, None)
 @test('subdivide', (26, 48, 24))
 def _():
     ob = fresh(); edit(ob); bpy.ops.mesh.subdivide(number_cuts=1); return counts(ob)
