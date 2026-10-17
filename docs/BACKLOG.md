@@ -25,7 +25,7 @@
 - [x] (analýzou, odhad) Velikost vrcholů: expanze quadu používá přesně `gl_PointSize` px (= theme.vert × 2 = 6 px), jako desktop; rozdíl je optický (kulatý bod). Na iPadu ověřit okem.
 - [x] (PASS: `scripts/blend_open_win.sh` — dobrý 64-bit soubor OK, uměle poškozený (kolize adres) odmítnut s hláškou; fork má stejný `>>3` truncation jako gessa ADR-004; dlouhodobě pointer interning zůstává otevřené) **P2b** riziko korupce 64-bit .blend (gessa ADR-004): ověř + aspoň detektor kolizí.
 - [!] BLOCKED na iPad data (PC test PASS: ico sphere 1,3 M trojúhelníků i 5,2 M s limity omezenými jako Safari 256 MiB/128 MiB se vykreslí celá bez chyb, `scripts/highpoly_win.sh 9 ipad`, out/win/hp_9i_orbit.png, hp_10i_orbit.png; 1,3 M = 38 ms/snímek, 5,2 M = 180 ms na NVIDIA. Limity bufferů tedy asi nejsou příčina; podezření: paměť wasm heapu (5 M tris = 2,3 GB) vs limit iOS tabu — potřebuju čísla z iPadu přes `?perf=1`) **P3** high-poly: model 500k–1M trojúhelníků, ověř limity bufferů a čas snímku.
-- [ ] `_multiprocessing` chybí → add-on Extensions (bl_pkg) se neregistruje (nízká priorita).
+- [x] (WONTFIX, analýzou: bl_pkg downloader.py spouští stahování přes `multiprocessing` `spawn` = nový proces, v prohlížeči nemožné; stub by jen schoval traceback a Extensions by stejně nefungovaly. Řešení by bylo přepsat downloader na vlákno — mimo cíl) `_multiprocessing` chybí → add-on Extensions (bl_pkg) se neregistruje (nízká priorita).
 
 - [ ] Miniatury štětců v asset shelfu (Sculpt) zůstávají jako „hodiny“ — náhledy (preview) se negenerují. Kosmetické.
 
