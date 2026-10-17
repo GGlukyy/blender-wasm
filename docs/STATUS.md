@@ -18,6 +18,8 @@ Výsledek: 🟡 víkend: opraveno ~10 chyb ověřených na PC (viz níže), regr
 - Kompilace pipeline při prvním Material Preview blokuje 6–7 s (jen hláška, ne oprava).
 
 # Víkend — co je nového (17. 10., odpoledne)
+- Kolo 31: otočení iPadu / změna velikosti okna ověřeno na PC (`resize_win.sh` PASS, DPR 2). Opravena nezachycená chyba při každém resize (`fitCanvas`). **Na iPadu ověř:** otoč iPad naležato/na výšku — layout se přeloží? Je UI dost ostré (odhad: kreslí se v 1× rozlišení, ne Retina)?
+
 - Kolo 30 (noc): `ops_win.sh` teď 81 testů, všechny PASS (nově multires, Remesh Blocks, sekvencer). Cycles v buildu není (jen EEVEE/Workbench) — známá mezera, ne chyba.
 
 - Noc 17. → 18. 10. (21:45): backlog zkontrolován — zbývají jen položky, které potřebují iPad nebo desktop Blender (z-fighting, OpenVDB, drag&drop parent, Info editor řádek). `startup_win.sh` PASS (seed 198 shaderů, okno naběhlo za 5,6 s). Žádná nová chyba, žádná změna kódu.

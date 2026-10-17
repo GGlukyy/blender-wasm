@@ -412,8 +412,13 @@ const scan = (t) => {
 const canvas = document.getElementById("canvas");
 const fitCanvas = () => {
   if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    /* After transferControlToOffscreen() the main thread may not resize the
+     * canvas (InvalidStateError on every rotate/resize); emscripten resizes the
+     * offscreen canvas itself, so this only matters before the transfer. */
+    try {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    } catch (_) { /* offscreen already */ }
   }
 };
 fitCanvas();
