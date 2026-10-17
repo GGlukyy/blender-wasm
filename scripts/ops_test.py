@@ -128,6 +128,65 @@ def _():
     bpy.ops.object.mode_set(mode='OBJECT'); assert len(bpy.context.scene.objects) == 2, len(bpy.context.scene.objects)
     return counts(bpy.context.scene.objects[0])
 # undo/redo: bpy.ops.ed.undo() nejde z timeru (poll) -> testuje se skutečnými klávesami, viz scripts/undo_win.sh
+@test('geometry_nodes_subdivide', None)
+def _():
+    ob = fresh(); m = ob.modifiers.new('GN', 'NODES'); ng = bpy.data.node_groups.new('G', 'GeometryNodeTree')
+    ng.interface.new_socket('Geometry', in_out='INPUT', socket_type='NodeSocketGeometry')
+    ng.interface.new_socket('Geometry', in_out='OUTPUT', socket_type='NodeSocketGeometry')
+    i = ng.nodes.new('NodeGroupInput'); o = ng.nodes.new('NodeGroupOutput'); sub = ng.nodes.new('GeometryNodeSubdivideMesh')
+    sub.inputs['Level'].default_value = 2
+    ng.links.new(i.outputs[0], sub.inputs['Mesh']); ng.links.new(sub.outputs[0], o.inputs[0]); m.node_group = ng
+    ev = ob.evaluated_get(bpy.context.evaluated_depsgraph_get()); n = len(ev.data.vertices); assert n > 8, n
+    return (n, 0, 0)
+@test('shape_keys', None)
+def _():
+    ob = fresh(); ob.shape_key_add(name='Basis'); k = ob.shape_key_add(name='Up')
+    for v in k.data: v.co.z += 1.0
+    k.value = 1.0; ev = ob.evaluated_get(bpy.context.evaluated_depsgraph_get())
+    zmax = max(v.co.z for v in ev.data.vertices); assert abs(zmax - 2.0) < 1e-4, zmax
+    return (zmax, 0, 0)
+@test('animation_keyframes', None)
+def _():
+    ob = fresh(); sc = bpy.context.scene
+    sc.frame_set(1); ob.location.x = 0; ob.keyframe_insert('location', frame=1)
+    ob.location.x = 10; ob.keyframe_insert('location', frame=11)
+    sc.frame_set(6); x = ob.location.x; assert abs(x - 5.0) < 0.6, x   # bezier ~ mezi 0 a 10
+    sc.frame_set(1); return (x, 0, 0)
+@test('curve_text_objects', None)
+def _():
+    fresh(); bpy.ops.curve.primitive_bezier_circle_add(); c = bpy.context.object
+    bpy.ops.object.text_add(); t = bpy.context.object; t.data.body = 'Hello'
+    dg = bpy.context.evaluated_depsgraph_get(); ev = t.evaluated_get(dg); me = ev.to_mesh()
+    n = len(me.vertices); ev.to_mesh_clear(); assert n > 20, n
+    return (n, 0, 0)
+@test('armature_skin', None)
+def _():
+    ob = fresh(); bpy.ops.object.armature_add(); arm = bpy.context.object
+    ob.select_set(True); arm.select_set(True); bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.parent_set(type='ARMATURE_AUTO')
+    assert any(m.type == 'ARMATURE' for m in ob.modifiers) and len(ob.vertex_groups) >= 1
+    return (len(ob.vertex_groups), 0, 0)
+@test('decimate', None)
+def _():
+    ob = fresh(); bpy.ops.mesh.primitive_uv_sphere_add(); ob = bpy.context.object
+    d = ob.modifiers.new('D', 'DECIMATE'); d.ratio = 0.3
+    ev = ob.evaluated_get(bpy.context.evaluated_depsgraph_get()); n = len(ev.data.polygons); assert 0 < n < 512, n
+    return (n, 0, 0)
+@test('physics_cloth', None)
+def _():
+    fresh(); bpy.ops.mesh.primitive_plane_add(location=(0, 0, 3)); p = bpy.context.object
+    bpy.ops.object.modifier_add(type='CLOTH'); sc = bpy.context.scene
+    for f in range(1, 6): sc.frame_set(f)
+    ev = p.evaluated_get(bpy.context.evaluated_depsgraph_get()); z = max(v.co.z for v in ev.data.vertices)
+    assert z < 3.0, z   # tkanina padá gravitací
+    sc.frame_set(1); return (z, 0, 0)
+@test('texture_paint_image', None)
+def _():
+    ob = fresh(); img = bpy.data.images.new('T', 64, 64); mat = bpy.data.materials.new('M'); mat.use_nodes = True
+    n = mat.node_tree.nodes.new('ShaderNodeTexImage'); n.image = img; ob.data.materials.append(mat)
+    px = list(img.pixels[:4]); assert len(img.pixels) == 64 * 64 * 4
+    return (len(px), 0, 0)
+
 @test('shade_smooth_normals', (8, 12, 6))
 def _():
     ob = fresh(); bpy.ops.object.shade_smooth(); ob.data.calc_loop_triangles(); assert len(ob.data.loop_triangles) == 12
@@ -147,6 +206,18 @@ def _():
     ob = fresh(); edit(ob); bpy.ops.mesh.subdivide(number_cuts=1); bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.wm.save_as_mainfile(filepath='/tmp/ops_test.blend'); import os; assert os.path.getsize('/tmp/ops_test.blend') > 1000
     bpy.ops.wm.open_mainfile(filepath='/tmp/ops_test.blend'); return counts(bpy.context.scene.objects[0])
+# ZNÁMÉ MEZERY buildu (WITH_* vypnuto v cmake/blender-wasm-cache.cmake) — hlásí se jako GAP, nepočítají se jako FAIL.
+GAPS = [
+    ('voxel_remesh (OpenVDB)', lambda: (lambda ob: (setattr(ob.modifiers.new('R', 'REMESH'), 'mode', 'VOXEL'), len(ob.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.polygons))[1])(fresh())),
+    ('rigid_body (Bullet)', lambda: (fresh(), bpy.ops.rigidbody.object_add())[1]),
+    ('quadriflow_remesh', lambda: (fresh(), bpy.ops.object.quadriflow_remesh())[1]),
+]
+for name, fn in GAPS:
+    try:
+        r = fn(); ok = bool(r) and r != {'CANCELLED'}
+        out('OPS GAP', name, 'WORKS' if ok else 'MISSING', repr(r)[:80])
+    except Exception as e:
+        out('OPS GAP', name, 'MISSING', str(e).replace('\n', ' ')[:100])
 failed = 0
 for name, expect, fn in TESTS:
     try:
