@@ -94,6 +94,8 @@
 
 - [x] (PASS: `scripts/uiscale_win.sh` — `?uiscale=1.4` nastaví Preferences ▸ Interface ▸ Resolution Scale (uloží se, vrátit `?uiscale=1`); snímek out/win/uis_big.png: ovládací prvky větší pro prsty, ale pravý panel Properties je při 1180 px úzký (hodnoty se schovají) — proto jen volitelné, ne výchozí; rozhodnutí o výchozí hodnotě nechávám na Lukášovi) Lov chyb kolo 58: malé ovládací prvky pro prsty
 
+- [x] (celá `scripts/regress_all.sh` po kolech 41–58: 0 FAIL / 0 PAGEERROR, `out/regress_k58.log`; do sady přidány utf8, templates, bar, touch_modal/loopcut/boxsel, autokbd, hidden, editors) Regresní kontrola po kole 58
+
 ## Výkon (až nebude co opravovat)
 - [x] (znovu změřeno po numpy/OIIO/ikonách: `scripts/startup_win.sh` okno nahoře za 5,4 s, bez regrese oproti 5,6 s) Start po víkendových změnách
 - [x] (změřeno 17. 10., `scripts/passes_win.sh` = `?passlog=1`; orbit kostky Solid, passy na snímek ÷208 snímků: WebGPUBackbuffer 11, `&framebuffer.fb` 10 (obojí = kompozice UI regionů, ne viewport), overlay_line_fb 4, overlay_output 4, po 2: Clear Main, smaa_resolve, outline.prepass, dfbl overlay, smaa_edge, smaa_weight; po 1: Opaque.Gbuffer/Deferred, Workbench.Outline, taa_accumulation, overlay_line_on, Clear In Front… = ~48) Rozpad passů: víc než polovina jsou kompozice UI (střídání offscreen region ↔ backbuffer = nutné lámání passů); zisk by dalo jen cachování/slučování kompozice regionů (zásah do upstream UI kódu, nejisté) → neřeším, dokud iPad nepotvrdí, že je to úzké hrdlo (`?perf=1`).
