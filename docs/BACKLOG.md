@@ -60,6 +60,8 @@
 
 - [x] (PASS: `scripts/utf8_win.sh` — soft-klávesnicové keydown s prázdným `code` a znakem ř/€/š dorazí do Python konzole (`ord('ř')`=345, `len('€š')`=2); před opravou prázdný řetězec; `regress_all.sh` bez FAIL; fork commit 9e618cf5) Lov chyb kolo 41: **znaky mimo ASCII se zahazovaly** (ř, š, ž, €…) — `GHOST_SystemWeb::handleKey` bral jen 1bajtové `key` a klávesy bez `code` (iOS soft klávesnice) úplně zahodil. Teď celá UTF-8 sekvence + klávesa bez code projde jako text.
 
+- [x] (PASS: `scripts/utf8_outliner_win.sh` — přejmenování objektu v Outlineru znaky bez `code` jako soft klávesnice: „příšera“ → název objektu přesně „příšera“; out/win/utf8_outliner.png) Lov chyb kolo 42: diakritika v reálném textovém poli (navazuje na kolo 41)
+
 ## Výkon (až nebude co opravovat)
 - [x] (znovu změřeno po numpy/OIIO/ikonách: `scripts/startup_win.sh` okno nahoře za 5,4 s, bez regrese oproti 5,6 s) Start po víkendových změnách
 - [x] (změřeno 17. 10., `scripts/passes_win.sh` = `?passlog=1`; orbit kostky Solid, passy na snímek ÷208 snímků: WebGPUBackbuffer 11, `&framebuffer.fb` 10 (obojí = kompozice UI regionů, ne viewport), overlay_line_fb 4, overlay_output 4, po 2: Clear Main, smaa_resolve, outline.prepass, dfbl overlay, smaa_edge, smaa_weight; po 1: Opaque.Gbuffer/Deferred, Workbench.Outline, taa_accumulation, overlay_line_on, Clear In Front… = ~48) Rozpad passů: víc než polovina jsou kompozice UI (střídání offscreen region ↔ backbuffer = nutné lámání passů); zisk by dalo jen cachování/slučování kompozice regionů (zásah do upstream UI kódu, nejisté) → neřeším, dokud iPad nepotvrdí, že je to úzké hrdlo (`?perf=1`).
