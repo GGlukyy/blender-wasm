@@ -55,6 +55,7 @@
 - [x] (hunt: `scripts/ops_win.sh` 74 testů failed=0 — spin, shrinkwrap+lattice+displace, data transfer, weighted normal, decimate planar, ocean, remesh blocks, curve modifier + bevel; žádná nová chyba, 3 počáteční FAIL byly chyby testů) Lov chyb kolo 15: modifikátory a výběr
 - [x] (hunt: `scripts/uiops_win.sh` PASS — navíc Shift+D, Esc, M→At Center, X→Vertices, undo, Tab zpět přes skutečné klávesy/menu; out/win/uiops_7_merge_menu.png, uiops_8_delete_menu.png) Lov chyb kolo 16: duplikace, merge, delete přes UI
 - [x] (hunt: `scripts/uiops_win.sh` PASS — G X 2, S 2, R Z 90, G Y -1 s číslem, undo ×2, Esc zruší; out/win/uiops_9_transforms.png) Lov chyb kolo 17: modální transformace v object modu
+- [x] (hunt: `scripts/uiops_win.sh` PASS — výběr A/Alt+A/Ctrl+I, skrytí H/Alt+H, klik na vrchol, G Z 1 bez a s proportional editing (O + PageUp; sum z 0,5 → 2,39); out/win/uiops_10_proportional.png; úplný log `out/uiops_full.log`) Lov chyb kolo 18: výběr, skrytí, proportional editing
 
 ## Výkon (až nebude co opravovat)
 - [x] (znovu změřeno po numpy/OIIO/ikonách: `scripts/startup_win.sh` okno nahoře za 5,4 s, bez regrese oproti 5,6 s) Start po víkendových změnách

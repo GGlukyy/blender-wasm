@@ -12,7 +12,7 @@ def _t():
                 bm = bmesh.from_edit_mesh(ob.data); c = (len(bm.verts), len(bm.edges), len(bm.faces))
             else:
                 c = (len(ob.data.vertices), len(ob.data.edges), len(ob.data.polygons))
-            print('UIC', ob.mode, *c); print('UIL', round(ob.location.x,2), round(ob.scale.x,2), round(ob.rotation_euler.z*57.29578), round(ob.location.y,2)); sys.stdout.flush()
+            print('UIC', ob.mode, *c); print('UIH', *((sum(v.select for v in bm.verts), sum(v.hide for v in bm.verts), round(max((v.co.z for v in bm.verts), default=0),2)) if ob.mode == 'EDIT' else (0, 0, 0)), round(sum(v.co.z for v in bm.verts),2) if ob.mode == 'EDIT' else 0, int(bpy.context.scene.tool_settings.use_proportional_edit), round(bpy.context.scene.tool_settings.proportional_size,2)); print('UIL', round(ob.location.x,2), round(ob.scale.x,2), round(ob.rotation_euler.z*57.29578), round(ob.location.y,2)); sys.stdout.flush()
         else: print('UIC NOOBJ', len(bpy.data.objects)); sys.stdout.flush()
     except Exception as e: print('UIC ERR', e); sys.stdout.flush()
     return 0.7
@@ -20,8 +20,8 @@ bpy.app.timers.register(_t, first_interval=3.0)`;
 const browser = await chromium.launch({ headless: false, executablePath: process.env.CHROME,
   args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
 const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
-let last = null, lastL = null;
-page.on("console", (m) => { const t = m.text(); if (/Traceback|Error|UIC|UIL/.test(t) && !/WGPU/.test(t)) console.log("LOG", t.slice(0, 200)); const j = t.indexOf("UIL "); if (j >= 0) lastL = t.slice(j + 4).trim().split(/\s+/).map(Number); const i = t.indexOf("UIC "); if (i >= 0) last = t.slice(i + 4).trim().split(/\s+/); });
+let last = null, lastL = null, lastH = null;
+page.on("console", (m) => { const t = m.text(); if (/Traceback|Error|UIC|UIL|UIH/.test(t) && !/WGPU/.test(t)) console.log("LOG", t.slice(0, 200)); const h = t.indexOf("UIH "); if (h >= 0) lastH = t.slice(h + 4).trim().split(/\s+/).map(Number); const j = t.indexOf("UIL "); if (j >= 0) lastL = t.slice(j + 4).trim().split(/\s+/).map(Number); const i = t.indexOf("UIC "); if (i >= 0) last = t.slice(i + 4).trim().split(/\s+/); });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
 await page.goto("http://localhost:5173/", { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
@@ -123,5 +123,28 @@ await checkL("undo_two", "2 2 0 0");
 // Esc ruší: G X 5 Esc
 await key("g"); await key("x"); await key("5"); await key("Escape");
 await checkL("grab_cancel", "2 2 0 0");
+const checkH = async (name, want) => { await wait(1600); const g = lastH ? lastH.slice(0, want.split(" ").length).join(" ") : "none"; const ok = g === want; if (!ok) fails++; console.log(`UIOPS ${name} ${ok ? "PASS" : "FAIL"} got=${g} want=${want}`); };
+// Edit mode: výběr/skrytí/invert + proportional editing
+await key("Tab"); await key("1"); await key("a");
+await checkH("select_all", "8 0 1");
+await key("h"); await checkH("hide_selected", "0 8 1");
+await page.keyboard.down("Alt"); await key("h"); await page.keyboard.up("Alt");
+await checkH("reveal", "8 0 1");
+await key("a"); await page.keyboard.down("Alt"); await key("a"); await page.keyboard.up("Alt");
+await checkH("deselect_all", "0 0 1");
+await page.keyboard.down("Control"); await key("i"); await page.keyboard.up("Control");
+await checkH("invert", "8 0 1");
+await page.keyboard.down("Control"); await key("i"); await page.keyboard.up("Control");
+// vybrat 1 vrchol (levý horní roh, objekt je 2x větší a posunutý), G Z 1 s proportional (O)
+await page.mouse.click(box.x + 577, box.y + 310); await wait(300);
+await checkH("pick_corner", "1 0 1 0");
+await key("g"); await key("z"); await key("1"); await key("Enter");
+await checkH("grab_no_prop", "1 0 1.5 0.5");
+await undo();
+await key("o"); await key("g"); await key("z"); await key("1"); for (let i = 0; i < 25; i++) { await key("PageUp"); } await key("Enter");
+await wait(500); await shot("10_proportional");
+await wait(1600); if (!(lastH[3] > 0.5)) { fails++; console.log("UIOPS proportional FAIL H=" + lastH.join(" ")); } else console.log("UIOPS proportional PASS sumz=" + lastH[3]);
+await undo();
+await key("Tab");
 console.log(fails ? `FAIL: ${fails}` : "PASS: uiops");
 await browser.close();
