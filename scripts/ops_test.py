@@ -6,11 +6,12 @@ def out(*a):
     print(*a); sys.stdout.flush()
 
 def fresh():
-    if bpy.context.object and bpy.context.object.mode != 'OBJECT':
+    _o = getattr(bpy.context, 'object', None)
+    if _o and _o.mode != 'OBJECT':
         bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete()
     bpy.ops.mesh.primitive_cube_add()
-    return bpy.context.object
+    return bpy.context.view_layer.objects.active
 
 def counts(ob=None):
     ob = ob or bpy.context.object
@@ -493,6 +494,18 @@ def _():
     ob = fresh(); edit(ob); bpy.ops.mesh.subdivide(number_cuts=1); bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.wm.save_as_mainfile(filepath='/tmp/ops_test.blend'); import os; assert os.path.getsize('/tmp/ops_test.blend') > 1000
     bpy.ops.wm.open_mainfile(filepath='/tmp/ops_test.blend'); return counts(bpy.context.scene.objects[0])
+@test('big_blend_save_open_timing', (None, None, None))
+def _():
+    import time, os
+    ob = fresh(); bpy.ops.object.delete(); bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=7); bpy.ops.object.shade_smooth()
+    n = len(bpy.context.view_layer.objects.active.data.polygons)
+    t0 = time.time(); bpy.ops.wm.save_as_mainfile(filepath='/tmp/big.blend'); ts = time.time() - t0
+    sz = os.path.getsize('/tmp/big.blend')
+    t0 = time.time(); bpy.ops.wm.open_mainfile(filepath='/tmp/big.blend'); to = time.time() - t0
+    got = [(o.name, len(o.data.polygons)) for o in bpy.context.scene.objects if o.type == 'MESH']; assert ('Icosphere', n) in got, (n, got)
+    out('OPS_TIMING big_blend polys=%d size=%dKB save=%.2fs open=%.2fs' % (n, sz // 1024, ts, to))
+    assert ts < 30 and to < 30, (ts, to)
+    return (None, None, None)
 # ZNÁMÉ MEZERY buildu (WITH_* vypnuto v cmake/blender-wasm-cache.cmake) — hlásí se jako GAP, nepočítají se jako FAIL.
 GAPS = [
     ('voxel_remesh (OpenVDB)', lambda: (lambda ob: (setattr(ob.modifiers.new('R', 'REMESH'), 'mode', 'VOXEL'), len(ob.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.polygons))[1])(fresh())),
