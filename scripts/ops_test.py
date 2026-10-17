@@ -85,6 +85,18 @@ def _():
     sc.render.resolution_x = sc.render.resolution_y = 64; sc.render.engine = 'BLENDER_WORKBENCH'
     bpy.ops.render.render(write_still=False)
     return (None, None, None)
+@test('node_assets_load_all', (None, None, None))
+def _():
+    import os, glob
+    base = bpy.utils.system_resource('DATAFILES', path='assets/nodes')
+    files = sorted(glob.glob(os.path.join(base, '*.blend'))); assert len(files) >= 6, files
+    tot = 0
+    for f in files:
+        with bpy.data.libraries.load(f, link=True, assets_only=True) as (src, dst):
+            dst.node_groups = list(src.node_groups); tot += len(src.node_groups)
+    assert tot > 20, tot
+    out('OPS info node_assets', len(files), tot)
+    return (None, None, None)
 @test('subdivide', (26, 48, 24))
 def _():
     ob = fresh(); edit(ob); bpy.ops.mesh.subdivide(number_cuts=1); return counts(ob)
