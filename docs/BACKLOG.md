@@ -66,6 +66,8 @@
 
 - [x] (PASS: `scripts/ops_win.sh` 90/90 — `modifier_assets_add_all`: všech 28 modifikátorů z geometry_nodes_essentials (Smooth by Angle, Array, Scatter…) se přidá a vyhodnotí bez chyby) Lov chyb kolo 44: asset modifikátory
 
+- [x] (PASS: `scripts/templates_win.sh` — po opravě má každá šablona vlastní workspaces (2D Animation: „2D Animation, 2D Full Canvas“; Sculpting; Storyboarding; VFX; Video Editing) a načte se bez pádu, General zpět OK; PŘED: `startup.blend` šablon byly git-lfs ukazatele (131 B) a File ▸ New ▸ šablona nedělala nic; oprava: skutečné soubory z Blenderu 5.2 v `demo/app-templates/`, `link_blender_release.sh` je přepíše; `startup_win.sh` OK 5,6 s) Lov chyb kolo 45: File ▸ New ▸ šablony
+
 ## Výkon (až nebude co opravovat)
 - [x] (znovu změřeno po numpy/OIIO/ikonách: `scripts/startup_win.sh` okno nahoře za 5,4 s, bez regrese oproti 5,6 s) Start po víkendových změnách
 - [x] (změřeno 17. 10., `scripts/passes_win.sh` = `?passlog=1`; orbit kostky Solid, passy na snímek ÷208 snímků: WebGPUBackbuffer 11, `&framebuffer.fb` 10 (obojí = kompozice UI regionů, ne viewport), overlay_line_fb 4, overlay_output 4, po 2: Clear Main, smaa_resolve, outline.prepass, dfbl overlay, smaa_edge, smaa_weight; po 1: Opaque.Gbuffer/Deferred, Workbench.Outline, taa_accumulation, overlay_line_on, Clear In Front… = ~48) Rozpad passů: víc než polovina jsou kompozice UI (střídání offscreen region ↔ backbuffer = nutné lámání passů); zisk by dalo jen cachování/slučování kompozice regionů (zásah do upstream UI kódu, nejisté) → neřeším, dokud iPad nepotvrdí, že je to úzké hrdlo (`?perf=1`).

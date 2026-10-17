@@ -86,6 +86,17 @@ else
   echo ">> brush assets NOT bundled (BLENDER_WEB_BUNDLE_BRUSHES=0) — sculpt/paint brushes disabled"
 fi
 
+# --- app templates (File > New > 2D Animation, Sculpting, ...) ---------------
+# Their startup.blend files are git-lfs pointers in the fork (131 B) -> File > New silently kept the
+# General layout. Vendored real copies (Blender 5.2, GPL) live in demo/app-templates.
+if [ -d "$ROOT/demo/app-templates" ]; then
+  for d in "$ROOT"/demo/app-templates/*/; do
+    n=$(basename "$d")
+    [ -d "$STAGE/5.3/scripts/startup/bl_app_templates_system/$n" ] && cp -f "$d/startup.blend" "$STAGE/5.3/scripts/startup/bl_app_templates_system/$n/startup.blend"
+  done
+  echo ">> staged app templates"
+fi
+
 # --- essentials NODE assets -> 5.3/datafiles/assets/nodes ---------------------
 # Blender 5.x modifiers like Array (and Scatter on Surface, Curve to Tube, ...) are geometry-
 # nodes ASSETS loaded from assets/nodes/geometry_nodes_essentials.blend. The blends are git-lfs

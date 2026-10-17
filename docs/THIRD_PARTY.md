@@ -14,3 +14,4 @@ Base: HeyPuter/blender-wasm + HeyPuter/blender (GPL-2.0).
 
 ## numpy 2.3.4 (static, wasm) — `scripts/build_numpy.sh`
 - Source: numpy 2.3.4 sdist (BSD-3-Clause). Cross-compile recipe (meson cross file values `longdouble_format='IEEE_QUAD_LE'`, `-Wno-return-type`, cython from the build machine) follows numpy PR #24603 / numpy "cross compilation" docs and the Pyodide numpy recipe (pyodide/pyodide-recipes, MPL-2.0 recipe, ideas only, no files copied). Static linking via CPython inittab is our own (`numpy_inittab.o`).
+- `demo/app-templates/*/startup.blend`: šablony File ▸ New (2D Animation, Sculpting, Storyboarding, VFX, Video Editing), zkopírováno z Blenderu 5.2 (GPL), protože v forku jsou git-lfs ukazatele.

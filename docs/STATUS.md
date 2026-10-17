@@ -18,6 +18,7 @@ Výsledek: 🟡 víkend: opraveno ~10 chyb ověřených na PC (viz níže), regr
 - Kompilace pipeline při prvním Material Preview blokuje 6–7 s (jen hláška, ne oprava).
 
 # Víkend — co je nového (17. 10., odpoledne)
+- ✅ Kolo 45 **File ▸ New ▸ šablony** (2D Animation, Sculpting, Storyboarding, VFX, Video Editing) dřív nedělaly nic (soubory šablon chyběly). Teď se načtou (PC: `templates_win.sh` PASS). **Na iPadu ověř:** File ▸ New ▸ Sculpting — změní se rozložení? (první přepnutí může kompilovat shadery několik sekund.)
 - ✅ Kolo 43 **Vlasy (Curves ▸ Empty Hair)** padaly na chybějících assetech — doplněno (PC: `ops_win.sh` 88/88). **Na iPadu ověř:** Add ▸ Curves ▸ Empty Hair → vznikne objekt bez chyby. Známá mezera: Physics ▸ Fluid (kouř/voda) není v buildu.
 - ✅ Kolo 41 **Háčky a čárky při psaní**: znaky mimo ASCII (ř, š, ž, é, €…) se v Blenderu zahazovaly a klávesy bez kódu z iPad soft klávesnice taky. Teď se píšou (PC: `utf8_win.sh` PASS, `regress_all.sh` bez FAIL). **Na iPadu ověř:** ⌨ v liště → dvojklik na název objektu v Outlineru → napiš „příšera“ (+ případně Ctrl+A v poli smaže?) — objeví se diakritika? Novinka: nový build blender.wasm (BLENDER_REF 9e618cf5).
 - 🟡 Kolo 40 (odhad): plátno používalo `100vh` — na iPad Safari je to výška bez lišty, takže spodek Blenderu mohl být schovaný / plátno roztažené. Změněno na `100dvh`. Na PC nic nemění. **Na iPadu ověř:** je celá spodní lišta Blenderu (timeline, verze vpravo dole) vidět při zobrazené liště Safari? Je obraz ostrý a neroztažený?
