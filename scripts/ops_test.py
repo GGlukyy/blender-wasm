@@ -115,6 +115,21 @@ def _():
     out('OPS info modifier_assets', ok, len(names), bad[:5])
     assert ok >= 5 and not bad, (ok, bad)
     return (None, None, None)
+@test('render_animation_png_sequence', (None, None, None))
+def _():
+    import os, glob
+    fresh(); sc = bpy.context.scene
+    bpy.ops.object.camera_add(location=(0, -6, 2), rotation=(1.3, 0, 0)); sc.camera = bpy.context.object
+    sc.render.engine = 'BLENDER_WORKBENCH'; sc.render.resolution_x = sc.render.resolution_y = 64; sc.render.resolution_percentage = 100
+    sc.frame_start, sc.frame_end = 1, 3
+    d = '/opfs/home/_rendertest/'; os.makedirs(d, exist_ok=True)
+    for f in glob.glob(d + '*'): os.remove(f)
+    sc.render.filepath = d + 'f_'; sc.render.image_settings.file_format = 'PNG'
+    bpy.ops.render.render(animation=True)
+    fs = sorted(glob.glob(d + 'f_*.png')); assert len(fs) == 3 and all(os.path.getsize(f) > 100 for f in fs), fs
+    for f in fs: os.remove(f)
+    os.rmdir(d); sc.frame_set(1)
+    return (len(fs), 0, 0)
 @test('subdivide', (26, 48, 24))
 def _():
     ob = fresh(); edit(ob); bpy.ops.mesh.subdivide(number_cuts=1); return counts(ob)
