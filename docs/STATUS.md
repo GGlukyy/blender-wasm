@@ -1,5 +1,16 @@
 Výsledek: 🟡 víkendový blok hotový (edit mode, 3D kurzor, modifikátory, body, parity test) — čeká na test na iPadu
 
+# Víkend — co je nového (17. 10., odpoledne)
+- ✅ **P1 shader seed**: příčina byla jinde, než se čekalo — Blender běží na pthread workeru a cache z `main.js` tam nebyla vidět (nikdy nefungovala). Seed se teď načítá sync XHR ve workeru. Důkaz: `scripts/wgsl_seed_win.sh verify` → 0 překladů při průchodu 11 workspace + edit mode + shading (dřív 177). Seed se generuje `scripts/wgsl_seed_win.sh seed` (soubor je v .gitignore, 2,6 MB).
+- ✅ **Výběr skrz objekt** (Solid): zakryté vrcholy/hrany se nevyberou, plocha = ta pod kurzorem (CPU BVH ray cast). Důkaz: `scripts/p2_occl_check.sh`. Box/lasso zatím bez occlusion (BACKLOG).
+- 🔴/❓ **Z-fighting ploch**: na PC se nereprodukuje. Hypotéza je v `docs/patches/zfight_invariant_gl_position.patch` (neaplikováno).
+## Co otestovat na iPadu (podle důležitosti)
+1. Čistá data webu → Tab, 3, klik na plochu, orbit: bliká/pere se výběr plochy? (pokud ano, řekni a aplikuju patch)
+2. Solid, režim vrcholů (1): klepni na vrchol na zadní straně kostky → nesmí se vybrat. Režim ploch: vybere se plocha pod prstem.
+3. Přepnutí workspace (Layout → Shading → Modeling): už by se nemělo sekat na překlad shaderů (první načtení stáhne seed 2,6 MB).
+
+---
+
 ## Co jsem udělal (16.–17. 10. 2026)
 | Krok | Oprava | Commit (fork `GGlukyy/blender`, větev `ipad`) |
 |---|---|---|
