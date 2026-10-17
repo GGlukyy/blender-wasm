@@ -76,6 +76,8 @@
 
 - [x] (PASS: `scripts/editors_win.sh` — hlavní oblast přepnutá postupně na 17 typů editorů (Image, UV, Sequencer, Node ×4 stromy, Text, Spreadsheet, Outliner, File Browser, Info, Movie Clip, Dope Sheet, Graph, NLA, Console, Properties, Preferences, zpět 3D View): 0 GPU/Python chyb, žádný prázdný snímek) Lov chyb kolo 49: všechny typy editorů
 
+- [x] (PASS: `scripts/bar_win.sh` + `touch_win.sh` ALL PASS; JS-only `demo/src/touch.js`) Lov chyb kolo 50: lišta kláves na iPadu neměla **E (extrude), Space (přehrát), H, I, F2, Ctrl+S**… → přidáno tlačítko ⋯ (druhá řada: E F B C D H I K M N P T Q W, Space, ⌫, F2, F3, . - /, 💾 Ctrl+S); ověřeno: I vloží klíč, Space spustí/zastaví přehrávání, H skryje, E v edit modu vytlačí (8 → 16 vrcholů)
+
 ## Výkon (až nebude co opravovat)
 - [x] (znovu změřeno po numpy/OIIO/ikonách: `scripts/startup_win.sh` okno nahoře za 5,4 s, bez regrese oproti 5,6 s) Start po víkendových změnách
 - [x] (změřeno 17. 10., `scripts/passes_win.sh` = `?passlog=1`; orbit kostky Solid, passy na snímek ÷208 snímků: WebGPUBackbuffer 11, `&framebuffer.fb` 10 (obojí = kompozice UI regionů, ne viewport), overlay_line_fb 4, overlay_output 4, po 2: Clear Main, smaa_resolve, outline.prepass, dfbl overlay, smaa_edge, smaa_weight; po 1: Opaque.Gbuffer/Deferred, Workbench.Outline, taa_accumulation, overlay_line_on, Clear In Front… = ~48) Rozpad passů: víc než polovina jsou kompozice UI (střídání offscreen region ↔ backbuffer = nutné lámání passů); zisk by dalo jen cachování/slučování kompozice regionů (zásah do upstream UI kódu, nejisté) → neřeším, dokud iPad nepotvrdí, že je to úzké hrdlo (`?perf=1`).

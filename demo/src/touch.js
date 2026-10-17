@@ -431,6 +431,29 @@ export function installTouch(canvas) {
       key(sticky[name] ? "keydown" : "keyup", code, label);
     });
   });
+  /* second row: the rest of the keys modeling needs (E extrude, Space play, F2 rename, Ctrl+S save...) */
+  const MORE = [["E", "KeyE", "e"], ["F", "KeyF", "f"], ["B", "KeyB", "b"], ["C", "KeyC", "c"], ["D", "KeyD", "d"],
+    ["H", "KeyH", "h"], ["I", "KeyI", "i"], ["K", "KeyK", "k"], ["M", "KeyM", "m"], ["N", "KeyN", "n"], ["P", "KeyP", "p"],
+    ["T", "KeyT", "t"], ["Q", "KeyQ", "q"], ["W", "KeyW", "w"], ["Space", "Space", " "], ["⌫", "Backspace", "Backspace"],
+    ["F2", "F2", "F2"], ["F3", "F3", "F3"], [".", "Period", "."], ["-", "Minus", "-"], ["/", "Slash", "/"]];
+  const more = document.createElement("div");
+  more.id = "touchbar-more";
+  more.style.cssText = "display:none;flex-basis:100%;flex-wrap:wrap;gap:6px;justify-content:center";
+  const moreBtn = (label, onTap) => {
+    const b = document.createElement("button");
+    b.textContent = label;
+    b.style.cssText = "min-width:46px;height:42px;padding:0 10px;border-radius:8px;border:1px solid #666;" +
+      "background:#3a3a3a;color:#eee;font:inherit;touch-action:manipulation";
+    b.addEventListener("pointerdown", (e) => e.preventDefault());
+    b.addEventListener("click", onTap);
+    more.appendChild(b);
+    return b;
+  };
+  MORE.forEach(([label, code, k]) => moreBtn(label, () => press(code, k)));
+  moreBtn("💾", () => chord([["ControlLeft", "Control"]], "KeyS", "s")).title = "Uložit (Ctrl+S)";
+  const toggleMore = btn("⋯", () => { more.style.display = more.style.display === "none" ? "flex" : "none"; });
+  toggleMore.title = "Další klávesy (E, Space, F2, Ctrl+S…)";
+  bar.appendChild(more);
   btn("📁", openFiles).title = "Soubory: nahrát / stáhnout";
   btn("⌨", showKeyboard).title = "Klávesnice (psaní do polí, přejmenování)";
   const hide = btn("✕", () => bar.remove());
