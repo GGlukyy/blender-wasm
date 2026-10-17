@@ -7,6 +7,9 @@ const scenes = {
   cubes200: "[bpy.ops.mesh.primitive_cube_add(location=((i%15)*2.5, (i//15)*2.5, 0)) for i in range(200)]",
   monkeys50: "[bpy.ops.mesh.primitive_monkey_add(location=((i%8)*3, (i//8)*3, 0)) for i in range(50)]",
   monkey_sub3: "bpy.ops.object.delete(); bpy.ops.mesh.primitive_monkey_add(); m=bpy.context.object.modifiers.new('s','SUBSURF'); m.levels=3; m.render_levels=3; bpy.ops.object.shade_smooth()",
+  ico6_edit: "bpy.ops.object.delete(); bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=6); bpy.ops.object.mode_set(mode='EDIT')",
+  ico7_edit: "bpy.ops.object.delete(); bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=7); bpy.ops.object.mode_set(mode='EDIT')",
+  monkey_sub2_edit: "bpy.ops.object.delete(); bpy.ops.mesh.primitive_monkey_add(); m=bpy.context.object.modifiers.new('s','SUBSURF'); m.levels=2; bpy.ops.object.mode_set(mode='EDIT')",
   ico8: "bpy.ops.object.delete(); bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=8); bpy.ops.object.shade_smooth()",
 };
 for (const [name, setup] of Object.entries(scenes)) {
