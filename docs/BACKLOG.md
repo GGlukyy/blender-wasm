@@ -15,7 +15,7 @@
   Konzultuj architekta, guard `#ifdef __EMSCRIPTEN__`.
 
 ## Plán
-- [~] **P1** shader seed (`wgsl-cache.json`) pro všechny workspaces + edit mode + shading módy;
+- [x] **P1** (PASS: `scripts/wgsl_seed_win.sh verify` → TOTAL translations: 0, seed 179 shaderů; BLENDER_REF=f077479e. Příčina: Blender běží na pthread workeru, cache z main.js tam nebyla vidět → nikdy nefungovala; seed se načítá sync XHR. Regenerace: `scripts/wgsl_seed_win.sh seed`, `wgsl-cache.json` je v .gitignore (generovaný). Zbývá iPad: čistá data webu, přepnutí workspace) shader seed (`wgsl-cache.json`) pro všechny workspaces + edit mode + shading módy;
   test: cache-miss = 0 při prvním přepnutí.
 - [ ] **Výkonový panel**: FPS, ms/snímek, paměť wasm, počet draw callů; zapnutí `?perf=1`.
 - [ ] Vrcholy velikostí jako na desktopu (teď ~4–5 px vs ~6 px).
