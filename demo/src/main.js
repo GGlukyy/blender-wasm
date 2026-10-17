@@ -820,8 +820,22 @@ async function start() {
   startBtn.disabled = true;
   startBtn.textContent = "Starting…";
 
+// EEVEE Shadow Pool: výchozí 512 MB (jen shadow atlas) + sondy ≈ 1 GB GPU paměti při Material Preview (měřeno ?perf=1: 1080 MB).
+// iPad Safari má malý limit na tab → pro nové soubory / startup scénu 128 MB (-380 MB). Přepsat: ?shadowpool=512 (hodnoty enumu v MB).
+const SHADOW_POOL = (new URLSearchParams(location.search).get("shadowpool") || "128").replace(/[^0-9]/g, "") || "128";
+const SHADOW_POOL_PY = `import bpy
+from bpy.app.handlers import persistent
+def _cap_pool():
+    try:
+        for sc in bpy.data.scenes: sc.eevee.shadow_pool_size = '${SHADOW_POOL}'
+    except Exception as e: print('shadowpool', e)
+@persistent
+def _on_new(*a):
+    if not bpy.data.filepath: _cap_pool()
+_cap_pool()
+bpy.app.handlers.load_post.append(_on_new)`;
 window.Module = {
-  arguments: ["--factory-startup", ...(window.__BARGS || [])],
+  arguments: ["--factory-startup", "--python-expr", SHADOW_POOL_PY, ...(window.__BARGS || [])],
   canvas,
   print: (t) => { log(t); scan(t); },
   printErr: (t) => { log("[err] " + t); scan(t); },
