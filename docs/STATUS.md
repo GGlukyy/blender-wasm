@@ -1,15 +1,17 @@
 Výsledek: 🟡 víkend: opraveno ~10 chyb ověřených na PC (viz níže), regresní sada `regress_all.sh` bez FAIL — vše čeká na test na iPadu
 
 # ⭐ Co otestovat na iPadu NEJDŘÍV (nové z víkendu, podle důležitosti)
-(Ověřeno jen na PC/Chrome; na iPadu nic. Pokud něco spadne, napiš přesné kroky + screenshot.)
-1. **UV Editing nespadne**: Tab (edit mode) → záložka *UV Editing* nahoře → A → G → táhnout.
-2. **Záložka Material nezamrzne**: vpravo vlastnosti objektu → koule dole (Material). Náhledy jsou záměrně šedé koule.
-3. **Export do hry**: File ▸ Export ▸ *glTF 2.0 (.glb)* a *FBX* → cesta `/opfs/home/test.glb` → 📁 stáhnout → otevři v Unity/desktop Blenderu.
-4. **Uložit obrázek PNG**: F12 render (nebo Image ▸ Save As) → PNG → stáhnout přes 📁.
-5. **Sculpt**: dole v pruhu štětců jsou obrázky (ne hodiny). Vertex/Weight/Texture Paint tahem Pencilu.
-6. **Grease Pencil**: Shift+A → Grease Pencil → kreslit.
-7. První přepnutí do **Material Preview**: objeví se hláška „Kompiluji shadery…“ — kolik sekund trvá?
-8. Dále stále platí seznam „Co otestovat na iPadu (podle důležitosti)“ níže (dotyk, soubory, výběr, z-fighting, `?perf=1`).
+(Ověřeno jen na PC/Chrome; na iPadu nic. Pokud něco spadne, napiš přesné kroky + screenshot. Po načtení stránky udělej reload, ať se nahraje nový build.)
+1. **Prst místo myši (kola 51–54):** vyber kostku → lišta **G** → táhni prstem (lišta zmodrá, kostka se hýbe) → klepni = potvrdit. Edit mode: **Ctrl→R→Ctrl** loop cut (najeď prstem na hranu, klepni 2×), **⋯ → B** box select tahem, **⋯ → E** extrude.
+2. **Klávesnice sama (kolo 54):** dvojklepni na název objektu vpravo → vyjede klávesnice? Napiš „příšera“ — objeví se diakritika (kolo 41)? Když ne, tlačítko ⌨ v liště.
+3. **Lišta ⋯ (kolo 50):** Space (přehrát), H, I, F2, 💾 Ctrl+S.
+4. **UV Editing nespadne**: Tab → záložka *UV Editing* → A → G → táhnout.
+5. **Záložka Material nezamrzne** (vpravo koule dole). Náhledy jsou záměrně šedé koule.
+6. **File ▸ New ▸ Sculpting / 2D Animation…** (kolo 45) změní rozložení; **Add ▸ Curves ▸ Empty Hair** (kolo 43) funguje.
+7. **Export do hry**: File ▸ Export ▸ glTF/FBX → `/opfs/home/test.glb` → 📁 stáhnout → otevři v Unity/desktop Blenderu. Uložení PNG z F12.
+8. **Sculpt/Vertex/Weight/Texture Paint** tahem Pencilu; **Grease Pencil**.
+9. První přepnutí do **Material Preview**: hláška „Kompiluji shadery…“ — kolik sekund?
+10. Dále stále platí seznam „Co otestovat na iPadu (podle důležitosti)“ níže (dotyk, soubory, výběr, z-fighting, `?perf=1`).
 
 ## Blocked / otevřené (poctivě)
 - Z-fighting ploch: nereprodukuje se na PC, aplikovaná hypotéza čeká na iPad.
