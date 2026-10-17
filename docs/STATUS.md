@@ -1,6 +1,7 @@
 Výsledek: 🟡 víkendový blok hotový (edit mode, 3D kurzor, modifikátory, body, parity test) — čeká na test na iPadu
 
 # Víkend — co je nového (17. 10., odpoledne)
+- ✅ **Pád v UV Editing workspace** (stránka spadla s „Aborted(Assertion failed)“ hned po přepnutí na UV Editing s objektem v edit modu): GPU buffer vrcholů se mezi přípravou a vykreslením vyměnil a kreslilo se se zrušeným handlem. Opraveno, test `uvedit_win.sh` PASS (G posune UV). **Na iPadu ověřit:** Tab (edit mode) → záložka UV Editing nahoře → vybrat vše (A) → G → táhnout: nespadne? (Mohlo to být i příčinou jiných náhodných pádů.)
 - ✅ **Hláška „⏳ Kompiluji shadery…“**: při prvním přepnutí do Material Preview / Rendered se Blender na 6–7 s zasekne (PC; na iPadu asi víc) — prohlížeč kompiluje velké pipeline; teď se v tu chvíli dole zobrazí hláška, ať to nevypadá jako pád. Samotné zasekání zůstává (jednorázově za session). **Na iPadu změřit:** jak dlouho trvá první přepnutí na Material Preview (hláška viditelná?).
 - ✅ **Zamrznutí při otevření záložky Material** (a pád/zaseknutí při přidání Grease Pencil): příčina = náhledové ikony materiálů (EEVEE) se na webu kompilují synchronně. Vypnuto (šedá koule místo náhledu; `?iconprev=1` je zapne). PC: UI se už neblokuje, GP kreslí. **Na iPadu ověřit:** vlastnosti objektu → záložka Material (koule vpravo dole) → nezamrzne? Shift+A → Grease Pencil → kreslit Pencilem.
 - ✅ Další paint režimy ověřeny na PC: Vertex, Weight, Texture Paint i Grease Pencil (`vpaint/wpaint/tpaint/gpaint_win.sh`).
