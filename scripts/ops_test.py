@@ -97,6 +97,24 @@ def _():
     assert tot > 20, tot
     out('OPS info node_assets', len(files), tot)
     return (None, None, None)
+@test('modifier_assets_add_all', (None, None, None))
+def _():
+    import os
+    f = os.path.join(bpy.utils.system_resource('DATAFILES', path='assets/nodes'), 'geometry_nodes_essentials.blend')
+    with bpy.data.libraries.load(f, link=True, assets_only=True) as (src, dst):
+        names = list(src.node_groups)
+    ok, bad = 0, []
+    for n in names:
+        ob = fresh()
+        try:
+            r = bpy.ops.object.modifier_add_node_group(asset_library_type='ESSENTIALS', asset_library_identifier='', relative_asset_identifier='nodes/geometry_nodes_essentials.blend/NodeTree/' + n)
+            if r == {'FINISHED'}:
+                ev = ob.evaluated_get(bpy.context.evaluated_depsgraph_get()); ev.to_mesh_clear() if False else len(ev.data.vertices); ok += 1
+        except Exception as e:
+            if 'not a modifier' not in str(e).lower(): bad.append((n, str(e)[:60]))
+    out('OPS info modifier_assets', ok, len(names), bad[:5])
+    assert ok >= 5 and not bad, (ok, bad)
+    return (None, None, None)
 @test('subdivide', (26, 48, 24))
 def _():
     ob = fresh(); edit(ob); bpy.ops.mesh.subdivide(number_cuts=1); return counts(ob)

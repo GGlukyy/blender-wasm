@@ -64,6 +64,8 @@
 
 - [x] (PASS: `scripts/ops_win.sh` 88 testů failed=0 — nově softbody, particles, dynamic paint, Line Art GP, hair curves, Freestyle render; NALEZENO+OPRAVENO: Add ▸ Curves ▸ Empty Hair padal „No asset found … geometry_nodes_dynamics_assets.blend“, protože chyběly 3 node-assety (`geometry_nodes_dynamics_assets`, `procedural_hair_node_assets`, `principal_components`) — doplněno z Blenderu 5.2 do `demo/node-assets/nodes`, THIRD_PARTY.md; GAP: Fluid/Mantaflow vypnutý v buildu (`WITH_MOD_FLUID OFF`) → Physics ▸ Fluid nic nedělá) Lov chyb kolo 43: fyzika, vlasy, Freestyle
 
+- [x] (PASS: `scripts/ops_win.sh` 90/90 — `modifier_assets_add_all`: všech 28 modifikátorů z geometry_nodes_essentials (Smooth by Angle, Array, Scatter…) se přidá a vyhodnotí bez chyby) Lov chyb kolo 44: asset modifikátory
+
 ## Výkon (až nebude co opravovat)
 - [x] (znovu změřeno po numpy/OIIO/ikonách: `scripts/startup_win.sh` okno nahoře za 5,4 s, bez regrese oproti 5,6 s) Start po víkendových změnách
 - [x] (změřeno 17. 10., `scripts/passes_win.sh` = `?passlog=1`; orbit kostky Solid, passy na snímek ÷208 snímků: WebGPUBackbuffer 11, `&framebuffer.fb` 10 (obojí = kompozice UI regionů, ne viewport), overlay_line_fb 4, overlay_output 4, po 2: Clear Main, smaa_resolve, outline.prepass, dfbl overlay, smaa_edge, smaa_weight; po 1: Opaque.Gbuffer/Deferred, Workbench.Outline, taa_accumulation, overlay_line_on, Clear In Front… = ~48) Rozpad passů: víc než polovina jsou kompozice UI (střídání offscreen region ↔ backbuffer = nutné lámání passů); zisk by dalo jen cachování/slučování kompozice regionů (zásah do upstream UI kódu, nejisté) → neřeším, dokud iPad nepotvrdí, že je to úzké hrdlo (`?perf=1`).
