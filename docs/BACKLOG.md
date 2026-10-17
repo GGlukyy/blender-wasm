@@ -1,7 +1,7 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
 ## Bugy od Lukáše (iPad, 17. 10.)
-- [ ] **Face select: z-fighting** — v režimu ploch se vybraná plocha „pere“ s nevybranou
+- [~] **Face select: z-fighting** — v režimu ploch se vybraná plocha „pere“ s nevybranou
   (overlay plochy a mesh mají stejnou hloubku). Desktop/Metal to řeší depth biasem pro face
   overlay (`overlay_edit_mesh_face`, ndc offset / polygon offset). Ověř, že WebGPU pipeline
   aplikuje stejný offset (depthBias / ndc_offset_factor). Repro: Tab, 3, klik na plochu, orbit.
