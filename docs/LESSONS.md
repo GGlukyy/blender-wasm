@@ -15,3 +15,5 @@
 - 17. 10.: PNG save padal na „tEXt: invalid keyword“ (~1,5 h). Nehledat v libpng: pomohl debug fprintf do libpng → klíč byl prázdný → OIIO `ustring::string()` prázdné kvůli libc++ hacku. Knihovní chyby ladit printfem v deps/src + `build_*.sh` + `link_blender_release.sh` (bez ninja).
 
 - 17. 10.: numpy do wasm přes meson cross + `-sFAKE_DYLIBS=1` (emsdk 6: `-shared` = SIDE_MODULE) vyšlo na první pokus za ~10 min díky plánu od architekta; Python add-ony ladit rovnou přes `ops_win.sh` testy (chyby jdou jako text, ne screenshot).
+
+- 17. 10.: `scripts/link_blender_release.sh` kopíruje `web/wgsl-cache.json` do `demo/public/` (přepíše seed!) — seed upravuj v obou místech (wgsl_seed_win.sh to dělá). Seed pro náhledy materiálů (mattab_seed.sh) NEPOMOHL: s cache 12 s vs 6 s bez; pipeline compile je úzké hrdlo, ne překlad.
