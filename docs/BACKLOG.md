@@ -70,6 +70,8 @@
 
 - [x] (hunt: `scripts/addons_win.sh` — zapnutí všech 12 přibalených add-onů: 10 PASS (Rigify, FBX, glTF, BVH, SVG, UV layout, Node Wrangler, Pose Library, Hydra, VR preview); 2 známé: bl_pkg (Extensions, WONTFIX `_multiprocessing`) a ui_translate (`_ctypes`, jen nástroj pro překladatele) — nic nového; poznámky: čeština UI nejde (`WITH_INTERNATIONAL OFF`, chybí boost locale → Preferences ▸ Language nic nemění; velký zásah), OCIO view „Khronos PBR Neutral“ a Rec.2100 jsou záměrně ořezané (`trim_ocio.py`, velikost) ) Lov chyb kolo 46: add-ony, chybějící data
 
+- [x] (PASS: `scripts/hidden_win.sh` — CDP `Page.setWebLifecycleState frozen` 8 s (jako když iPad uspí tab) → `active`: Blender po návratu dál kreslí a reaguje na orbit (snímky 26 → 62), 0 chyb stránky; zamrazení tabu je simulace, skutečné zabití tabu iPadem řeší autosave) Lov chyb kolo 47: návrat z pozadí
+
 ## Výkon (až nebude co opravovat)
 - [x] (znovu změřeno po numpy/OIIO/ikonách: `scripts/startup_win.sh` okno nahoře za 5,4 s, bez regrese oproti 5,6 s) Start po víkendových změnách
 - [x] (změřeno 17. 10., `scripts/passes_win.sh` = `?passlog=1`; orbit kostky Solid, passy na snímek ÷208 snímků: WebGPUBackbuffer 11, `&framebuffer.fb` 10 (obojí = kompozice UI regionů, ne viewport), overlay_line_fb 4, overlay_output 4, po 2: Clear Main, smaa_resolve, outline.prepass, dfbl overlay, smaa_edge, smaa_weight; po 1: Opaque.Gbuffer/Deferred, Workbench.Outline, taa_accumulation, overlay_line_on, Clear In Front… = ~48) Rozpad passů: víc než polovina jsou kompozice UI (střídání offscreen region ↔ backbuffer = nutné lámání passů); zisk by dalo jen cachování/slučování kompozice regionů (zásah do upstream UI kódu, nejisté) → neřeším, dokud iPad nepotvrdí, že je to úzké hrdlo (`?perf=1`).
