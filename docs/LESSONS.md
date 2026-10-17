@@ -10,3 +10,4 @@
 - Komentáře ve `.glsl` shader_tool maže → marker `/* DEBUG */` v shaderu v buildu není; shadery jsou v targetu `bf_draw_shaders`. `git push` do forku Blenderu: `GIT_LFS_SKIP_PUSH=1`.
 - 17. 10.: WGSL seed/IndexedDB cache nikdy nefungovala — Blender běží na pthread workeru (`PROXY_TO_PTHREAD`), `globalThis` z `main.js` tam není. Cokoli z JS pro C++ musí jít sync XHR / BroadcastChannel, ne přes globál stránky.
 - 17. 10.: `--python-expr` ve wasm: bez `sys.stdout.flush()` se výstup nikdy nedostane do konzole stránky. Detektor první verze odmítl i vestavěný startup.blend (legitimní duplicitní adresy) — porovnávat RAW 64bit hodnoty, ne zkrácené.
+- 17. 10.: Jakákoli změna GLSL preambule (`webgpu_glsl_patch`) mění klíče WGSL cache → seed je k ničemu; po změně vždy `scripts/wgsl_seed_win.sh seed` (2×) a `verify`.
