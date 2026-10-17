@@ -36,6 +36,18 @@ def test(name, expect=None):
     def deco(fn): TESTS.append((name, expect, fn)); return fn
     return deco
 
+# POZOR: běží první — po některých pozdějších testech chybí `bpy.context.active_object` (omezený kontext v exec) a rigify operátor ho čte.
+@test('rigify_generate', (None, None, None))
+def _():
+    import addon_utils
+    assert addon_utils.enable('rigify', default_set=True, persistent=True) is not None, 'rigify enable'
+    fresh(); bpy.ops.object.armature_human_metarig_add(); meta = bpy.context.object
+    bpy.ops.pose.rigify_generate()
+    rig = [o for o in bpy.data.objects if o.type == 'ARMATURE' and o is not meta]
+    assert rig and len(rig[0].data.bones) > 500, [len(o.data.bones) for o in rig]
+    for o in list(bpy.data.objects): bpy.data.objects.remove(o)   # widgety rigu zůstávají ve skryté kolekci a kazí počty dalších testů
+    for c in list(bpy.data.collections): bpy.data.collections.remove(c)
+    return (None, None, None)
 @test('subdivide', (26, 48, 24))
 def _():
     ob = fresh(); edit(ob); bpy.ops.mesh.subdivide(number_cuts=1); return counts(ob)
@@ -551,5 +563,5 @@ for name, expect, fn in TESTS:
         failed += 0 if ok else 1
     except Exception as e:
         failed += 1
-        out('OPS', name, 'FAIL', 'EXC %s: %s' % (type(e).__name__, str(e).replace('\n', ' | ')[:200]))
+        out('OPS', name, 'FAIL', 'EXC %s: %s' % (type(e).__name__, str(e).replace('\n', ' | ')[:600]))
 out('OPS_DONE failed=%d total=%d' % (failed, len(TESTS)))
