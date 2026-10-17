@@ -90,6 +90,8 @@
 
 - [x] (odhad, na PC beze změny: nelze ověřit mimo iPad) Lov chyb kolo 56: aplikace z plochy iPadu (PWA fullscreen) měla `black-translucent` + `viewport-fit=cover` a žádné `safe-area` → horní lišta Blenderu (menu) mohla být pod hodinami/baterií a spodek pod home indikátorem. Změněno na `apple-mobile-web-app-status-bar-style=black` a bez `viewport-fit=cover` → rozvržení mimo systémové lišty. Ověřit na iPadu (vrátit lze v `demo/index.html`)
 
+- [x] (PASS: `scripts/ipadview_win.sh` — rozlišení iPad Air 1180×820 DPR 2: lišta s rozbaleným ⋯ byla 296 px vysoká (6 řad, třetina viewportu); teď menší tlačítka + plná šířka = 2 řady, 86 px; snímky out/win/ipad_1.png, ipad_2_more.png; `bar`, `touch`, `touch_modal`, `touch_loopcut`, `touch_boxsel`, `autokbd` PASS) Lov chyb kolo 57: lišta kláves zakrývala viewport
+
 ## Výkon (až nebude co opravovat)
 - [x] (znovu změřeno po numpy/OIIO/ikonách: `scripts/startup_win.sh` okno nahoře za 5,4 s, bez regrese oproti 5,6 s) Start po víkendových změnách
 - [x] (změřeno 17. 10., `scripts/passes_win.sh` = `?passlog=1`; orbit kostky Solid, passy na snímek ÷208 snímků: WebGPUBackbuffer 11, `&framebuffer.fb` 10 (obojí = kompozice UI regionů, ne viewport), overlay_line_fb 4, overlay_output 4, po 2: Clear Main, smaa_resolve, outline.prepass, dfbl overlay, smaa_edge, smaa_weight; po 1: Opaque.Gbuffer/Deferred, Workbench.Outline, taa_accumulation, overlay_line_on, Clear In Front… = ~48) Rozpad passů: víc než polovina jsou kompozice UI (střídání offscreen region ↔ backbuffer = nutné lámání passů); zisk by dalo jen cachování/slučování kompozice regionů (zásah do upstream UI kódu, nejisté) → neřeším, dokud iPad nepotvrdí, že je to úzké hrdlo (`?perf=1`).

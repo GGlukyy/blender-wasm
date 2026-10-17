@@ -471,14 +471,14 @@ export function installTouch(canvas) {
   const bar = document.createElement("div");
   bar.id = "touchbar";
   updateArmed = () => { bar.style.borderColor = modalArmed ? "#2a6fd6" : "#555"; bar.style.boxShadow = modalArmed ? "0 0 0 2px #2a6fd6" : "none"; };
-  bar.style.cssText = "position:fixed;left:50%;bottom:34px;transform:translateX(-50%);z-index:90;display:flex;" +
-    "gap:6px;padding:6px;background:rgba(28,28,28,.88);border:1px solid #555;border-radius:12px;" +
-    "font:600 15px system-ui,sans-serif;-webkit-user-select:none;user-select:none;touch-action:manipulation;" +
-    "flex-wrap:wrap;max-width:96vw;justify-content:center";
+  bar.style.cssText = "position:fixed;left:0;right:0;margin:0 auto;width:fit-content;bottom:30px;z-index:90;display:flex;" +
+    "gap:4px;padding:4px;background:rgba(28,28,28,.88);border:1px solid #555;border-radius:10px;" +
+    "font:600 14px system-ui,sans-serif;-webkit-user-select:none;user-select:none;touch-action:manipulation;" +
+    "flex-wrap:wrap;max-width:98vw;justify-content:center";
   const btn = (label, onTap) => {
     const b = document.createElement("button");
     b.textContent = label;
-    b.style.cssText = "min-width:46px;height:42px;padding:0 10px;border-radius:8px;border:1px solid #666;" +
+    b.style.cssText = "min-width:38px;height:36px;padding:0 6px;border-radius:7px;border:1px solid #666;" +
       "background:#3a3a3a;color:#eee;font:inherit;touch-action:manipulation";
     b.addEventListener("pointerdown", (e) => e.preventDefault());   /* don't steal focus from canvas */
     b.addEventListener("click", onTap);
@@ -502,11 +502,11 @@ export function installTouch(canvas) {
     ["F2", "F2", "F2"], ["F3", "F3", "F3"], [".", "Period", "."], ["-", "Minus", "-"], ["/", "Slash", "/"]];
   const more = document.createElement("div");
   more.id = "touchbar-more";
-  more.style.cssText = "display:none;flex-basis:100%;flex-wrap:wrap;gap:6px;justify-content:center";
+  more.style.cssText = "display:none;flex-basis:100%;flex-wrap:wrap;gap:4px;justify-content:center";
   const moreBtn = (label, onTap) => {
     const b = document.createElement("button");
     b.textContent = label;
-    b.style.cssText = "min-width:46px;height:42px;padding:0 10px;border-radius:8px;border:1px solid #666;" +
+    b.style.cssText = "min-width:38px;height:36px;padding:0 6px;border-radius:7px;border:1px solid #666;" +
       "background:#3a3a3a;color:#eee;font:inherit;touch-action:manipulation";
     b.addEventListener("pointerdown", (e) => e.preventDefault());
     b.addEventListener("click", onTap);
@@ -517,10 +517,10 @@ export function installTouch(canvas) {
   moreBtn("💾", () => chord([["ControlLeft", "Control"]], "KeyS", "s")).title = "Uložit (Ctrl+S)";
   const toggleMore = btn("⋯", () => { more.style.display = more.style.display === "none" ? "flex" : "none"; });
   toggleMore.title = "Další klávesy (E, Space, F2, Ctrl+S…)";
-  bar.appendChild(more);
   btn("📁", openFiles).title = "Soubory: nahrát / stáhnout";
   btn("⌨", showKeyboard).title = "Klávesnice (psaní do polí, přejmenování)";
   const hide = btn("✕", () => bar.remove());
   hide.title = "Skrýt lištu";
+  bar.appendChild(more);   /* last, so the 2nd row wraps below ALL first-row buttons */
   document.body.appendChild(bar);
 }
