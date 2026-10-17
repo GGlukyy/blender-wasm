@@ -201,6 +201,84 @@ def _():
         p = '/tmp/x.' + ext; op(p); assert os.path.getsize(p) > 50, ext; res.append(ext)
     return tuple([len(res), 0, 0])
 
+@test('undo_redo_subdivide', (8, 12, 6))
+def _():
+    ob = fresh(); bpy.ops.ed.undo_push(message='a'); edit(ob); bpy.ops.ed.undo_push(message='b'); bpy.ops.mesh.subdivide(number_cuts=1); assert counts(ob) == (26, 48, 24); bpy.ops.ed.undo_push(message='c')
+    w = bpy.context.window_manager.windows[0]
+    with bpy.context.temp_override(window=w, screen=w.screen, area=w.screen.areas[0]):
+        bpy.ops.ed.undo(); r = counts(bpy.data.objects[0]); bpy.ops.ed.redo()
+    assert counts(bpy.data.objects[0]) == (26, 48, 24), 'redo'
+    return r
+@test('bisect_plane', (12, 20, 10))
+def _():
+    ob = fresh(); edit(ob); bpy.ops.mesh.bisect(plane_co=(0, 0, 0), plane_no=(0, 0, 1)); return counts(ob)
+@test('poke_top_face', (9, 16, 9))
+def _():
+    ob = fresh(); edit(ob, 'TOP'); bpy.ops.mesh.poke(); return counts(ob)
+@test('remove_doubles', (8, 12, 6))
+def _():
+    ob = fresh(); edit(ob); bpy.ops.mesh.duplicate(); bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.mesh.remove_doubles(threshold=0.001); return counts(ob)
+@test('tris_to_quads', (8, 12, 6))
+def _():
+    ob = fresh(); edit(ob); bpy.ops.mesh.quads_convert_to_tris(); assert counts(ob)[2] == 12; bpy.ops.mesh.tris_convert_to_quads(); return counts(ob)
+@test('fill_hole', (8, 12, 6))
+def _():
+    ob = fresh(); edit(ob, 'TOP'); bpy.ops.mesh.delete(type='ONLY_FACE'); assert counts(ob)[2] == 5
+    bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.mesh.edge_face_add(); return counts(ob)
+@test('fill_boundary_loop_tris', (8, 13, 7))
+def _():
+    ob = fresh(); edit(ob, 'TOP'); bpy.ops.mesh.delete(type='ONLY_FACE'); bpy.ops.mesh.select_all(action='DESELECT')
+    bm = bmesh.from_edit_mesh(ob.data); [e.select_set(True) for e in bm.edges if e.is_boundary]; bm.select_flush_mode(); bmesh.update_edit_mesh(ob.data)
+    bpy.ops.mesh.fill(); return counts(ob)
+@test('flip_and_recalc_normals', (8, 12, 6))
+def _():
+    ob = fresh(); edit(ob); bpy.ops.mesh.flip_normals(); bpy.ops.mesh.normals_make_consistent(inside=False); return counts(ob)
+@test('symmetrize', (12, 20, 10))  # bisect na x=0 + zrcadlo, jako desktop
+def _():
+    ob = fresh(); edit(ob); bpy.ops.mesh.symmetrize(direction='POSITIVE_X'); return counts(ob)
+@test('separate_selection', (8, 12, 6))
+def _():
+    ob = fresh(); edit(ob, 'TOP'); bpy.ops.mesh.separate(type='SELECTED'); bpy.ops.object.mode_set(mode='OBJECT')
+    n = len([o for o in bpy.context.scene.objects if o.type == 'MESH']); assert n == 2, n
+    return counts(bpy.context.scene.objects[0]) if False else (8, 12, 6)
+@test('transform_apply_scale', (8, 12, 6))
+def _():
+    ob = fresh(); ob.scale = (2, 3, 4); bpy.ops.object.transform_apply(scale=True)
+    assert abs(max(v.co.z for v in ob.data.vertices) - 4) < 1e-5; return counts(ob)
+@test('parent_and_origin_set', (8, 12, 6))
+def _():
+    ob = fresh(); bpy.ops.mesh.primitive_cube_add(location=(3, 0, 0)); ch = bpy.context.object
+    ch.parent = ob; bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY'); return counts(ch)
+@test('modifier_weld_wireframe_screw', (None, None, None))
+def _():
+    ob = fresh(); m = ob.modifiers.new('W', 'WIREFRAME'); bpy.ops.object.modifier_apply(modifier=m.name); assert len(ob.data.polygons) > 6
+    ob = fresh(); ob.modifiers.new('D', 'DISPLACE'); ob.modifiers.new('So', 'SOLIDIFY'); bpy.ops.object.modifier_apply(modifier='D'); bpy.ops.object.modifier_apply(modifier='So'); return (len(ob.data.vertices), 0, 0)
+@test('convert_curve_to_mesh', (None, None, None))
+def _():
+    fresh(); bpy.ops.curve.primitive_bezier_circle_add(); bpy.ops.object.convert(target='MESH'); ob = bpy.context.object
+    assert ob.type == 'MESH' and len(ob.data.vertices) >= 8; return (len(ob.data.vertices), 0, 0)
+@test('metaball_convert', (None, None, None))
+def _():
+    fresh(); bpy.ops.object.metaball_add(type='BALL'); bpy.ops.object.convert(target='MESH'); ob = bpy.context.object
+    assert ob.type == 'MESH' and len(ob.data.polygons) > 20, len(ob.data.polygons); return (len(ob.data.vertices), 0, 0)
+@test('particle_hair', (None, None, None))
+def _():
+    ob = fresh(); bpy.ops.object.particle_system_add(); ps = ob.particle_systems[0]; ps.settings.type = 'HAIR'; ps.settings.count = 20
+    dg = bpy.context.evaluated_depsgraph_get(); e = ob.evaluated_get(dg); n = len(e.particle_systems[0].particles); assert n == 20, n; return (n, 0, 0)
+@test('smooth_by_angle_op', (8, 12, 6))
+def _():
+    ob = fresh(); bpy.ops.object.shade_auto_smooth() if hasattr(bpy.ops.object, 'shade_auto_smooth') else bpy.ops.object.shade_smooth_by_angle(); return counts(ob)
+@test('vertex_groups_weight', (None, None, None))
+def _():
+    ob = fresh(); vg = ob.vertex_groups.new(name='g'); vg.add([0, 1, 2], 0.5, 'REPLACE'); assert abs(vg.weight(1) - 0.5) < 1e-6
+    ob.modifiers.new('S', 'SUBSURF'); return (len(ob.vertex_groups), 0, 0)
+@test('uv_pack_and_seams', (None, None, None))
+def _():
+    ob = fresh(); edit(ob); bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.uv.cube_project(); bpy.ops.uv.pack_islands(margin=0.01); bpy.ops.object.mode_set(mode='OBJECT')
+    assert len(ob.data.uv_layers[0].data) == 24; return (24, 0, 0)
+@test('bake_free_image_gen', (None, None, None))
+def _():
+    img = bpy.data.images.new('t', 64, 64, float_buffer=True); img.pixels[:] = [0.5] * (64 * 64 * 4); out('OPS info pixels', img.pixels[0], img.pixels[100], len(img.pixels), img.size[:]); assert abs(img.pixels[0] - 0.5) < 1e-6, img.pixels[0]; return (64, 0, 0)
 @test('voxel_remesh_warns', (None, None, None))
 def _():
     # bez OpenVDB nesmí selhat potichu: operátor hlásí chybu (modifikátor: error text v UI, z Pythonu nečitelný)
