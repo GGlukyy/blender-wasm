@@ -8,11 +8,13 @@
   (overlay plochy a mesh mají stejnou hloubku). Desktop/Metal to řeší depth biasem pro face
   overlay (`overlay_edit_mesh_face`, ndc offset / polygon offset). Ověř, že WebGPU pipeline
   aplikuje stejný offset (depthBias / ndc_offset_factor). Repro: Tab, 3, klik na plochu, orbit.
-- [~] **Výběr skrz objekt** — klik vybere i prvek na zadní straně (dočasné obejití bez occlusion,
+- [x] (PASS: `scripts/p2_occl_check.sh` — zakrytý vrchol se nevybere, viditelný ano, plocha pod kurzorem: out/win/p2_occlhid_7_click.png, p2_occlvis_7_click.png, p2_occlface2_7_click.png; box/lasso v Solid pořád bez occlusion → nový bod níže) **Výběr skrz objekt** — klik vybere i prvek na zadní straně (dočasné obejití bez occlusion,
   commit a760dba). Oprava bez async GPU select: CPU occlusion test — po geometrickém nearest
   pickingu ověř raycastem (BVH editmesh, `BKE_bvhutils`/`ED_view3d_win_to_segment`), že prvek
   není zakrytý; nebo použij depth snapshot (P2c) a porovnej hloubku prvku s hloubkou pixelu.
   Konzultuj architekta, guard `#ifdef __EMSCRIPTEN__`.
+
+- [ ] Box/lasso/circle select v Solid ignoruje zakrytí (view3d_select.cc ~866/4099/4836, `point_visible` z `WebOccl` v editmesh_select.cc — vyndat do sdílené hlavičky).
 
 ## Plán
 - [x] **P1** (PASS: `scripts/wgsl_seed_win.sh verify` → TOTAL translations: 0, seed 179 shaderů; BLENDER_REF=f077479e. Příčina: Blender běží na pthread workeru, cache z main.js tam nebyla vidět → nikdy nefungovala; seed se načítá sync XHR. Regenerace: `scripts/wgsl_seed_win.sh seed`, `wgsl-cache.json` je v .gitignore (generovaný). Zbývá iPad: čistá data webu, přepnutí workspace) shader seed (`wgsl-cache.json`) pro všechny workspaces + edit mode + shading módy;
