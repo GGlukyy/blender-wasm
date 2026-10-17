@@ -368,6 +368,7 @@ if (new URLSearchParams(location.search).get("perf") === "1") {
     box.textContent =
       `${(1000 / d.dt_avg_ms).toFixed(0)} FPS  ${d.dt_avg_ms.toFixed(1)} ms (max ${d.dt_max_ms.toFixed(0)})\n` +
       `submits ${d.submits}  passes ${d.passes}  bindgroups ${d.bindgroups}\n` +
+      `WebGPU draw/submit ${d.api_ms.toFixed(1)} ms   immediate bufs ${d.imm_bufs} (${d.imm_kb} KB)\n` +
       `textures ${d.tex} / ${d.tex_mb} MB   wasm heap ${d.heap_mb.toFixed(0)} MB`;
   };
   setInterval(() => { if (last && performance.now() - last > 2500) box.style.opacity = ".4"; else box.style.opacity = "1"; }, 1000);
@@ -793,6 +794,7 @@ window.Module = {
       ENV.BLENDER_SYSTEM_PYTHON = "/assets";
       ENV.PYTHONHOME = "/assets";
       if (window.__CAPENV) for (const k in window.__CAPENV) ENV[k] = window.__CAPENV[k];
+      if (new URLSearchParams(location.search).get("perf") === "1") ENV.WGPU_PERF = "1";
     } catch (e) { log("preRun ENV: " + e); }
 
     /* Register the in-memory tar FsProvider for the WasmFS ProviderBackend
