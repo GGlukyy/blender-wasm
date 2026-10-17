@@ -104,6 +104,8 @@
 
 - [x] (PASS: `scripts/quit_win.sh` — Ctrl+Q: Blender vypsal „Blender quit“, runtime se zastavil a na plátně zůstal ZAMRZLÝ poslední snímek bez jakékoli hlášky (+ PAGEERROR memory access out of bounds); teď šedý pruh „Blender skončil … Spustit znovu“ (`showQuit` v `demo/src/main.js`); `startup_win`, `gpulost_win` PASS) Lov chyb kolo 62: File ▸ Quit / Ctrl+Q
 
+- [x] (PASS: `scripts/winops_win.sh` — 18 „globálních“ operátorů (Window ▸ New Window hlásí čistou chybu „Failed to create window“, fullscreen toggle, Load Factory Settings, New/Open/Revert, Recover, splash, menu search, debug menu) bez pádu a bez PAGEERROR; chyby `poll() failed` jsou omezení kontextu timeru; druhé okno na webu není (očekávané)) Lov chyb kolo 63: operátory okna a souborů
+
 ## Výkon (až nebude co opravovat)
 - [x] (změřeno 18. 10., PC/NVIDIA, `SCENES=ico6_edit,ico7_edit,monkey_sub2_edit scripts/drawtime_win.sh`: překreslení okna v EDIT MODU: kostka 13,4 ms, ico 40k trojúhelníků 18,8 ms, ico 164k = 32,3 ms, opice+Subsurf2 16,1 ms → pro malé herní assety (<20k tris) edit mode drží ~55 FPS na PC, 164k je na hraně; iPad odhadem 2–3× pomalejší, změřit přes `?perf=1`) Cena snímku v edit modu
 - [x] (znovu změřeno po numpy/OIIO/ikonách: `scripts/startup_win.sh` okno nahoře za 5,4 s, bez regrese oproti 5,6 s) Start po víkendových změnách
