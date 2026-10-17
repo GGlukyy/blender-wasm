@@ -22,7 +22,7 @@ let last = "", errors = 0;
 page.on("console", (m) => { const t = m.text(); const i = t.indexOf("SPROBE"); if (i >= 0) last = t.slice(i + 7); else if (/RuntimeError|abort\(|unreachable|memory access/i.test(t)) { errors++; console.log("CONSOLE-ERR " + t.slice(0, 160)); } });
 page.on("pageerror", (e) => { errors++; console.log("PAGEERROR " + e.message.slice(0, 160)); });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
-await page.goto("http://localhost:5173/", { waitUntil: "load" });
+await page.goto("http://localhost:5173/" + (process.env.QS || ""), { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
 await page.getByRole("button", { name: /Launch Blender/ }).click();
 for (let i = 0; i < 300; i++) { if ((await page.evaluate(() => window.__BGUI__ || {})).window) break; await new Promise(r => setTimeout(r, 1000)); }
