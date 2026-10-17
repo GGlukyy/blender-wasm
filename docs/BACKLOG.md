@@ -8,7 +8,7 @@
   (overlay plochy a mesh mají stejnou hloubku). Desktop/Metal to řeší depth biasem pro face
   overlay (`overlay_edit_mesh_face`, ndc offset / polygon offset). Ověř, že WebGPU pipeline
   aplikuje stejný offset (depthBias / ndc_offset_factor). Repro: Tab, 3, klik na plochu, orbit.
-- [ ] **Výběr skrz objekt** — klik vybere i prvek na zadní straně (dočasné obejití bez occlusion,
+- [~] **Výběr skrz objekt** — klik vybere i prvek na zadní straně (dočasné obejití bez occlusion,
   commit a760dba). Oprava bez async GPU select: CPU occlusion test — po geometrickém nearest
   pickingu ověř raycastem (BVH editmesh, `BKE_bvhutils`/`ED_view3d_win_to_segment`), že prvek
   není zakrytý; nebo použij depth snapshot (P2c) a porovnej hloubku prvku s hloubkou pixelu.
