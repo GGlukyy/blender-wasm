@@ -1,15 +1,16 @@
 // Sculpt: ico sphere, SCULPT mode, tah myší přes kouli -> geometrie se musí změnit (max poloměr / součet z).
 const { chromium } = await import(process.env.PW || "playwright");
+const SUB = Number((process.env.ICO || "").replace(/%.*/, "")) || 5;
 const expr = `import bpy, sys, math
 bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete()
-bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=5, radius=1.0)
+bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=${SUB}, radius=1.0)
 def probe():
     ob = bpy.context.view_layer.objects.active
     if ob and ob.type == 'MESH':
         vs = ob.data.vertices
         r = max(v.co.length for v in vs); sz = sum(v.co.z for v in vs)
         print('SPROBE mode=%s verts=%d maxr=%.4f sumz=%.3f' % (ob.mode, len(vs), r, sz)); sys.stdout.flush()
-    return 0.5
+    return 0.5 if len(bpy.context.view_layer.objects.active.data.vertices) < 50000 else 3.0
 bpy.app.timers.register(probe, first_interval=5.0)
 def to_sculpt():
     bpy.ops.object.mode_set(mode='SCULPT'); return None
