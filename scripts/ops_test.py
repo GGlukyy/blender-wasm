@@ -48,6 +48,43 @@ def _():
     for o in list(bpy.data.objects): bpy.data.objects.remove(o)   # widgety rigu zůstávají ve skryté kolekci a kazí počty dalších testů
     for c in list(bpy.data.collections): bpy.data.collections.remove(c)
     return (None, None, None)
+@test('softbody_falls', (None, None, None))
+def _():
+    fresh(); bpy.ops.mesh.primitive_uv_sphere_add(location=(0, 0, 5)); o = bpy.context.object
+    bpy.ops.object.modifier_add(type='SOFT_BODY'); sc = bpy.context.scene
+    for f in range(1, 9): sc.frame_set(f)
+    ev = o.evaluated_get(bpy.context.evaluated_depsgraph_get()); n = len(ev.data.vertices); sc.frame_set(1)
+    assert n == 482, n
+    return (None, None, None)
+@test('particles_emitter_sim', (None, None, None))
+def _():
+    fresh(); bpy.ops.object.particle_system_add(); o = bpy.context.object; sc = bpy.context.scene
+    for f in range(1, 12): sc.frame_set(f)
+    dg = bpy.context.evaluated_depsgraph_get(); ps = o.evaluated_get(dg).particle_systems[0]
+    n = len([p for p in ps.particles if p.alive_state == 'ALIVE']); sc.frame_set(1)
+    assert n > 0, n
+    return (n, 0, 0)
+@test('dynamic_paint_canvas', (None, None, None))
+def _():
+    fresh(); bpy.ops.object.modifier_add(type='DYNAMIC_PAINT'); m = bpy.context.object.modifiers[-1]
+    bpy.ops.dpaint.type_toggle(type='CANVAS'); assert m.ui_type == 'CANVAS', m.ui_type
+    return (None, None, None)
+@test('lineart_gp_modifier', (None, None, None))
+def _():
+    fresh(); bpy.ops.object.grease_pencil_add(type='LINEART_SCENE')
+    assert any(o.type in ('GREASEPENCIL', 'GPENCIL') for o in bpy.data.objects)
+    return (None, None, None)
+@test('hair_curves_add', (None, None, None))
+def _():
+    fresh(); bpy.ops.object.curves_empty_hair_add(); o = bpy.context.object; assert o.type == 'CURVES', o.type
+    return (None, None, None)
+@test('freestyle_render', (None, None, None))
+def _():
+    fresh(); sc = bpy.context.scene; sc.render.use_freestyle = True
+    bpy.ops.object.camera_add(location=(0, -6, 2), rotation=(1.3, 0, 0)); sc.camera = bpy.context.object
+    sc.render.resolution_x = sc.render.resolution_y = 64; sc.render.engine = 'BLENDER_WORKBENCH'
+    bpy.ops.render.render(write_still=False)
+    return (None, None, None)
 @test('subdivide', (26, 48, 24))
 def _():
     ob = fresh(); edit(ob); bpy.ops.mesh.subdivide(number_cuts=1); return counts(ob)
@@ -546,6 +583,7 @@ GAPS = [
     ('voxel_remesh (OpenVDB)', lambda: (lambda ob: (setattr(ob.modifiers.new('R', 'REMESH'), 'mode', 'VOXEL'), len(ob.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.polygons))[1])(fresh())),
     ('rigid_body (Bullet)', lambda: (fresh(), bpy.ops.rigidbody.object_add())[1]),
     ('cycles_engine', lambda: (setattr(bpy.context.scene.render, 'engine', 'CYCLES'), True)[1]),
+    ('fluid_mantaflow (WITH_MOD_FLUID)', lambda: (fresh(), bpy.ops.object.modifier_add(type='FLUID'), setattr(bpy.context.object.modifiers[-1], 'fluid_type', 'DOMAIN'), bpy.context.object.modifiers[-1].domain_settings.domain_type)[3]),
     ('quadriflow_remesh', lambda: (fresh(), bpy.ops.object.quadriflow_remesh())[1]),
 ]
 for name, fn in GAPS:
