@@ -870,6 +870,7 @@ async function start() {
 const SHADOW_POOL = (new URLSearchParams(location.search).get("shadowpool") || "128").replace(/[^0-9]/g, "") || "128";
 const AUTOSAVE_S = (new URLSearchParams(location.search).get("autosave") || "120").replace(/[^0-9]/g, "") || "120";
 const RESET_PREFS = new URLSearchParams(location.search).get("resetprefs") === "1" ? "1" : "0"; // ?resetprefs=1 smaže uložené Preferences
+const UI_SCALE = (new URLSearchParams(location.search).get("uiscale") || "").replace(/[^0-9.]/g, ""); // ?uiscale=1.3 → větší UI pro prsty (uloží se do Preferences)
 const SHADOW_POOL_PY = `import bpy
 from bpy.app.handlers import persistent
 def _cap_pool():
@@ -887,6 +888,9 @@ try:
     if '${RESET_PREFS}' == '1' and _os.path.exists(_UP): _os.remove(_UP); print('USERPREF reset')
     if _os.path.exists(_UP): bpy.ops.wm.read_userpref(); print('USERPREF loaded')
 except Exception as e: print('USERPREF load ERR', e)
+try:
+    if '${UI_SCALE}': bpy.context.preferences.view.ui_scale = max(0.5, min(3.0, float('${UI_SCALE}'))); print('UISCALE set ${UI_SCALE}', flush=True)
+except Exception as e: print('UISCALE ERR', e)
 def _save_prefs():
     try:
         if bpy.context.preferences.is_dirty: bpy.ops.wm.save_userpref(); print('USERPREF saved')
