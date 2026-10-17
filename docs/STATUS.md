@@ -18,6 +18,8 @@ Výsledek: 🟡 víkend: opraveno ~10 chyb ověřených na PC (viz níže), regr
 - Kompilace pipeline při prvním Material Preview blokuje 6–7 s (jen hláška, ne oprava).
 
 # Víkend — co je nového (17. 10., odpoledne)
+- ✅ Kolo 36 **Preferences se pamatují**: UI scale, navigace, zkratky, motiv… se dřív po každém načtení stránky vracely na výchozí. Teď se ukládají (do ~5 s po změně) a při startu načítají. PC: `prefsave_win.sh` PASS. **Na iPadu ověř:** Edit ▸ Preferences ▸ Interface ▸ Resolution Scale změň (např. 1.3), počkej 10 s, obnov stránku → zůstalo? Kdyby se něco pokazilo: otevři stránku s `?resetprefs=1`.
+
 - ✅ Kolo 35 **Schránka (Ctrl+C / Ctrl+V)**: nefungovala vůbec (kopírování hodnot, textu v Text Editoru, Python konzole). Teď funguje uvnitř Blenderu i ven/dovnitř přes systémovou schránku (PC: `clip_win.sh` PASS). **Na iPadu ověř (klávesnice/lišta):** v Text Editoru napiš text, vyber, Ctrl+C, Ctrl+V; najeď na číslo v panelu vlastností, Ctrl+C a Ctrl+V na jiné pole; zkopíruj text z Poznámek a vlož do Python konzole (Cmd+V). Safari může ukázat bublinu „Vložit“.
 
 - ✅ Kolo 34 **Zaseknutý Shift/Ctrl**: když okno ztratí fokus (přepnutí aplikace) při držené klávese, Blender ji měl „stále stisknutou“. Teď se při ztrátě fokusu pošle uvolnění (`blur_win.sh` PASS, `interactive_win.sh` ALL PASS). Na iPadu relevantní jen s externí klávesnicí.
