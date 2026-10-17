@@ -18,6 +18,8 @@ Výsledek: 🟡 víkend: opraveno ~10 chyb ověřených na PC (viz níže), regr
 - Kompilace pipeline při prvním Material Preview blokuje 6–7 s (jen hláška, ne oprava).
 
 # Víkend — co je nového (17. 10., odpoledne)
+- Noc 17. → 18. 10. (21:45): backlog zkontrolován — zbývají jen položky, které potřebují iPad nebo desktop Blender (z-fighting, OpenVDB, drag&drop parent, Info editor řádek). `startup_win.sh` PASS (seed 198 shaderů, okno naběhlo za 5,6 s). Žádná nová chyba, žádná změna kódu.
+
 - Večer 17. 10. (kola 15–21): nové testy přes UI (Shift+D, merge, delete, G/S/R s číslem, výběr/skrytí, proportional editing, Smart UV dialog, barva materiálu v Material Preview/Rendered), `ops_win.sh` 77 testů. **Žádná nová chyba**, `regress_all.sh` bez FAIL.
 - Výkon (PC): překreslení 13 ms nezávisí na počtu objektů (200 kostek = 13,2 ms); sculpt tah 685–842 ms od 2 562 do 655 362 vrcholů; save/open .blend 0,03 s. Úzké hrdlo je pevná režie UI, ne scéna.
 - **Nové (výkon/paměť):** Material Preview zabíral ~1 GB GPU paměti (hlavně EEVEE Shadow Pool 512 MB). Teď 128 MB (−384 MB) pro startup scénu a nové soubory. **Na iPadu ověř:** Material Preview (koule v liště / Z → Material Preview) nespadne a stíny vypadají dobře; kdyby ne, `?shadowpool=512`.
