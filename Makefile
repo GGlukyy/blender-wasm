@@ -154,7 +154,11 @@ cycles-web: cycles
 # datafiles. Host codegen tools (makesdna/makesrna/datatoc/shader_tool) run via
 # node (wiring committed in the fork). Build dir: build-blender.
 # ---------------------------------------------------------------------------
-configure-blender: toolchain blender blender-assets deps dep-python
+# numpy (FBX/glTF export) is built after CPython and linked statically by scripts/link_blender_*.sh:
+# after `make dep-python` run `make dep-numpy` (needs native python from build_python.sh).
+dep-numpy: dep-python
+
+configure-blender: toolchain blender blender-assets deps dep-python dep-numpy
 	bash scripts/build_shader_tool_native.sh   # native codegen tool (wasm one is buggy)
 	$(EM_ENV) "$(EMCMAKE)" cmake -S blender -B build-blender -G Ninja \
 		-DCMAKE_BUILD_TYPE=Release \
