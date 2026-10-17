@@ -8,7 +8,7 @@ def probe():
         if a.type == 'VIEW_3D':
             r = a.spaces[0].region_3d
             q = r.view_rotation; l = r.view_location
-            print('TPROBE rot=%.4f,%.4f,%.4f,%.4f dist=%.4f loc=%.3f,%.3f,%.3f mode=%s sel=%d' % (q.w, q.x, q.y, q.z, r.view_distance, l.x, l.y, l.z, ob.mode if ob else '-', 1 if (ob and ob.select_get()) else 0)); sys.stdout.flush()
+            print('TPROBE rot=%.4f,%.4f,%.4f,%.4f dist=%.4f loc=%.3f,%.3f,%.3f mode=%s sel=%d ox=%.3f' % (q.w, q.x, q.y, q.z, r.view_distance, l.x, l.y, l.z, ob.mode if ob else '-', 1 if (ob and ob.select_get()) else 0, ob.location.x if ob else 0)); sys.stdout.flush()
     return 0.3
 bpy.app.timers.register(probe, first_interval=5.0)`;
 const browser = await chromium.launch({ headless: false, executablePath: process.env.CHROME,
@@ -28,7 +28,7 @@ const cdp = await ctx.newCDPSession(page);
 const box = await page.locator("#canvas").boundingBox();
 const P = (x, y, id = 0) => ({ x: box.x + x, y: box.y + y, id, radiusX: 4, radiusY: 4, force: 1 });
 const touch = (type, pts) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: pts });
-const parse = (s) => { const m = s.match(/rot=([-\d.,]+) dist=([-\d.]+) loc=([-\d.,]+) mode=(\S+) sel=(\d)/); return m ? { rot: m[1].split(",").map(Number), dist: +m[2], loc: m[3].split(",").map(Number), mode: m[4], sel: +m[5] } : null; };
+const parse = (s) => { const m = s.match(/rot=([-\d.,]+) dist=([-\d.]+) loc=([-\d.,]+) mode=(\S+) sel=(\d) ox=([-\d.]+)/); return m ? { rot: m[1].split(",").map(Number), dist: +m[2], loc: m[3].split(",").map(Number), mode: m[4], sel: +m[5], ox: +m[6] } : null; };
 const state = async () => { await wait(1000); return parse(last); };
 const diff = (a, b) => Math.hypot(...a.map((v, i) => v - b[i]));
 let fail = 0;
@@ -75,6 +75,18 @@ await pen("mouseMoved", 340, 300, 0); await pen("mousePressed", 340, 300, 1);
 for (let i = 1; i <= 15; i++) { await pen("mouseMoved", 340 + i * 12, 300 + i * 10, 1); await wait(16); }
 await pen("mouseReleased", 520, 450, 0); let s8 = await state();
 check("Pencil tah = box select", sPre.sel === 0 && s8.sel === 1, `sel ${sPre.sel} -> ${s8.sel}`);
+// 8) UI oblast: 1 prst táhne číselné pole (Location X v Properties) = mění hodnotu, NEorbituje
+await page.keyboard.press("Escape"); await wait(500);
+let s9 = await state();
+await touch("touchStart", [P(1305, 318)]);
+for (let i = 1; i <= 20; i++) { await touch("touchMove", [P(1305 + i * 4, 318)]); await wait(16); }
+await touch("touchEnd", []); let s10 = await state();
+check("UI: 1 prst na poli = změna hodnoty", Math.abs(s10.ox - s9.ox) > 0.01 && diff(s9.rot, s10.rot) < 0.001, `ox ${s9.ox} -> ${s10.ox}, rot Δ=${diff(s9.rot, s10.rot).toFixed(4)}`);
+// 9) UI oblast: 1 prst na prázdném místě panelu neotáčí pohled
+await touch("touchStart", [P(1290, 760)]);
+for (let i = 1; i <= 20; i++) { await touch("touchMove", [P(1290 - i * 3, 760 - i * 5)]); await wait(16); }
+await touch("touchEnd", []); let s11 = await state();
+check("UI: tah v panelu neotáčí viewport", diff(s10.rot, s11.rot) < 0.001, `rot Δ=${diff(s10.rot, s11.rot).toFixed(4)}`);
 console.log(fail === 0 ? "ALL PASS" : `FAILED ${fail}`);
 await page.screenshot({ path: "out/touch_end.png" });
 await browser.close();

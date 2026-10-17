@@ -51,8 +51,31 @@ export function installTouch(canvas) {
     setTimeout(() => mouse("mouseup", x, y, button, 0), 90);
   };
 
+  /* Pencil pressure/tilt -> GHOST tablet data (see blender_web_pen in GHOST_SystemWeb.cc). */
+  const penData = (active, e) => {
+    const f = window.Module && window.Module._blender_web_pen;
+    if (f) f(active ? 1 : 0, active ? (e.pressure || 0) : 0, (e.tiltX || 0) / 90, (e.tiltY || 0) / 90);
+  };
+
+  /* Where are the 3D viewports? Published by Blender (wm_web_publish_viewports in wm_draw.cc).
+   * Over a viewport finger gestures navigate; over UI regions (properties, outliner, timeline,
+   * headers...) one finger is the LEFT mouse button (drag sliders, resize, box select) and two
+   * fingers scroll/zoom the editor (middle mouse drag). Unknown (old build) = viewport. */
+  const inViewport = (x, y) => {
+    const M = window.Module;
+    if (!M || !M._blender_web_viewport_rects || !M.HEAPU8) return true;
+    const a = new Int32Array(M.HEAPU8.buffer, M._blender_web_viewport_rects(), 33);
+    const n = a[0];
+    if (n === 0) return true;
+    for (let i = 0; i < n; i++) {
+      if (x >= a[1 + 4 * i] && y >= a[2 + 4 * i] && x <= a[3 + 4 * i] && y <= a[4 + 4 * i]) return true;
+    }
+    return false;
+  };
+  let area = "view"; /* "view" | "ui" for the current touch gesture */
+
   /* ---- gesture state ---- */
-  let mode = "idle"; /* idle | pending | orbit | pen | two | ignore */
+  let mode = "idle"; /* idle | pending | orbit | uidrag | pen | two | ignore */
   let longTimer = 0;
   let longFired = false;
   let two = null; /* {d0, cx0, cy0, kind: null|"zoom"|"pan", ax, ay, dragY} */
@@ -67,7 +90,7 @@ export function installTouch(canvas) {
   };
   const endTwo = () => {
     if (two && two.kind) {
-      const extra = two.kind === "zoom" ? { ctrl: true } : { shift: true };
+      const extra = two.kind === "zoom" ? { ctrl: true } : { shift: area === "view" };
       mouse("mouseup", two.ax, two.ay, 1, 0, extra);
       /* GHOST takes shift/ctrl/alt from the LAST mouse event: clear the gesture's temporary
        * Ctrl/Shift so later keyboard shortcuts (Tab, Ctrl+Z...) are not seen as Ctrl+Tab etc. */
@@ -84,6 +107,7 @@ export function installTouch(canvas) {
 
     if (e.pointerType === "pen") {
       mode = "pen";
+      penData(true, e);
       mouse("mousemove", e.clientX, e.clientY, 0, 0);
       mouse("mousedown", e.clientX, e.clientY, e.button > 0 ? e.button : 0, 1 << (e.button > 0 ? e.button : 0));
       return;
@@ -92,6 +116,7 @@ export function installTouch(canvas) {
     const touches = [...pointers.values()].filter((p) => p.type === "touch");
     if (touches.length === 1 && mode === "idle") {
       mode = "pending"; longFired = false;
+      area = inViewport(e.clientX, e.clientY) ? "view" : "ui";
       clearTimeout(longTimer);
       longTimer = setTimeout(() => {
         const p = [...pointers.values()][0];
@@ -101,13 +126,14 @@ export function installTouch(canvas) {
         }
       }, LONG_PRESS_MS);
     }
-    else if (touches.length === 2 && (mode === "pending" || mode === "orbit")) {
+    else if (touches.length === 2 && (mode === "pending" || mode === "orbit" || mode === "uidrag")) {
       clearTimeout(longTimer);
-      if (mode === "orbit") {
+      if (mode === "orbit" || mode === "uidrag") {
         const p = [...pointers.values()][0];
-        mouse("mouseup", p.x, p.y, 1, 0, {});
+        mouse("mouseup", p.x, p.y, mode === "uidrag" ? 0 : 1, 0, {});
       }
       const c = centroid();
+      area = inViewport(c.x, c.y) ? "view" : "ui";
       two = { d0: dist(), cx0: c.x, cy0: c.y, kind: null, ax: c.x, ay: c.y, dragY: c.y };
       mode = "two";
     }
@@ -125,6 +151,7 @@ export function installTouch(canvas) {
     if (e.pointerType === "pen") {
       if (p) { p.x = e.clientX; p.y = e.clientY; }
       /* Hover (no contact) moves the cursor too. */
+      penData(mode === "pen", e);
       mouse("mousemove", e.clientX, e.clientY, 0, mode === "pen" ? 1 : 0);
       return;
     }
@@ -134,14 +161,18 @@ export function installTouch(canvas) {
     if (mode === "pending") {
       if (Math.hypot(p.x - p.x0, p.y - p.y0) > MOVE_START_PX) {
         clearTimeout(longTimer);
-        mode = "orbit";
+        const left = area === "ui";
+        mode = left ? "uidrag" : "orbit";
         mouse("mousemove", p.x0, p.y0, 0, 0);
-        mouse("mousedown", p.x0, p.y0, 1, 4);
-        mouse("mousemove", p.x, p.y, 0, 4);
+        mouse("mousedown", p.x0, p.y0, left ? 0 : 1, left ? 1 : 4);
+        mouse("mousemove", p.x, p.y, 0, left ? 1 : 4);
       }
     }
     else if (mode === "orbit") {
       mouse("mousemove", p.x, p.y, 0, 4);
+    }
+    else if (mode === "uidrag") {
+      mouse("mousemove", p.x, p.y, 0, 1);
     }
     else if (mode === "two" && two && pointers.size === 2) {
       const c = centroid();
@@ -152,7 +183,7 @@ export function installTouch(canvas) {
         if (dd > GESTURE_START_PX || dc > GESTURE_START_PX) {
           two.kind = dd > dc ? "zoom" : "pan";
           two.ax = c.x; two.ay = c.y; two.dragY = c.y; two.d0 = d; two.cx0 = c.x; two.cy0 = c.y;
-          const extra = two.kind === "zoom" ? { ctrl: true } : { shift: true };
+          const extra = two.kind === "zoom" ? { ctrl: true } : { shift: area === "view" };
           mouse("mousemove", c.x, c.y, 0, 0, extra);
           mouse("mousedown", c.x, c.y, 1, 4, extra);
         }
@@ -165,7 +196,7 @@ export function installTouch(canvas) {
         mouse("mousemove", two.ax, y, 0, 4, { ctrl: true });
       }
       else {
-        mouse("mousemove", c.x, c.y, 0, 4, { shift: true });
+        mouse("mousemove", c.x, c.y, 0, 4, { shift: area === "view" });
       }
     }
   }, { passive: false });
@@ -180,6 +211,7 @@ export function installTouch(canvas) {
     if (e.pointerType === "pen") {
       if (mode === "pen") {
         mouse("mouseup", p ? p.x : e.clientX, p ? p.y : e.clientY, 0, 0);
+        penData(false, e);
         mode = pointers.size ? "ignore" : "idle";
       }
       return;
@@ -193,6 +225,10 @@ export function installTouch(canvas) {
     }
     else if (mode === "orbit") {
       mouse("mouseup", p ? p.x : e.clientX, p ? p.y : e.clientY, 1, 0);
+      mode = "idle";
+    }
+    else if (mode === "uidrag") {
+      mouse("mouseup", p ? p.x : e.clientX, p ? p.y : e.clientY, 0, 0);
       mode = "idle";
     }
     else if (mode === "two") {
