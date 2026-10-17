@@ -18,6 +18,8 @@ Výsledek: 🟡 víkend: opraveno ~10 chyb ověřených na PC (viz níže), regr
 - Kompilace pipeline při prvním Material Preview blokuje 6–7 s (jen hláška, ne oprava).
 
 # Víkend — co je nového (17. 10., odpoledne)
+- ✅ Kolo 32 **Autosave** (ochrana proti ztrátě práce, když iPad zabije tab na pozadí): Blenderův autosave na webu nezapisoval nic. Teď každé 2 min (jen pokud je scéna změněná) zápis `/opfs/home/_autosave.blend` (📁 → stáhnout / File ▸ Open `/opfs/home/_autosave.blend`). Starý se při startu uloží jako `_autosave_prev.blend`. PC: `autosave_win.sh` PASS. **Na iPadu ověř:** uprav scénu, počkej 2 min, 📁 → je tam `_autosave.blend`? Přepni na jinou appku a zpět / obnov stránku → otevři soubor.
+
 - Kolo 31: otočení iPadu / změna velikosti okna ověřeno na PC (`resize_win.sh` PASS, DPR 2). Opravena nezachycená chyba při každém resize (`fitCanvas`). **Na iPadu ověř:** otoč iPad naležato/na výšku — layout se přeloží? Je UI dost ostré (odhad: kreslí se v 1× rozlišení, ne Retina)?
 
 - Kolo 30 (noc): `ops_win.sh` teď 81 testů, všechny PASS (nově multires, Remesh Blocks, sekvencer). Cycles v buildu není (jen EEVEE/Workbench) — známá mezera, ne chyba.

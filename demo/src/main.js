@@ -828,6 +828,7 @@ async function start() {
 // EEVEE Shadow Pool: výchozí 512 MB (jen shadow atlas) + sondy ≈ 1 GB GPU paměti při Material Preview (měřeno ?perf=1: 1080 MB).
 // iPad Safari má malý limit na tab → pro nové soubory / startup scénu 128 MB (-380 MB). Přepsat: ?shadowpool=512 (hodnoty enumu v MB).
 const SHADOW_POOL = (new URLSearchParams(location.search).get("shadowpool") || "128").replace(/[^0-9]/g, "") || "128";
+const AUTOSAVE_S = (new URLSearchParams(location.search).get("autosave") || "120").replace(/[^0-9]/g, "") || "120";
 const SHADOW_POOL_PY = `import bpy
 from bpy.app.handlers import persistent
 def _cap_pool():
@@ -838,7 +839,27 @@ def _cap_pool():
 def _on_new(*a):
     if not bpy.data.filepath: _cap_pool()
 _cap_pool()
-bpy.app.handlers.load_post.append(_on_new)`;
+bpy.app.handlers.load_post.append(_on_new)
+# Autosave: Blenderův vlastní autosave timer na webu nezapíše nic (ověřeno 3 min, 1 min interval) a /tmp je v paměti.
+# iPad Safari zabíjí tab na pozadí → vlastní kopie do /opfs/home/_autosave.blend (viditelná v 📁), jen když je scéna změněná.
+import os, time
+_AS = '/opfs/home/_autosave.blend'
+_AS_EVERY = float('${AUTOSAVE_S}')
+_as = {'wait': _AS_EVERY}
+try:
+    if os.path.exists(_AS): os.replace(_AS, '/opfs/home/_autosave_prev.blend'); print('AUTOSAVE previous session kept as /opfs/home/_autosave_prev.blend')
+except Exception as e: print('AUTOSAVE rotate ERR', e)
+def _autosave():
+    try:
+        if bpy.data.is_dirty and bpy.context.window_manager.windows:
+            t = time.time()
+            bpy.ops.wm.save_as_mainfile(filepath=_AS, copy=True, compress=True)
+            dt = time.time() - t
+            _as['wait'] = max(_AS_EVERY, dt * 20)
+            print('AUTOSAVE', os.path.getsize(_AS), round(dt, 2))
+    except Exception as e: print('AUTOSAVE ERR', e)
+    return _as['wait']
+bpy.app.timers.register(_autosave, first_interval=_AS_EVERY, persistent=True)`;
 window.Module = {
   arguments: ["--factory-startup", "--python-expr", SHADOW_POOL_PY, ...(window.__BARGS || [])],
   canvas,
