@@ -17,3 +17,7 @@
 - 17. 10.: numpy do wasm přes meson cross + `-sFAKE_DYLIBS=1` (emsdk 6: `-shared` = SIDE_MODULE) vyšlo na první pokus za ~10 min díky plánu od architekta; Python add-ony ladit rovnou přes `ops_win.sh` testy (chyby jdou jako text, ne screenshot).
 
 - 17. 10.: `scripts/link_blender_release.sh` kopíruje `web/wgsl-cache.json` do `demo/public/` (přepíše seed!) — seed upravuj v obou místech (wgsl_seed_win.sh to dělá). Seed pro náhledy materiálů (mattab_seed.sh) NEPOMOHL: s cache 12 s vs 6 s bez; pipeline compile je úzké hrdlo, ne překlad.
+- (17. 10. večer) Playwright `click({modifiers:["Control"]})` v Blenderu nestačí → Ctrl+klik jen přes `keyboard.down("Control")` + klik + `up`. Souběžně: po `open_mainfile` z Python timeru přestane `bpy.context.object` existovat → používat `view_layer.objects.active`.
+- (17. 10. večer) V Blenderu 5.x je akce vrstvená: `action.fcurves` neexistuje (AttributeError v timeru tiše zabije celý probe a test vypadá „zamrzle“). Při NaN/null v měřených hodnotách nejdřív zkontrolovat `… ERR` řádek.
+- (17. 10. večer) Env proměnné do Windows node z WSL: nutné `WSLENV=NAZEV:NAZEV2` + v `*_win.sh` předat přes `set NAZEV=%NAZEV%&&` (a v JS ošetřit nenastavené `%NAZEV%`).
+- (17. 10. večer) Test barvy materiálu: výchozí kostka už má slot 0 (`materials.clear()` před `append`), splash screen zakrývá viewport (Escape), a osvětlená červená v Material Preview je oranžová → porovnávat poměrem, ne pevným prahem.
