@@ -25,6 +25,8 @@
 - [!] BLOCKED na iPad data (PC test PASS: ico sphere 1,3 M trojúhelníků i 5,2 M s limity omezenými jako Safari 256 MiB/128 MiB se vykreslí celá bez chyb, `scripts/highpoly_win.sh 9 ipad`, out/win/hp_9i_orbit.png, hp_10i_orbit.png; 1,3 M = 38 ms/snímek, 5,2 M = 180 ms na NVIDIA. Limity bufferů tedy asi nejsou příčina; podezření: paměť wasm heapu (5 M tris = 2,3 GB) vs limit iOS tabu — potřebuju čísla z iPadu přes `?perf=1`) **P3** high-poly: model 500k–1M trojúhelníků, ověř limity bufferů a čas snímku.
 - [ ] `_multiprocessing` chybí → add-on Extensions (bl_pkg) se neregistruje (nízká priorita).
 
+- [ ] Miniatury štětců v asset shelfu (Sculpt) zůstávají jako „hodiny“ — náhledy (preview) se negenerují. Kosmetické.
+
 ## Výkon (až nebude co opravovat)
 - [x] (měřeno 17. 10., PC/NVIDIA, `scripts/drawtime_win.sh`, `scripts/profile_win.mjs` + `profile_window.py`) **Cena snímku**: překreslení okna = 13,4 ms (kostka) / 14,2 (Monkey+Subsurf 3) / 14,7 (ico 327k tris) → cena je skoro NEZÁVISLÁ na scéně, je to pevná režie UI + ~50 render passů + ~900 WebGPU volání. V profilu je ~60 % snímku JS↔wasm lepidlo emdawnwebgpu (`get`, `getWasmTableEntry`, `_wgpuQueueWriteBuffer`, `CreateBindGroup`, `CreateBuffer`), samotný draw/submit jen ~1,5 ms. Orbit přes `ND_SPACE_VIEW3D` překresluje i headery/lišty (upstream chování, stejné na desktopu): ~9 regionů × 2 passy z ~49. Nápady (nezkoušeno): (a) při modal navigaci nepřekreslovat headery (listener skip), (b) menší počet bind groups/passů, (c) sdružit immediate buffery (jen 10/snímek → malý přínos).
 - [ ] Zbytečné re-uploady bufferů každý snímek? Pipeline cache hit rate?
