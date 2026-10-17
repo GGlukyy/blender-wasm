@@ -298,6 +298,79 @@ export function installTouch(canvas) {
     inp.focus({ preventScroll: true });
   };
 
+
+  /* ---- file manager: upload files into /uploads, download anything Blender wrote ----
+   * iPad has no Blender-visible filesystem; exports (OBJ/FBX/GLB/...) land in the wasm FS, so the
+   * page must hand them to the user as downloads, and imports need an upload path. */
+  const fsWalk = (FS, dir, depth, out) => {
+    let names = [];
+    try { names = FS.readdir(dir); } catch (e) { return; }
+    for (const n of names) {
+      if (n === "." || n === "..") continue;
+      const p = (dir === "/" ? "" : dir) + "/" + n;
+      let st; try { st = FS.stat(p); } catch (e) { continue; }
+      if ((st.mode & 0o170000) === 0o040000) {   /* WasmFS has no FS.isDir */ if (depth > 0) fsWalk(FS, p, depth - 1, out); }
+      else if (!/(\.index\.json$|\/\.)/.test(p)) out.push({ path: p, size: st.size, mtime: st.mtime });
+    }
+  };
+  const openFiles = () => {
+    const M = window.Module;
+    if (!M || !M.FS) return;
+    const ov = document.createElement("div");
+    ov.style.cssText = "position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;" +
+      "background:rgba(0,0,0,.6);font:15px system-ui,sans-serif;color:#ddd";
+    const box = document.createElement("div");
+    box.style.cssText = "width:560px;max-width:92vw;max-height:80vh;overflow:auto;padding:18px;border-radius:12px;background:#1c1c1c;border:1px solid #555";
+    ov.appendChild(box);
+    const render = () => {
+      const files = [];
+      for (const root of ["/uploads", "/opfs/home", "/home", "/tmp", "/exports"]) fsWalk(M.FS, root, 4, files);
+      files.sort((a, b) => b.mtime - a.mtime);   /* newest first */
+      box.innerHTML = "<div style='font-size:18px;font-weight:600;margin-bottom:10px'>Soubory</div>" +
+        "<div style='color:#aaa;margin-bottom:12px;line-height:1.4'>Nahraj soubory pro File ▸ Import (jsou v /uploads) a stáhni to, co Blender uložil/exportoval.</div>";
+      const up = document.createElement("button");
+      up.textContent = "⬆ Nahrát soubory…";
+      up.style.cssText = "padding:10px 16px;border:0;border-radius:8px;background:#e87d0d;color:#111;font:600 15px system-ui;margin-right:8px";
+      const inp = document.createElement("input"); inp.type = "file"; inp.multiple = true; inp.style.display = "none";
+      up.onclick = () => inp.click();
+      inp.onchange = async () => {
+        try { M.FS.mkdir("/uploads"); } catch (e) { /* exists */ }
+        for (const f of inp.files) M.FS.writeFile("/uploads/" + f.name, new Uint8Array(await f.arrayBuffer()));
+        render();
+      };
+      const close = document.createElement("button");
+      close.textContent = "Zavřít";
+      close.style.cssText = "padding:10px 16px;border:0;border-radius:8px;background:#333;color:#ddd;font:15px system-ui";
+      close.onclick = () => ov.remove();
+      box.append(up, inp, close);
+      const list = document.createElement("div"); list.style.marginTop = "14px";
+      if (!files.length) list.innerHTML = "<div style='color:#888'>Zatím žádné soubory (ulož/exportuj něco v Blenderu).</div>";
+      for (const f of files) {
+        const row = document.createElement("div");
+        row.style.cssText = "display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid #333";
+        const name = document.createElement("div");
+        name.style.cssText = "flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
+        name.textContent = f.path + "  (" + (f.size / 1024).toFixed(0) + " KB)";
+        const dl = document.createElement("button");
+        dl.textContent = "⬇";
+        dl.style.cssText = "padding:6px 14px;border:0;border-radius:6px;background:#2a6fd6;color:#fff;font:15px system-ui";
+        dl.onclick = () => {
+          const data = M.FS.readFile(f.path);
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(new Blob([data], { type: "application/octet-stream" }));
+          a.download = f.path.split("/").pop();
+          document.body.appendChild(a); a.click(); a.remove();
+        };
+        row.append(name, dl); list.appendChild(row);
+      }
+      box.appendChild(list);
+    };
+    render();
+    ov.addEventListener("click", (e) => { if (e.target === ov) ov.remove(); });
+    document.body.appendChild(ov);
+  };
+  window.__openFileManager = openFiles;
+
   /* ---- floating key bar ---- */
   const show = qs.get("touch") === "1" || (qs.get("touch") !== "0" && (navigator.maxTouchPoints || 0) > 0);
   if (!show) return;
@@ -349,6 +422,7 @@ export function installTouch(canvas) {
       key(sticky[name] ? "keydown" : "keyup", code, label);
     });
   });
+  btn("📁", openFiles).title = "Soubory: nahrát / stáhnout";
   btn("⌨", showKeyboard).title = "Klávesnice (psaní do polí, přejmenování)";
   const hide = btn("✕", () => bar.remove());
   hide.title = "Skrýt lištu";

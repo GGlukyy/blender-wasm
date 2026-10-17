@@ -594,7 +594,10 @@ function dropModalPick() {
     zone.innerHTML =
       "<div style='font-size:17px;font-weight:600;margin-bottom:8px'>Open a folder</div>" +
       "<div style='color:#aaa;line-height:1.5'>Your browser doesn't support the folder picker.<br>" +
-      "<b>Drag &amp; drop a folder here</b> to open it.</div>" +
+      "<b>Drag &amp; drop a folder here</b> to open it.<br>(iPad: choose a file instead)</div>" +
+      "<button id='dz-files' style='margin-top:14px;padding:12px 22px;border:0;border-radius:8px;" +
+      "background:#e87d0d;color:#111;font:600 16px system-ui;cursor:pointer'>Choose file(s)…</button>" +
+      "<input id='dz-input' type='file' multiple style='display:none'>" +
       "<div id='dz-status' style='margin-top:14px;color:#e87d0d;min-height:18px'></div>" +
       "<button id='dz-cancel' style='margin-top:16px;padding:6px 16px;border:0;border-radius:5px;" +
       "background:#333;color:#ddd;cursor:pointer'>Cancel</button>";
@@ -605,6 +608,24 @@ function dropModalPick() {
     const finish = (val) => { if (done) return; done = true; ov.remove(); resolve(val); };
 
     zone.querySelector("#dz-cancel").onclick = () => finish(null);
+
+    /* File picker (works on iPad Safari / Files app): copy the chosen files into /uploads in the
+     * wasm FS and let Blender's file browser open that directory. */
+    const fileInput = zone.querySelector("#dz-input");
+    zone.querySelector("#dz-files").onclick = () => fileInput.click();
+    fileInput.onchange = async () => {
+      try {
+        const FS = window.Module.FS;
+        try { FS.mkdir("/uploads"); } catch (e) { /* exists */ }
+        for (const f of fileInput.files) {
+          statusEl.textContent = "Loading “" + f.name + "”…";
+          FS.writeFile("/uploads/" + f.name, new Uint8Array(await f.arrayBuffer()));
+        }
+        if (fileInput.files.length) finish("/uploads");
+      } catch (err) {
+        statusEl.textContent = "Failed: " + (err && err.message || err);
+      }
+    };
     ov.addEventListener("click", (e) => { if (e.target === ov) finish(null); });
 
     const hl = (on) => { zone.style.borderColor = on ? "#e87d0d" : "#555"; zone.style.background = on ? "#242018" : "#1c1c1c"; };
