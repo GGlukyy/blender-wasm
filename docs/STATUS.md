@@ -18,6 +18,8 @@ Výsledek: 🟡 víkend: opraveno ~10 chyb ověřených na PC (viz níže), regr
 - Kompilace pipeline při prvním Material Preview blokuje 6–7 s (jen hláška, ne oprava).
 
 # Víkend — co je nového (17. 10., odpoledne)
+- ✅ Kolo 33 **Ztráta GPU**: když iPad GPU odebere (málo paměti, přepnutí aplikace), plátno dřív tiše zamrzlo. Teď červený pruh nahoře „GPU se odpojila… Obnovit“ (+ odkaz na autosave). PC: skutečný pád GPU procesu → banner (`gpulost_win.sh` PASS). Nový build blender.wasm (BLENDER_REF 6f1b18e6). **Na iPadu:** nic zvláštního; pokud pruh uvidíš, napiš, co jsi dělal.
+
 - ✅ Kolo 32 **Autosave** (ochrana proti ztrátě práce, když iPad zabije tab na pozadí): Blenderův autosave na webu nezapisoval nic. Teď každé 2 min (jen pokud je scéna změněná) zápis `/opfs/home/_autosave.blend` (📁 → stáhnout / File ▸ Open `/opfs/home/_autosave.blend`). Starý se při startu uloží jako `_autosave_prev.blend`. PC: `autosave_win.sh` PASS. **Na iPadu ověř:** uprav scénu, počkej 2 min, 📁 → je tam `_autosave.blend`? Přepni na jinou appku a zpět / obnov stránku → otevři soubor.
 
 - Kolo 31: otočení iPadu / změna velikosti okna ověřeno na PC (`resize_win.sh` PASS, DPR 2). Opravena nezachycená chyba při každém resize (`fitCanvas`). **Na iPadu ověř:** otoč iPad naležato/na výšku — layout se přeloží? Je UI dost ostré (odhad: kreslí se v 1× rozlišení, ne Retina)?

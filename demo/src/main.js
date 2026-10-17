@@ -399,7 +399,17 @@ if (new URLSearchParams(location.search).get("perf") === "1") {
 }
 
 window.__BGUI__ = { booted: false, device: false, window: false };
+const showGpuLost = (reason) => {
+  if (document.getElementById("gpu-lost")) return;
+  window.__GPU_LOST__ = reason;
+  const b = document.createElement("div");
+  b.id = "gpu-lost";
+  b.style.cssText = "position:fixed;left:0;right:0;top:0;z-index:99999;padding:14px 18px;background:#b3261e;color:#fff;font:16px system-ui;text-align:center";
+  b.innerHTML = "GPU se odpojila (" + reason + "). Obnov stránku — rozdělaná práce je v <code>/opfs/home/_autosave.blend</code> (📁). <button style='margin-left:12px;font-size:16px' onclick='location.reload()'>Obnovit</button>";
+  document.body.appendChild(b);
+};
 const scan = (t) => {
+  if (t.includes("WEBGPU_LOST")) showGpuLost(t.split("WEBGPU_LOST ")[1].split(" ")[0]);
   if (t.includes("WEBGPU_CONTEXT") && t.includes("real device acquired")) window.__BGUI__.device = true;
   /* First frame that actually drew something (not the black startup clear):
    * swap the splash/console for the live canvas. */
