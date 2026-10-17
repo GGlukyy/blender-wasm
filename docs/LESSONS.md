@@ -8,3 +8,5 @@
 - Hypotézy z PLAN.md (depth range) ověř MĚŘENÍM dřív než kódem: `WGPU_LOG_DRAW` (přes `window.__CAPENV`) + experiment „vypnout depth“ + „natvrdo fialová barva ve fragment shaderu“ rozlišily příčinu za ~1 h; čtení kódu ji nenašlo.
 - Screenshoty canvasu: Chrome ve WSL (SwiftShader) kreslí canvas BÍLE → testuj ve Windows Chrome přes `scripts/p2_win.sh` (node.exe + playwright-core, `C:\Users\<u>\p2win`).
 - Komentáře ve `.glsl` shader_tool maže → marker `/* DEBUG */` v shaderu v buildu není; shadery jsou v targetu `bf_draw_shaders`. `git push` do forku Blenderu: `GIT_LFS_SKIP_PUSH=1`.
+- 17. 10.: WGSL seed/IndexedDB cache nikdy nefungovala — Blender běží na pthread workeru (`PROXY_TO_PTHREAD`), `globalThis` z `main.js` tam není. Cokoli z JS pro C++ musí jít sync XHR / BroadcastChannel, ne přes globál stránky.
+- 17. 10.: `--python-expr` ve wasm: bez `sys.stdout.flush()` se výstup nikdy nedostane do konzole stránky. Detektor první verze odmítl i vestavěný startup.blend (legitimní duplicitní adresy) — porovnávat RAW 64bit hodnoty, ne zkrácené.

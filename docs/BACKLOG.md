@@ -21,7 +21,7 @@
   test: cache-miss = 0 při prvním přepnutí.
 - [x] (PASS: `scripts/perf_panel_win.sh`, out/win/perf_panel.png; PC baseline orbit kostky: 43 FPS, 23 ms, submits 13, passes 49, bindgroups 76) **Výkonový panel** `?perf=1`: FPS, ms/snímek, submity/passy, textury, wasm heap.
 - [ ] Vrcholy velikostí jako na desktopu (teď ~4–5 px vs ~6 px).
-- [ ] **P2b** riziko korupce 64-bit .blend (gessa ADR-004): ověř + aspoň detektor kolizí.
+- [x] (PASS: `scripts/blend_open_win.sh` — dobrý 64-bit soubor OK, uměle poškozený (kolize adres) odmítnut s hláškou; fork má stejný `>>3` truncation jako gessa ADR-004; dlouhodobě pointer interning zůstává otevřené) **P2b** riziko korupce 64-bit .blend (gessa ADR-004): ověř + aspoň detektor kolizí.
 - [ ] **P3** high-poly: model 500k–1M trojúhelníků, ověř limity bufferů a čas snímku.
 - [ ] `_multiprocessing` chybí → add-on Extensions (bl_pkg) se neregistruje (nízká priorita).
 
