@@ -11,7 +11,8 @@ Výsledek: 🟡 víkend: opraveno ~10 chyb ověřených na PC (viz níže), regr
 7. **Export do hry**: File ▸ Export ▸ glTF/FBX → `/opfs/home/test.glb` → 📁 stáhnout → otevři v Unity/desktop Blenderu. Uložení PNG z F12.
 8. **Sculpt/Vertex/Weight/Texture Paint** tahem Pencilu; **Grease Pencil**.
 9. První přepnutí do **Material Preview**: hláška „Kompiluji shadery…“ — kolik sekund?
-10. Dále stále platí seznam „Co otestovat na iPadu (podle důležitosti)“ níže (dotyk, soubory, výběr, z-fighting, `?perf=1`).
+10. **Ikona na ploše:** Sdílet ▸ Přidat na plochu → má logo Blenderu (kolo 55; staré zástupce smaž a přidej znovu)? Otevře se celoobrazovkově?
+11. Dále stále platí seznam „Co otestovat na iPadu (podle důležitosti)“ níže (dotyk, soubory, výběr, z-fighting, `?perf=1`).
 
 ## Blocked / otevřené (poctivě)
 - Z-fighting ploch: nereprodukuje se na PC, aplikovaná hypotéza čeká na iPad.
