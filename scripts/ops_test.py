@@ -460,6 +460,34 @@ def _():
     bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.mesh.edge_split()
     bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.mesh.remove_doubles(threshold=0.001)
     assert counts(ob)[2] == 6; bpy.ops.object.mode_set(mode='OBJECT'); return (None, None, None)
+@test('material_nodes_and_uv_projections', (None, None, None))
+def _():
+    ob = fresh(); mat = bpy.data.materials.new('M'); mat.use_nodes = True
+    nt = mat.node_tree; bsdf = nt.nodes['Principled BSDF']
+    tex = nt.nodes.new('ShaderNodeTexImage'); tex.image = bpy.data.images.new('T', 64, 64)
+    nt.links.new(tex.outputs['Color'], bsdf.inputs['Base Color'])
+    noise = nt.nodes.new('ShaderNodeTexNoise'); nt.links.new(noise.outputs['Fac'], bsdf.inputs['Roughness'])
+    assert len(nt.links) >= 3, len(nt.links)
+    ob.data.materials.append(mat)
+    edit(ob)
+    for op in (bpy.ops.uv.cube_project, bpy.ops.uv.sphere_project, bpy.ops.uv.cylinder_project, bpy.ops.uv.project_from_view):
+        try:
+            op()
+        except RuntimeError as e:
+            if 'project_from_view' in str(op) or 'region' in str(e).lower(): continue
+            raise
+    bpy.ops.uv.unwrap(method='CONFORMAL', margin=0.01)
+    bpy.ops.object.mode_set(mode='OBJECT')
+    assert len(ob.data.uv_layers.active.data) == 24
+    return (None, None, None)
+@test('image_ops_new_scale_invert_pack', (None, None, None))
+def _():
+    bpy.ops.image.new(name='X', width=32, height=32, generated_type='COLOR_GRID')
+    im = bpy.data.images['X']; im.scale(16, 16); assert tuple(im.size) == (16, 16)
+    im.pack(); assert im.packed_file is not None
+    px = list(im.pixels); assert len(px) == 16 * 16 * 4
+    im.pixels = [1.0 - v if i % 4 != 3 else v for i, v in enumerate(px)]
+    return (None, None, None)
 @test('save_reload', (26, 48, 24))
 def _():
     ob = fresh(); edit(ob); bpy.ops.mesh.subdivide(number_cuts=1); bpy.ops.object.mode_set(mode='OBJECT')
