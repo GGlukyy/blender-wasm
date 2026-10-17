@@ -12,3 +12,4 @@
 Poznámky: `bpy.ops.ed.undo()` jde z Python timeru jen s kontextem (poll) → testováno klávesami. Miniatury štětců v asset shelfu v Sculpt módu jsou „hodiny“ (náhledy se negenerují) — kosmetické, viz BACKLOG.
 
 **Známé mezery buildu** (hlásí `ops_win.sh` jako GAP): Voxel Remesh (OpenVDB) vrací prázdno, Rigid Body (Bullet) „Compiled without Bullet“, Quadriflow selže. Viz BACKLOG.
+| Uložení .blend jako download (Safari cesta, bez FS Access API) | `scripts/save_download_win.sh` | ✅ untitled.blend 97 kB (zstd) |
