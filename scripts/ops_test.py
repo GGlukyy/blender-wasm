@@ -402,6 +402,64 @@ def _():
     except RuntimeError as e:
         assert 'OpenVDB' in str(e), str(e)
     return (None, None, None)
+@test('spin_lathe', (None, None, None))
+def _():
+    ob = fresh(); edit(ob)
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.spin(steps=8, angle=6.2831853, center=(2, 0, 0), axis=(0, 0, 1))
+    n = counts(ob); assert n[0] > 8 and n[2] > 6, n
+    bpy.ops.object.mode_set(mode='OBJECT'); return (None, None, None)
+@test('modifiers_shrinkwrap_lattice_displace', (None, None, None))
+def _():
+    ob = fresh(); bpy.ops.mesh.primitive_uv_sphere_add(location=(0, 0, 3)); tgt = bpy.context.object
+    bpy.ops.object.select_all(action='DESELECT'); ob.select_set(True); bpy.context.view_layer.objects.active = ob
+    m = ob.modifiers.new('S', 'SHRINKWRAP'); m.target = tgt
+    bpy.ops.object.modifier_apply(modifier='S')
+    bpy.ops.object.add(type='LATTICE'); lat = bpy.context.object; lat.data.points_u = 3
+    ob.modifiers.new('L', 'LATTICE').object = lat
+    d = ob.modifiers.new('D', 'DISPLACE'); d.strength = 0.1
+    ev = ob.evaluated_get(bpy.context.evaluated_depsgraph_get()); assert len(ev.data.vertices) == 8
+    return (None, None, None)
+@test('data_transfer_normal_edit', (None, None, None))
+def _():
+    ob = fresh(); bpy.ops.mesh.primitive_cube_add(location=(3, 0, 0)); src = bpy.context.object
+    bpy.ops.object.select_all(action='DESELECT'); ob.select_set(True); bpy.context.view_layer.objects.active = ob
+    m = ob.modifiers.new('DT', 'DATA_TRANSFER'); m.object = src; m.use_poly_data = True; m.data_types_polys = {'SMOOTH'}
+    ev = ob.evaluated_get(bpy.context.evaluated_depsgraph_get()); assert len(ev.data.polygons) == 6
+    ob.modifiers.new('WN', 'WEIGHTED_NORMAL')
+    ev = ob.evaluated_get(bpy.context.evaluated_depsgraph_get()); assert len(ev.data.polygons) == 6
+    return (None, None, None)
+@test('decimate_planar_and_cleanup', (None, None, None))
+def _():
+    ob = fresh(); bpy.ops.mesh.primitive_grid_add(x_subdivisions=6, y_subdivisions=6)
+    ob = bpy.context.object; m = ob.modifiers.new('DP', 'DECIMATE'); m.decimate_type = 'DISSOLVE'
+    ev = ob.evaluated_get(bpy.context.evaluated_depsgraph_get()); assert len(ev.data.polygons) <= 2, len(ev.data.polygons)
+    return (None, None, None)
+@test('ocean_and_remesh_blocks', (None, None, None))
+def _():
+    ob = fresh(); bpy.ops.mesh.primitive_grid_add(x_subdivisions=8, y_subdivisions=8); ob = bpy.context.object
+    o = ob.modifiers.new('O', 'OCEAN'); o.geometry_mode = 'GENERATE'; o.resolution = 4
+    ev = ob.evaluated_get(bpy.context.evaluated_depsgraph_get()); assert len(ev.data.polygons) > 10, 'ocean polys=%d' % len(ev.data.polygons)
+    ob = fresh(); r = ob.modifiers.new('R', 'REMESH'); r.mode = 'BLOCKS'; r.octree_depth = 3
+    ev = ob.evaluated_get(bpy.context.evaluated_depsgraph_get()); assert len(ev.data.polygons) > 0
+    return (None, None, None)
+@test('curve_modifier_and_bevel_object', (None, None, None))
+def _():
+    ob = fresh(); bpy.ops.curve.primitive_bezier_curve_add(); c = bpy.context.object
+    c.data.bevel_depth = 0.1; c.data.resolution_u = 12
+    me = c.evaluated_get(bpy.context.evaluated_depsgraph_get()).to_mesh(); assert len(me.polygons) > 10, len(me.polygons)
+    bpy.ops.object.select_all(action='DESELECT'); ob.select_set(True); bpy.context.view_layer.objects.active = ob
+    ob.modifiers.new('C', 'CURVE').object = c
+    ev = ob.evaluated_get(bpy.context.evaluated_depsgraph_get()); assert len(ev.data.vertices) == 8
+    return (None, None, None)
+@test('knife_project_and_mesh_select_ops', (None, None, None))
+def _():
+    ob = fresh(); edit(ob)
+    bpy.ops.mesh.select_random(ratio=0.5, seed=1); bpy.ops.mesh.select_more(); bpy.ops.mesh.select_less()
+    bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.mesh.region_to_loop()
+    bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.mesh.edge_split()
+    bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.mesh.remove_doubles(threshold=0.001)
+    assert counts(ob)[2] == 6; bpy.ops.object.mode_set(mode='OBJECT'); return (None, None, None)
 @test('save_reload', (26, 48, 24))
 def _():
     ob = fresh(); edit(ob); bpy.ops.mesh.subdivide(number_cuts=1); bpy.ops.object.mode_set(mode='OBJECT')
