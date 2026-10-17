@@ -84,6 +84,8 @@
 
 - [x] (PASS: `scripts/touch_boxsel_win.sh` — ⋯ → B: pad s „levým tlačítkem“, tah prstem nakreslí box a vybere 7 z 8 vrcholů (zadní zakryt), pak se pad vypne; `touch_modal`, `touch_loopcut`, `touch` PASS) Lov chyb kolo 53: box select (B) prstem
 
+- [x] (PASS na PC: `scripts/autokbd_win.sh` — dvojklepnutí prstem (CDP touch) na název objektu → editace pole → skrytý `#kbd-input` dostane focus; Esc z lišty ukončí editaci i klávesnici; `touch`, `interactive`, `utf8_outliner`, `startup` PASS; C++: export `blender_web_text_editing()` v `interface_handlers.cc` (textedit_begin/end); odhad: iOS Safari nechá `focus()` z časovače do ~1 s po klepnutí — nutno ověřit na iPadu, vypnutí `?autokbd=0`) Lov chyb kolo 54: **klávesnice se musela vyvolávat ručně tlačítkem ⌨** → teď vyskočí sama při editaci pole
+
 ## Výkon (až nebude co opravovat)
 - [x] (znovu změřeno po numpy/OIIO/ikonách: `scripts/startup_win.sh` okno nahoře za 5,4 s, bez regrese oproti 5,6 s) Start po víkendových změnách
 - [x] (změřeno 17. 10., `scripts/passes_win.sh` = `?passlog=1`; orbit kostky Solid, passy na snímek ÷208 snímků: WebGPUBackbuffer 11, `&framebuffer.fb` 10 (obojí = kompozice UI regionů, ne viewport), overlay_line_fb 4, overlay_output 4, po 2: Clear Main, smaa_resolve, outline.prepass, dfbl overlay, smaa_edge, smaa_weight; po 1: Opaque.Gbuffer/Deferred, Workbench.Outline, taa_accumulation, overlay_line_on, Clear In Front… = ~48) Rozpad passů: víc než polovina jsou kompozice UI (střídání offscreen region ↔ backbuffer = nutné lámání passů); zisk by dalo jen cachování/slučování kompozice regionů (zásah do upstream UI kódu, nejisté) → neřeším, dokud iPad nepotvrdí, že je to úzké hrdlo (`?perf=1`).

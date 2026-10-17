@@ -344,6 +344,27 @@ export function installTouch(canvas) {
   };
 
 
+  /* Raise the soft keyboard when Blender starts editing a text/number field (blender_web_text_editing)
+   * and lower it when editing ends. iOS only opens the keyboard when focus() runs inside a user
+   * gesture; WebKit lets timers started from a gesture (< 1 s) inherit it, so after every tap we poll
+   * for ~1 s. Also works for a field that is already being edited when the poll starts. */
+  let kbdUp = false;
+  const textEditing = () => { const f = window.Module && window.Module._blender_web_text_editing; return f ? f() === 1 : false; };
+  const watchTextEdit = () => {
+    const t0 = performance.now();
+    const step = () => {
+      const te = textEditing();
+      if (te && !kbdUp) { kbdUp = true; showKeyboard(); }
+      else if (!te && kbdUp) { kbdUp = false; const i = document.getElementById("kbd-input"); if (i) i.blur(); }
+      if (performance.now() - t0 < 950) setTimeout(step, 40);
+    };
+    setTimeout(step, 40);
+  };
+  window.__touchTextEditing = textEditing;
+  canvas.addEventListener("pointerup", (e) => { if (e.pointerType !== "mouse" && !qs.get("autokbd")?.startsWith("0")) watchTextEdit(); }, true);
+  /* editing can also end without a tap (Enter/Esc on the key bar): drop the keyboard state then */
+  setInterval(() => { if (kbdUp && !textEditing()) { kbdUp = false; const i = document.getElementById("kbd-input"); if (i) i.blur(); } }, 500);
+
   /* ---- file manager: upload files into /uploads, download anything Blender wrote ----
    * iPad has no Blender-visible filesystem; exports (OBJ/FBX/GLB/...) land in the wasm FS, so the
    * page must hand them to the user as downloads, and imports need an upload path. */
