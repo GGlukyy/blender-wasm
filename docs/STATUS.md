@@ -1,7 +1,7 @@
 Výsledek: 🟡 víkendový blok hotový (edit mode, 3D kurzor, modifikátory, body, parity test) — čeká na test na iPadu
 
 # Víkend — co je nového (17. 10., odpoledne)
-- ✅ **P4 dotyk a Pencil** (nové, JS `demo/src/touch.js`): Safari posílá myší eventy jen pro tap, ne pro tažení → dřív se na iPadu nedalo orbitovat prstem. Teď: **1 prst = orbit, 2 prsty = pan / pinch zoom, tap = klik (výběr), dlouhý stisk = pravé tlačítko, Pencil = levé tlačítko** + plovoucí lišta kláves (Esc, Enter, Tab, A, G, R, S, X, Y, Z, Del, 1/2/3, Home, ↶ ↷, Shift/Ctrl/Alt jako přepínače). Důkaz na PC: `scripts/touch_win.sh` (CDP dotyk + pen) ALL PASS. **Na iPadu neověřeno.**
+- ✅ **P4 dotyk a Pencil** (nové, JS `demo/src/touch.js`): Safari posílá myší eventy jen pro tap, ne pro tažení → dřív se na iPadu nedalo orbitovat prstem. Teď: **1 prst = orbit, 2 prsty = pan / pinch zoom, tap = klik (výběr), dlouhý stisk = pravé tlačítko, Pencil = levé tlačítko** + **tlak a náklon Pencilu** (sculpt/paint štětce reagují na sílu přítlaku; PC test `scripts/pen_pressure_win.sh`: tlak 0,15 → 4× slabší tah) + plovoucí lišta kláves (Esc, Enter, Tab, A, G, R, S, X, Y, Z, Del, 1/2/3, Home, ↶ ↷, Shift/Ctrl/Alt jako přepínače). Důkaz na PC: `scripts/touch_win.sh` (CDP dotyk + pen) ALL PASS. **Na iPadu neověřeno.**
 - ✅ **P1 shader seed**: příčina — Blender běží na pthread workeru a cache z `main.js` tam nebyla vidět (nikdy nefungovala). Teď se seed načítá sync XHR ve workeru. Důkaz: `scripts/wgsl_seed_win.sh verify` → 0 překladů při průchodu 11 workspace (dřív 177). Seed 2,6 MB se stahuje při prvním načtení.
 - ✅ **Výběr skrz objekt** (Solid): zakryté vrcholy/hrany se nevyberou, plocha = ta pod kurzorem, i box/lasso/kruh (CPU BVH ray cast, jen vůči aktivnímu objektu). Důkaz: `scripts/p2_occl_check.sh`.
 - ✅ **P2b**: otevření 64-bit .blend s kolizí adres se teď nahlas odmítne (dřív tiché poškození). `scripts/blend_open_win.sh`.
@@ -10,7 +10,7 @@ Výsledek: 🟡 víkendový blok hotový (edit mode, 3D kurzor, modifikátory, b
 - ✅ **Sada modelovacích testů** (27 operací, undo/redo, Ctrl+R, bevel, extrude, sculpt, Material Preview): vše OK, `docs/OPS_RESULTS.md`.
 - ❓ **Z-fighting ploch**: na PC se nereprodukuje; hypotéza + patch v `docs/patches/zfight_invariant_gl_position.patch` (neaplikováno).
 ## Co otestovat na iPadu (podle důležitosti)
-1. **Dotyk** (otevři `?touch=1` pokud lišta není vidět): jeden prst táhne = otáčí pohled? Dva prsty roztáhnout/stáhnout = zoom (správným směrem)? Dva prsty táhnout = posun? Klepnutí = výběr? Dlouhý stisk = kontextové menu? Pencil: tah = box select / kreslení nástrojem? Případně napiš, co je moc citlivé/pomalé (konstanty v `demo/src/touch.js` nahoře).
+1. **Dotyk** (otevři `?touch=1` pokud lišta není vidět): jeden prst táhne = otáčí pohled? Dva prsty roztáhnout/stáhnout = zoom (správným směrem)? Dva prsty táhnout = posun? Klepnutí = výběr? Dlouhý stisk = kontextové menu? Pencil: tah = box select / kreslení nástrojem? Ve Sculpt módu (Ctrl+Tab → Sculpt) tah Pencilem s různým přítlakem: mění se síla štětce? Případně napiš, co je moc citlivé/pomalé (konstanty v `demo/src/touch.js` nahoře).
 2. **Lišta kláves**: Tab (edit mode), G/R/S + tah, Shift/Ctrl jako přepínače (modré = zapnuto), ↶ undo.
 3. Čistá data webu → Tab, 3, klik na plochu, orbit: bliká/pere se výběr plochy? (pokud ano, aplikuju patch)
 4. Solid, režim vrcholů (1): klepni na vrchol na zadní straně kostky → nesmí se vybrat. Režim ploch: vybere se plocha pod prstem.
