@@ -35,11 +35,14 @@ await wait(1500);
 const before = last; console.log("before: " + before);
 await page.screenshot({ path: "out/sculpt_before.png" });
 // tah přes střed koule (Draw štětec): několik tahů
-for (let k = 0; k < 3; k++) {
-  await page.mouse.move(c.x - 70, c.y + (k - 1) * 25); await page.mouse.down();
-  await page.mouse.move(c.x + 70, c.y + (k - 1) * 25, { steps: 30 }); await page.mouse.up(); await wait(600);
+const N = Number((process.env.STROKES || "").replace(/%.*/, "")) || 3, tStroke = Date.now();
+for (let k = 0; k < N; k++) {
+  const yy = ((k % 5) - 2) * 18;
+  await page.mouse.move(c.x - 70, c.y + yy); await page.mouse.down();
+  await page.mouse.move(c.x + 70, c.y + yy, { steps: 30 }); await page.mouse.up(); await wait(N > 3 ? 100 : 600);
 }
 await wait(2000);
+console.log(`STROKES ${N} total_ms=${Date.now() - tStroke} per_stroke_ms=${((Date.now() - tStroke) / N).toFixed(0)}`);
 const after = last; console.log("after:  " + after);
 await page.screenshot({ path: "out/sculpt_after.png" });
 const g = (s, k) => Number((s.match(new RegExp(k + "=([-\\d.]+)")) || [])[1]);
