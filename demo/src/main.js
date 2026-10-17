@@ -487,10 +487,20 @@ window.addEventListener(
     if (isEditableTarget(document.activeElement)) return;
     /* Ctrl/Cmd shortcuts (save/open/undo/…) + focus/scroll/history keys. Plain
      * character keys have no page default over the canvas, so leave them be. */
+    /* Ctrl/Cmd+V must keep its default or the browser never fires `paste` (clipboard bridge below). */
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === "v" || e.key === "V")) return;
     if (e.ctrlKey || e.metaKey || NAV_KEYS.has(e.key)) e.preventDefault();
   },
   { capture: true },
 );
+
+/* Clipboard bridge: text copied outside Blender reaches Blender's (sync) clipboard via the page's
+ * `paste` event (trusted, no permission prompt). Blender -> outside goes through putClipboard in C++. */
+window.addEventListener("paste", (e) => {
+  if (!window.Module || !Module.ccall || isEditableTarget(document.activeElement)) return;
+  const t = e.clipboardData && e.clipboardData.getData("text/plain");
+  if (typeof t === "string") { try { Module.ccall("blender_web_set_clipboard", null, ["string"], [t]); } catch (_) {} }
+}, true);
 
 /* Held keys: when the window loses focus (app switch, Cmd/Alt+Tab, iPad multitasking, devtools) the
  * keyup never arrives and Blender keeps Shift/Ctrl/Alt "stuck" until the key is pressed again.

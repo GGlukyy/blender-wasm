@@ -18,6 +18,8 @@ Výsledek: 🟡 víkend: opraveno ~10 chyb ověřených na PC (viz níže), regr
 - Kompilace pipeline při prvním Material Preview blokuje 6–7 s (jen hláška, ne oprava).
 
 # Víkend — co je nového (17. 10., odpoledne)
+- ✅ Kolo 35 **Schránka (Ctrl+C / Ctrl+V)**: nefungovala vůbec (kopírování hodnot, textu v Text Editoru, Python konzole). Teď funguje uvnitř Blenderu i ven/dovnitř přes systémovou schránku (PC: `clip_win.sh` PASS). **Na iPadu ověř (klávesnice/lišta):** v Text Editoru napiš text, vyber, Ctrl+C, Ctrl+V; najeď na číslo v panelu vlastností, Ctrl+C a Ctrl+V na jiné pole; zkopíruj text z Poznámek a vlož do Python konzole (Cmd+V). Safari může ukázat bublinu „Vložit“.
+
 - ✅ Kolo 34 **Zaseknutý Shift/Ctrl**: když okno ztratí fokus (přepnutí aplikace) při držené klávese, Blender ji měl „stále stisknutou“. Teď se při ztrátě fokusu pošle uvolnění (`blur_win.sh` PASS, `interactive_win.sh` ALL PASS). Na iPadu relevantní jen s externí klávesnicí.
 
 - ✅ Kolo 33 **Ztráta GPU**: když iPad GPU odebere (málo paměti, přepnutí aplikace), plátno dřív tiše zamrzlo. Teď červený pruh nahoře „GPU se odpojila… Obnovit“ (+ odkaz na autosave). PC: skutečný pád GPU procesu → banner (`gpulost_win.sh` PASS). Nový build blender.wasm (BLENDER_REF 6f1b18e6). **Na iPadu:** nic zvláštního; pokud pruh uvidíš, napiš, co jsi dělal.
