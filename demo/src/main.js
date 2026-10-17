@@ -409,6 +409,10 @@ const showGpuLost = (reason) => {
   document.body.appendChild(b);
 };
 const scan = (t) => {
+  if (t.startsWith("WEB_OPEN_URL ")) {
+    const u = t.slice(13).trim();
+    if (/^https?:\/\//.test(u)) { window.__LAST_OPEN_URL__ = u; window.open(u, "_blank", "noopener"); }
+  }
   if (t.includes("WEBGPU_LOST")) showGpuLost(t.split("WEBGPU_LOST ")[1].split(" ")[0]);
   if (t.includes("WEBGPU_CONTEXT") && t.includes("real device acquired")) window.__BGUI__.device = true;
   /* First frame that actually drew something (not the black startup clear):
@@ -889,6 +893,12 @@ def _save_prefs():
     except Exception as e: print('USERPREF save ERR', e)
     return 5.0
 bpy.app.timers.register(_save_prefs, first_interval=10.0, persistent=True)
+# Help ▸ Manual, odkazy v dialozích: webbrowser.open() na webu nic nedělá → pošli URL stránce (main.js scan → window.open).
+import webbrowser as _wb, sys as _sys
+class _WebBrowser(_wb.BaseBrowser):
+    def open(self, url, new=0, autoraise=True):
+        print('WEB_OPEN_URL ' + url); _sys.stdout.flush(); return True
+_wb.register('blender-web', None, _WebBrowser('blender-web'), preferred=True)
 _cap_pool()
 bpy.app.handlers.load_post.append(_on_new)
 # Autosave: Blenderův vlastní autosave timer na webu nezapíše nic (ověřeno 3 min, 1 min interval) a /tmp je v paměti.

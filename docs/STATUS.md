@@ -18,6 +18,8 @@ Výsledek: 🟡 víkend: opraveno ~10 chyb ověřených na PC (viz níže), regr
 - Kompilace pipeline při prvním Material Preview blokuje 6–7 s (jen hláška, ne oprava).
 
 # Víkend — co je nového (17. 10., odpoledne)
+- ✅ Kolo 37 **Odkazy z Blenderu** (Help ▸ Manual, Python API…): nic se neotevíralo. Teď se otevře nová karta (PC: `urlopen_win.sh` PASS). **Na iPadu ověř:** Help ▸ Manual — otevře se dokumentace? (Safari může blokovat vyskakovací okno → povol.)
+
 - ✅ Kolo 36 **Preferences se pamatují**: UI scale, navigace, zkratky, motiv… se dřív po každém načtení stránky vracely na výchozí. Teď se ukládají (do ~5 s po změně) a při startu načítají. PC: `prefsave_win.sh` PASS. **Na iPadu ověř:** Edit ▸ Preferences ▸ Interface ▸ Resolution Scale změň (např. 1.3), počkej 10 s, obnov stránku → zůstalo? Kdyby se něco pokazilo: otevři stránku s `?resetprefs=1`.
 
 - ✅ Kolo 35 **Schránka (Ctrl+C / Ctrl+V)**: nefungovala vůbec (kopírování hodnot, textu v Text Editoru, Python konzole). Teď funguje uvnitř Blenderu i ven/dovnitř přes systémovou schránku (PC: `clip_win.sh` PASS). **Na iPadu ověř (klávesnice/lišta):** v Text Editoru napiš text, vyber, Ctrl+C, Ctrl+V; najeď na číslo v panelu vlastností, Ctrl+C a Ctrl+V na jiné pole; zkopíruj text z Poznámek a vlož do Python konzole (Cmd+V). Safari může ukázat bublinu „Vložit“.
