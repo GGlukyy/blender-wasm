@@ -12,6 +12,7 @@
  * visit and fed to emscripten via Module.instantiateWasm.
  */
 import { ZSTDDecoder } from "zstddec";
+import { installTouch } from "./touch.js";
 
 /* ---- Splash UI: progress bar + startup console (ported from gecko-wasm's
  * demo/chrome/src/main.ts). ---- */
@@ -406,6 +407,7 @@ window.addEventListener("contextmenu", (e) => e.preventDefault());
  * and zooms its viewport. `passive:false` is required for preventDefault on
  * wheel to take effect. touch-action:none (CSS) covers touchscreen pinch/pan;
  * gesture* covers Safari's trackpad pinch. */
+installTouch(canvas);
 const eatGesture = (e) => e.preventDefault();
 canvas.addEventListener("wheel", eatGesture, { passive: false });
 canvas.addEventListener("gesturestart", eatGesture);
