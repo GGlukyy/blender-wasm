@@ -87,6 +87,14 @@ await touch("touchStart", [P(1290, 760)]);
 for (let i = 1; i <= 20; i++) { await touch("touchMove", [P(1290 - i * 3, 760 - i * 5)]); await wait(16); }
 await touch("touchEnd", []); let s11 = await state();
 check("UI: tah v panelu neotáčí viewport", diff(s10.rot, s11.rot) < 0.001, `rot Δ=${diff(s10.rot, s11.rot).toFixed(4)}`);
+// 10) iOS soft keyboard: keydown s prázdným code (jen key) musí fungovat -> "Tab" přepne do edit módu
+await page.mouse.move(box.x + 430, box.y + 400); await wait(300); await page.keyboard.press("Escape"); await wait(500);
+let k0 = await state();
+await page.evaluate(() => { for (const t of ["keydown", "keyup"]) window.dispatchEvent(new KeyboardEvent(t, { key: "Tab", code: "", bubbles: true, cancelable: true })); });
+let k1 = await state();
+check("soft klávesnice: key bez code (Tab)", k0.mode !== k1.mode, `${k0.mode} -> ${k1.mode}`);
+await page.keyboard.press("Tab"); await state();
+check("codeFromKey mapování", await page.evaluate(() => [window.__touchCodeFromKey("g"), window.__touchCodeFromKey("5"), window.__touchCodeFromKey(" "), window.__touchCodeFromKey("Backspace")].join()) === "KeyG,Digit5,Space,Backspace");
 console.log(fail === 0 ? "ALL PASS" : `FAILED ${fail}`);
 await page.screenshot({ path: "out/touch_end.png" });
 await browser.close();

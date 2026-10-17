@@ -249,6 +249,55 @@ export function installTouch(canvas) {
     canvas.addEventListener(t, (e) => e.preventDefault(), { passive: false });
   }
 
+
+  /* ---- on-screen keyboard (iPad has none unless an <input> is focused) ----
+   * iOS soft-keyboard keydown events usually have an EMPTY `code`; GHOST maps keys by `code`, so
+   * such events are dropped. Re-dispatch them with a code derived from `key`. */
+  const SYMBOLS = { " ": "Space", "-": "Minus", "_": "Minus", "=": "Equal", "+": "Equal", "[": "BracketLeft", "{": "BracketLeft",
+    "]": "BracketRight", "}": "BracketRight", "\\": "Backslash", "|": "Backslash", ";": "Semicolon", ":": "Semicolon",
+    "'": "Quote", "\"": "Quote", "`": "Backquote", "~": "Backquote", ",": "Comma", "<": "Comma", ".": "Period", ">": "Period",
+    "/": "Slash", "?": "Slash" };
+  const NAMED = { Tab: "Tab", Enter: "Enter", Escape: "Escape", Backspace: "Backspace", Delete: "Delete",
+    ArrowLeft: "ArrowLeft", ArrowRight: "ArrowRight", ArrowUp: "ArrowUp", ArrowDown: "ArrowDown", Home: "Home", End: "End" };
+  const SHIFTED_DIGITS = { "!": "1", "@": "2", "#": "3", "$": "4", "%": "5", "^": "6", "&": "7", "*": "8", "(": "9", ")": "0" };
+  const codeFromKey = (k) => {
+    if (NAMED[k]) return NAMED[k];
+    if (k.length !== 1) return "";
+    if (/[a-z]/i.test(k)) return "Key" + k.toUpperCase();
+    if (/[0-9]/.test(k)) return "Digit" + k;
+    if (SHIFTED_DIGITS[k]) return "Digit" + SHIFTED_DIGITS[k];
+    return SYMBOLS[k] || "";
+  };
+  const fixKey = (e) => {
+    if (e.code || e.__fixed || !e.key) return;
+    const code = codeFromKey(e.key);
+    if (!code) return;
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    const ev = new KeyboardEvent(e.type, { code, key: e.key, bubbles: true, cancelable: true, repeat: e.repeat,
+      shiftKey: e.shiftKey, ctrlKey: e.ctrlKey, altKey: e.altKey });
+    ev.__fixed = true;
+    window.dispatchEvent(ev);
+  };
+  window.addEventListener("keydown", fixKey, true);
+  window.addEventListener("keyup", fixKey, true);
+  window.__touchCodeFromKey = codeFromKey;
+
+  const showKeyboard = () => {
+    let inp = document.getElementById("kbd-input");
+    if (!inp) {
+      inp = document.createElement("input");
+      inp.id = "kbd-input";
+      inp.type = "text";
+      inp.autocapitalize = "off"; inp.autocomplete = "off"; inp.autocorrect = "off"; inp.spellcheck = false;
+      /* 16px+ font avoids iOS zoom-on-focus; nearly invisible but focusable. */
+      inp.style.cssText = "position:fixed;left:0;bottom:0;width:1px;height:1px;opacity:.01;font-size:16px;border:0;padding:0;z-index:95";
+      document.body.appendChild(inp);
+      inp.addEventListener("input", () => { inp.value = ""; });   /* keys go to Blender via keydown; keep the field empty */
+    }
+    inp.focus({ preventScroll: true });
+  };
+
   /* ---- floating key bar ---- */
   const show = qs.get("touch") === "1" || (qs.get("touch") !== "0" && (navigator.maxTouchPoints || 0) > 0);
   if (!show) return;
@@ -300,6 +349,7 @@ export function installTouch(canvas) {
       key(sticky[name] ? "keydown" : "keyup", code, label);
     });
   });
+  btn("⌨", showKeyboard).title = "Klávesnice (psaní do polí, přejmenování)";
   const hide = btn("✕", () => bar.remove());
   hide.title = "Skrýt lištu";
   document.body.appendChild(bar);

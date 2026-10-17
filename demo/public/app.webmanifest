@@ -1,0 +1,10 @@
+{
+  "name": "Blender (web)",
+  "short_name": "Blender",
+  "start_url": "./?touch=1",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#181818",
+  "theme_color": "#181818",
+  "icons": [{ "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
