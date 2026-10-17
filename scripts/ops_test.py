@@ -489,6 +489,10 @@ def _():
     px = list(im.pixels); assert len(px) == 16 * 16 * 4
     im.pixels = [1.0 - v if i % 4 != 3 else v for i, v in enumerate(px)]
     return (None, None, None)
+@test('probe_memory_api', (None, None, None))
+def _():
+    out('OPS_INFO bpy.app mem attrs', [a for a in dir(bpy.app) if 'mem' in a.lower()], 'stats', [a for a in dir(bpy.context.scene) if 'stat' in a.lower()][:6])
+    return (None, None, None)
 @test('save_reload', (26, 48, 24))
 def _():
     ob = fresh(); edit(ob); bpy.ops.mesh.subdivide(number_cuts=1); bpy.ops.object.mode_set(mode='OBJECT')
