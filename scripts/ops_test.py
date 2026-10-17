@@ -288,6 +288,53 @@ def _():
     assert os.path.getsize('/tmp/rt.png') > 60
     back = bpy.data.images.load('/tmp/rt.png'); assert tuple(back.size) == (16, 16), back.size
     return (os.path.getsize('/tmp/rt.png'), 0, 0)
+@test('image_formats_save', (None, None, None))
+def _():
+    import os
+    img = bpy.data.images.new('fmt', 32, 32, float_buffer=True); img.pixels[:] = [0.2, 0.4, 0.6, 1.0] * 1024
+    ok = []; sc = bpy.context.scene
+    for fmt, ext in (('JPEG', 'jpg'), ('OPEN_EXR', 'exr'), ('TARGA', 'tga'), ('BMP', 'bmp'), ('PNG', 'png'), ('HDR', 'hdr')):
+        p = '/tmp/fmt.' + ext
+        sc.render.image_settings.file_format = fmt
+        try:
+            img.save_render(p)
+            assert os.path.getsize(p) > 20; ok.append(ext)
+        except Exception as e:
+            out('OPS info save fail', fmt, str(e)[:80])
+    assert len(ok) == 6, ok
+    return (len(ok), 0, 0)
+@test('io_gltf_fbx_export', (None, None, None))
+def _():
+    import os
+    fresh(); res = []
+    for name, op in (('glb', lambda p: bpy.ops.export_scene.gltf(filepath=p, export_format='GLB')), ('fbx', lambda p: bpy.ops.export_scene.fbx(filepath=p))):
+        p = '/tmp/x.' + name
+        try:
+            op(p); assert os.path.getsize(p) > 200; res.append(name)
+        except Exception as e:
+            out('OPS info export fail', name, str(e).replace(chr(10), ' | ')[-400:])
+    assert len(res) == 2, res
+    return (2, 0, 0)
+@test('io_import_obj_stl_roundtrip', (8, 12, 6))
+def _():
+    ob = fresh(); bpy.ops.wm.obj_export(filepath='/tmp/rt.obj'); bpy.ops.wm.stl_export(filepath='/tmp/rt.stl')
+    fresh(); bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete()
+    bpy.ops.wm.obj_import(filepath='/tmp/rt.obj'); o = [x for x in bpy.context.scene.objects if x.type == 'MESH'][0]
+    r = (len(o.data.vertices), len(o.data.edges), len(o.data.polygons))
+    bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete()
+    bpy.ops.wm.stl_import(filepath='/tmp/rt.stl'); o2 = [x for x in bpy.context.scene.objects if x.type == 'MESH'][0]
+    assert len(o2.data.polygons) in (6, 12), len(o2.data.polygons)
+    return r
+@test('render_workbench_to_png', (None, None, None))
+def _():
+    import os
+    fresh(); sc = bpy.context.scene; sc.render.engine = 'BLENDER_WORKBENCH'; sc.render.resolution_x = 64; sc.render.resolution_y = 64
+    sc.render.filepath = '/tmp/render_wb.png'; sc.render.image_settings.file_format = 'PNG'
+    if not sc.camera:
+        bpy.ops.object.camera_add(location=(4, -4, 3), rotation=(1.1, 0, 0.78)); sc.camera = bpy.context.object
+    bpy.ops.render.render(write_still=True)
+    assert os.path.getsize('/tmp/render_wb.png') > 100
+    return (os.path.getsize('/tmp/render_wb.png'), 0, 0)
 @test('voxel_remesh_warns', (None, None, None))
 def _():
     # bez OpenVDB nesmí selhat potichu: operátor hlásí chybu (modifikátor: error text v UI, z Pythonu nečitelný)
