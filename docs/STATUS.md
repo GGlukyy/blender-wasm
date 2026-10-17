@@ -18,7 +18,9 @@ Výsledek: 🟡 víkend: opraveno ~10 chyb ověřených na PC (viz níže), regr
 - Kompilace pipeline při prvním Material Preview blokuje 6–7 s (jen hláška, ne oprava).
 
 # Víkend — co je nového (17. 10., odpoledne)
-- Večer 17. 10.: kolo 15 lovu chyb — `ops_win.sh` 74 testů, failed=0 (modifikátory, spin, ocean, remesh). Nic nového k testu na iPadu.
+- Večer 17. 10. (kola 15–21): nové testy přes UI (Shift+D, merge, delete, G/S/R s číslem, výběr/skrytí, proportional editing, Smart UV dialog, barva materiálu v Material Preview/Rendered), `ops_win.sh` 77 testů. **Žádná nová chyba**, `regress_all.sh` bez FAIL.
+- Výkon (PC): překreslení 13 ms nezávisí na počtu objektů (200 kostek = 13,2 ms); sculpt tah 685–842 ms od 2 562 do 655 362 vrcholů; save/open .blend 0,03 s. Úzké hrdlo je pevná režie UI, ne scéna.
+- Nic z toho se na iPadu nezměnilo → seznam „Co otestovat na iPadu NEJDŘÍV“ výše platí beze změny.
 - ✅ **Pád v UV Editing workspace** (stránka spadla s „Aborted(Assertion failed)“ hned po přepnutí na UV Editing s objektem v edit modu): GPU buffer vrcholů se mezi přípravou a vykreslením vyměnil a kreslilo se se zrušeným handlem. Opraveno, test `uvedit_win.sh` PASS (G posune UV). **Na iPadu ověřit:** Tab (edit mode) → záložka UV Editing nahoře → vybrat vše (A) → G → táhnout: nespadne? (Mohlo to být i příčinou jiných náhodných pádů.)
 - ✅ **Hláška „⏳ Kompiluji shadery…“**: při prvním přepnutí do Material Preview / Rendered se Blender na 6–7 s zasekne (PC; na iPadu asi víc) — prohlížeč kompiluje velké pipeline; teď se v tu chvíli dole zobrazí hláška, ať to nevypadá jako pád. Samotné zasekání zůstává (jednorázově za session). **Na iPadu změřit:** jak dlouho trvá první přepnutí na Material Preview (hláška viditelná?).
 - ✅ **Zamrznutí při otevření záložky Material** (a pád/zaseknutí při přidání Grease Pencil): příčina = náhledové ikony materiálů (EEVEE) se na webu kompilují synchronně. Vypnuto (šedá koule místo náhledu; `?iconprev=1` je zapne). PC: UI se už neblokuje, GP kreslí. **Na iPadu ověřit:** vlastnosti objektu → záložka Material (koule vpravo dole) → nezamrzne? Shift+A → Grease Pencil → kreslit Pencilem.
