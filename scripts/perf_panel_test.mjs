@@ -23,6 +23,16 @@ await wait(1500);
 const perf = await page.evaluate(() => window.__PERF__ || null);
 const text = await page.evaluate(() => [...document.querySelectorAll("div")].map(d => d.textContent).find(t => t && t.includes("FPS")) || "");
 await page.screenshot({ path: "out/perf_panel.png" });
+// nepřerušovaný redraw bez vstupních událostí: přehrávání animace (mezerník) -> dt = skutečná cena snímku
+await page.keyboard.press("Space"); await wait(4000);
+const play = await page.evaluate(() => window.__PERF__ || null);
+await page.keyboard.press("Space"); await wait(500);
+console.log("PLAY " + JSON.stringify(play));
+// klid: bez vstupu a bez přehrávání by se neměly kreslit žádné snímky
+const f0 = (await page.evaluate(() => window.__PERF__ || {})).frame || 0;
+await wait(4000);
+const f1 = (await page.evaluate(() => window.__PERF__ || {})).frame || 0;
+console.log(`IDLE frames in 4 s: ${f1 - f0}`);
 console.log("PERF " + JSON.stringify(perf));
 console.log(perf && text.includes("FPS") ? "PASS: panel zobrazuje FPS" : "FAIL: panel bez dat");
 await browser.close();

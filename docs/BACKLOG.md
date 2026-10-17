@@ -26,6 +26,6 @@
 - [ ] `_multiprocessing` chybí → add-on Extensions (bl_pkg) se neregistruje (nízká priorita).
 
 ## Výkon (až nebude co opravovat)
-- [ ] Změř orbit na Monkey + Subdivision 3: ms/snímek, kde se čeká (CPU vs GPU vs upload).
+- [x] (měřeno 17. 10., PC/NVIDIA, `scripts/drawtime_win.sh`, `scripts/profile_win.mjs` + `profile_window.py`) **Cena snímku**: překreslení okna = 13,4 ms (kostka) / 14,2 (Monkey+Subsurf 3) / 14,7 (ico 327k tris) → cena je skoro NEZÁVISLÁ na scéně, je to pevná režie UI + ~50 render passů + ~900 WebGPU volání. V profilu je ~60 % snímku JS↔wasm lepidlo emdawnwebgpu (`get`, `getWasmTableEntry`, `_wgpuQueueWriteBuffer`, `CreateBindGroup`, `CreateBuffer`), samotný draw/submit jen ~1,5 ms. Orbit přes `ND_SPACE_VIEW3D` překresluje i headery/lišty (upstream chování, stejné na desktopu): ~9 regionů × 2 passy z ~49. Nápady (nezkoušeno): (a) při modal navigaci nepřekreslovat headery (listener skip), (b) menší počet bind groups/passů, (c) sdružit immediate buffery (jen 10/snímek → malý přínos).
 - [ ] Zbytečné re-uploady bufferů každý snímek? Pipeline cache hit rate?
 - [ ] Čas startu: kde se čeká (stahování, rozbalení, Python init, shadery) → zrychli největší.
