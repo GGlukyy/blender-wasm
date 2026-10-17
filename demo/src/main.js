@@ -352,6 +352,27 @@ const idbOpen = () => new Promise((res, rej) => {
 });
 
 /* ---- boot ---- */
+/* ---- ?perf=1: performance overlay (FPS, ms/frame, draw stats, wasm heap). Samples come from the
+ * render pthread via BroadcastChannel (webgpu_context.cc wgpu_perf_post). ---- */
+if (new URLSearchParams(location.search).get("perf") === "1") {
+  const box = document.createElement("div");
+  box.style.cssText = "position:fixed;top:4px;right:4px;z-index:99999;background:rgba(0,0,0,.7);" +
+    "color:#9f9;font:12px/1.35 monospace;padding:4px 8px;border-radius:4px;pointer-events:none;white-space:pre";
+  box.textContent = "perf: čekám na snímky…";
+  if (document.body) document.body.appendChild(box);
+  else document.addEventListener("DOMContentLoaded", () => document.body.appendChild(box));
+  let last = 0;
+  new BroadcastChannel("blender-perf").onmessage = (e) => {
+    const d = e.data; last = performance.now();
+    window.__PERF__ = d;
+    box.textContent =
+      `${(1000 / d.dt_avg_ms).toFixed(0)} FPS  ${d.dt_avg_ms.toFixed(1)} ms (max ${d.dt_max_ms.toFixed(0)})\n` +
+      `submits ${d.submits}  passes ${d.passes}  bindgroups ${d.bindgroups}\n` +
+      `textures ${d.tex} / ${d.tex_mb} MB   wasm heap ${d.heap_mb.toFixed(0)} MB`;
+  };
+  setInterval(() => { if (last && performance.now() - last > 2500) box.style.opacity = ".4"; else box.style.opacity = "1"; }, 1000);
+}
+
 window.__BGUI__ = { booted: false, device: false, window: false };
 const scan = (t) => {
   if (t.includes("WEBGPU_CONTEXT") && t.includes("real device acquired")) window.__BGUI__.device = true;
