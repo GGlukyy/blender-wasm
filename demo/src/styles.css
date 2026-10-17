@@ -9,6 +9,11 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  overscroll-behavior: none;
+}
+
 body {
   margin: 0;
   min-width: 320px;
@@ -32,6 +37,10 @@ input {
   inset: 0;
   width: 100vw;
   height: 100vh;
+  /* iPad Safari: 100vh is the viewport WITHOUT the toolbar, so the bottom of Blender (timeline, status
+   * bar) was drawn under it; dvh follows the visible area (same as window.innerHeight used in main.js). */
+  width: 100dvw;
+  height: 100dvh;
   border: 0;
   background: #181818;
   outline: none;
@@ -43,6 +52,7 @@ input {
   /* Click-drag in the viewport must not select surrounding page text. */
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 #splash {

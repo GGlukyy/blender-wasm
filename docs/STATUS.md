@@ -18,6 +18,8 @@ Výsledek: 🟡 víkend: opraveno ~10 chyb ověřených na PC (viz níže), regr
 - Kompilace pipeline při prvním Material Preview blokuje 6–7 s (jen hláška, ne oprava).
 
 # Víkend — co je nového (17. 10., odpoledne)
+- 🟡 Kolo 40 (odhad): plátno používalo `100vh` — na iPad Safari je to výška bez lišty, takže spodek Blenderu mohl být schovaný / plátno roztažené. Změněno na `100dvh`. Na PC nic nemění. **Na iPadu ověř:** je celá spodní lišta Blenderu (timeline, verze vpravo dole) vidět při zobrazené liště Safari? Je obraz ostrý a neroztažený?
+
 - ✅ Kolo 39 **Gizmo prstem**: ikony ruka/lupa/kamera vpravo nahoře ve 3D viewportu i tahací šipky (Move/Rotate/Scale) šly dřív ovládat jen Pencilem — prst vždy orbitoval. Teď tah prstem začatý na gizmu táhne gizmo. PC: `gizmo_touch_win.sh` PASS (ruka = pan), `gizmo_move_win.sh` PASS (šipka Move), `touch_win.sh` ALL PASS. **Na iPadu ověř:** prstem táhni za ikonu ruky (posun) a lupy (zoom); vyber objekt, vyber nástroj Move (T-lišta vlevo) a táhni za šipku — táhne se objekt? Táhnutí mimo gizmo pořád otáčí.
 
 - ✅ Kolo 37 **Odkazy z Blenderu** (Help ▸ Manual, Python API…): nic se neotevíralo. Teď se otevře nová karta (PC: `urlopen_win.sh` PASS). **Na iPadu ověř:** Help ▸ Manual — otevře se dokumentace? (Safari může blokovat vyskakovací okno → povol.)
