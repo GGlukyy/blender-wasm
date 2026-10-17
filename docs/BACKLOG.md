@@ -33,6 +33,8 @@
 
 - [x] (hunt 17. 10.: `scripts/ops_win.sh` 56 testů failed=0; nově bisect, poke, remove_doubles, tris↔quads, fill, symmetrize, separate, transform_apply, parent, wireframe/solidify, curve/metaball convert, particle hair, vertex groups, UV pack, undo/redo, float image — vše odpovídá desktopu; žádné nové chyby) Lov chyb kolo 2: modelovací operace
 - [x] (hunt: `scripts/uiops_win.sh` PASS — loop cut Ctrl+R, undo, inset, extrude, bevel přes skutečnou myš/klávesy, screenshoty out/win/uiops_*.png; knife K + Enter přes UI také PASS (10/15/7); sculpt viz sculpt_win.sh) Lov chyb kolo 3: nástroje přes UI
+- [x] (hunt: `scripts/vpaint_win.sh` PASS — tah myší ve Vertex Paint obarví 422 rohů; dřívější „nemaluje“ byla chyba testu bez Escape/fokusu) Lov chyb kolo 4: Vertex Paint
+- [ ] Drobnost: při startu hlásí `image.write ERROR OpenImageIO PNG write error: tEXt: invalid keyword` (zápis náhledu do thumbnail cache?) — zjistit, jestli cache náhledů funguje
 
 ## Výkon (až nebude co opravovat)
 - [x] (změřeno 17. 10., `scripts/passes_win.sh` = `?passlog=1`; orbit kostky Solid, passy na snímek ÷208 snímků: WebGPUBackbuffer 11, `&framebuffer.fb` 10 (obojí = kompozice UI regionů, ne viewport), overlay_line_fb 4, overlay_output 4, po 2: Clear Main, smaa_resolve, outline.prepass, dfbl overlay, smaa_edge, smaa_weight; po 1: Opaque.Gbuffer/Deferred, Workbench.Outline, taa_accumulation, overlay_line_on, Clear In Front… = ~48) Rozpad passů: víc než polovina jsou kompozice UI (střídání offscreen region ↔ backbuffer = nutné lámání passů); zisk by dalo jen cachování/slučování kompozice regionů (zásah do upstream UI kódu, nejisté) → neřeším, dokud iPad nepotvrdí, že je to úzké hrdlo (`?perf=1`).

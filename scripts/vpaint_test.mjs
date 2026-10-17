@@ -32,8 +32,7 @@ const browser = await chromium.launch({ headless: false, executablePath: process
   args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
 const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
 let last = null;
-let dbg = false;
-page.on("console", (m) => { const t = m.text(); if (dbg && !/WGPU|VPC|PASSLOG/.test(t)) console.log("DBG", t.slice(0, 160)); const i = t.indexOf("VPC "); if (i >= 0) { if (/OPSTROKE|ERR/.test(t)) console.log("RAW", t.slice(0, 200)); last = t.slice(i + 4).trim().split(/\s+/); } });
+page.on("console", (m) => { const t = m.text(); const i = t.indexOf("VPC "); if (i >= 0) { last = t.slice(i + 4).trim().split(/\s+/); } });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
 await page.goto("http://localhost:5173/", { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
@@ -41,15 +40,16 @@ await page.getByRole("button", { name: /Launch Blender/ }).click();
 for (let i = 0; i < 300; i++) { if ((await page.evaluate(() => window.__BGUI__ || {})).window) break; await new Promise(r => setTimeout(r, 1000)); }
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
 await wait(14000);
+await page.keyboard.press("Escape"); await wait(800);
 const box = await page.locator("#canvas").boundingBox();
 const c = { x: box.x + 576, y: box.y + 396 };
 console.log("BEFORE", last && last.join(" "));
-dbg = true; await page.mouse.move(c.x - 50, c.y); await page.mouse.down();
+await page.mouse.move(c.x - 50, c.y); await page.mouse.down();
 for (let i = 0; i <= 20; i++) { await page.mouse.move(c.x - 50 + i * 5, c.y + 10 * Math.sin(i / 3), {}); await wait(30); }
 await page.mouse.up(); await wait(2500);
 console.log("AFTER", last && last.join(" "));
-await wait(12000); console.log("AFTER_EXIT", last && last.join(" "));
 await page.locator("#canvas").screenshot({ path: "out/vpaint.png" });
+await wait(12000); console.log("AFTER_EXIT", last && last.join(" "));
 const red = last ? +last[3] : 0;
 console.log(red > 20 ? "PASS: vertex paint zbarvil " + red + " bodů" : "FAIL: red=" + red);
 await browser.close();
