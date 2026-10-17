@@ -18,6 +18,8 @@
 
 - [x] (PASS na PC: `scripts/touch_win.sh`; čeká na iPad) **P4 dotyk/Pencil + lišta kláves** — `demo/src/touch.js`.
 
+- [~] **Render do souboru je PRÁZDNÝ** (Lov chyb kolo 65, jen web): `bpy.ops.render.render(write_still=True)` (EEVEE i Workbench) uloží PNG s alpha 0 a rgb ≤ 1/255; `scripts/ops_win.sh` test `render_eevee_to_png` FAIL (`out/ops_run.log`, „black render“). Příčina (odhad z kódu): `WebGPUContext::read_color_sync` (`webgpu_context.cc`) pro 4kanálové čtení vrací nuly (JSPI vypnuté kvůli -fexceptions), pixely se jen kopírují do capture bufferu pro JS (`wgpu_capture_map`). F12 v UI obraz ukáže (GPU), ale Image ▸ Save As / render animace / uložení renderu dají prázdno. Na desktopu OK. Konzultován architekt (kolo 65), plán níže ve STATUS.
+
 ## Plán
 - [x] **P1** (PASS: `scripts/wgsl_seed_win.sh verify` → TOTAL translations: 0, seed 179 shaderů; BLENDER_REF=f077479e. Příčina: Blender běží na pthread workeru, cache z main.js tam nebyla vidět → nikdy nefungovala; seed se načítá sync XHR. Regenerace: `scripts/wgsl_seed_win.sh seed`, `wgsl-cache.json` je v .gitignore (generovaný). Zbývá iPad: čistá data webu, přepnutí workspace) shader seed (`wgsl-cache.json`) pro všechny workspaces + edit mode + shading módy;
   test: cache-miss = 0 při prvním přepnutí.

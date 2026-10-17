@@ -130,6 +130,38 @@ def _():
     for f in fs: os.remove(f)
     os.rmdir(d); sc.frame_set(1)
     return (len(fs), 0, 0)
+@test('mesh_bridge_rip_screw_spin_edgering', (None, None, None))
+def _():
+    ob = fresh(); bm = edit(ob)
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.mesh.select_mode(type='FACE')
+    bm = bmesh.from_edit_mesh(ob.data); bm.faces.ensure_lookup_table()
+    zs = sorted(bm.faces, key=lambda f: f.calc_center_median().z)
+    zs[0].select_set(True); zs[-1].select_set(True); bm.select_flush(True); bmesh.update_edit_mesh(ob.data)
+    bpy.ops.mesh.delete(type='ONLY_FACE')
+    bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.mesh.select_mode(type='EDGE')
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.bridge_edge_loops(); bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.bevel(offset=0.05, segments=2, affect='VERTICES')
+    bpy.ops.object.mode_set(mode='OBJECT')
+    assert len(ob.data.polygons) > 6, len(ob.data.polygons)
+    return (None, None, None)
+@test('render_eevee_to_png', (None, None, None))
+def _():
+    import os
+    fresh(); sc = bpy.context.scene; sc.render.engine = 'BLENDER_EEVEE'
+    sc.render.resolution_x = 64; sc.render.resolution_y = 64; sc.render.resolution_percentage = 100
+    sc.render.filepath = '/tmp/render_ee.png'; sc.render.image_settings.file_format = 'PNG'
+    bpy.ops.object.light_add(type='POINT', location=(2, -2, 3))
+    if not sc.camera:
+        bpy.ops.object.camera_add(location=(4, -4, 3), rotation=(1.1, 0, 0.78)); sc.camera = bpy.context.object
+    bpy.ops.render.render(write_still=True)
+    sz = os.path.getsize('/tmp/render_ee.png'); assert sz > 100, sz
+    sc.render.engine = 'BLENDER_WORKBENCH'; sc.render.filepath = '/tmp/render_wb2.png'; bpy.ops.render.render(write_still=True)
+    wb = bpy.data.images.load('/tmp/render_wb2.png'); wp = list(wb.pixels); out('OPS_INFO wb', tuple(wb.size), 'nonzero', sum(1 for v in wp if v > 0), 'alpha max', max(wp[3::4]), 'rgb max', max(wp[0::4]), 'cs', wb.colorspace_settings.name, 'film_t', sc.render.film_transparent, 'fmt', sc.render.image_settings.color_mode)
+    sc.render.engine = 'BLENDER_EEVEE'
+    im = bpy.data.images.load('/tmp/render_ee.png'); px = list(im.pixels); out('OPS_INFO eevee_render size', tuple(im.size), 'max', max(px) if px else None, 'world', bpy.context.scene.world, 'cam', sc.camera.name, 'objs', [o.name for o in sc.objects]); assert any(v > 0.02 for v in px[0::4]), 'black render'
+    return (None, None, None)
 @test('subdivide', (26, 48, 24))
 def _():
     ob = fresh(); edit(ob); bpy.ops.mesh.subdivide(number_cuts=1); return counts(ob)
@@ -382,6 +414,7 @@ def _():
     img.filepath_raw = '/tmp/rt.png'; img.file_format = 'PNG'; img.save()
     assert os.path.getsize('/tmp/rt.png') > 60
     back = bpy.data.images.load('/tmp/rt.png'); assert tuple(back.size) == (16, 16), back.size
+    bp = list(back.pixels); out('OPS_INFO png_rt px', [round(v, 3) for v in bp[:8]], len(bp))
     return (os.path.getsize('/tmp/rt.png'), 0, 0)
 @test('image_formats_save', (None, None, None))
 def _():
