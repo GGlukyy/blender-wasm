@@ -82,5 +82,28 @@ await page.mouse.click(C.x + 60, C.y + 5); await wait(300);
 await shot("6_knife");
 await page.keyboard.press("Enter"); await wait(300);
 await check("knife", "EDIT 10 15 7");
+const undo = async () => { await page.keyboard.down("Control"); await page.keyboard.press("z"); await page.keyboard.up("Control"); await wait(400); };
+await undo();
+await check("undo_knife", "EDIT 8 12 6");
+// Shift+D duplikát, Esc zruší přesun (kopie zůstane)
+await page.mouse.move(C.x + 3, C.y); await page.keyboard.press("a"); await wait(200);
+await page.keyboard.down("Shift"); await page.keyboard.press("d"); await page.keyboard.up("Shift"); await wait(300);
+await page.keyboard.press("Escape"); await wait(300);
+await check("duplicate_shift_d", "EDIT 16 24 12");
+await undo(); await undo();
+// Merge: vertex mód, A, M, At Center
+await page.keyboard.press("1"); await page.keyboard.press("a"); await wait(200);
+await page.keyboard.press("m"); await wait(400); await shot("7_merge_menu");
+await page.keyboard.press("c"); await wait(300);
+await check("merge_center", "EDIT 1 0 0");
+await undo();
+// Delete: X, menu Vertices
+await page.keyboard.press("a"); await page.keyboard.press("x"); await wait(400); await shot("8_delete_menu");
+await page.keyboard.press("v"); await wait(300);
+await check("delete_vertices", "EDIT 0 0 0");
+await undo();
+// Tab zpět do objektů a ven
+await page.keyboard.press("Tab"); await wait(500);
+await check("back_object", "OBJECT 8 12 6");
 console.log(fails ? `FAIL: ${fails}` : "PASS: uiops");
 await browser.close();
