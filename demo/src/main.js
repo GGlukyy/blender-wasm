@@ -492,6 +492,22 @@ window.addEventListener(
   { capture: true },
 );
 
+/* Held keys: when the window loses focus (app switch, Cmd/Alt+Tab, iPad multitasking, devtools) the
+ * keyup never arrives and Blender keeps Shift/Ctrl/Alt "stuck" until the key is pressed again.
+ * Track keydowns and replay a keyup for each on blur / page hidden. */
+const heldKeys = new Map();
+window.addEventListener("keydown", (e) => { if (e.isTrusted) heldKeys.set(e.code, { code: e.code, key: e.key, keyCode: e.keyCode }); }, true);
+window.addEventListener("keyup", (e) => { heldKeys.delete(e.code); }, true);
+const releaseHeldKeys = () => {
+  for (const k of heldKeys.values()) {
+    window.dispatchEvent(new KeyboardEvent("keyup", { code: k.code, key: k.key, keyCode: k.keyCode, bubbles: true, cancelable: true }));
+  }
+  if (heldKeys.size) log("KEYS_RELEASED_ON_BLUR " + [...heldKeys.keys()].join(","));
+  heldKeys.clear();
+};
+window.addEventListener("blur", releaseHeldKeys);
+document.addEventListener("visibilitychange", () => { if (document.hidden) releaseHeldKeys(); });
+
 /* ---- File ▸ Open hijack: a REAL, lazy mount (no copying) of a folder the
  * user picks on their machine. Blender's wm_open_mainfile invoke (wasm build)
  * calls window.__blenderFileOpenHook() on every File ▸ Open press and forces
