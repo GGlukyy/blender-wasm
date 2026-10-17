@@ -1,4 +1,21 @@
-Výsledek: 🟡 víkendový blok hotový (edit mode, 3D kurzor, modifikátory, body, parity test) — čeká na test na iPadu
+Výsledek: 🟡 víkend: opraveno ~10 chyb ověřených na PC (viz níže), regresní sada `regress_all.sh` bez FAIL — vše čeká na test na iPadu
+
+# ⭐ Co otestovat na iPadu NEJDŘÍV (nové z víkendu, podle důležitosti)
+(Ověřeno jen na PC/Chrome; na iPadu nic. Pokud něco spadne, napiš přesné kroky + screenshot.)
+1. **UV Editing nespadne**: Tab (edit mode) → záložka *UV Editing* nahoře → A → G → táhnout.
+2. **Záložka Material nezamrzne**: vpravo vlastnosti objektu → koule dole (Material). Náhledy jsou záměrně šedé koule.
+3. **Export do hry**: File ▸ Export ▸ *glTF 2.0 (.glb)* a *FBX* → cesta `/opfs/home/test.glb` → 📁 stáhnout → otevři v Unity/desktop Blenderu.
+4. **Uložit obrázek PNG**: F12 render (nebo Image ▸ Save As) → PNG → stáhnout přes 📁.
+5. **Sculpt**: dole v pruhu štětců jsou obrázky (ne hodiny). Vertex/Weight/Texture Paint tahem Pencilu.
+6. **Grease Pencil**: Shift+A → Grease Pencil → kreslit.
+7. První přepnutí do **Material Preview**: objeví se hláška „Kompiluji shadery…“ — kolik sekund trvá?
+8. Dále stále platí seznam „Co otestovat na iPadu (podle důležitosti)“ níže (dotyk, soubory, výběr, z-fighting, `?perf=1`).
+
+## Blocked / otevřené (poctivě)
+- Z-fighting ploch: nereprodukuje se na PC, aplikovaná hypotéza čeká na iPad.
+- Voxel Remesh, Rigid Body, Quadriflow: v buildu chybí (OpenVDB/Bullet/Quadriflow) — hlásí chybu.
+- Draco/Meshopt komprese glTF, Extensions (bl_pkg), `_ctypes`/`_ssl`/`_lzma`, `import sqlite3` zavěsí.
+- Kompilace pipeline při prvním Material Preview blokuje 6–7 s (jen hláška, ne oprava).
 
 # Víkend — co je nového (17. 10., odpoledne)
 - ✅ **Pád v UV Editing workspace** (stránka spadla s „Aborted(Assertion failed)“ hned po přepnutí na UV Editing s objektem v edit modu): GPU buffer vrcholů se mezi přípravou a vykreslením vyměnil a kreslilo se se zrušeným handlem. Opraveno, test `uvedit_win.sh` PASS (G posune UV). **Na iPadu ověřit:** Tab (edit mode) → záložka UV Editing nahoře → vybrat vše (A) → G → táhnout: nespadne? (Mohlo to být i příčinou jiných náhodných pádů.)
