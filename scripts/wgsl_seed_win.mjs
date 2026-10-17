@@ -20,6 +20,31 @@ page.on("console", (m) => {
   else if (t.startsWith("WGSL seed")) seedLine = t;
 });
 if (mode === "seed") await page.addInitScript(() => { window.__CAPENV = { WGPU_WGSL_EXPORT: "1" }; });
+// Python příkazový timer: JS zapíše název režimu do /tmp/seedcmd (Module.FS), Blender ho provede.
+const PYCMD = `import bpy, os
+def _c():
+    p = '/tmp/seedcmd'
+    try:
+        if os.path.exists(p):
+            m = open(p).read().strip(); os.remove(p)
+            w = bpy.context.window_manager.windows[0]
+            area = [a for a in w.screen.areas if a.type == 'VIEW_3D'][0]
+            reg = [r for r in area.regions if r.type == 'WINDOW'][0]
+            with bpy.context.temp_override(window=w, area=area, region=reg):
+                if m == 'tpaint':
+                    bpy.ops.object.mode_set(mode='TEXTURE_PAINT')
+                    bpy.ops.paint.add_texture_paint_slot(type='BASE_COLOR', slot_type='IMAGE', name='seedtp', width=64, height=64, color=(1, 1, 1, 1), alpha=False)
+                elif m == 'wpaint':
+                    ob = bpy.context.view_layer.objects.active
+                    if not ob.vertex_groups: ob.vertex_groups.new(name='g')
+                    bpy.ops.object.mode_set(mode='WEIGHT_PAINT')
+                else:
+                    bpy.ops.object.mode_set(mode=m)
+    except Exception as e:
+        print('seedcmd error', e)
+    return 0.5
+bpy.app.timers.register(_c, first_interval=2.0)`;
+await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, PYCMD);
 await page.goto("http://localhost:5173/", { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
 await page.getByRole("button", { name: /Launch Blender/ }).click();
@@ -59,6 +84,19 @@ for (let i = 0; i < 11; i++) {
     await page.keyboard.down("Control"); await page.keyboard.press("PageDown"); await page.keyboard.up("Control");
     await wait(i === 5 ? 15000 : 4500);
   });
+}
+// Properties editor: všechny záložky (materiál = náhledové koule EEVEE, fyzika, modifikátory, ...)
+await phase("properties tabs", async () => {
+  for (const y of [222, 258, 286, 314, 342, 370, 406, 442, 470, 498, 526, 554, 582, 610]) {
+    await page.mouse.click(box.x + 1167, box.y + y); await wait(y === 610 ? 15000 : 2500);
+  }
+  await page.mouse.click(box.x + 1167, box.y + 442); await wait(1500);
+});
+// režimy: sculpt, vertex/weight/texture paint, edit, zpět do object
+const cmd = async (m, ms) => { await page.evaluate((m) => window.Module.FS.writeFile("/tmp/seedcmd", m), m); await wait(ms); await page.mouse.move(vp.x, vp.y); };
+await page.mouse.click(vp.x, vp.y);
+for (const [m, ms] of [["SCULPT", 12000], ["VERTEX_PAINT", 10000], ["wpaint", 10000], ["tpaint", 12000], ["EDIT", 5000], ["OBJECT", 4000]]) {
+  await phase(`mode ${m}`, async () => { await cmd(m, ms); });
 }
 const total = await misses();
 console.log(`TOTAL translations: ${total}; ${seedLine || "seed not loaded"}`);

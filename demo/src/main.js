@@ -820,6 +820,7 @@ window.Module = {
       if (new URLSearchParams(location.search).get("perf") === "1") ENV.WGPU_PERF = "1";
       if (new URLSearchParams(location.search).get("perf") === "1" && new URLSearchParams(location.search).get("reglog") === "1") ENV.WGPU_REGIONLOG = "1";
       if (new URLSearchParams(location.search).get("passlog") === "1") ENV.WGPU_PASSLOG = "1";
+      if (new URLSearchParams(location.search).get("iconprev") === "1") ENV.BLENDER_WEB_ICON_PREVIEWS = "1";
     } catch (e) { log("preRun ENV: " + e); }
 
     /* Register the in-memory tar FsProvider for the WasmFS ProviderBackend
