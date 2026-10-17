@@ -11,3 +11,5 @@
 - 17. 10.: WGSL seed/IndexedDB cache nikdy nefungovala — Blender běží na pthread workeru (`PROXY_TO_PTHREAD`), `globalThis` z `main.js` tam není. Cokoli z JS pro C++ musí jít sync XHR / BroadcastChannel, ne přes globál stránky.
 - 17. 10.: `--python-expr` ve wasm: bez `sys.stdout.flush()` se výstup nikdy nedostane do konzole stránky. Detektor první verze odmítl i vestavěný startup.blend (legitimní duplicitní adresy) — porovnávat RAW 64bit hodnoty, ne zkrácené.
 - 17. 10.: Jakákoli změna GLSL preambule (`webgpu_glsl_patch`) mění klíče WGSL cache → seed je k ničemu; po změně vždy `scripts/wgsl_seed_win.sh seed` (2×) a `verify`.
+
+- 17. 10.: PNG save padal na „tEXt: invalid keyword“ (~1,5 h). Nehledat v libpng: pomohl debug fprintf do libpng → klíč byl prázdný → OIIO `ustring::string()` prázdné kvůli libc++ hacku. Knihovní chyby ladit printfem v deps/src + `build_*.sh` + `link_blender_release.sh` (bez ninja).

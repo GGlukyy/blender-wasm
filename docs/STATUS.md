@@ -1,6 +1,7 @@
 Výsledek: 🟡 víkendový blok hotový (edit mode, 3D kurzor, modifikátory, body, parity test) — čeká na test na iPadu
 
 # Víkend — co je nového (17. 10., odpoledne)
+- ✅ **Ukládání PNG nefungovalo** (Image ▸ Save As, uložení renderu F12 jako PNG, bake, miniatury): „Could not write image“. Příčina v knihovně OpenImageIO (`ustring::string()` vracelo prázdný text u delších názvů metadat). Opraveno (`scripts/build_oiio.sh`), test `ops_win.sh` png_save_roundtrip PASS. **Na iPadu ověřit:** F12 render → Image ▸ Save As → PNG → stáhnout přes 📁. Pozor: `wasm-sysroot/` se přebuildoval; kdo staví od nuly, spustí `scripts/build_oiio.sh`.
 - ✅ **Miniatury štětců** v Sculpt režimu (asset shelf dole) se teď zobrazují (dřív věčné „hodiny“; příčina: job na načítání náhledů se na webu spouštěl zbytečně dokola při každém překreslení → i menší zátěž). Důkaz: `out/win/sculpt_after.png`, `scripts/regress_all.sh` bez FAIL. Na iPadu ověřit: Sculpting workspace → dole pruh se štětci má obrázky.
 - ✅ **Měření uploadů**: při orbitu 169 zápisů / 205 KB na snímek, žádný velký → mesh buffery se nepřenačítají každý snímek (žádný snadný zisk). `scripts/uploads_win.sh` PASS. `_multiprocessing` = WONTFIX (Extensions stahují přes spawn procesů, v prohlížeči nejde).
 - ✅ **Voxel Remesh bez OpenVDB** už nemlčí: operátor i modifikátor hlásí „built without OpenVDB“ (dřív prázdný výsledek). Samotný OpenVDB build je pořád otevřený (těžký). Důkaz: `scripts/ops_win.sh` → voxel_remesh_warns PASS, 36 testů failed=0. BLENDER_REF=9f1d369d.

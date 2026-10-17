@@ -19,6 +19,16 @@ if [ ! -f "$src/.wasm_linux_patched" ]; then
   touch "$src/.wasm_linux_patched"
 fi
 
+# ustring's libc++ hack (forces std::string internals to point at the table chars)
+# is wrong for current emscripten libc++: ustring::string() came back EMPTY for
+# strings >= 11 chars (e.g. "ResolutionUnit"), so PNG saving failed with
+# "tEXt: invalid keyword". Fall back to the plain std::string copy. Idempotent.
+if [ ! -f "$src/.wasm_ustring_patched" ]; then
+  sed -i 's/#elif defined(_LIBCPP_VERSION) \&\& !defined(__aarch64__)/#elif defined(_LIBCPP_VERSION) \&\& !defined(__aarch64__) \&\& !defined(__EMSCRIPTEN__)/' "$src/src/libutil/ustring.cpp"
+  grep -q '__aarch64__) && !defined(__EMSCRIPTEN__)' "$src/src/libutil/ustring.cpp"
+  touch "$src/.wasm_ustring_patched"
+fi
+
 em_cmake "$src" oiio \
   -DCMAKE_CXX_STANDARD=17 \
   -DLINKSTATIC=ON \

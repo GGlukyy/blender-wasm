@@ -279,6 +279,15 @@ def _():
 @test('bake_free_image_gen', (None, None, None))
 def _():
     img = bpy.data.images.new('t', 64, 64, float_buffer=True); img.pixels[:] = [0.5] * (64 * 64 * 4); out('OPS info pixels', img.pixels[0], img.pixels[100], len(img.pixels), img.size[:]); assert abs(img.pixels[0] - 0.5) < 1e-6, img.pixels[0]; return (64, 0, 0)
+@test('png_save_roundtrip', (None, None, None))
+def _():
+    # regrese: OIIO ustring::string() vracelo prázdný řetězec (libc++ hack) → PNG se nedalo uložit
+    import os
+    img = bpy.data.images.new('png_rt', 16, 16); img.pixels[:] = [0.25, 0.5, 0.75, 1.0] * 256
+    img.filepath_raw = '/tmp/rt.png'; img.file_format = 'PNG'; img.save()
+    assert os.path.getsize('/tmp/rt.png') > 60
+    back = bpy.data.images.load('/tmp/rt.png'); assert tuple(back.size) == (16, 16), back.size
+    return (os.path.getsize('/tmp/rt.png'), 0, 0)
 @test('voxel_remesh_warns', (None, None, None))
 def _():
     # bez OpenVDB nesmí selhat potichu: operátor hlásí chybu (modifikátor: error text v UI, z Pythonu nečitelný)
