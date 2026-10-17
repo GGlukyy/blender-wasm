@@ -82,6 +82,8 @@
 
 - [x] (PASS: `scripts/touch_loopcut_win.sh` — Ctrl (sticky) + R z lišty → pad: tah prstem najede na hranu, 1. klepnutí umístí řez, 2. klepnutí potvrdí posun, kostka 8 → 12 vrcholů; Knife (K) drží pad do Enter; pad ignoruje sticky Ctrl/Shift; `touch_modal`, `touch`, `bar` PASS; JS-only) Lov chyb kolo 52: loop cut a knife prstem (bez hoveru nešly)
 
+- [x] (PASS: `scripts/touch_boxsel_win.sh` — ⋯ → B: pad s „levým tlačítkem“, tah prstem nakreslí box a vybere 7 z 8 vrcholů (zadní zakryt), pak se pad vypne; `touch_modal`, `touch_loopcut`, `touch` PASS) Lov chyb kolo 53: box select (B) prstem
+
 ## Výkon (až nebude co opravovat)
 - [x] (znovu změřeno po numpy/OIIO/ikonách: `scripts/startup_win.sh` okno nahoře za 5,4 s, bez regrese oproti 5,6 s) Start po víkendových změnách
 - [x] (změřeno 17. 10., `scripts/passes_win.sh` = `?passlog=1`; orbit kostky Solid, passy na snímek ÷208 snímků: WebGPUBackbuffer 11, `&framebuffer.fb` 10 (obojí = kompozice UI regionů, ne viewport), overlay_line_fb 4, overlay_output 4, po 2: Clear Main, smaa_resolve, outline.prepass, dfbl overlay, smaa_edge, smaa_weight; po 1: Opaque.Gbuffer/Deferred, Workbench.Outline, taa_accumulation, overlay_line_on, Clear In Front… = ~48) Rozpad passů: víc než polovina jsou kompozice UI (střídání offscreen region ↔ backbuffer = nutné lámání passů); zisk by dalo jen cachování/slučování kompozice regionů (zásah do upstream UI kódu, nejisté) → neřeším, dokud iPad nepotvrdí, že je to úzké hrdlo (`?perf=1`).

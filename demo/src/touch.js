@@ -37,6 +37,7 @@ export function installTouch(canvas) {
   /* Modal operators started from the key bar (G/R/S/E…): a finger would orbit instead of moving the
    * cursor, so while "armed" one finger is a TRACKPAD (relative cursor move, tap = confirm click). */
   let modalArmed = false;
+  let modalDrag = false;    /* B (box select) needs press-drag-release: pad finger acts as the left button */
   let modalTaps = 1;        /* taps that confirm before the pad switches off (loop cut = 2, knife = until Enter) */
   let curX = 0, curY = 0;   /* last cursor position we sent to Blender */
   canvas.addEventListener("mousemove", (e) => { if (e.isTrusted) { curX = e.clientX; curY = e.clientY; } }, true);   /* real mouse/trackpad */
@@ -126,7 +127,8 @@ export function installTouch(canvas) {
     const touches = [...pointers.values()].filter((p) => p.type === "touch");
     if (touches.length === 1 && mode === "idle" && modalArmed && inViewport(e.clientX, e.clientY)) {
       mode = "pad"; padNoMods = true;
-      padBase = { bx: curX, by: curY, px: e.clientX, py: e.clientY };
+      padBase = { bx: curX, by: curY, px: e.clientX, py: e.clientY, down: false };
+      if (modalDrag) { mouse("mousemove", curX, curY, 0, 0); padBase.down = true; setTimeout(() => { if (mode === "pad") mouse("mousedown", curX, curY, 0, 1); }, 20); }
       return;
     }
     if (touches.length === 1 && mode === "idle") {
@@ -181,7 +183,7 @@ export function installTouch(canvas) {
     p.x = e.clientX; p.y = e.clientY;
 
     if (mode === "pad") {
-      mouse("mousemove", padBase.bx + (p.x - padBase.px), padBase.by + (p.y - padBase.py), 0, 0);
+      mouse("mousemove", padBase.bx + (p.x - padBase.px), padBase.by + (p.y - padBase.py), 0, padBase.down ? 1 : 0);
       return;
     }
     if (mode === "pending") {
@@ -244,7 +246,13 @@ export function installTouch(canvas) {
       }
       return;
     }
-    if (mode === "pad") {
+    if (mode === "pad" && padBase && padBase.down) {
+      mouse("mouseup", curX, curY, 0, 0);
+      modalArmed = false; modalDrag = false; updateArmed();
+      mode = "idle";
+      setTimeout(() => { if (mode !== "pad") padNoMods = false; }, 150);
+    }
+    else if (mode === "pad") {
       /* tap = confirm the modal operator (LMB click at the current cursor); a drag just moved it */
       if (p && performance.now() - p.t0 < TAP_MAX_MS && Math.hypot(p.x - p.x0, p.y - p.y0) < TAP_MAX_PX) {
         click(curX, curY, 0);
@@ -426,8 +434,9 @@ export function installTouch(canvas) {
   const press = (code, k) => {
     if (code === "KeyR" && sticky.ctrl) { modalArmed = true; modalTaps = 2; updateArmed(); }   /* loop cut: place, then slide */
     else if (code === "KeyK" && !sticky.ctrl) { modalArmed = true; modalTaps = 1e9; updateArmed(); }   /* knife: many clicks, Enter ends */
+    else if (code === "KeyB" && !sticky.ctrl) { modalArmed = true; modalDrag = true; modalTaps = 1; updateArmed(); }
     else if (MODAL_CODES.has(code) && !sticky.ctrl && !sticky.shift && !sticky.alt) { modalArmed = true; modalTaps = 1; updateArmed(); }
-    else if (code === "Enter" || code === "Escape" || code === "Tab") { modalArmed = false; updateArmed(); }
+    else if (code === "Enter" || code === "Escape" || code === "Tab") { modalArmed = false; modalDrag = false; updateArmed(); }
     const ch = k.length === 1 && sticky.shift ? k.toUpperCase() : k;
     key("keydown", code, ch);
     setTimeout(() => key("keyup", code, ch), 40);
