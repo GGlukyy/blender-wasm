@@ -16,6 +16,8 @@
 
 - [x] (PASS: `scripts/p2_occl_check.sh` box — out/win/p2_occlboxhid_7_drag.png nic, p2_occlboxvis_7_drag.png vrchol; lasso/circle stejný kód, netestováno automaticky) Box/lasso/circle select v Solid respektuje zakrytí (`ED_mesh_web_occl.hh`). Occlusion jen vůči aktivnímu objektu.
 
+- [x] (PASS na PC: `scripts/touch_win.sh`; čeká na iPad) **P4 dotyk/Pencil + lišta kláves** — `demo/src/touch.js`.
+
 ## Plán
 - [x] **P1** (PASS: `scripts/wgsl_seed_win.sh verify` → TOTAL translations: 0, seed 179 shaderů; BLENDER_REF=f077479e. Příčina: Blender běží na pthread workeru, cache z main.js tam nebyla vidět → nikdy nefungovala; seed se načítá sync XHR. Regenerace: `scripts/wgsl_seed_win.sh seed`, `wgsl-cache.json` je v .gitignore (generovaný). Zbývá iPad: čistá data webu, přepnutí workspace) shader seed (`wgsl-cache.json`) pro všechny workspaces + edit mode + shading módy;
   test: cache-miss = 0 při prvním přepnutí.
