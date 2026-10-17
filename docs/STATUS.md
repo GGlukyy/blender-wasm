@@ -1,4 +1,4 @@
-Výsledek: 🟡 víkend: opraveno ~10 chyb ověřených na PC (viz níže), regresní sada `regress_all.sh` bez FAIL — vše čeká na test na iPadu
+Výsledek: 🟡 víkend: kola 41–60 hotová na PC (diakritika, šablony, vlasy, prst jako touchpad pro G/R/S/E/loop cut/box, auto-klávesnice, lišta ⋯, ikona), regresní sada bez FAIL — vše čeká na test na iPadu
 
 # ⭐ Co otestovat na iPadu NEJDŘÍV (nové z víkendu, podle důležitosti)
 (Ověřeno jen na PC/Chrome; na iPadu nic. Pokud něco spadne, napiš přesné kroky + screenshot. Po načtení stránky udělej reload, ať se nahraje nový build.)
