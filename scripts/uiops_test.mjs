@@ -12,7 +12,7 @@ def _t():
                 bm = bmesh.from_edit_mesh(ob.data); c = (len(bm.verts), len(bm.edges), len(bm.faces))
             else:
                 c = (len(ob.data.vertices), len(ob.data.edges), len(ob.data.polygons))
-            print('UIC', ob.mode, *c); sys.stdout.flush()
+            print('UIC', ob.mode, *c); print('UIL', round(ob.location.x,2), round(ob.scale.x,2), round(ob.rotation_euler.z*57.29578), round(ob.location.y,2)); sys.stdout.flush()
         else: print('UIC NOOBJ', len(bpy.data.objects)); sys.stdout.flush()
     except Exception as e: print('UIC ERR', e); sys.stdout.flush()
     return 0.7
@@ -20,8 +20,8 @@ bpy.app.timers.register(_t, first_interval=3.0)`;
 const browser = await chromium.launch({ headless: false, executablePath: process.env.CHROME,
   args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
 const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
-let last = null;
-page.on("console", (m) => { const t = m.text(); if (/Traceback|Error|UIC/.test(t) && !/WGPU/.test(t)) console.log("LOG", t.slice(0, 200)); const i = t.indexOf("UIC "); if (i >= 0) last = t.slice(i + 4).trim().split(/\s+/); });
+let last = null, lastL = null;
+page.on("console", (m) => { const t = m.text(); if (/Traceback|Error|UIC|UIL/.test(t) && !/WGPU/.test(t)) console.log("LOG", t.slice(0, 200)); const j = t.indexOf("UIL "); if (j >= 0) lastL = t.slice(j + 4).trim().split(/\s+/).map(Number); const i = t.indexOf("UIC "); if (i >= 0) last = t.slice(i + 4).trim().split(/\s+/); });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
 await page.goto("http://localhost:5173/", { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
@@ -105,5 +105,23 @@ await undo();
 // Tab zpět do objektů a ven
 await page.keyboard.press("Tab"); await wait(500);
 await check("back_object", "OBJECT 8 12 6");
+const key = async (k) => { await page.keyboard.press(k); await wait(150); };
+const checkL = async (name, want) => { await wait(1600); const g = lastL ? lastL.join(" ") : "none"; const ok = g === want; if (!ok) fails++; console.log(`UIOPS ${name} ${ok ? "PASS" : "FAIL"} got=${g} want=${want}`); };
+// Modální transformace v object modu s číslem: G X 2, S 2, R Z 90, G Y -1
+await page.mouse.move(C.x + 3, C.y); await wait(200);
+await key("g"); await key("x"); await key("2"); await key("Enter");
+await checkL("grab_x2", "2 1 0 0");
+await key("s"); await key("2"); await key("Enter");
+await checkL("scale_2", "2 2 0 0");
+await key("r"); await key("z"); await key("9"); await key("0"); await key("Enter");
+await checkL("rot_z90", "2 2 90 0");
+await key("g"); await key("y"); await key("-"); await key("1"); await key("Enter");
+await checkL("grab_y-1", "2 2 90 -1");
+await shot("9_transforms");
+await undo(); await undo();
+await checkL("undo_two", "2 2 0 0");
+// Esc ruší: G X 5 Esc
+await key("g"); await key("x"); await key("5"); await key("Escape");
+await checkL("grab_cancel", "2 2 0 0");
 console.log(fails ? `FAIL: ${fails}` : "PASS: uiops");
 await browser.close();
