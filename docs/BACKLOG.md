@@ -15,7 +15,7 @@
   Konzultuj architekta, guard `#ifdef __EMSCRIPTEN__`.
 
 ## Plán
-- [ ] **P1** shader seed (`wgsl-cache.json`) pro všechny workspaces + edit mode + shading módy;
+- [~] **P1** shader seed (`wgsl-cache.json`) pro všechny workspaces + edit mode + shading módy;
   test: cache-miss = 0 při prvním přepnutí.
 - [ ] **Výkonový panel**: FPS, ms/snímek, paměť wasm, počet draw callů; zapnutí `?perf=1`.
 - [ ] Vrcholy velikostí jako na desktopu (teď ~4–5 px vs ~6 px).
