@@ -1,12 +1,16 @@
 // Cena -> bpy.ops.wm.redraw_timer(DRAW_WIN_SWAP) = čas jednoho překreslení okna (CPU Blenderu + submit).
 // node drawtime_test.mjs   (scény: cube, monkey_sub3, ico8)
 const { chromium } = await import(process.env.PW || "playwright");
+const only = process.env.SCENES && !process.env.SCENES.includes("%") ? process.env.SCENES.split(",") : null;
 const scenes = {
   cube: "pass",
+  cubes200: "[bpy.ops.mesh.primitive_cube_add(location=((i%15)*2.5, (i//15)*2.5, 0)) for i in range(200)]",
+  monkeys50: "[bpy.ops.mesh.primitive_monkey_add(location=((i%8)*3, (i//8)*3, 0)) for i in range(50)]",
   monkey_sub3: "bpy.ops.object.delete(); bpy.ops.mesh.primitive_monkey_add(); m=bpy.context.object.modifiers.new('s','SUBSURF'); m.levels=3; m.render_levels=3; bpy.ops.object.shade_smooth()",
   ico8: "bpy.ops.object.delete(); bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=8); bpy.ops.object.shade_smooth()",
 };
 for (const [name, setup] of Object.entries(scenes)) {
+  if (only && !only.includes(name)) continue;
   const expr = `
 import bpy, sys, time
 ${setup}
