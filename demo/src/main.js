@@ -375,6 +375,29 @@ if (new URLSearchParams(location.search).get("perf") === "1") {
   setInterval(() => { if (last && performance.now() - last > 2500) box.style.opacity = ".4"; else box.style.opacity = "1"; }, 1000);
 }
 
+/* "Kompiluji shadery" overlay: the render pthread blocks for seconds while the browser compiles big
+ * WebGPU pipelines (first Material Preview / Rendered switch). It posts to "blender-compile" before
+ * each compile (webgpu_context.cc wgpu_note_compile); the main thread is free, so show a message
+ * when compiles keep coming for > 700 ms, hide after 2.5 s of silence. */
+{
+  const note = document.createElement("div");
+  note.style.cssText = "position:fixed;left:50%;bottom:48px;transform:translateX(-50%);z-index:99998;" +
+    "background:rgba(20,20,20,.88);color:#fff;font:14px/1.3 system-ui,sans-serif;padding:8px 16px;" +
+    "border-radius:8px;pointer-events:none;display:none";
+  note.textContent = "⏳ Kompiluji shadery… (jen poprvé, může to trvat několik sekund)";
+  const attach = () => document.body.appendChild(note);
+  if (document.body) attach(); else document.addEventListener("DOMContentLoaded", attach);
+  let first = 0, hideT = 0;
+  new BroadcastChannel("blender-compile").onmessage = () => {
+    const now = performance.now();
+    if (!first) first = now;
+    if (now - first > 700) note.style.display = "block";
+    clearTimeout(hideT);
+    hideT = setTimeout(() => { note.style.display = "none"; first = 0; window.__COMPILE_SHOWN__ = false; }, 2500);
+    if (note.style.display === "block") window.__COMPILE_SHOWN__ = true;
+  };
+}
+
 window.__BGUI__ = { booted: false, device: false, window: false };
 const scan = (t) => {
   if (t.includes("WEBGPU_CONTEXT") && t.includes("real device acquired")) window.__BGUI__.device = true;

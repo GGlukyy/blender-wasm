@@ -30,13 +30,17 @@ const c = { x: box.x + 576, y: box.y + 396 };
 await page.keyboard.press("Escape"); await wait(500);
 console.log("BEFORE", last && last.join(" "));
 // záložka Material v Properties (ikona dole v sloupci záložek)
+await page.evaluate(() => { window.__tick = 0; window.__maxgap = 0; let last = performance.now(); setInterval(() => { const n = performance.now(); window.__maxgap = Math.max(window.__maxgap, n - last); last = n; window.__tick++; }, 50); });
 const t0 = Date.now(); const n0 = last ? +last[1] : 0;
-await page.mouse.click(box.x + 1167, box.y + 610);
+const [cx, cy] = (process.env.CLICK || "1167,610").split(",").map(Number);
+await page.mouse.click(box.x + cx, box.y + cy);
 let miss = 0; page.on("console", m => { if (m.text().includes("WGSL_MISS")) miss++; });
-let resumed = 0;
-for (let i = 0; i < 240; i++) { await wait(500); const n = last ? +last[1] : 0; if (n > n0 + 2 && i > 4) { resumed = Date.now() - t0; break; } }
+let resumed = 0; let shown = false;
+for (let i = 0; i < 240; i++) { await wait(500); if (await page.evaluate(() => window.__COMPILE_SHOWN__ === true)) shown = true; const n = last ? +last[1] : 0; if (n > n0 + 2 && i > 4) { resumed = Date.now() - t0; break; } }
+console.log("COMPILE_OVERLAY_SHOWN " + shown);
+console.log("MAIN_THREAD_MAX_GAP_MS " + Math.round(await page.evaluate(() => window.__maxgap)));
 console.log(`BLOCK_MS ${resumed || "NEVER"} WGSL_MISS ${miss}`);
 await page.screenshot({ path: "out/mattab.png" });
-console.log(resumed && resumed < 4500 ? "PASS: Material záložka neblokuje" : "FAIL: Material záložka blokuje UI " + resumed + " ms (překlad shaderů mimo seed)");
+console.log(resumed && resumed < (+process.env.LIMIT || 4500) ? "PASS: Material záložka neblokuje" : "FAIL: Material záložka blokuje UI " + resumed + " ms (překlad shaderů mimo seed)");
 if (process.env.SEEDOUT) { const { writeFileSync } = await import("node:fs"); writeFileSync("out/mattab_seed.json", JSON.stringify([...exported.entries()])); console.log("EXPORTED " + exported.size); }
 await browser.close();
