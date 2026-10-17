@@ -14,7 +14,8 @@ Výsledek: 🟡 víkend: opraveno ~10 chyb ověřených na PC (viz níže), regr
 10. **Ikona na ploše:** Sdílet ▸ Přidat na plochu → má logo Blenderu (kolo 55; staré zástupce smaž a přidej znovu)? Otevře se celoobrazovkově?
 11. **Z plochy (celoobrazovkově):** je horní menu Blenderu (File Edit Render…) celé vidět pod hodinami a spodní lišta nad čárou dole? (kolo 56, odhad)
 12. **Větší UI pro prsty (volitelné):** otevři stránku s `?uiscale=1.3` (nebo Edit ▸ Preferences ▸ Interface ▸ Resolution Scale) — líbí se ti? Panel vpravo je pak užší. Řekni, jestli to má být výchozí.
-13. Dále stále platí seznam „Co otestovat na iPadu (podle důležitosti)“ níže (dotyk, soubory, výběr, z-fighting, `?perf=1`).
+13. **Pozor na klávesy z lišty:** platí pro oblast, kam jsi naposledy klepnul (jako kurzor myši). Chceš Tab/G/E ve viewportu → nejdřív klepni do viewportu. Dává to smysl, nebo má lišta sama „skočit“ do viewportu?
+14. Dále stále platí seznam „Co otestovat na iPadu (podle důležitosti)“ níže (dotyk, soubory, výběr, z-fighting, `?perf=1`).
 
 ## Blocked / otevřené (poctivě)
 - Z-fighting ploch: nereprodukuje se na PC, aplikovaná hypotéza čeká na iPad.

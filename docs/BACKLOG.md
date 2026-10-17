@@ -96,6 +96,8 @@
 
 - [x] (celá `scripts/regress_all.sh` po kolech 41–58: 0 FAIL / 0 PAGEERROR, `out/regress_k58.log`; do sady přidány utf8, templates, bar, touch_modal/loopcut/boxsel, autokbd, hidden, editors) Regresní kontrola po kole 58
 
+- [x] (PASS: `scripts/touch_shiftsel_win.sh` — edit mode, klepnutí vybere vrchol, sticky Shift + klepnutí přidá 2. a 3., bez Shift výběr nahradí (souřadnice vrcholů počítá Python z view3d); poznámka z ladění: klávesy z lišty platí pro oblast, nad kterou je naposledy známý kurzor — když poslední klepnutí bylo třeba ve vlastnostech, Tab z lišty ve viewportu nic neudělá; chování je záměrné jako u klávesnice, jen to říct Lukášovi) Lov chyb kolo 59: výběr více prvků prstem
+
 ## Výkon (až nebude co opravovat)
 - [x] (změřeno 18. 10., PC/NVIDIA, `SCENES=ico6_edit,ico7_edit,monkey_sub2_edit scripts/drawtime_win.sh`: překreslení okna v EDIT MODU: kostka 13,4 ms, ico 40k trojúhelníků 18,8 ms, ico 164k = 32,3 ms, opice+Subsurf2 16,1 ms → pro malé herní assety (<20k tris) edit mode drží ~55 FPS na PC, 164k je na hraně; iPad odhadem 2–3× pomalejší, změřit přes `?perf=1`) Cena snímku v edit modu
 - [x] (znovu změřeno po numpy/OIIO/ikonách: `scripts/startup_win.sh` okno nahoře za 5,4 s, bez regrese oproti 5,6 s) Start po víkendových změnách
