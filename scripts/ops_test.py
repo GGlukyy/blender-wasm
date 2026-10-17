@@ -335,6 +335,27 @@ def _():
     bpy.ops.render.render(write_still=True)
     assert os.path.getsize('/tmp/render_wb.png') > 100
     return (os.path.getsize('/tmp/render_wb.png'), 0, 0)
+@test('numpy_basic', (None, None, None))
+def _():
+    import numpy as np
+    a = np.arange(12, dtype=np.float32).reshape(3, 4)
+    assert float(a.sum()) == 66.0 and a.T.shape == (4, 3)
+    assert abs(float(np.linalg.norm(np.array([3.0, 4.0]))) - 5.0) < 1e-9
+    v = np.empty(24, dtype=np.float32); bpy.data.objects[0].data.vertices.foreach_get('co', v) if len(bpy.data.objects) and bpy.data.objects[0].type == 'MESH' else None
+    assert np.random.default_rng(1).random(3).shape == (3,)
+    return (int(a.sum()), 0, 0)
+@test('io_gltf_fbx_roundtrip', (8, 12, 6))
+def _():
+    import os
+    fresh(); bpy.ops.export_scene.gltf(filepath='/tmp/rt.glb', export_format='GLB'); bpy.ops.export_scene.fbx(filepath='/tmp/rt.fbx')
+    assert os.path.getsize('/tmp/rt.glb') > 200 and os.path.getsize('/tmp/rt.fbx') > 200
+    res = []
+    for imp in (lambda: bpy.ops.import_scene.gltf(filepath='/tmp/rt.glb'), lambda: bpy.ops.import_scene.fbx(filepath='/tmp/rt.fbx')):
+        bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete(); imp()
+        o = [x for x in bpy.context.scene.objects if x.type == 'MESH'][0]
+        res.append((len(o.data.vertices), len(o.data.polygons)))
+    assert res[0] == (24, 12) and res[1] == (8, 6), res   # glTF: trojúhelníky + vrcholy rozdělené podle normál; FBX zachová kvádr
+    return (8, 12, 6)
 @test('voxel_remesh_warns', (None, None, None))
 def _():
     # bez OpenVDB nesmí selhat potichu: operátor hlásí chybu (modifikátor: error text v UI, z Pythonu nečitelný)

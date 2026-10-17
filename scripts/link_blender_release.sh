@@ -110,6 +110,8 @@ cmd=${raw#*&& }
 cmd=${cmd%% && cd *}
 cmd=${cmd/-o bin\/blender.js/-o $OUT/blender.js}
 cmd=${cmd//-sNODERAWFS=1/}
+# numpy (static, see scripts/build_numpy.sh): inittab registration + module archive.
+if [ -f "$SYSROOT/lib/numpy_inittab.o" ]; then cmd="$cmd $SYSROOT/lib/numpy_inittab.o $SYSROOT/lib/libnumpy_static.a"; fi
 
 # Custom wasmfs backends (compiled against emscripten's internal wasmfs headers):
 #  - localdir_backend.cpp: lazy async mount of a user-picked folder (open/save).

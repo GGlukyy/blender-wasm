@@ -53,6 +53,8 @@ cmd=${cmd%% && cd *}
 cmd=${cmd/-o bin\/blender.js/-o $WEB/blender.js}
 # Drop node-only filesystem + environment settings (we replace them below).
 cmd=${cmd//-sNODERAWFS=1/}
+# numpy (static, see scripts/build_numpy.sh): inittab registration + module archive.
+if [ -f "$ROOT/wasm-sysroot/lib/numpy_inittab.o" ]; then cmd="$cmd $ROOT/wasm-sysroot/lib/numpy_inittab.o $ROOT/wasm-sysroot/lib/libnumpy_static.a"; fi
 
 # Web runtime flags. PROXY_TO_PTHREAD: Blender's main + worker pthreads run off
 # the browser UI thread. WASMFS keeps the file store in shared memory so the
