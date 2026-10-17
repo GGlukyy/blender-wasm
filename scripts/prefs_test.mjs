@@ -1,50 +1,50 @@
-import { spawn } from "node:child_process";
-import { createWriteStream } from "node:fs";
-import { chromium } from "playwright";
-const srv = spawn("node", ["scripts/serve.mjs", "web", "8137"], { stdio: "ignore" });
-await new Promise(r => setTimeout(r, 700));
-const browser = await chromium.launch({
-  executablePath: `${process.env.HOME}/.cache/ms-playwright/chromium-1228/chrome-linux64/chrome`,
-  headless: false,
-  env: { ...process.env, DISPLAY: ":0", XDG_RUNTIME_DIR: "/run/user/1000",
-         VK_ICD_FILENAMES: "/usr/share/vulkan/icd.d/radeon_icd.json" },
-  args: ["--ozone-platform=x11", "--enable-unsafe-webgpu", "--enable-features=Vulkan",
-         "--ignore-gpu-blocklist", "--window-size=1700,1000"],
-});
-const page = await (await browser.newContext({ viewport: { width: 1600, height: 950 } })).newPage();
-const full = createWriteStream("/tmp/prefs_test.log");
-page.on("console", (m) => full.write(m.text() + "\n"));
-page.on("pageerror", (e) => full.write("PAGEERROR:\n" + (e.stack || e.message) + "\n"));
-await page.goto("http://localhost:8137/blender-gui.html", { waitUntil: "load" });
-for (let i = 0; i < 70; i++) {
-  const s = await page.evaluate(() => window.__BGUI__ || {});
-  if (s.window) break;
-  await new Promise(r => setTimeout(r, 2000));
-}
-await new Promise(r => setTimeout(r, 4000));
-const box = await page.locator("#canvas").boundingBox();
-const shot = (n) => page.locator("#canvas").screenshot({ path: `web/pf_${n}.png` });
-const settle = (ms = 1500) => new Promise(r => setTimeout(r, ms));
-await page.keyboard.press("Escape"); await settle();
-
-// Edit > Preferences...
-await page.mouse.click(box.x + 75, box.y + 10); await settle();
-await shot("1_edit_menu");
-// Preferences… is 2nd from the menu bottom ("Project Setup…" sits below it);
-// keyboard selection avoids pixel-position fragility.
-await page.keyboard.press("ArrowUp"); await settle(300);
-await page.keyboard.press("ArrowUp"); await settle(300);
-await page.keyboard.press("Enter"); await settle(4000);
-await shot("2_preferences");
-// Fullscreen temp spaces close via the header "Back to Previous" button
-// (Escape does not close them, same as desktop Blender).
-await page.mouse.move(box.x + 800, box.y + 400); await settle(400);
-await page.mouse.click(box.x + 320, box.y + 12); await settle(1500);
-await shot("3_back");
-
-// F12 render (EEVEE) — takes a while (lazy shader compiles + render).
-await page.keyboard.press("F12"); await settle(150000);
-await shot("4_render");
-await page.mouse.click(box.x + 320, box.y + 12); await settle(1500);
-await shot("5_back_from_render");
-await browser.close(); srv.kill(); console.log("done");
+// Edit ▸ Preferences (nové okno), Ctrl+O file browser, Shift+A menu přes UI. node prefs_test.mjs
+import { mkdirSync } from "node:fs";
+const { chromium } = await import(process.env.PW || "playwright");
+mkdirSync("out", { recursive: true });
+const expr = `import bpy, bmesh, sys
+def _t():
+    try:
+        ob = bpy.context.view_layer.objects.active
+        info = (ob.mode, len(ob.data.uv_layers))
+        s = 0.0; mn = 9.0; mx = -9.0
+        if ob.mode == 'EDIT' and ob.data.uv_layers:
+            bm = bmesh.from_edit_mesh(ob.data); l = bm.loops.layers.uv.active
+            us = [lp[l].uv for f in bm.faces for lp in f.loops]
+            mn = min(min(u.x, u.y) for u in us); mx = max(max(u.x, u.y) for u in us)
+        print('UK', ob.mode, len(ob.data.uv_layers), round(mn, 3), round(mx, 3)); sys.stdout.flush()
+    except Exception as e: print('UK ERR', e); sys.stdout.flush()
+    return 0.7
+bpy.app.timers.register(_t, first_interval=3.0)`;
+const browser = await chromium.launch({ headless: false, executablePath: process.env.CHROME,
+  args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
+const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
+let last = null; let errs = 0;
+page.on('pageerror', (e) => { errs++; console.log('PAGEERROR', String(e).slice(0, 200)); });
+page.on("console", (m) => { const t = m.text(); const i = t.indexOf("UK "); if (i >= 0) last = t.slice(i + 3).trim().split(/\s+/); });
+await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
+await page.goto("http://localhost:5173/", { waitUntil: "load" });
+await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
+await page.getByRole("button", { name: /Launch Blender/ }).click();
+for (let i = 0; i < 300; i++) { if ((await page.evaluate(() => window.__BGUI__ || {})).window) break; await new Promise(r => setTimeout(r, 1000)); }
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+await wait(8000); await page.keyboard.press("Escape"); await wait(800);
+await page.mouse.move(600, 450); await wait(300);
+await page.mouse.click(75, 13); await wait(800);            // Edit
+await page.locator("#canvas").screenshot({ path: "out/prefs_1_editmenu.png" });
+await page.mouse.click(125, 271); await wait(2500);   // Preferences
+await page.locator("#canvas").screenshot({ path: "out/prefs_1b_prefs.png" });
+await page.mouse.click(322, 13); await wait(1500);   // Back to Previous
+await page.mouse.move(600, 450);
+await page.keyboard.down("Shift"); await page.keyboard.press("a"); await page.keyboard.up("Shift"); await wait(800);
+await page.locator("#canvas").screenshot({ path: "out/prefs_2_addmenu.png" });
+await page.keyboard.press("Escape"); await wait(400);
+await page.mouse.click(40, 13); await wait(700); await page.mouse.click(75, 56); await wait(3000);   // File ▸ Open…
+await page.locator("#canvas").screenshot({ path: "out/prefs_3_filebrowser.png" });
+await page.keyboard.press("Escape"); await wait(800);
+await page.mouse.move(600, 450); await wait(500);
+await page.locator("#canvas").screenshot({ path: "out/prefs_4_after.png" });
+await wait(1500);
+console.log("PK final", last && last.join(" "), "errors", errs);
+console.log(errs === 0 && last ? "PASS: prefs/menus alive" : "FAIL: prefs/menus");
+await browser.close();
