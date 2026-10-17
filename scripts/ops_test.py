@@ -175,6 +175,17 @@ def _():
     bpy.ops.mesh.merge(type='CENTER'); assert counts(ob)[0] == 1, counts(ob)
     bpy.ops.object.mode_set(mode='OBJECT')
     return (None, None, None)
+@test('select_similar_linked_loop_ops', (None, None, None))
+def _():
+    ob = fresh(); edit(ob); bpy.ops.mesh.subdivide(number_cuts=2)
+    bpy.ops.mesh.select_all(action='DESELECT'); bpy.ops.mesh.select_mode(type='EDGE')
+    bm = bmesh.from_edit_mesh(ob.data); bm.edges.ensure_lookup_table(); bm.edges[0].select_set(True); bm.select_flush(True); bmesh.update_edit_mesh(ob.data)
+    bpy.ops.mesh.select_more(); n1 = sum(e.select for e in bmesh.from_edit_mesh(ob.data).edges); assert n1 >= 4, n1
+    bpy.ops.mesh.select_more(); bpy.ops.mesh.select_less(); bpy.ops.mesh.select_linked(); bpy.ops.mesh.select_all(action='INVERT')
+    bpy.ops.mesh.select_random(ratio=0.5, seed=1); bpy.ops.mesh.select_nth(); bpy.ops.mesh.edges_select_sharp()
+    bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.mesh.mark_sharp(); bpy.ops.mesh.mark_seam(); bpy.ops.mesh.normals_make_consistent()
+    bpy.ops.object.mode_set(mode='OBJECT'); assert len(ob.data.polygons) == 54, len(ob.data.polygons)
+    return (None, None, None)
 @test('subdivide', (26, 48, 24))
 def _():
     ob = fresh(); edit(ob); bpy.ops.mesh.subdivide(number_cuts=1); return counts(ob)
