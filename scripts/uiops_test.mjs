@@ -73,5 +73,14 @@ await page.keyboard.down("Control"); await page.keyboard.press("b"); await page.
 await page.mouse.move(C.x + 30, C.y, { steps: 8 }); await wait(300); await page.mouse.click(C.x + 30, C.y); await wait(300);
 await check("bevel_all", "EDIT 24 48 26");
 await shot("5_bevel");
+await page.keyboard.down("Control"); await page.keyboard.press("z"); await page.keyboard.up("Control"); await wait(300);
+// Knife: K, klik začátek, klik konec, Enter
+await page.mouse.move(C.x - 60, C.y + 5); await page.keyboard.press("k"); await wait(400);
+await page.mouse.click(C.x - 60, C.y + 5); await wait(200);
+await page.mouse.move(C.x, C.y + 5, { steps: 6 }); await page.mouse.move(C.x + 60, C.y + 5, { steps: 6 }); await wait(300);
+await page.mouse.click(C.x + 60, C.y + 5); await wait(300);
+await shot("6_knife");
+await page.keyboard.press("Enter"); await wait(300);
+await check("knife", "EDIT 10 15 7");
 console.log(fails ? `FAIL: ${fails}` : "PASS: uiops");
 await browser.close();
