@@ -30,10 +30,17 @@ const PINCH_PX_PER_LN_OUT = 210;
 export function installTouch(canvas) {
   const qs = new URLSearchParams(location.search);
   const sticky = { shift: false, ctrl: false, alt: false };
+  let updateArmed = () => {};
   const pointers = new Map(); /* id -> {x, y, type, x0, y0, t0} */
 
-  window.__touchDebug = () => ({ mode, pointers: [...pointers.keys()] });
+  window.__touchDebug = () => ({ mode, pointers: [...pointers.keys()], modalArmed });
+  /* Modal operators started from the key bar (G/R/S/E…): a finger would orbit instead of moving the
+   * cursor, so while "armed" one finger is a TRACKPAD (relative cursor move, tap = confirm click). */
+  let modalArmed = false;
+  let curX = 0, curY = 0;   /* last cursor position we sent to Blender */
+  let padBase = null;       /* {bx, by, px, py} for the current trackpad drag */
   const mouse = (type, x, y, button, buttons, extra = {}) => {
+    curX = x; curY = y;
     canvas.dispatchEvent(new MouseEvent(type, {
       bubbles: true, cancelable: true, view: window,
       clientX: x, clientY: y, button, buttons,
@@ -75,7 +82,7 @@ export function installTouch(canvas) {
   let area = "view"; /* "view" | "ui" for the current touch gesture */
 
   /* ---- gesture state ---- */
-  let mode = "idle"; /* idle | pending | orbit | uidrag | pen | two | ignore */
+  let mode = "idle"; /* idle | pending | orbit | uidrag | pen | two | pad | ignore */
   let longTimer = 0;
   let longFired = false;
   let two = null; /* {d0, cx0, cy0, kind: null|"zoom"|"pan", ax, ay, dragY} */
@@ -114,6 +121,11 @@ export function installTouch(canvas) {
     }
     /* touch */
     const touches = [...pointers.values()].filter((p) => p.type === "touch");
+    if (touches.length === 1 && mode === "idle" && modalArmed && inViewport(e.clientX, e.clientY)) {
+      mode = "pad";
+      padBase = { bx: curX, by: curY, px: e.clientX, py: e.clientY };
+      return;
+    }
     if (touches.length === 1 && mode === "idle") {
       mode = "pending"; longFired = false;
       area = inViewport(e.clientX, e.clientY) ? "view" : "ui";
@@ -165,6 +177,10 @@ export function installTouch(canvas) {
     if (!p) return;
     p.x = e.clientX; p.y = e.clientY;
 
+    if (mode === "pad") {
+      mouse("mousemove", padBase.bx + (p.x - padBase.px), padBase.by + (p.y - padBase.py), 0, 0);
+      return;
+    }
     if (mode === "pending") {
       /* In a viewport give Blender ~60 ms to hover-highlight a gizmo under the finger before deciding orbit vs gizmo drag. */
       if (Math.hypot(p.x - p.x0, p.y - p.y0) > MOVE_START_PX && (area !== "view" || performance.now() - p.t0 >= 80)) {
@@ -225,7 +241,15 @@ export function installTouch(canvas) {
       }
       return;
     }
-    if (mode === "pending") {
+    if (mode === "pad") {
+      /* tap = confirm the modal operator (LMB click at the current cursor); a drag just moved it */
+      if (p && performance.now() - p.t0 < TAP_MAX_MS && Math.hypot(p.x - p.x0, p.y - p.y0) < TAP_MAX_PX) {
+        click(curX, curY, 0);
+        modalArmed = false; updateArmed();
+      }
+      mode = "idle";
+    }
+    else if (mode === "pending") {
       clearTimeout(longTimer);
       if (p && !longFired && performance.now() - p.t0 < TAP_MAX_MS && Math.hypot(p.x - p.x0, p.y - p.y0) < TAP_MAX_PX) {
         click(p.x0, p.y0, 0);
@@ -394,7 +418,10 @@ export function installTouch(canvas) {
   const MODS = [["Shift", "shift", "ShiftLeft"], ["Ctrl", "ctrl", "ControlLeft"], ["Alt", "alt", "AltLeft"]];
 
   const key = (type, code, k) => window.dispatchEvent(new KeyboardEvent(type, { code, key: k, bubbles: true, cancelable: true }));
+  const MODAL_CODES = new Set(["KeyG", "KeyR", "KeyS", "KeyE", "KeyB", "KeyK"]);
   const press = (code, k) => {
+    if (MODAL_CODES.has(code) && !sticky.ctrl && !sticky.shift && !sticky.alt) { modalArmed = true; updateArmed(); }
+    else if (code === "Enter" || code === "Escape" || code === "Tab") { modalArmed = false; updateArmed(); }
     const ch = k.length === 1 && sticky.shift ? k.toUpperCase() : k;
     key("keydown", code, ch);
     setTimeout(() => key("keyup", code, ch), 40);
@@ -407,6 +434,7 @@ export function installTouch(canvas) {
 
   const bar = document.createElement("div");
   bar.id = "touchbar";
+  updateArmed = () => { bar.style.borderColor = modalArmed ? "#2a6fd6" : "#555"; bar.style.boxShadow = modalArmed ? "0 0 0 2px #2a6fd6" : "none"; };
   bar.style.cssText = "position:fixed;left:50%;bottom:34px;transform:translateX(-50%);z-index:90;display:flex;" +
     "gap:6px;padding:6px;background:rgba(28,28,28,.88);border:1px solid #555;border-radius:12px;" +
     "font:600 15px system-ui,sans-serif;-webkit-user-select:none;user-select:none;touch-action:manipulation;" +
