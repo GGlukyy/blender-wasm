@@ -162,6 +162,19 @@ def _():
     sc.render.engine = 'BLENDER_EEVEE'
     im = bpy.data.images.load('/tmp/render_ee.png'); px = list(im.pixels); out('OPS_INFO eevee_render size', tuple(im.size), 'max', max(px) if px else None, 'world', bpy.context.scene.world, 'cam', sc.camera.name, 'objs', [o.name for o in sc.objects]); assert any(v > 0.02 for v in px[0::4]), 'black render'
     return (None, None, None)
+@test('lights_cameras_text_to_mesh_rip', (None, None, None))
+def _():
+    fresh()
+    for t in ('POINT', 'SUN', 'SPOT', 'AREA'):
+        bpy.ops.object.light_add(type=t); assert bpy.context.object.type == 'LIGHT'
+    bpy.ops.object.camera_add(); cam = bpy.context.object; cam.data.lens = 50
+    bpy.ops.object.text_add(); tx = bpy.context.object; tx.data.body = 'Hra'
+    bpy.ops.object.convert(target='MESH'); assert len(tx.data.polygons) > 0, 'text->mesh'
+    ob = fresh(); bm = edit(ob, 'TOP')
+    bpy.ops.mesh.select_mode(type='VERT'); bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.merge(type='CENTER'); assert counts(ob)[0] == 1, counts(ob)
+    bpy.ops.object.mode_set(mode='OBJECT')
+    return (None, None, None)
 @test('subdivide', (26, 48, 24))
 def _():
     ob = fresh(); edit(ob); bpy.ops.mesh.subdivide(number_cuts=1); return counts(ob)
