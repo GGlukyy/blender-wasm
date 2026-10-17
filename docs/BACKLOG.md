@@ -49,6 +49,7 @@
 - [x] (hunt: `scripts/persist2_win.sh` PASS — .blend uložený do /opfs/home přežije reload stránky, po otevření sedí modifikátor, materiál i pozice) Lov chyb kolo 11: perzistence
 - [x] (hunt: `scripts/stress_test.py` přes ops_test.mjs OPS_PY — 30 opic × subsurf 2 aplikovaný = 236 160 polygonů za 2,1 s, 60 undo pushů 0,2 s, undo/redo funguje do limitu 32 kroků (výchozí Preferences; na desktopu stejně)) Lov chyb kolo 12: zátěž
 - [x] (hunt: `scripts/compositor_win.sh` PASS — use_nodes + viewport compositor ALWAYS žije; Cycles v nabídce enginů není (jen EEVEE a Workbench), EEVEE render F12 OK) Lov chyb kolo 13: compositor/engines
+- [x] (hunt: ops_win.sh 67 testů failed=0 — kolekce+instance, Text Editor run_script, linked duplicate, drivery, constraints) Lov chyb kolo 14
 
 ## Výkon (až nebude co opravovat)
 - [x] (změřeno 17. 10., `scripts/passes_win.sh` = `?passlog=1`; orbit kostky Solid, passy na snímek ÷208 snímků: WebGPUBackbuffer 11, `&framebuffer.fb` 10 (obojí = kompozice UI regionů, ne viewport), overlay_line_fb 4, overlay_output 4, po 2: Clear Main, smaa_resolve, outline.prepass, dfbl overlay, smaa_edge, smaa_weight; po 1: Opaque.Gbuffer/Deferred, Workbench.Outline, taa_accumulation, overlay_line_on, Clear In Front… = ~48) Rozpad passů: víc než polovina jsou kompozice UI (střídání offscreen region ↔ backbuffer = nutné lámání passů); zisk by dalo jen cachování/slučování kompozice regionů (zásah do upstream UI kódu, nejisté) → neřeším, dokud iPad nepotvrdí, že je to úzké hrdlo (`?perf=1`).

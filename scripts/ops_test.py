@@ -356,6 +356,43 @@ def _():
         res.append((len(o.data.vertices), len(o.data.polygons)))
     assert res[0] == (24, 12) and res[1] == (8, 6), res   # glTF: trojúhelníky + vrcholy rozdělené podle normál; FBX zachová kvádr
     return (8, 12, 6)
+@test('collections_rename_hide', (None, None, None))
+def _():
+    ob = fresh(); col = bpy.data.collections.new('Props'); bpy.context.scene.collection.children.link(col)
+    for c in list(ob.users_collection): c.objects.unlink(ob)
+    col.objects.link(ob); ob.name = 'Crate'
+    col.hide_viewport = True; assert not ob.visible_get(); col.hide_viewport = False
+    inst = bpy.data.objects.new('CrateInst', None); inst.instance_type = 'COLLECTION'; inst.instance_collection = col
+    bpy.context.scene.collection.objects.link(inst)
+    d = bpy.context.evaluated_depsgraph_get(); n = len([i for i in d.object_instances if i.is_instance])
+    assert n >= 1, n
+    return (n, 0, 0)
+@test('text_editor_run_script', (None, None, None))
+def _():
+    t = bpy.data.texts.new('t.py'); t.write("import bpy\nbpy.context.scene['ran_text'] = 42\n")
+    w = bpy.context.window_manager.windows[0]
+    area = [a for a in w.screen.areas if a.type != 'VIEW_3D'][0]
+    old = area.type; area.type = 'TEXT_EDITOR'; area.spaces[0].text = t
+    reg = [r for r in area.regions if r.type == 'WINDOW'][0]
+    with bpy.context.temp_override(window=w, area=area, region=reg, space_data=area.spaces[0]):
+        bpy.ops.text.run_script()
+    area.type = old
+    assert bpy.context.scene.get('ran_text') == 42
+    return (42, 0, 0)
+@test('duplicate_linked_and_instances', (None, None, None))
+def _():
+    ob = fresh(); bpy.ops.object.duplicate(linked=True); o2 = bpy.context.object
+    assert o2.data is ob.data and ob.data.users == 2
+    bpy.ops.object.make_single_user(object=True, obdata=True); assert o2.data is not ob.data
+    return (1, 0, 0)
+@test('drivers_and_constraints', (None, None, None))
+def _():
+    ob = fresh(); c = ob.constraints.new('TRACK_TO'); e = bpy.data.objects.new('E', None); bpy.context.scene.collection.objects.link(e); c.target = e
+    e.location = (5, 0, 0); bpy.context.view_layer.update()
+    fc = ob.driver_add('scale', 0); fc.driver.expression = 'frame / 10'
+    bpy.context.scene.frame_set(20); bpy.context.view_layer.update()
+    assert abs(ob.scale.x - 2.0) < 1e-4, ob.scale.x
+    return (1, 0, 0)
 @test('voxel_remesh_warns', (None, None, None))
 def _():
     # bez OpenVDB nesmí selhat potichu: operátor hlásí chybu (modifikátor: error text v UI, z Pythonu nečitelný)
