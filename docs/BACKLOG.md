@@ -1,7 +1,7 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
 ## Bugy od Lukáše (iPad, 17. 10.)
-- [!] BLOCKED (nejde reprodukovat na PC; návrh opravy čeká na iPad): **Face select: z-fighting**
+- [~] APLIKOVÁNO `invariant gl_Position` (hypotéza, regresní sada `scripts/regress_all.sh` PASS na PC; čeká na iPad — pokud pořád bliká, napsat) (původně: nejde reprodukovat na PC): **Face select: z-fighting**
   Zkoušeno 17. 10.: Chrome/NVIDIA nemá z-fight (out/win/zf_before.png = zf_after.png, identické). Hypotéza
   `invariant gl_Position` ve WebGPU GLSL patchi je v `docs/patches/zfight_invariant_gl_position.patch`
   (neaplikováno, neověřeno; na iPadu otestovat po aplikaci). Depth bias v webgpu/ není vůbec (grep). Původní popis: — v režimu ploch se vybraná plocha „pere“ s nevybranou

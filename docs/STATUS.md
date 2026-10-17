@@ -8,7 +8,7 @@ Výsledek: 🟡 víkendový blok hotový (edit mode, 3D kurzor, modifikátory, b
 - ✅ **Výkonový panel** `?perf=1` (FPS, ms, passy, immediate buffery). Měření: překreslení okna 13–15 ms bez ohledu na scénu, 60 % je JS↔wasm lepidlo WebGPU (viz BACKLOG). PC: orbit kostky ~40 FPS.
 - ✅ **High-poly (P3)** na PC OK i s limity bufferů jako Safari (1,3 M trojúhelníků 38 ms, 5,2 M 180 ms) → příčina „chybí kusy“ na iPadu asi není limit bufferu; potřebuju čísla z iPadu.
 - ✅ **Sada modelovacích testů** (27 operací, undo/redo, Ctrl+R, bevel, extrude, sculpt, Material Preview): vše OK, `docs/OPS_RESULTS.md`.
-- ❓ **Z-fighting ploch**: na PC se nereprodukuje; hypotéza + patch v `docs/patches/zfight_invariant_gl_position.patch` (neaplikováno).
+- ❓ **Z-fighting ploch**: na PC se nereprodukuje; aplikoval jsem hypotézu `invariant gl_Position` (Apple Metal fast-math → shodná hloubka v různých shaderech). Regresní sada `scripts/regress_all.sh` na PC PASS. Čeká na iPad.
 ## Co otestovat na iPadu (podle důležitosti)
 0. **Soubory** (tlačítko 📁 na liště): ⬆ nahraj soubor (např. .blend/.obj/.png z aplikace Soubory) → je v /uploads (File ▸ Import / Open ho tam najde; **File ▸ Open** teď na iPadu otevře dialog „Choose file(s)…“). ⬇ stáhni, co Blender uložil/exportoval (Ctrl+S ukládá do `/opfs/home`, trvale v prohlížeči; export OBJ/FBX/GLB zadej do `/opfs/home/…` a stáhni přes 📁). Test PC: `scripts/open_file_win.sh`, `scripts/files_win.sh`.
 0b. **Klávesnice a celá obrazovka**: tlačítko ⌨ na liště vyvolá klávesnici iPadu (přejmenování objektu = poklepat v Outlineru/F2, psaní čísel do polí). Navíc: Sdílet → *Přidat na plochu* → otevře se bez lišty Safari (celá obrazovka). Pokud ⌨ nevyvolá klávesnici, napiš.
