@@ -53,9 +53,9 @@ console.log("AFTER_2", last.join(" "));
 // zpět na snímek 1 → kostka se vrátí na původní X; na 13 je posunutá
 for (let i = 0; i < 12; i++) { await page.keyboard.press("ArrowLeft"); await wait(150); }
 await wait(1500);
-const x1 = +last[4]; console.log("FRAME1", last.join(" "));
+const x1 = +last[3]; console.log("FRAME1", last.join(" "));
 for (let i = 0; i < 12; i++) { await page.keyboard.press("ArrowRight"); await wait(150); }
 await wait(1500);
-const x13 = +last[4]; console.log("FRAME13", last.join(" ")); await page.screenshot({ path: "out/anim.png" });
+const x13 = +last[3]; console.log("FRAME13", last.join(" ")); await page.screenshot({ path: "out/anim.png" });
 console.log(Math.abs(x1) < 1e-3 && x13 > 1 ? "PASS: animace — klíče I, posun G, scrub šipkami vrací správné hodnoty" : `FAIL: x1=${x1} x13=${x13}`);
 await browser.close();
