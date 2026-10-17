@@ -14,7 +14,7 @@
   není zakrytý; nebo použij depth snapshot (P2c) a porovnej hloubku prvku s hloubkou pixelu.
   Konzultuj architekta, guard `#ifdef __EMSCRIPTEN__`.
 
-- [ ] Box/lasso/circle select v Solid ignoruje zakrytí (view3d_select.cc ~866/4099/4836, `point_visible` z `WebOccl` v editmesh_select.cc — vyndat do sdílené hlavičky).
+- [x] (PASS: `scripts/p2_occl_check.sh` box — out/win/p2_occlboxhid_7_drag.png nic, p2_occlboxvis_7_drag.png vrchol; lasso/circle stejný kód, netestováno automaticky) Box/lasso/circle select v Solid respektuje zakrytí (`ED_mesh_web_occl.hh`). Occlusion jen vůči aktivnímu objektu.
 
 ## Plán
 - [x] **P1** (PASS: `scripts/wgsl_seed_win.sh verify` → TOTAL translations: 0, seed 179 shaderů; BLENDER_REF=f077479e. Příčina: Blender běží na pthread workeru, cache z main.js tam nebyla vidět → nikdy nefungovala; seed se načítá sync XHR. Regenerace: `scripts/wgsl_seed_win.sh seed`, `wgsl-cache.json` je v .gitignore (generovaný). Zbývá iPad: čistá data webu, přepnutí workspace) shader seed (`wgsl-cache.json`) pro všechny workspaces + edit mode + shading módy;

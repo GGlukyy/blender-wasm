@@ -36,6 +36,10 @@ for (const k of keys) {
     const [x, y] = k.slice(9).split(":").map(Number);
     await page.keyboard.down("Shift"); await page.mouse.click(box.x + x, box.y + y, { button: "right" });
     await page.keyboard.up("Shift"); await shot(`${n++}_cursor`);
+  } else if (k.startsWith("drag=")) {   // drag=x1:y1:x2:y2 levé tlačítko tažení (box select, px canvasu)
+    const [x1, y1, x2, y2] = k.slice(5).split(":").map(Number);
+    await page.mouse.move(box.x + x1, box.y + y1); await page.mouse.down();
+    await page.mouse.move(box.x + x2, box.y + y2, { steps: 12 }); await page.mouse.up(); await shot(`${n++}_drag`);
   } else if (k.startsWith("click=")) {   // click=<x>:<y> levé tlačítko (px canvasu)
     const [x, y] = k.slice(6).split(":").map(Number);
     await page.mouse.click(box.x + x, box.y + y); await shot(`${n++}_click`);

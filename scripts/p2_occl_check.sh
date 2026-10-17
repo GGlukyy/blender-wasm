@@ -9,3 +9,7 @@ echo "Zkontroluj: out/win/p2_occlhid_7_click.png (nic vybráno) a out/win/p2_occ
 # Plocha: klik na přední stěnu (400:500) vybere právě ji, ne zadní (nejbližší tečka středu zadní plochy)
 scripts/p2_win.sh occlface Escape,Tab,3,NumpadDecimal,Alt+a,click=500:500 >/dev/null
 echo "Zkontroluj: out/win/p2_occlface_7_click.png (vybraná přední plocha = oranžová)"
+# Box select (tažení) v Solid: obdélník kolem skrytého vrcholu nic nevybere, kolem viditelného ano
+scripts/p2_win.sh occlboxhid Escape,Tab,1,NumpadDecimal,Alt+a,drag=630:420:700:480 >/dev/null
+scripts/p2_win.sh occlboxvis Escape,Tab,1,NumpadDecimal,Alt+a,drag=250:190:310:250 >/dev/null
+echo "Zkontroluj: out/win/p2_occlboxhid_7_drag.png (nic) a out/win/p2_occlboxvis_7_drag.png (vrchol vybrán)"
