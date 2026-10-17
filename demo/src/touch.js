@@ -117,6 +117,9 @@ export function installTouch(canvas) {
     if (touches.length === 1 && mode === "idle") {
       mode = "pending"; longFired = false;
       area = inViewport(e.clientX, e.clientY) ? "view" : "ui";
+      /* Let Blender hover-highlight a gizmo under the finger (nav hand/zoom icons, move handles);
+       * if one is hot when the drag starts, the drag goes to it (left button) instead of orbiting. */
+      if (area === "view") mouse("mousemove", e.clientX, e.clientY, 0, 0);
       clearTimeout(longTimer);
       longTimer = setTimeout(() => {
         const p = [...pointers.values()][0];
@@ -159,9 +162,11 @@ export function installTouch(canvas) {
     p.x = e.clientX; p.y = e.clientY;
 
     if (mode === "pending") {
-      if (Math.hypot(p.x - p.x0, p.y - p.y0) > MOVE_START_PX) {
+      /* In a viewport give Blender ~60 ms to hover-highlight a gizmo under the finger before deciding orbit vs gizmo drag. */
+      if (Math.hypot(p.x - p.x0, p.y - p.y0) > MOVE_START_PX && (area !== "view" || performance.now() - p.t0 >= 60)) {
         clearTimeout(longTimer);
-        const left = area === "ui";
+        const gizmoHot = area === "view" && window.Module && window.Module._blender_web_gizmo_hot && window.Module._blender_web_gizmo_hot() === 1;
+        const left = area === "ui" || gizmoHot;
         mode = left ? "uidrag" : "orbit";
         mouse("mousemove", p.x0, p.y0, 0, 0);
         mouse("mousedown", p.x0, p.y0, left ? 0 : 1, left ? 1 : 4);

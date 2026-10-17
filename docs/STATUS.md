@@ -18,6 +18,8 @@ Výsledek: 🟡 víkend: opraveno ~10 chyb ověřených na PC (viz níže), regr
 - Kompilace pipeline při prvním Material Preview blokuje 6–7 s (jen hláška, ne oprava).
 
 # Víkend — co je nového (17. 10., odpoledne)
+- ✅ Kolo 39 **Gizmo prstem**: ikony ruka/lupa/kamera vpravo nahoře ve 3D viewportu i tahací šipky (Move/Rotate/Scale) šly dřív ovládat jen Pencilem — prst vždy orbitoval. Teď tah prstem začatý na gizmu táhne gizmo. PC: `gizmo_touch_win.sh` PASS (ruka = pan), `touch_win.sh` ALL PASS. **Na iPadu ověř:** prstem táhni za ikonu ruky (posun) a lupy (zoom); vyber objekt, vyber nástroj Move (T-lišta vlevo) a táhni za šipku — táhne se objekt? Táhnutí mimo gizmo pořád otáčí.
+
 - ✅ Kolo 37 **Odkazy z Blenderu** (Help ▸ Manual, Python API…): nic se neotevíralo. Teď se otevře nová karta (PC: `urlopen_win.sh` PASS). **Na iPadu ověř:** Help ▸ Manual — otevře se dokumentace? (Safari může blokovat vyskakovací okno → povol.)
 
 - ✅ Kolo 36 **Preferences se pamatují**: UI scale, navigace, zkratky, motiv… se dřív po každém načtení stránky vracely na výchozí. Teď se ukládají (do ~5 s po změně) a při startu načítají. PC: `prefsave_win.sh` PASS. **Na iPadu ověř:** Edit ▸ Preferences ▸ Interface ▸ Resolution Scale změň (např. 1.3), počkej 10 s, obnov stránku → zůstalo? Kdyby se něco pokazilo: otevři stránku s `?resetprefs=1`.
