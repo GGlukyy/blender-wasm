@@ -700,7 +700,6 @@ def _():
 # ZNÁMÉ MEZERY buildu (WITH_* vypnuto v cmake/blender-wasm-cache.cmake) — hlásí se jako GAP, nepočítají se jako FAIL.
 GAPS = [
     ('cycles_engine', lambda: (setattr(bpy.context.scene.render, 'engine', 'CYCLES'), True)[1]),
-    ('fluid_mantaflow (WITH_MOD_FLUID)', lambda: (fresh(), bpy.ops.object.modifier_add(type='FLUID'), setattr(bpy.context.object.modifiers[-1], 'fluid_type', 'DOMAIN'), bpy.context.object.modifiers[-1].domain_settings.domain_type)[3]),
 ]
 for name, fn in GAPS:
     try:

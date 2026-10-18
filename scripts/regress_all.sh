@@ -45,6 +45,7 @@ run rna2_sweep scripts/rna2_sweep_win.sh
 run gn_sweep scripts/gn_sweep_win.sh
 run world_sweep scripts/world_sweep_win.sh
 run saveload_all scripts/saveload_all_win.sh
+run fluid scripts/fluid_win.sh
 run sculpt_draw_sweep scripts/sculpt_draw_sweep_win.sh
 run rna_signatures python3 scripts/check_rna_update_signatures.py
 run prefs_input scripts/prefs_input_win.sh
