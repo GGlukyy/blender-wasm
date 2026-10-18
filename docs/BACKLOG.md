@@ -18,8 +18,8 @@ Subsurf 2 na Monkey plynulý, glTF export + import zpět (triangulováno).
   Ověřit v Chrome: zabít GPU (gpulost_win.sh) → reload → naběhne?
 - [ ] **Při startu sama vyskočí mini klávesnice (lišta) a znovu panel „Launch Blender“** — auto-klávesnice
   (P54) nebo lišta se ukazuje dřív, než má. Při Sculptu lišta zakrývá štětce.
-- [ ] **Ctrl+S uložit → File ▸ Open: „špatný formát“** (.blend uložený na webu se nedá otevřít!). Vážné.
-  Ověř save/open přes UI (ne přes Python) včetně cesty a komprese.
+- [x] ~~Ctrl+S → Open „špatný formát“~~ — NENÍ bug (Lukáš 18. 10. 19:43): save/open funguje, jen nevybral
+  složku v souborovém dialogu Blenderu. UX: zvážit výchozí adresář `/opfs/home` v File Browseru (Save/Open).
 - [ ] **Grease Pencil ▸ Monkey = zamrznutí** (neodseklo se). Odhad: limit storage bufferů Safari (texel buffery).
 - [ ] **Kam se uložilo .glb?** Export prošel a import ho našel, ale Lukáš nevěděl kde je / jak stáhnout.
   Zviditelnit 📁 prohlížeč souborů nebo po exportu nabídnout stažení.
