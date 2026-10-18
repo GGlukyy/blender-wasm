@@ -12,7 +12,7 @@ const browser = await chromium.launch({ headless: false, executablePath: process
   args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
 const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
 const lines = []; let done = false;
-page.on("console", (m) => { const t = m.text(); const i = t.indexOf("OPS"); if (t.includes("WGPU_FILM")) lines.push(t.slice(0, 160)); if (i >= 0) { lines.push(t.slice(i)); if (t.includes("OPS_DONE")) done = true; } });
+page.on("console", (m) => { const t = m.text(); const i = t.indexOf("OPS"); if (t.includes("WGPU_FILM") || process.env.OPS_ALL) lines.push(t.slice(0, 160)); if (i >= 0) { lines.push(t.slice(i)); if (t.includes("OPS_DONE")) done = true; } });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
 await page.goto("http://localhost:5173/", { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});

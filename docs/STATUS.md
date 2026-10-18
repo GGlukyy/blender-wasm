@@ -11,6 +11,10 @@ Výsledek: 🟡 víkend: kola 41–60 hotová na PC (diakritika, šablony, vlasy
 - Co otestovat na iPadu: Ctrl+F12 s 3 snímky (Output ▸ PNG, 64×64 stačí) → ve stavovém řádku proběhnou 3 snímky a soubory v `/opfs/home/` nejsou černé; F12 → Image ▸ Save As → PNG → 📁 stáhnout → obrázek není černý.
 
 
+# Kolo 66 (víkend, 18. 10.) — lov chyb v EEVEE
+- ✅ Nový `scripts/render_features_win.sh` (11 případů, kontrola barev pixelů): emise, textura, svět, průhledný film, slunce, alpha blend, vertex color — vše PASS.
+- 🟡 **Compositor** (Render ▸ Compositing) vracel prázdný/průhledný obraz. Web ho teď přeskočí s varováním a render zůstane bez kompozitingu (skutečná oprava v BACKLOGu). Na iPadu: scéna s compositing nodes → F12 → obraz je vidět + varování.
+
 # ⭐ Co otestovat na iPadu NEJDŘÍV (nové z víkendu, podle důležitosti)
 (Ověřeno jen na PC/Chrome; na iPadu nic. Pokud něco spadne, napiš přesné kroky + screenshot. Po načtení stránky udělej reload, ať se nahraje nový build.)
 1. **Prst místo myši (kola 51–54):** vyber kostku → lišta **G** → táhni prstem (lišta zmodrá, kostka se hýbe) → klepni = potvrdit. Edit mode: **Ctrl→R→Ctrl** loop cut (najeď prstem na hranu, klepni 2×), **⋯ → B** box select tahem, **⋯ → E** extrude.
