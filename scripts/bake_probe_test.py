@@ -40,8 +40,15 @@ def jpg_tga_bmp():
     for f, ext in (('JPEG', 'jpg'), ('TARGA', 'tga'), ('BMP', 'bmp'), ('TIFF', 'tif'), ('WEBP', 'webp')):
         try:
             img.filepath_raw = '/tmp/j.' + ext; img.file_format = f; img.save(); res.append('%s=%d' % (ext, os.path.getsize('/tmp/j.' + ext)))
-        except Exception as e: res.append('%s=ERR' % ext)
+        except Exception as e: res.append('%s=ERR(%s)' % (ext, str(e)[:80]))
     return ' '.join(res)
+def tiff_save_render():
+    img = bpy.data.images.new('T', 16, 16); sc.render.image_settings.file_format = 'TIFF'
+    img.save_render('/tmp/t1.tif'); a = os.path.getsize('/tmp/t1.tif')
+    sc.render.image_settings.tiff_codec = 'NONE'; img.save_render('/tmp/t2.tif'); return (a, os.path.getsize('/tmp/t2.tif'))
+def avif_save_render():
+    img = bpy.data.images.new('A', 16, 16); sc.render.image_settings.file_format = 'AVIF'
+    img.save_render('/tmp/a1.avif'); return os.path.getsize('/tmp/a1.avif')
 def text_font_load():
     fresh(); bpy.ops.object.text_add(); t = bpy.context.object; t.data.body = 'Čau ř'; ev = t.evaluated_get(bpy.context.evaluated_depsgraph_get()); me = ev.to_mesh(); n = len(me.vertices); ev.to_mesh_clear(); assert n > 10, n; return n
 def video_formats():
@@ -63,7 +70,7 @@ def geonodes_bake_cache():
     return len(a.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.polygons)
 CASES = [('lightprobe_cache_bake_sphere', lightprobe_bake), ('lightprobe_cache_bake_volume', volume_probe_bake), ('bake_prep', bake_texture),
          ('render_result_pixels', render_to_image_save), ('exr_world_load', hdri_world_load), ('hdr_save', hdr_roundtrip), ('image_formats_extra', jpg_tga_bmp),
-         ('text_diacritics_mesh', text_font_load), ('ffmpeg_format_settable', video_formats), ('sequencer_create', sound_add),
+         ('tiff_save_render', tiff_save_render), ('avif_save_render', avif_save_render), ('text_diacritics_mesh', text_font_load), ('ffmpeg_format_settable', video_formats), ('sequencer_create', sound_add),
          ('boolean_exact', mesh_boolean_exact), ('remesh_voxel_modifier', remesh_voxel_modifier), ('geonodes_passthrough', geonodes_bake_cache)]
 state = {'i': 0}
 def tick():
