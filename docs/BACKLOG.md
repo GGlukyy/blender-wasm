@@ -24,6 +24,8 @@
 
 - [ ] **Viewport Render (Render ▸ Viewport Render Image, `render.opengl`) uloží prázdný obrázek** — `GPU_offscreen_read_color(GPU_DATA_UBYTE)` je 8bit čtení, `read_color_sync` ho vrací jako nuly (`film_capture_async` bere jen RGBA16F/32F). Test: `render_write_win.sh` řádek `opengl_write_still … GAP`. Oprava by potřebovala stejné odložení zápisu + vložení pixelů do ibuf v `render_opengl.cc`. Priorita nízká (F12 funguje).
 
+- [~] **Pád wasm: `MEM_delete_void` v `WM_gesture_end` (abort)** — `FUZZ_FULL=1 FUZZ_SEED=12 scripts/ui_fuzz_win.sh` padá deterministicky u akce 241 (stack: `WM_gesture_box_modal` → `WM_gesture_end` → `MEM_lockfree_freeN` „Attempt to use C-style MEM_delete_void on a pointer created with CPP-style MEM_new“; box select tah končí mimo oblast). Hypotéza (odhad): gesto uvolněné podruhé / use-after-free — např. `but_drag_init` volá `WM_gestures_remove` a uvolní i gesto modálního operátoru; jednoduchý repro (B + tah za pole vlastností) nepadá. Minimalizace: `scripts/ddmin.py 12 241 WM_gesture_end` (log `out/ddmin.log`). Podle CLAUDE.md 3b: až bude minimální postup, ověřit na desktopu (pokud padá i tam, je to upstream).
+
 ## Plán
 - [x] **P1** (PASS: `scripts/wgsl_seed_win.sh verify` → TOTAL translations: 0, seed 179 shaderů; BLENDER_REF=f077479e. Příčina: Blender běží na pthread workeru, cache z main.js tam nebyla vidět → nikdy nefungovala; seed se načítá sync XHR. Regenerace: `scripts/wgsl_seed_win.sh seed`, `wgsl-cache.json` je v .gitignore (generovaný). Zbývá iPad: čistá data webu, přepnutí workspace) shader seed (`wgsl-cache.json`) pro všechny workspaces + edit mode + shading módy;
   test: cache-miss = 0 při prvním přepnutí.
