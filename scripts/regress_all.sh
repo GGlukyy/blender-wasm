@@ -22,5 +22,8 @@ run touch_boxsel scripts/touch_boxsel_win.sh
 run autokbd scripts/autokbd_win.sh
 run hidden scripts/hidden_win.sh
 run editors scripts/editors_win.sh
+run render_write scripts/render_write_win.sh
+run fuzz scripts/fuzz_win.sh
+run fuzz_obj scripts/fuzz_obj_win.sh
 run seed_verify scripts/wgsl_seed_win.sh verify
 echo "=== hotovo" | tee -a $L
