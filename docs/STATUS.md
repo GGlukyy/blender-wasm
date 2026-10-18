@@ -4,6 +4,7 @@ Výsledek: 🟡 víkend: kola 41–60 hotová na PC (diakritika, šablony, vlasy
 - ✅ **Render do souboru byl prázdný** (PNG s alpha 0): `render.render(write_still=True)`, Save As z Render Result. Web nemá synchronní čtení z GPU → zápis se teď odloží, až dorazí pixely (fork 7224a3a6). Důkaz: `scripts/render_write_win.sh` PASS (EEVEE, Workbench, Save As); ops 94/94, interactive ALL PASS, parity bez ❌, gpulost PASS.
 - Testy `render_eevee_to_png` a `render_workbench_to_png` přesunuty z `ops_test.py` do `render_write_test.py` — asserty stejné, jen čekají na asynchronní čtení (zápis je teď o pár ticků později). Není to zeslabení.
 - Nové ops testy: bridge/bevel, světla/kamery/text→mesh/merge, výběry/sharp/seam, atributy + Geometry Nodes (vše PASS).
+- ✅ UI fuzz `scripts/ui_fuzz_win.sh` (náhodné klávesy + myš, 4 seedy × 150 s, ~1100 akcí): bez pádu, bez PAGEERROR, render loop žije. Objektový fuzz `fuzz_obj_win.sh` (modifikátory, join, sculpt/paint módy, undo): 2 seedy PASS.
 - ✅ Fuzz `scripts/fuzz_win.sh` (náhodné edit-mode operace + undo/redo + přepínání módů; `FUZZ_SEED`, `FUZZ_N`): 3 seedy × ~860 operací bez pádu wasm.
 - 🟡 Viewport Render (`render.opengl`) ukládá prázdný obrázek (8bit čtení) — GAP v BACKLOGu, F12 funguje.
 - 🔴 Zůstává: **animace (Ctrl+F12)** zapisuje stále prázdné snímky (BACKLOG).

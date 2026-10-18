@@ -24,6 +24,7 @@ run hidden scripts/hidden_win.sh
 run editors scripts/editors_win.sh
 run render_write scripts/render_write_win.sh
 run fuzz scripts/fuzz_win.sh
+run ui_fuzz scripts/ui_fuzz_win.sh
 run fuzz_obj scripts/fuzz_obj_win.sh
 run seed_verify scripts/wgsl_seed_win.sh verify
 echo "=== hotovo" | tee -a $L
