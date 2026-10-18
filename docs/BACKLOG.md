@@ -1,5 +1,31 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## ⭐ Bugy od Lukáše (iPad Air M1, Safari, 18. 10. večer) — NEJVYŠŠÍ PRIORITA
+Test na skutečném iPadu po víkendovém bloku. Start ~11 s (65 MB) + ~5 s. Funguje: výběr kostky, Tab
+z lišty, orbit/zoom prstem, G + prst, A/G v UV, Emulate 3 Button Mouse (nepadá), diakritika v Outlineru,
+Subsurf 2 na Monkey plynulý, glTF export + import zpět (triangulováno).
+- [ ] **ČASTÉ „GPU se odpojila“ (WebGPU device lost) — hlavní problém.** Padá po pár operacích skoro
+  všude: UV Editing (A, G, táhnout → po chvíli pád), Material Preview (spadlo; podruhé se kostka
+  s materiálem nevykreslila a po změně Base Color na červenou pád), edit mode výběr plochy, G + táhnout,
+  Sculpt po Subsurf (pár tahů → pád, jednou ještě před tahem), Subsurf level 3 na Monkey (pád bez hlášky).
+  Z-fighting to nejspíš NENÍ. Odhad: paměť (GPU textury / wasm heap po víkendu větší: numpy, OpenVDB,
+  Bullet) nebo watchdog dlouhého command bufferu na Apple GPU. NEJDŘÍV ZMĚŘIT: `?perf=1` panel musí
+  ukazovat i `maxStorageBuffersPerShaderStage`, maxBufferSize a odhad využité GPU paměti; ať Lukáš může
+  vyfotit panel těsně před pádem (konzole na iPadu bez Macu není). Pak architekt. Kandidáti: zmenšit
+  textury/pooly v edit/sculpt, uvolňovat buffery, rozdělit velké submity.
+- [ ] **Po pádu se další načtení zasekne na „Loading Blender…“** (stejný tab i reload); pomůže zavřít tab
+  a otevřít nový. Odhad: OPFS sync access handle / zámek drží mrtvá instance (worker) → nový start čeká.
+  Ověřit v Chrome: zabít GPU (gpulost_win.sh) → reload → naběhne?
+- [ ] **Při startu sama vyskočí mini klávesnice (lišta) a znovu panel „Launch Blender“** — auto-klávesnice
+  (P54) nebo lišta se ukazuje dřív, než má. Při Sculptu lišta zakrývá štětce.
+- [ ] **Ctrl+S uložit → File ▸ Open: „špatný formát“** (.blend uložený na webu se nedá otevřít!). Vážné.
+  Ověř save/open přes UI (ne přes Python) včetně cesty a komprese.
+- [ ] **Grease Pencil ▸ Monkey = zamrznutí** (neodseklo se). Odhad: limit storage bufferů Safari (texel buffery).
+- [ ] **Kam se uložilo .glb?** Export prošel a import ho našel, ale Lukáš nevěděl kde je / jak stáhnout.
+  Zviditelnit 📁 prohlížeč souborů nebo po exportu nabídnout stažení.
+- [ ] Voxel Remesh na holé kostce „nic neudělal“ — pravděpodobně OK (kostka zůstane kostkou), ověřit s větším
+  Voxel Size / po sculptu.
+
 ## Bugy od Lukáše (iPad, 17. 10.)
 - [~] APLIKOVÁNO `invariant gl_Position` (hypotéza, regresní sada `scripts/regress_all.sh` PASS na PC; čeká na iPad — pokud pořád bliká, napsat) (původně: nejde reprodukovat na PC): **Face select: z-fighting**
   Zkoušeno 17. 10.: Chrome/NVIDIA nemá z-fight (out/win/zf_before.png = zf_after.png, identické). Hypotéza
