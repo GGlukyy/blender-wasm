@@ -21,3 +21,5 @@
 - (17. 10. večer) V Blenderu 5.x je akce vrstvená: `action.fcurves` neexistuje (AttributeError v timeru tiše zabije celý probe a test vypadá „zamrzle“). Při NaN/null v měřených hodnotách nejdřív zkontrolovat `… ERR` řádek.
 - (17. 10. večer) Env proměnné do Windows node z WSL: nutné `WSLENV=NAZEV:NAZEV2` + v `*_win.sh` předat přes `set NAZEV=%NAZEV%&&` (a v JS ošetřit nenastavené `%NAZEV%`).
 - (17. 10. večer) Test barvy materiálu: výchozí kostka už má slot 0 (`materials.clear()` před `append`), splash screen zakrývá viewport (Escape), a osvětlená červená v Material Preview je oranžová → porovnávat poměrem, ne pevným prahem.
+
+- 18. 10.: hledání zamrznutí operátoru (~1,5 h): `fprintf`+`fflush(stderr)` mezi řádky funkce + `OPS_ALL=1` v `ops_test.mjs` najde přesný řádek za 3–4 buildy (`ninja bf_editor_uvedit` + `link_blender_release.sh`, ~4 min/cyklus). Zamrzla `Array<Struct s bitfieldy>(n, {false,false})`, ne algoritmus. Dřív zkusit sweep (`scripts/*_ops_sweep_win.sh`) než číst algoritmy.

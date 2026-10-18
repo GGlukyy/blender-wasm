@@ -4,7 +4,7 @@ import bpy, sys, bmesh
 def out(*a):
     print(*a); sys.stdout.flush()
 names = sorted(n for n in dir(bpy.ops.uv) if not n.startswith('_'))
-skip = {'select_edge_ring', 'select_overlap', 'select_random', 'delete_all', 'knife_tool', 'loopcut_slide', 'dupli_extrude_cursor', 'primitive_cube_add_gizmo', 'select_random', 'bevel', 'inset', 'extrude_region_move', 'extrude_context_move', 'extrude_faces_move', 'extrude_edges_move', 'extrude_vertices_move', 'extrude_manifold', 'rip_move', 'rip_edge_move', 'duplicate_move', 'edge_rotate',}
+skip = {'stitch', 'select_random', 'delete_all', 'knife_tool', 'loopcut_slide', 'dupli_extrude_cursor', 'primitive_cube_add_gizmo', 'select_random', 'bevel', 'inset', 'extrude_region_move', 'extrude_context_move', 'extrude_faces_move', 'extrude_edges_move', 'extrude_vertices_move', 'extrude_manifold', 'rip_move', 'rip_edge_move', 'duplicate_move', 'edge_rotate',}
 out('OPS_INFO mesh ops', len(names))
 state = {'i': 0, 'err': 0, 'ok': 0, 'poll': 0}
 def fresh():

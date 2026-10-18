@@ -35,6 +35,7 @@ run curve_ops_sweep scripts/curve_ops_sweep_win.sh
 run armature_ops_sweep scripts/armature_ops_sweep_win.sh
 run pose_ops_sweep scripts/pose_ops_sweep_win.sh
 run uv_ops_sweep scripts/uv_ops_sweep_win.sh
+run uv_hang scripts/uv_hang_win.sh
 run sculpt_ops_sweep scripts/sculpt_ops_sweep_win.sh
 run paint_ops_sweep scripts/paint_ops_sweep_win.sh
 run lattice_ops_sweep scripts/lattice_ops_sweep_win.sh
