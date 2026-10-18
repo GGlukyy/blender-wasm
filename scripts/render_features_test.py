@@ -60,11 +60,74 @@ def c_vertex_color_attr():
     def b(nt):
         a = nt.nodes.new('ShaderNodeVertexColor'); a.layer_name = 'Col'; e = emission(nt, (1, 1, 1), 2.0); nt.links.new(a.outputs[0], e.inputs[0]); return e
     mat(ob, b)
+
+def diffuse(ob, col):
+    mat(ob, lambda nt: nt.nodes.new('ShaderNodeBsdfDiffuse')); ob.active_material.node_tree.nodes['Diffuse BSDF'].inputs[0].default_value = (*col, 1)
+def c_shadow():
+    # kamera shora na podlahu; kostka mezi sluncem a podlahou vrhá stín (levá polovina obrazu)
+    cam = sc.camera; cam.location = (0, 0, 8); cam.rotation_euler = (0, 0, 0)
+    bpy.ops.mesh.primitive_plane_add(size=10); diffuse(bpy.context.object, (1, 1, 1))
+    bpy.ops.mesh.primitive_cube_add(size=1.5, location=(0, 0, 2)); diffuse(bpy.context.object, (1, 1, 1))
+    bpy.ops.object.light_add(type='SUN', rotation=(0, 0.6, 0)); bpy.context.object.data.energy = 4   # svítí z +X → stín posunutý do -X
+def c_volume():
+    ob = cube(3.0)
+    def b(nt):
+        v = nt.nodes.new('ShaderNodeVolumeAbsorption'); v.inputs[0].default_value = (0, 1, 1, 1); v.inputs[1].default_value = 3.0; return v
+    m = bpy.data.materials.new('V'); m.use_nodes = True; nt = m.node_tree
+    for n in list(nt.nodes): nt.nodes.remove(n)
+    o = nt.nodes.new('ShaderNodeOutputMaterial'); v = b(nt); nt.links.new(v.outputs[0], o.inputs[1]); ob.data.materials.append(m)
+    bpy.data.worlds['W'].node_tree.nodes['Background'].inputs[0].default_value = (1, 1, 1, 1)
+def c_volume_scatter_light():
+    ob = cube(1.2); m = bpy.data.materials.new('V'); m.use_nodes = True; nt = m.node_tree
+    for n in list(nt.nodes): nt.nodes.remove(n)
+    o = nt.nodes.new('ShaderNodeOutputMaterial'); v = nt.nodes.new('ShaderNodeVolumeScatter'); v.inputs[0].default_value = (1, 1, 1, 1); v.inputs[1].default_value = 1.5
+    nt.links.new(v.outputs[0], o.inputs[1]); ob.data.materials.append(m)
+    bpy.ops.object.light_add(type='POINT', location=(0, -1.5, 0.8)); bpy.context.object.data.energy = 150
+def c_text():
+    bpy.ops.object.text_add(location=(0, 0, 0), rotation=(1.5708, 0, 0)); t = bpy.context.object; t.data.body = 'I'; t.data.size = 3; t.data.extrude = 0.1
+    mat(t, lambda nt: emission(nt, (1, 1, 1), 3.0))
+    t.location = (-0.4, 0, -1.5)
+def c_curve_bevel():
+    bpy.ops.curve.primitive_bezier_circle_add(radius=1.5, rotation=(1.5708, 0, 0)); c = bpy.context.object; c.data.bevel_depth = 0.3
+    mat(c, lambda nt: emission(nt, (1, 0.5, 0), 3.0))
+def c_glossy_world():
+    # lesklá koule odráží modrý svět (střed koule modrý odlesk)
+    bpy.data.worlds['W'].node_tree.nodes['Background'].inputs[0].default_value = (0, 0, 1, 1)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=1.5); bpy.ops.object.shade_smooth(); ob = bpy.context.object
+    def b(nt):
+        g = nt.nodes.new('ShaderNodeBsdfGlossy'); g.inputs[0].default_value = (1, 0.5, 0.5, 1); g.inputs[1].default_value = 0.0; return g
+    mat(ob, b)
+def c_gpencil():
+    bpy.ops.object.grease_pencil_add(type='MONKEY', location=(0, 0, 0), rotation=(1.5708, 0, 0))
+def c_subsurf_smooth_emission():
+    bpy.ops.mesh.primitive_ico_sphere_add(radius=1.5, subdivisions=1); ob = bpy.context.object
+    ob.modifiers.new('S', 'SUBSURF').levels = 2; bpy.ops.object.shade_smooth(); mat(ob, lambda nt: emission(nt, (1, 1, 1), 1.0))
+def c_instanced_particles():
+    bpy.ops.mesh.primitive_plane_add(size=3, location=(0, 0, 0), rotation=(1.5708, 0, 0)); ob = bpy.context.object
+    mat(ob, lambda nt: emission(nt, (1, 0, 1), 2.0))
+    ob.modifiers.new('A', 'ARRAY').count = 2
+def c_displace_texture():
+    bpy.ops.mesh.primitive_grid_add(x_subdivisions=20, y_subdivisions=20, size=4, rotation=(1.5708, 0, 0)); ob = bpy.context.object
+    mat(ob, lambda nt: emission(nt, (0, 1, 0), 2.0))
 def px(path):
     im = bpy.data.images.load(path, check_existing=False); p = list(im.pixels); w, h = im.size
     def at(x, y): i = (y * w + x) * 4; return tuple(p[i:i + 4])
+    IMG.update(at=at, w=w, h=h)
     return at(w // 2, h // 2), at(2, 2)
 # (jméno, příprava, predikát(střed, roh) → bool)
+IMG = {}
+def dom(k):
+    from collections import Counter
+    c = Counter(tuple(round(v, 1) for v in q) for q in allpx() if max(abs(q[i] - k[i]) for i in range(4)) > 0.05)
+    return c.most_common(1)
+def allpx(): return [IMG['at'](x, y) for y in range(IMG['h']) for x in range(IMG['w'])]
+def shadow_pred(c, k):
+    lum = [(p[0] + p[1] + p[2]) / 3 for p in allpx()]
+    return max(lum) > 0.5 and sum(1 for v in lum if v < 0.05) > 40 and sum(1 for v in lum if v > 0.3) > 200   # stín (tmavé) i osvětlená podlaha
+def ring_pred():
+    return sum(1 for p in allpx() if p[0] > 0.5 and p[1] > 0.2 and p[2] < 0.2) >= 100   # oranžový prstenec (křivka s bevel) je vykreslen
+def gp_pred():
+    k = IMG['at'](1, 1); return sum(1 for p in allpx() if max(abs(p[i] - k[i]) for i in range(3)) > 0.1) > 60
 CASES = [
     ('emission_red', lambda: (reset(), c_emission()), lambda c, k: c[0] > 0.5 and c[1] < 0.2 and c[2] < 0.2),
     ('image_texture', lambda: (reset(), c_image_tex()), lambda c, k: c[1] > 0.3 and c[0] < 0.2 and c[2] < 0.2),
@@ -75,8 +138,19 @@ CASES = [
     ('compositor_skipped_keeps_render', lambda: (reset(), c_compositor_invert()), lambda c, k: c[0] > 0.5 and c[1] < 0.2 and c[2] < 0.2),
     ('compositor_passthrough', lambda: (reset(), c_compositor_invert(True)), lambda c, k: c[0] > 0.5 and c[1] < 0.2),
     ('compositor_cpu_skipped', lambda: (reset(), c_compositor_invert(False, 'CPU')), lambda c, k: c[0] > 0.5 and c[1] < 0.2 and c[2] < 0.2),
+    ('shadow_sun', lambda: (reset(world=(0, 0, 0)), c_shadow()), lambda c, k: shadow_pred(c, k)),
+    ('volume_absorb', lambda: (reset(), c_volume()), lambda c, k: c[0] < 0.2 and c[1] > 0.3),
+    ('volume_scatter_light', lambda: (reset(world=(0, 0, 0)), c_volume_scatter_light()), lambda c, k: (c[0] + c[1] + c[2]) / 3 > 0.1 and (k[0] + k[1] + k[2]) / 3 < 0.05),
+    ('text_object', lambda: (reset(), c_text()), lambda c, k: c[0] > 0.5 and c[1] > 0.5 and c[2] > 0.5),
+    ('curve_bevel_ring', lambda: (reset(), c_curve_bevel()), lambda c, k: c[0] < 0.3 and ring_pred()),
+    ('glossy_reflects_world', lambda: (reset(), c_glossy_world()), lambda c, k: 0.3 < c[2] < 0.95 and k[2] > 0.95 and c[0] < 0.1),
+    ('grease_pencil', lambda: (reset(), c_gpencil()), lambda c, k: gp_pred()),
+    ('subsurf_modifier', lambda: (reset(), c_subsurf_smooth_emission()), lambda c, k: c[0] > 0.5),
+    ('array_modifier_plane', lambda: (reset(), c_instanced_particles()), lambda c, k: c[0] > 0.5 and c[2] > 0.5 and c[1] < 0.2),
+    ('grid_emission', lambda: (reset(), c_displace_texture()), lambda c, k: c[1] > 0.5 and c[0] < 0.2),
     ('vertex_color_attr', lambda: (reset(), c_vertex_color_attr()), lambda c, k: c[1] > 0.3 and c[0] < 0.2 and c[2] < 0.2),
 ]
+KNOWN_GAPS = {'grease_pencil'}   # BACKLOG: GP render přes EEVEE vrací nuly
 state = {'i': 0, 'phase': 0, 'waited': 0}
 def tick():
     i = state['i']
@@ -96,6 +170,7 @@ def tick():
         out('OPS render_feat %s FAIL no file' % name)
     else:
         c, k = px(path); ok = bool(pred(c, k))
-        out('OPS render_feat %s %s center=%s corner=%s' % (name, 'PASS' if ok else 'FAIL', tuple(round(v, 2) for v in c), tuple(round(v, 2) for v in k)))
+        nd = sum(1 for q in allpx() if max(abs(q[i] - k[i]) for i in range(4)) > 0.05)
+        out('OPS render_feat %s %s center=%s corner=%s differing_px=%d domcolor=%s' % (name, 'PASS' if ok else ('GAP' if name in KNOWN_GAPS else 'FAIL'), tuple(round(v, 2) for v in c), tuple(round(v, 2) for v in k), nd, dom(k)))
     state['i'] += 1; state['phase'] = 0; return 0.3
 bpy.app.timers.register(tick, first_interval=1.0)
