@@ -184,6 +184,24 @@ def _():
     m = ob.modifiers.new('GN', 'NODES'); m.node_group = nt
     n = len(ob.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.polygons); assert n == 24, n
     return (None, None, None)
+@test('gltf_textured_material_roundtrip', (None, None, None))
+def _():
+    import os
+    ob = fresh(); mat = bpy.data.materials.new('TexM'); mat.use_nodes = True
+    nt = mat.node_tree; bsdf = nt.nodes['Principled BSDF']
+    img = bpy.data.images.new('tex_rt', 16, 16); img.pixels[:] = [0.8, 0.2, 0.1, 1.0] * 256; img.pack()
+    tex = nt.nodes.new('ShaderNodeTexImage'); tex.image = img; nt.links.new(tex.outputs['Color'], bsdf.inputs['Base Color'])
+    ob.data.materials.append(mat)
+    p = '/tmp/tex_rt.glb'
+    if os.path.exists(p): os.remove(p)
+    bpy.ops.export_scene.gltf(filepath=p, export_format='GLB'); assert os.path.getsize(p) > 1500, os.path.getsize(p)
+    bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete()
+    for i in list(bpy.data.images): bpy.data.images.remove(i)
+    for m in list(bpy.data.materials): bpy.data.materials.remove(m)
+    bpy.ops.import_scene.gltf(filepath=p)
+    ims = [i for i in bpy.data.images if i.size[0] == 16]; assert ims, [(i.name, tuple(i.size)) for i in bpy.data.images]
+    mm = [m for m in bpy.data.materials if m.node_tree and any(n.type == 'TEX_IMAGE' for n in m.node_tree.nodes)]; assert mm, 'no tex material after import'
+    return (None, None, None)
 @test('subdivide', (26, 48, 24))
 def _():
     ob = fresh(); edit(ob); bpy.ops.mesh.subdivide(number_cuts=1); return counts(ob)
