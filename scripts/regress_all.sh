@@ -37,6 +37,7 @@ run pose_ops_sweep scripts/pose_ops_sweep_win.sh
 run uv_ops_sweep scripts/uv_ops_sweep_win.sh
 run uv_hang scripts/uv_hang_win.sh
 run props_sweep scripts/props_sweep_win.sh
+run space_sweep scripts/space_sweep_win.sh
 TAILN=25 run ops_sweeps_extra scripts/ops_sweeps_extra_win.sh
 run sculpt_ops_sweep scripts/sculpt_ops_sweep_win.sh
 run paint_ops_sweep scripts/paint_ops_sweep_win.sh
