@@ -9,4 +9,4 @@ cd "$W" && cmd.exe /c "set OPS_ALL=1&& set OPS_PY=world_sweep_test.py&& set CHRO
 # Souhrn: žádný shader se nesmí nepřeložit (regress_all vypíše posledních pár řádků)
 NF=$(grep -a -c "translate FAILED\|tint-read FAIL\|shaderc FAIL\|ICE recovered" "$ROOT/out/win/world_sweep_result.txt")
 NE=$(grep -a -c "OPS world_sweep ERR" "$ROOT/out/win/world_sweep_result.txt")
-if [ "$NF" = 0 ] && [ "$NE" = 0 ]; then echo "OPS world_sweep_summary PASS (0 shaderů selhalo)"; else echo "OPS $(basename $0 _win.sh)_summary FAIL shader_failures=$NF python_errors=$NE"; fi
+if grep -a -q "OPS_DONE" "$ROOT/out/win/world_sweep_result.txt" && [ "$NF" = 0 ] && [ "$NE" = 0 ]; then echo "OPS world_sweep_summary PASS (0 shaderů selhalo)"; else echo "OPS $(basename $0 _win.sh)_summary FAIL shader_failures=$NF python_errors=$NE"; fi

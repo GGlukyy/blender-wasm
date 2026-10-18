@@ -195,3 +195,5 @@
 
 - [x] (změřeno 18. 10., `scripts/idle_win.sh`: 20 s bez vstupu po načtení → 0 render passů, 0 submitů, 0 nových pipeline — Blender v klidu nic nekreslí, baterie OK) Nečinnost.
 - (poznámka) web3dsurvey.com uvádí pro iOS `maxStorageBuffersPerShaderStage` hodnoty 8, 16 i 44 podle zařízení; EEVEE se stíny/objemy potřebuje ≥ 10, vlasy ≥ 11 — **stále potřeba číslo z Lukášova iPadu** (viz výše).
+
+- [ ] (nízká priorita, Lov chyb kolo 66, `scripts/world_sweep_win.sh`; neověřeno na desktopu) **BSDF (např. Glossy/Anisotropic) zapojený přímo do World ▸ Surface shodí GPU** (`WEBGPU_LOST … A valid external Instance reference no longer exists`, shader `WOW_ShaderNodeBsdfAnisotropic_world_world`); Blender ukáže banner „GPU se odpojila“. Nesmyslné zapojení (world má mít Background/Emission), proto se ve sweepu vynechává. Navíc `ShaderNodeRaycast` ve world shaderu se nepřeloží (`drw_view_culling`) — v materiálu funguje.

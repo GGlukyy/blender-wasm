@@ -19,6 +19,14 @@ for n in dir(bpy.types):
             if issubclass(c, bpy.types.ShaderNode) and c is not bpy.types.ShaderNode and hasattr(c, 'bl_rna'): types.append(n)
         except Exception: pass
 types.sort()
+# BSDF/volume/AOV closures přímo do World Surface (nesmysl v Blenderu) shodí GPU (WEBGPU_LOST, ověřeno na ShaderNodeBsdfAnisotropic; BACKLOG) — ve sweepu se vynechají
+WORLD_OK_SHADER = {'ShaderNodeBackground', 'ShaderNodeEmission', 'ShaderNodeHoldout', 'ShaderNodeMixShader', 'ShaderNodeAddShader'}
+def _is_closure(tn):
+    try:
+        nt = bpy.data.node_groups.new('tmp_probe', 'ShaderNodeTree') if False else None
+    except Exception: pass
+    return tn.startswith('ShaderNodeBsdf') or tn.startswith('ShaderNodeVolume') or tn in ('ShaderNodeEeveeSpecular', 'ShaderNodeSubsurfaceScattering', 'ShaderNodeBsdfPrincipled', 'ShaderNodeBackground') and False
+types = [t for t in types if not (t.startswith('ShaderNodeBsdf') or t.startswith('ShaderNodeVolume') or t in ('ShaderNodeSubsurfaceScattering', 'ShaderNodeEeveeSpecular', 'ShaderNodeVolumeInfo', 'ShaderNodeRaycast'))]   # Raycast: potřebuje drw_view_culling (materiál ano, world ne)
 out('OPS_INFO node types', len(types))
 state = {'i': 0, 'phase': 0}
 def build(tn):

@@ -9,4 +9,4 @@ cd "$W" && cmd.exe /c "set OPS_ALL=1&& set OPS_PY=overlay_sweep_test.py&& set CH
 # Souhrn: žádný shader se nesmí nepřeložit (regress_all vypíše posledních pár řádků)
 NF=$(grep -a -c "translate FAILED\|tint-read FAIL\|shaderc FAIL\|ICE recovered" "$ROOT/out/win/overlay_sweep_result.txt")
 NE=$(grep -a -c "OPS sweep ERR" "$ROOT/out/win/overlay_sweep_result.txt")
-if [ "$NF" = 0 ] && [ "$NE" = 0 ]; then echo "OPS sweep_summary PASS (0 shaderů selhalo)"; else echo "OPS sweep_summary FAIL shader_failures=$NF python_errors=$NE"; fi
+if grep -a -q "OPS_DONE" "$ROOT/out/win/overlay_sweep_result.txt" && [ "$NF" = 0 ] && [ "$NE" = 0 ]; then echo "OPS sweep_summary PASS (0 shaderů selhalo)"; else echo "OPS sweep_summary FAIL shader_failures=$NF python_errors=$NE"; fi
