@@ -548,6 +548,29 @@ def _():
     ob2 = fresh(); m = ob2.modifiers.new('R', 'REMESH'); m.mode = 'VOXEL'; m.voxel_size = 0.1
     n2 = len(ob2.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.polygons); assert n2 > 100, n2
     return (n1, n2, 0)
+@test('rigid_body_bullet_falls', (None, None, None))
+def _():
+    # Bullet je v buildu (kolo 66): aktivní kostka padá na pasivní podlahu
+    sc = bpy.context.scene
+    ob = fresh(); ob.location.z = 5
+    bpy.ops.rigidbody.object_add(type='ACTIVE')
+    bpy.ops.mesh.primitive_plane_add(size=20, location=(0, 0, 0)); fl = bpy.context.object
+    bpy.ops.rigidbody.object_add(type='PASSIVE')
+    sc.frame_set(1)
+    z0 = ob.matrix_world.translation.z
+    for f in range(2, 60): sc.frame_set(f)
+    z1 = ob.matrix_world.translation.z
+    sc.frame_set(1)
+    assert z1 < z0 - 2.0 and z1 > 0.3, (z0, z1)
+    return (z0, z1, 0)
+@test('quadriflow_remesh_works', (None, None, None))
+def _():
+    ob = fresh(); bpy.ops.mesh.primitive_monkey_add(); ob = bpy.context.object
+    n0 = len(ob.data.polygons)
+    bpy.ops.object.quadriflow_remesh(target_faces=300, use_mesh_symmetry=False)
+    quads = sum(1 for p in ob.data.polygons if len(p.vertices) == 4)
+    assert len(ob.data.polygons) > 50 and quads > 0.8 * len(ob.data.polygons), (n0, len(ob.data.polygons), quads)
+    return (n0, len(ob.data.polygons), quads)
 @test('spin_lathe', (None, None, None))
 def _():
     ob = fresh(); edit(ob)
@@ -676,10 +699,8 @@ def _():
     return (None, None, None)
 # ZNÁMÉ MEZERY buildu (WITH_* vypnuto v cmake/blender-wasm-cache.cmake) — hlásí se jako GAP, nepočítají se jako FAIL.
 GAPS = [
-    ('rigid_body (Bullet)', lambda: (fresh(), bpy.ops.rigidbody.object_add())[1]),
     ('cycles_engine', lambda: (setattr(bpy.context.scene.render, 'engine', 'CYCLES'), True)[1]),
     ('fluid_mantaflow (WITH_MOD_FLUID)', lambda: (fresh(), bpy.ops.object.modifier_add(type='FLUID'), setattr(bpy.context.object.modifiers[-1], 'fluid_type', 'DOMAIN'), bpy.context.object.modifiers[-1].domain_settings.domain_type)[3]),
-    ('quadriflow_remesh', lambda: (fresh(), bpy.ops.object.quadriflow_remesh())[1]),
 ]
 for name, fn in GAPS:
     try:

@@ -68,9 +68,9 @@ set(WITH_GMP                 OFF CACHE BOOL "")
 set(WITH_POTRACE             OFF CACHE BOOL "")
 set(WITH_HARU                OFF CACHE BOOL "")
 set(WITH_MANIFOLD            OFF CACHE BOOL "")
-set(WITH_QUADRIFLOW          OFF CACHE BOOL "")
+set(WITH_QUADRIFLOW          ON  CACHE BOOL "")   # bundled extern/quadriflow (kolo 66): Quad Remesh
 set(WITH_INPUT_NDOF          OFF CACHE BOOL "")
-set(WITH_BULLET              OFF CACHE BOOL "")
+set(WITH_BULLET              ON  CACHE BOOL "")   # bundled extern/bullet2 (kolo 66): Rigid Body
 set(WITH_COMPOSITOR_CPU      OFF CACHE BOOL "")
 set(WITH_XR_OPENXR           OFF CACHE BOOL "")
 set(WITH_ALEMBIC             OFF CACHE BOOL "")
