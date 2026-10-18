@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# OpenVDB 13.0.0 (Blender 5.3 version) → wasm-sysroot, core static only (Voxel Remesh, Mesh to Volume…).
+# No Boost (removed from core in v11+), no Blosc, no NanoVDB, no tools/python.
+set -euo pipefail
+source "$(dirname "$0")/dep_common.sh"
+src=$(fetch_extract \
+  "https://github.com/AcademySoftwareFoundation/openvdb/archive/v13.0.0.tar.gz" \
+  "openvdb-13.0.0.tar.gz" "openvdb-13.0.0")
+em_cmake "$src" openvdb \
+  -DCMAKE_CXX_STANDARD=17 \
+  -DOPENVDB_BUILD_CORE=ON -DOPENVDB_CORE_STATIC=ON -DOPENVDB_CORE_SHARED=OFF \
+  -DOPENVDB_BUILD_BINARIES=OFF -DOPENVDB_BUILD_PYTHON_MODULE=OFF -DOPENVDB_BUILD_UNITTESTS=OFF \
+  -DOPENVDB_BUILD_DOCS=OFF -DOPENVDB_BUILD_NANOVDB=OFF -DOPENVDB_BUILD_VDB_PRINT=OFF \
+  -DOPENVDB_BUILD_VDB_LOD=OFF -DOPENVDB_BUILD_VDB_RENDER=OFF -DOPENVDB_BUILD_VDB_VIEW=OFF \
+  -DOPENVDB_BUILD_AX=OFF -DOPENVDB_BUILD_HOUDINI_PLUGIN=OFF -DOPENVDB_BUILD_MAYA_PLUGIN=OFF \
+  -DUSE_BLOSC=OFF -DUSE_ZLIB=ON -DUSE_IMATH_HALF=ON -DUSE_CCACHE=OFF -DUSE_EXPLICIT_INSTANTIATION=ON \
+  -DOPENVDB_USE_DELAYED_LOADING=OFF -DUSE_PKGCONFIG=OFF -DDISABLE_DEPENDENCY_VERSION_CHECKS=ON \
+  -DOPENVDB_FUTURE_DEPRECATION=OFF
+log "done"

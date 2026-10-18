@@ -25,6 +25,7 @@ Výsledek: 🟡 víkend: kola 41–66 (render animace, objemy, vlasy, GP viewpor
 0. **Nové z kola 65–66 (18. 10., vše ověřeno jen na PC/Chrome):**
    - **Číslo do konzole Safari:** `(await navigator.gpu.requestAdapter()).limits.maxStorageBuffersPerShaderStage` → napiš mi ho (vlasy potřebují ≥ 11, stíny/objemy ≥ 10).
    - **Hlavně nesmí spadnout:** Preferences ▸ Input ▸ *Emulate 3 Button Mouse* zaškrtnout (dřív pád); UV Editing ▸ Alt+klik na hranu (Edge Ring) a Select ▸ Select Overlap (dřív zamrzlo).
+   - **Sochání:** Sculpt mode ▸ Remesh ▸ Voxel Remesh (Ctrl+R) — dřív hlásilo chybu, teď (OpenVDB v buildu) vyrobí novou síť; Object ▸ Add ▸ Volume + Mesh to Volume.
    - **Nově vidět:** Add ▸ Grease Pencil ▸ Monkey (tahy ve viewportu); Add ▸ Curves ▸ Empty Hair (+ vlasy); materiál s Volume Absorption/Scatter; Solid + MatCap + Cavity ▸ Curvature.
    - **Render:** Ctrl+F12 (animace, 3 snímky PNG, soubory nejsou černé); F12 ▸ Image ▸ Save As ▸ PNG nebo **TIFF**; Viewport Render hlásí „not supported“; compositor se přeskočí s varováním.
 1. **Prst místo myši (kola 51–54):** vyber kostku → lišta **G** → táhni prstem (lišta zmodrá, kostka se hýbe) → klepni = potvrdit. Edit mode: **Ctrl→R→Ctrl** loop cut (najeď prstem na hranu, klepni 2×), **⋯ → B** box select tahem, **⋯ → E** extrude.
@@ -45,7 +46,7 @@ Výsledek: 🟡 víkend: kola 41–66 (render animace, objemy, vlasy, GP viewpor
 
 ## Blocked / otevřené (poctivě)
 - Z-fighting ploch: nereprodukuje se na PC, aplikovaná hypotéza čeká na iPad.
-- Voxel Remesh, Rigid Body, Quadriflow: v buildu chybí (OpenVDB/Bullet/Quadriflow) — hlásí chybu.
+- Rigid Body, Quadriflow: v buildu chybí (Bullet/Quadriflow) — hlásí chybu. (Voxel Remesh od kola 66 funguje — OpenVDB.)
 - Draco/Meshopt komprese glTF, Extensions (bl_pkg), `_ctypes`/`_ssl`/`_lzma`, `import sqlite3` zavěsí.
 - Kompilace pipeline při prvním Material Preview blokuje 6–7 s (jen hláška, ne oprava).
 

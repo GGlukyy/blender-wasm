@@ -45,6 +45,8 @@ wave openexr openexr
 wave ocio ocio
 # Wave 6: OpenImageIO (OpenEXR, OCIO, png, jpeg, fmt, robin-map, zstd).
 wave oiio oiio
+# Wave 7: OpenVDB (TBB, Imath, zlib) — Voxel Remesh / Mesh to Volume (kolo 66).
+wave openvdb openvdb
 
 # --- WebGPU shader toolchain: GLSL --(shaderc)--> SPIR-V --(Tint)--> WGSL. -----
 # Needed by the WITH_WEBGPU_BACKEND build/link (libtint_*.a, libSPIRV-Tools*.a,

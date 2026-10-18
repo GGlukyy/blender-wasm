@@ -538,15 +538,16 @@ def _():
     bpy.context.scene.frame_set(20); bpy.context.view_layer.update()
     assert abs(ob.scale.x - 2.0) < 1e-4, ob.scale.x
     return (1, 0, 0)
-@test('voxel_remesh_warns', (None, None, None))
+@test('voxel_remesh_works', (None, None, None))
 def _():
-    # bez OpenVDB nesmí selhat potichu: operátor hlásí chybu (modifikátor: error text v UI, z Pythonu nečitelný)
+    # OpenVDB je v buildu (kolo 66): Voxel Remesh operátor i modifikátor vyrobí skutečnou síť
     ob = fresh(); ob.data.remesh_voxel_size = 0.1
-    try:
-        bpy.ops.object.voxel_remesh(); raise AssertionError('voxel_remesh nehlásí chybu')
-    except RuntimeError as e:
-        assert 'OpenVDB' in str(e), str(e)
-    return (None, None, None)
+    n0 = len(ob.data.polygons)
+    bpy.ops.object.voxel_remesh()
+    n1 = len(ob.data.polygons); assert n1 > n0 and n1 > 100, (n0, n1)
+    ob2 = fresh(); m = ob2.modifiers.new('R', 'REMESH'); m.mode = 'VOXEL'; m.voxel_size = 0.1
+    n2 = len(ob2.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.polygons); assert n2 > 100, n2
+    return (n1, n2, 0)
 @test('spin_lathe', (None, None, None))
 def _():
     ob = fresh(); edit(ob)
@@ -675,7 +676,6 @@ def _():
     return (None, None, None)
 # ZNÁMÉ MEZERY buildu (WITH_* vypnuto v cmake/blender-wasm-cache.cmake) — hlásí se jako GAP, nepočítají se jako FAIL.
 GAPS = [
-    ('voxel_remesh (OpenVDB)', lambda: (lambda ob: (setattr(ob.modifiers.new('R', 'REMESH'), 'mode', 'VOXEL'), len(ob.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.polygons))[1])(fresh())),
     ('rigid_body (Bullet)', lambda: (fresh(), bpy.ops.rigidbody.object_add())[1]),
     ('cycles_engine', lambda: (setattr(bpy.context.scene.render, 'engine', 'CYCLES'), True)[1]),
     ('fluid_mantaflow (WITH_MOD_FLUID)', lambda: (fresh(), bpy.ops.object.modifier_add(type='FLUID'), setattr(bpy.context.object.modifiers[-1], 'fluid_type', 'DOMAIN'), bpy.context.object.modifiers[-1].domain_settings.domain_type)[3]),

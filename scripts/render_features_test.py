@@ -92,6 +92,18 @@ def c_hair_curves():
     for ci, c in enumerate(h.curves):
         for pi, pt in enumerate(c.points): pt.position = (-1 + ci, 0, -1 + pi * 0.7); pt.radius = 0.15
     mat(ob, lambda nt: emission(nt, (1, 0, 0), 3.0))
+def c_volume_object():
+    # OpenVDB: Mesh to Volume modifikátor na objektu Volume + materiál Volume Absorption → v EEVEE viditelný objem (3D textura z VDB mřížky)
+    bpy.ops.mesh.primitive_cube_add(size=1.5); src = bpy.context.object; src.hide_render = True
+    bpy.ops.object.volume_add(); vol = bpy.context.object
+    md = vol.modifiers.new('MV', 'MESH_TO_VOLUME'); md.object = src; md.voxel_amount = 32
+    m = bpy.data.materials.new('VV'); m.use_nodes = True; nt = m.node_tree
+    for n in list(nt.nodes): nt.nodes.remove(n)
+    o = nt.nodes.new('ShaderNodeOutputMaterial'); v = nt.nodes.new('ShaderNodeVolumeAbsorption'); v.inputs[0].default_value = (0, 1, 1, 1); v.inputs[1].default_value = 6.0
+    at = nt.nodes.new('ShaderNodeAttribute'); at.attribute_name = 'density'; mul = nt.nodes.new('ShaderNodeMath'); mul.operation = 'MULTIPLY'; mul.inputs[1].default_value = 40.0
+    nt.links.new(at.outputs['Fac'], mul.inputs[0]); nt.links.new(mul.outputs[0], v.inputs[1])
+    nt.links.new(v.outputs[0], o.inputs[1]); vol.data.materials.append(m)
+    bpy.data.worlds['W'].node_tree.nodes['Background'].inputs[0].default_value = (1, 1, 1, 1)
 def c_text():
     bpy.ops.object.text_add(location=(0, 0, 0), rotation=(1.5708, 0, 0)); t = bpy.context.object; t.data.body = 'I'; t.data.size = 3; t.data.extrude = 0.1
     mat(t, lambda nt: emission(nt, (1, 1, 1), 3.0))
@@ -242,6 +254,7 @@ CASES = [
     ('environment_texture', lambda: (reset(), c_env_texture()), lambda c, k: k[1] > 0.5 and k[0] < 0.2),
     ('backface_culling_flipped', lambda: (reset(), c_backface_culling()), lambda c, k: c[0] < 0.3 or c[0] > 0.5),
     ('wireframe_modifier', lambda: (reset(), c_wireframe_mod()), lambda c, k: sum(1 for q in allpx() if q[0] > 0.8 and q[2] > 0.8) > 50 and c[0] < 0.4),
+    ('volume_object_mesh_to_volume', lambda: (reset(), c_volume_object()), lambda c, k: c[0] < 0.2 and c[1] > 0.5 and k[0] > 0.5),   # objem z VDB mřížky (density) je vidět
     ('text_object', lambda: (reset(), c_text()), lambda c, k: c[0] > 0.5 and c[1] > 0.5 and c[2] > 0.5),
     ('curve_bevel_ring', lambda: (reset(), c_curve_bevel()), lambda c, k: c[0] < 0.3 and ring_pred()),
     ('glossy_reflects_world', lambda: (reset(), c_glossy_world()), lambda c, k: 0.3 < c[2] < 0.95 and k[2] > 0.95 and c[0] < 0.1),

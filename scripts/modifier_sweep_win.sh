@@ -7,4 +7,4 @@ cd "$W" && cmd.exe /c "set OPS_PY=modifier_sweep_test.py&& set CHROME=C:\\Progra
 
 NE=$(grep -a -c "OPS mod_sweep ERR" "$ROOT/out/win/modifier_sweep_result.txt")
 NK=$(grep -a -c "OPS mod_sweep ok" "$ROOT/out/win/modifier_sweep_result.txt")
-if [ "$NE" = 0 ] && [ "$NK" -ge 70 ]; then echo "OPS modifier_sweep_summary PASS ($NK typů vyhodnoceno, 0 výjimek; REMESH voxel/MASK/BUILD/VOLUME_TO_MESH dávají 0 polygonů — známé/očekávané)"; else echo "OPS modifier_sweep_summary FAIL errors=$NE ok=$NK"; fi
+if [ "$NE" = 0 ] && [ "$NK" -ge 70 ]; then echo "OPS modifier_sweep_summary PASS ($NK typů vyhodnoceno, 0 výjimek; MASK/BUILD/VOLUME_TO_MESH dávají 0 polygonů — očekávané, REMESH voxel už funguje)"; else echo "OPS modifier_sweep_summary FAIL errors=$NE ok=$NK"; fi

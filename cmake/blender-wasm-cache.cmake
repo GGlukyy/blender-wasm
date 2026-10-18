@@ -41,7 +41,10 @@ set(WITH_FRIBIDI            OFF CACHE BOOL "")
 
 # --- trim heavy/irrelevant features to reach codegen fast ------------------
 set(WITH_CYCLES              OFF CACHE BOOL "")
-set(WITH_OPENVDB             OFF CACHE BOOL "")
+set(WITH_OPENVDB             ON  CACHE BOOL "")   # scripts/build_openvdb.sh (kolo 66): Voxel Remesh, Mesh to Volume
+set(OPENVDB_ROOT_DIR         "${CMAKE_SOURCE_DIR}/../wasm-sysroot" CACHE PATH "")
+set(WITH_OPENVDB_BLOSC       OFF CACHE BOOL "")
+set(WITH_OPENVDB_3_ABI_COMPATIBLE OFF CACHE BOOL "")
 set(WITH_OPENSUBDIV          ON  CACHE BOOL "")
 set(OPENSUBDIV_ROOT_DIR      "${CMAKE_SOURCE_DIR}/../wasm-sysroot" CACHE PATH "")
 set(WITH_OPENCOLORIO         OFF CACHE BOOL "")
