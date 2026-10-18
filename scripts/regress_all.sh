@@ -29,6 +29,7 @@ run render_features scripts/render_features_win.sh
 run overlay_sweep scripts/overlay_sweep_win.sh
 run node_sweep scripts/node_sweep_win.sh
 run eevee_sweep scripts/eevee_sweep_win.sh
+run wb_sweep scripts/wb_sweep_win.sh
 run modifier_sweep scripts/modifier_sweep_win.sh
 run mesh_ops_sweep scripts/mesh_ops_sweep_win.sh
 run obj_ops_sweep scripts/obj_ops_sweep_win.sh
