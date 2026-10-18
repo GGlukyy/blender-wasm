@@ -1,4 +1,4 @@
-Výsledek: 🟡 víkend: kola 41–60 hotová na PC (diakritika, šablony, vlasy, prst jako touchpad pro G/R/S/E/loop cut/box, auto-klávesnice, lišta ⋯, ikona), regresní sada bez FAIL — vše čeká na test na iPadu
+Výsledek: 🟡 víkend: kola 41–66 (render animace, objemy, vlasy, GP viewport, compositor), kola 41–60 hotová na PC (diakritika, šablony, vlasy, prst jako touchpad pro G/R/S/E/loop cut/box, auto-klávesnice, lišta ⋯, ikona), regresní sada bez FAIL — vše čeká na test na iPadu
 
 # Kolo 65 (víkend, 18. 10.) — render do souboru
 - ✅ **Render do souboru byl prázdný** (PNG s alpha 0): `render.render(write_still=True)`, Save As z Render Result. Web nemá synchronní čtení z GPU → zápis se teď odloží, až dorazí pixely (fork 7224a3a6). Důkaz: `scripts/render_write_win.sh` PASS (EEVEE, Workbench, Save As); ops 94/94, interactive ALL PASS, parity bez ❌, gpulost PASS.
@@ -12,6 +12,7 @@ Výsledek: 🟡 víkend: kola 41–60 hotová na PC (diakritika, šablony, vlasy
 
 
 # Kolo 66 (víkend, 18. 10.) — lov chyb v EEVEE
+- Regresní sada po všech změnách kola 66 (`regress_all.sh`, 18. 10. ~08:00): bez FAIL, seed 217 shaderů, verify 0 překladů.
 - ✅ Nový `scripts/render_features_win.sh` (11 případů, kontrola barev pixelů): emise, textura, svět, průhledný film, slunce, alpha blend, vertex color — vše PASS.
 - ✅ **Objemy v EEVEE** (Volume Scatter/Absorption) se nevykreslovaly: shader `eevee_volume_scatter` se nepřeložil (`extinction_tx`). Opraveno (fork, `eevee_volume.bsl.hh`); důkaz `render_features_win.sh` volume_absorb + volume_scatter_light PASS. Na iPadu: kostka s materiálem Volume Absorption/Scatter ve vykresleném náhledu (F12) má barevný objem.
 - ✅ **Grease Pencil a vlasy (Curves)**: ve viewportu se dřív vůbec nekreslily (chyběly texel buffery `samplerBuffer`, `max_buffer_texture_size`, vyplnění dummy depth textury). Teď vlasy v F12 i viewportu a GP ve viewportu fungují (`render_features_win.sh` hair_curves PASS, `out/win/gp_viewport.png`). **Na iPadu ověř:** Add ▸ Grease Pencil ▸ Monkey vidět; Add ▸ Curves ▸ Empty Hair + vlasy viditelné; hlavně nesmí spadnout (nové storage buffery — limit Safari). Lukáš: v konzoli Safari `(await navigator.gpu.requestAdapter()).limits.maxStorageBuffersPerShaderStage` a napiš číslo.\n- 🟡 GP v F12 renderu zůstává prázdný (GAP, BACKLOG).
