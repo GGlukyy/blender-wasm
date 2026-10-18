@@ -6,7 +6,7 @@ bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete()
 bpy.ops.mesh.primitive_monkey_add(); bpy.ops.object.shade_smooth()
 prefs = bpy.context.preferences
 groups = ['view', 'edit', 'system', 'inputs', 'filepaths']
-skip = {'use_mouse_emulate_3_button', 'mouse_emulate_3_button_modifier', 'tablet_api', 'ui_scale', 'ui_line_width', 'dpi', 'pixel_size', 'use_online_access', 'use_auto_save_temporary_files', 'use_save_preview_images', 'is_dirty', 'show_developer_ui'}
+skip = {'tablet_api', 'ui_scale', 'ui_line_width', 'dpi', 'pixel_size', 'use_online_access', 'use_auto_save_temporary_files', 'use_save_preview_images', 'is_dirty', 'show_developer_ui'}
 steps = []
 for g in groups:
     obj = getattr(prefs, g)

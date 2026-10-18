@@ -39,6 +39,8 @@ run uv_hang scripts/uv_hang_win.sh
 run props_sweep scripts/props_sweep_win.sh
 run space_sweep scripts/space_sweep_win.sh
 run prefs_sweep scripts/prefs_sweep_win.sh
+run rna_signatures python3 scripts/check_rna_update_signatures.py
+run prefs_input scripts/prefs_input_win.sh
 TAILN=25 run ops_sweeps_extra scripts/ops_sweeps_extra_win.sh
 run sculpt_ops_sweep scripts/sculpt_ops_sweep_win.sh
 run paint_ops_sweep scripts/paint_ops_sweep_win.sh
