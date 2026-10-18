@@ -122,6 +122,8 @@ cmd=${cmd%% && cd *}
 cmd=${cmd/-o bin\/blender.js/-o $OUT/blender.js}
 cmd=${cmd//-sNODERAWFS=1/}
 # numpy (static, see scripts/build_numpy.sh): inittab registration + module archive.
+# libtiff: OpenImageIO is built with TIFF (scripts/build_oiio.sh), the static lib is not in Blender's link line.
+if [ -f "$SYSROOT/lib/libtiff.a" ]; then cmd="$cmd $SYSROOT/lib/libtiff.a"; fi
 if [ -f "$SYSROOT/lib/numpy_inittab.o" ]; then cmd="$cmd $SYSROOT/lib/numpy_inittab.o $SYSROOT/lib/libnumpy_static.a"; fi
 
 # Custom wasmfs backends (compiled against emscripten's internal wasmfs headers):

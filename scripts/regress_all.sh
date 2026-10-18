@@ -23,6 +23,7 @@ run autokbd scripts/autokbd_win.sh
 run hidden scripts/hidden_win.sh
 run editors scripts/editors_win.sh
 run render_write scripts/render_write_win.sh
+run bake_probe scripts/bake_probe_win.sh
 run render_anim scripts/render_anim_win.sh
 run render_features scripts/render_features_win.sh
 run overlay_sweep scripts/overlay_sweep_win.sh
@@ -40,6 +41,7 @@ run props_sweep scripts/props_sweep_win.sh
 run space_sweep scripts/space_sweep_win.sh
 run prefs_sweep scripts/prefs_sweep_win.sh
 run rna_sweep scripts/rna_sweep_win.sh
+run rna2_sweep scripts/rna2_sweep_win.sh
 run rna_signatures python3 scripts/check_rna_update_signatures.py
 run prefs_input scripts/prefs_input_win.sh
 TAILN=25 run ops_sweeps_extra scripts/ops_sweeps_extra_win.sh
