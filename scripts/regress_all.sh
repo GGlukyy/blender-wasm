@@ -28,6 +28,7 @@ run render_features scripts/render_features_win.sh
 run overlay_sweep scripts/overlay_sweep_win.sh
 run node_sweep scripts/node_sweep_win.sh
 run eevee_sweep scripts/eevee_sweep_win.sh
+run modifier_sweep scripts/modifier_sweep_win.sh
 run fuzz scripts/fuzz_win.sh
 run ui_fuzz scripts/ui_fuzz_win.sh
 run fuzz_obj scripts/fuzz_obj_win.sh
