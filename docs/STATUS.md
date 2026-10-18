@@ -12,7 +12,9 @@ Výsledek: 🟡 víkend: kola 41–66 (render animace, objemy, vlasy, GP viewpor
 
 
 # Kolo 66 (víkend, 18. 10.) — lov chyb v EEVEE
-- Regresní sada po všech změnách kola 66 (`regress_all.sh`, 18. 10. ~08:00): bez FAIL, seed 217 shaderů, verify 0 překladů.
+- Regresní sada po všech změnách kola 66 (`regress_all.sh`, 18. 10. ~10:30): bez FAIL (+36 nových sweepů: overlay/node/eevee/modifikátory/operátory 30 modulů/Properties), WGSL seed obnoven od nuly (193 shaderů, verify 2 překlady — prelude se změnil, takže po stažení nového buildu je první spuštění jako dřív).
+- ✅ Nalezeno a opraveno zamrznutí **UV ▸ Select Edge Ring / Select Overlap** (Alt+klik na hranu v UV editoru zamrzl Blender; `uv_hang_win.sh`).
+- ✅ Workbench **Matcap + Cavity Curvature** se nepřekládal (celočíselné samplery) a materiály s uzlem **Wireframe** se nepřekládaly (objekt by zmizel) — opraveno (wireframe uzel kreslí zatím bez čar).
 - ✅ Nový `scripts/render_features_win.sh` (11 případů, kontrola barev pixelů): emise, textura, svět, průhledný film, slunce, alpha blend, vertex color — vše PASS.
 - ✅ **Objemy v EEVEE** (Volume Scatter/Absorption) se nevykreslovaly: shader `eevee_volume_scatter` se nepřeložil (`extinction_tx`). Opraveno (fork, `eevee_volume.bsl.hh`); důkaz `render_features_win.sh` volume_absorb + volume_scatter_light PASS. Na iPadu: kostka s materiálem Volume Absorption/Scatter ve vykresleném náhledu (F12) má barevný objem.
 - ✅ **Grease Pencil a vlasy (Curves)**: ve viewportu se dřív vůbec nekreslily (chyběly texel buffery `samplerBuffer`, `max_buffer_texture_size`, vyplnění dummy depth textury). Teď vlasy v F12 i viewportu a GP ve viewportu fungují (`render_features_win.sh` hair_curves PASS, `out/win/gp_viewport.png`). **Na iPadu ověř:** Add ▸ Grease Pencil ▸ Monkey vidět; Add ▸ Curves ▸ Empty Hair + vlasy viditelné; hlavně nesmí spadnout (nové storage buffery — limit Safari). Lukáš: v konzoli Safari `(await navigator.gpu.requestAdapter()).limits.maxStorageBuffersPerShaderStage` a napiš číslo.\n- 🟡 GP v F12 renderu zůstává prázdný (GAP, BACKLOG).
