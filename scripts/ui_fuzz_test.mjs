@@ -43,8 +43,14 @@ while (Date.now() - t0 < SECS * 1000 && errs.length === 0 && n < MAXN) {
 }
 await page.keyboard.press("Escape"); await wait(500);
 const f0 = stats[stats.length - 1] || 0;
-await page.mouse.move(600, 400); await page.mouse.down({ button: "middle" }); await page.mouse.move(700, 430, { steps: 10 }); await page.mouse.up({ button: "middle" }); await wait(2500);
-const f1 = stats[stats.length - 1] || 0;
+// Kontrola živosti: MMB tah (orbit) — fuzz mohl změnit layout (viewport malý/jinde, velký Outliner…), proto zkusit více míst;
+// stačí, když KTERÉKOLI vyvolá překreslení (snímky GPU narostou). Dál platí: žádné chyby/pády.
+let f1 = f0;
+for (const [x, y] of [[600, 400], [120, 300], [1000, 300], [700, 600], [300, 200], [1100, 500]]) {
+  await page.mouse.move(x, y); await page.mouse.down({ button: "middle" }); await page.mouse.move(x + 100, y + 30, { steps: 10 }); await page.mouse.up({ button: "middle" }); await wait(1500);
+  f1 = stats[stats.length - 1] || 0;
+  if (f1 > f0) break;
+}
 await page.screenshot({ path: "out/ui_fuzz_end.png" });
 console.log(`CRASH_AT=${errs.length ? n : -1}`); console.log(`ui_fuzz seed=${process.env.FUZZ_SEED || 1} actions=${n} frames ${f0}->${f1} errors=${errs.length}`, errs.slice(0, 3).join(" | "));
 if (errs.length) { console.log("LAST ACTIONS:", acts.join(" ; ")); console.log("LAST LOGS:\n" + logs.slice(-25).join("\n")); }
