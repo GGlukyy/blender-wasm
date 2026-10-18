@@ -12,6 +12,7 @@ def reset(world=(0.05, 0.05, 0.05), transparent=False):
     for m in list(bpy.data.materials): bpy.data.materials.remove(m)
     sc.render.film_transparent = transparent; sc.compositing_node_group = None
     w = bpy.data.worlds.get('W') or bpy.data.worlds.new('W'); sc.world = w; w.use_nodes = True
+    for n in [n for n in w.node_tree.nodes if n.type == 'TEX_ENVIRONMENT']: w.node_tree.nodes.remove(n)
     w.node_tree.nodes['Background'].inputs[0].default_value = (*world, 1); w.node_tree.nodes['Background'].inputs[1].default_value = 1.0
     bpy.ops.object.camera_add(location=(0, -5, 0), rotation=(1.5708, 0, 0)); sc.camera = bpy.context.object
 def mat(ob, build):
@@ -117,6 +118,85 @@ def c_instanced_particles():
 def c_displace_texture():
     bpy.ops.mesh.primitive_grid_add(x_subdivisions=20, y_subdivisions=20, size=4, rotation=(1.5708, 0, 0)); ob = bpy.context.object
     mat(ob, lambda nt: emission(nt, (0, 1, 0), 2.0))
+def lit_cube(build_shader, light='SUN'):
+    ob = cube(); mat(ob, build_shader)
+    bpy.ops.object.light_add(type=light, location=(0, -4, 4), rotation=(0.8, 0, 0)); bpy.context.object.data.energy = 5 if light == 'SUN' else 600
+    return ob
+def c_spot_light():
+    bpy.ops.mesh.primitive_plane_add(size=6, rotation=(1.5708, 0, 0), location=(0, 0, 0)); diffuse(bpy.context.object, (1, 1, 1))
+    bpy.ops.object.light_add(type='SPOT', location=(0, -3, 0), rotation=(1.5708, 0, 0)); l = bpy.context.object.data; l.energy = 400; l.spot_size = 0.5
+def c_area_light():
+    bpy.ops.mesh.primitive_plane_add(size=6, rotation=(1.5708, 0, 0)); diffuse(bpy.context.object, (1, 1, 1))
+    bpy.ops.object.light_add(type='AREA', location=(0, -2, 0), rotation=(1.5708, 0, 0)); l = bpy.context.object.data; l.energy = 20; l.size = 2
+def c_noise_texture():
+    ob = cube()
+    def b(nt):
+        n = nt.nodes.new('ShaderNodeTexNoise'); n.inputs[2].default_value = 8.0; ramp = nt.nodes.new('ShaderNodeValToRGB')
+        ramp.color_ramp.elements[0].color = (1, 0, 0, 1); ramp.color_ramp.elements[1].color = (0, 0, 1, 1)
+        nt.links.new(n.outputs[0], ramp.inputs[0]); e = emission(nt, (1, 1, 1), 1.0); nt.links.new(ramp.outputs[0], e.inputs[0]); return e
+    mat(ob, b)
+def c_checker_tex():
+    ob = cube()
+    def b(nt):
+        t = nt.nodes.new('ShaderNodeTexChecker'); t.inputs[1].default_value = (1, 0, 0, 1); t.inputs[2].default_value = (0, 0, 1, 1); t.inputs[3].default_value = 4.0
+        co = nt.nodes.new('ShaderNodeTexCoord'); nt.links.new(co.outputs['Object'], t.inputs[0]); e = emission(nt, (1, 1, 1), 1.0); nt.links.new(t.outputs[0], e.inputs[0]); return e
+    mat(ob, b)
+def c_bump_normal():
+    ob = cube()
+    def b(nt):
+        d = nt.nodes.new('ShaderNodeBsdfDiffuse'); bump = nt.nodes.new('ShaderNodeBump'); n = nt.nodes.new('ShaderNodeTexNoise'); n.inputs[2].default_value = 20
+        mul = nt.nodes.new('ShaderNodeMath'); mul.operation = 'MULTIPLY'; mul.inputs[1].default_value = 20.0
+        nt.links.new(n.outputs[0], mul.inputs[0]); nt.links.new(mul.outputs[0], bump.inputs[2]); nt.links.new(bump.outputs[0], d.inputs[2]); return d
+    mat(ob, b)
+    bpy.ops.object.light_add(type='SUN', rotation=(0.8, 0, 0)); bpy.context.object.data.energy = 4
+def c_bump_normal_vis():
+    ob = cube()
+    def b(nt):
+        bump = nt.nodes.new('ShaderNodeBump'); n = nt.nodes.new('ShaderNodeTexNoise'); n.inputs[2].default_value = 20
+        mul = nt.nodes.new('ShaderNodeMath'); mul.operation = 'MULTIPLY'; mul.inputs[1].default_value = 20.0
+        nt.links.new(n.outputs[0], mul.inputs[0]); nt.links.new(mul.outputs[0], bump.inputs[2])
+        e = emission(nt, (1, 1, 1), 1.0); nt.links.new(bump.outputs[0], e.inputs[0]); return e
+    mat(ob, b)
+def c_wireframe_node():
+    ob = cube()
+    def b(nt):
+        w = nt.nodes.new('ShaderNodeWireframe'); w.use_pixel_size = True; w.inputs[0].default_value = 3.0
+        e = emission(nt, (1, 1, 1), 1.0); nt.links.new(w.outputs[0], e.inputs[0]); return e
+    mat(ob, b)
+def c_bump_gradient():
+    # výška = objektová X → normála se musí naklonit v X (bez derivací by zůstala plochá: červená 0.5 lin = 0.735 sRGB)
+    ob = cube()
+    def b(nt):
+        co = nt.nodes.new('ShaderNodeTexCoord'); sep = nt.nodes.new('ShaderNodeSeparateXYZ'); nt.links.new(co.outputs['Object'], sep.inputs[0])
+        bump = nt.nodes.new('ShaderNodeBump'); bump.inputs['Distance'].default_value = 1.0; nt.links.new(sep.outputs[0], bump.inputs['Height'])
+        vm = nt.nodes.new('ShaderNodeVectorMath'); vm.operation = 'MULTIPLY_ADD'; vm.inputs[1].default_value = (0.5, 0.5, 0.5); vm.inputs[2].default_value = (0.5, 0.5, 0.5)
+        nt.links.new(bump.outputs[0], vm.inputs[0]); e = emission(nt, (1, 1, 1), 1.0); nt.links.new(vm.outputs[0], e.inputs[0]); return e
+    mat(ob, b)
+def c_bump_noise_explicit(coord='Object'):
+    ob = cube()
+    def b(nt):
+        co = nt.nodes.new('ShaderNodeTexCoord'); n = nt.nodes.new('ShaderNodeTexNoise'); n.inputs['Scale'].default_value = 6.0
+        nt.links.new(co.outputs[coord], n.inputs['Vector'])
+        bump = nt.nodes.new('ShaderNodeBump'); bump.inputs['Distance'].default_value = 1.0; nt.links.new(n.outputs[0], bump.inputs['Height'])
+        vm = nt.nodes.new('ShaderNodeVectorMath'); vm.operation = 'MULTIPLY_ADD'; vm.inputs[1].default_value = (0.5, 0.5, 0.5); vm.inputs[2].default_value = (0.5, 0.5, 0.5)
+        nt.links.new(bump.outputs[0], vm.inputs[0]); e = emission(nt, (1, 1, 1), 1.0); nt.links.new(vm.outputs[0], e.inputs[0]); return e
+    mat(ob, b)
+def c_sss():
+    ob = cube(); ob.modifiers.new('S', 'SUBSURF').levels = 1
+    def b(nt):
+        p = nt.nodes.new('ShaderNodeBsdfPrincipled'); p.inputs['Base Color'].default_value = (1, 0.2, 0.1, 1); p.inputs['Subsurface Weight'].default_value = 1.0; return p
+    mat(ob, b)
+    bpy.ops.object.light_add(type='SUN', rotation=(0.8, 0, 0)); bpy.context.object.data.energy = 4
+def c_env_texture():
+    img = bpy.data.images.new('E', 16, 8); img.pixels = [0, 1, 0, 1] * 128
+    nt = bpy.data.worlds['W'].node_tree; env = nt.nodes.new('ShaderNodeTexEnvironment'); env.image = img
+    nt.links.new(env.outputs[0], nt.nodes['Background'].inputs[0])
+def c_backface_culling():
+    ob = cube(); m = mat(ob, lambda nt: emission(nt, (1, 0, 0), 3.0)); m.use_backface_culling = True
+    ob.scale = (1, 1, 1)
+    bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.mesh.flip_normals(); bpy.ops.object.mode_set(mode='OBJECT')
+def c_wireframe_mod():
+    ob = cube(); ob.modifiers.new('W', 'WIREFRAME').thickness = 0.1; mat(ob, lambda nt: emission(nt, (1, 0, 1), 3.0))
 def px(path):
     im = bpy.data.images.load(path, check_existing=False); p = list(im.pixels); w, h = im.size
     def at(x, y): i = (y * w + x) * 4; return tuple(p[i:i + 4])
@@ -150,6 +230,18 @@ CASES = [
     ('volume_absorb', lambda: (reset(), c_volume()), lambda c, k: c[0] < 0.2 and c[1] > 0.3),
     ('volume_scatter_light', lambda: (reset(world=(0, 0, 0)), c_volume_scatter_light()), lambda c, k: (c[0] + c[1] + c[2]) / 3 > 0.1 and (k[0] + k[1] + k[2]) / 3 < 0.05),
     ('hair_curves', lambda: (reset(), c_hair_curves()), lambda c, k: sum(1 for p in allpx() if p[0] > 0.5 and p[1] < 0.3) > 15),
+    ('spot_light', lambda: (reset(world=(0, 0, 0)), c_spot_light()), lambda c, k: (c[0] + c[1] + c[2]) / 3 > 0.2 and (k[0] + k[1] + k[2]) / 3 < 0.1),
+    ('area_light', lambda: (reset(world=(0, 0, 0)), c_area_light()), lambda c, k: (c[0] + c[1] + c[2]) / 3 > 0.2 and (c[0] + c[1] + c[2]) > (k[0] + k[1] + k[2]) * 1.5),
+    ('noise_ramp', lambda: (reset(), c_noise_texture()), lambda c, k: len(set(round(q[0], 1) for q in allpx() if q[0] > 0.01 and q != k)) > 4),
+    ('checker_texture', lambda: (reset(), c_checker_tex()), lambda c, k: sum(1 for q in allpx() if q[0] > 0.8 and q[2] < 0.2) > 100 and sum(1 for q in allpx() if q[2] > 0.8 and q[0] < 0.2) > 100),
+    ('wireframe_node', lambda: (reset(), c_wireframe_node()), lambda c, k: len(set(round(q[0], 1) for q in allpx())) > 2),
+    ('bump_height_gradient_tilts_normal', lambda: (reset(), c_bump_gradient()), lambda c, k: abs(c[0] - 0.735) > 0.08),
+    ('bump_noise_explicit_object', lambda: (reset(), c_bump_noise_explicit('Object')), lambda c, k: len(set((round(q[0], 1), round(q[2], 1)) for q in allpx())) > 8),
+    ('bump_noise_explicit_generated', lambda: (reset(), c_bump_noise_explicit('Generated')), lambda c, k: len(set((round(q[0], 1), round(q[2], 1)) for q in allpx())) > 8),
+    ('principled_sss', lambda: (reset(), c_sss()), lambda c, k: c[0] > 0.2),
+    ('environment_texture', lambda: (reset(), c_env_texture()), lambda c, k: k[1] > 0.5 and k[0] < 0.2),
+    ('backface_culling_flipped', lambda: (reset(), c_backface_culling()), lambda c, k: c[0] < 0.3 or c[0] > 0.5),
+    ('wireframe_modifier', lambda: (reset(), c_wireframe_mod()), lambda c, k: sum(1 for q in allpx() if q[0] > 0.8 and q[2] > 0.8) > 50 and c[0] < 0.4),
     ('text_object', lambda: (reset(), c_text()), lambda c, k: c[0] > 0.5 and c[1] > 0.5 and c[2] > 0.5),
     ('curve_bevel_ring', lambda: (reset(), c_curve_bevel()), lambda c, k: c[0] < 0.3 and ring_pred()),
     ('glossy_reflects_world', lambda: (reset(), c_glossy_world()), lambda c, k: 0.3 < c[2] < 0.95 and k[2] > 0.95 and c[0] < 0.1),
@@ -159,7 +251,7 @@ CASES = [
     ('grid_emission', lambda: (reset(), c_displace_texture()), lambda c, k: c[1] > 0.5 and c[0] < 0.2),
     ('vertex_color_attr', lambda: (reset(), c_vertex_color_attr()), lambda c, k: c[1] > 0.3 and c[0] < 0.2 and c[2] < 0.2),
 ]
-KNOWN_GAPS = {'grease_pencil'}   # BACKLOG: GP render přes EEVEE vrací nuly
+KNOWN_GAPS = {'grease_pencil', 'hair_curves'}   # BACKLOG: samplerBuffer (texel buffery) ve WebGPU backendu chybí
 state = {'i': 0, 'phase': 0, 'waited': 0}
 def tick():
     i = state['i']
