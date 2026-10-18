@@ -83,6 +83,14 @@ def c_volume_scatter_light():
     o = nt.nodes.new('ShaderNodeOutputMaterial'); v = nt.nodes.new('ShaderNodeVolumeScatter'); v.inputs[0].default_value = (1, 1, 1, 1); v.inputs[1].default_value = 1.5
     nt.links.new(v.outputs[0], o.inputs[1]); ob.data.materials.append(m)
     bpy.ops.object.light_add(type='POINT', location=(0, -1.5, 0.8)); bpy.context.object.data.energy = 150
+def c_hair_curves():
+    h = bpy.data.hair_curves.new('H'); ob = bpy.data.objects.new('H', h); bpy.context.collection.objects.link(ob)
+    h.add_curves([4, 4, 4]) if hasattr(h, 'add_curves') else None
+    out('OPS_INFO hair curves', len(h.curves), len(h.points))
+    import mathutils
+    for ci, c in enumerate(h.curves):
+        for pi, pt in enumerate(c.points): pt.position = (-1 + ci, 0, -1 + pi * 0.7); pt.radius = 0.15
+    mat(ob, lambda nt: emission(nt, (1, 0, 0), 3.0))
 def c_text():
     bpy.ops.object.text_add(location=(0, 0, 0), rotation=(1.5708, 0, 0)); t = bpy.context.object; t.data.body = 'I'; t.data.size = 3; t.data.extrude = 0.1
     mat(t, lambda nt: emission(nt, (1, 1, 1), 3.0))
@@ -141,6 +149,7 @@ CASES = [
     ('shadow_sun', lambda: (reset(world=(0, 0, 0)), c_shadow()), lambda c, k: shadow_pred(c, k)),
     ('volume_absorb', lambda: (reset(), c_volume()), lambda c, k: c[0] < 0.2 and c[1] > 0.3),
     ('volume_scatter_light', lambda: (reset(world=(0, 0, 0)), c_volume_scatter_light()), lambda c, k: (c[0] + c[1] + c[2]) / 3 > 0.1 and (k[0] + k[1] + k[2]) / 3 < 0.05),
+    ('hair_curves', lambda: (reset(), c_hair_curves()), lambda c, k: sum(1 for p in allpx() if p[0] > 0.5 and p[1] < 0.3) > 15),
     ('text_object', lambda: (reset(), c_text()), lambda c, k: c[0] > 0.5 and c[1] > 0.5 and c[2] > 0.5),
     ('curve_bevel_ring', lambda: (reset(), c_curve_bevel()), lambda c, k: c[0] < 0.3 and ring_pred()),
     ('glossy_reflects_world', lambda: (reset(), c_glossy_world()), lambda c, k: 0.3 < c[2] < 0.95 and k[2] > 0.95 and c[0] < 0.1),

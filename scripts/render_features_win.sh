@@ -5,6 +5,7 @@ U=${WINUSER:-$(ls /mnt/c/Users | grep -v -i -E 'public|default|all users|desktop
 W=/mnt/c/Users/$U/p2win; ROOT=$(cd "$(dirname "$0")/.." && pwd)
 cp "$ROOT/scripts/render_features_test.py" "$W/render_features_test.py"; cp "$ROOT/scripts/ops_test.mjs" "$W/"; mkdir -p "$W/out"
 ALL=""
+[ -n "$OPS_ALL" ] && ALL="set OPS_ALL=1&& "
 if [ -n "$RF_ONLY" ]; then
   sed -i "s/^state = {'i': 0/CASES = [c for c in CASES if c[0] in '$RF_ONLY'.split(',')]\nstate = {'i': 0/" "$W/render_features_test.py"; ALL="set OPS_ALL=1&& "
 fi
