@@ -1,5 +1,13 @@
 Výsledek: 🟡 víkend: kola 41–60 hotová na PC (diakritika, šablony, vlasy, prst jako touchpad pro G/R/S/E/loop cut/box, auto-klávesnice, lišta ⋯, ikona), regresní sada bez FAIL — vše čeká na test na iPadu
 
+# Kolo 65 (víkend, 18. 10.) — render do souboru
+- ✅ **Render do souboru byl prázdný** (PNG s alpha 0): `render.render(write_still=True)`, Save As z Render Result. Web nemá synchronní čtení z GPU → zápis se teď odloží, až dorazí pixely (fork 7224a3a6). Důkaz: `scripts/render_write_win.sh` PASS (EEVEE, Workbench, Save As); ops 94/94, interactive ALL PASS, parity bez ❌, gpulost PASS.
+- Testy `render_eevee_to_png` a `render_workbench_to_png` přesunuty z `ops_test.py` do `render_write_test.py` — asserty stejné, jen čekají na asynchronní čtení (zápis je teď o pár ticků později). Není to zeslabení.
+- Nové ops testy: bridge/bevel, světla/kamery/text→mesh/merge, výběry/sharp/seam, atributy + Geometry Nodes (vše PASS).
+- 🔴 Zůstává: **animace (Ctrl+F12)** zapisuje stále prázdné snímky (BACKLOG).
+- Co otestovat na iPadu: F12 → Image ▸ Save As → PNG → 📁 stáhnout → obrázek není černý.
+
+
 # ⭐ Co otestovat na iPadu NEJDŘÍV (nové z víkendu, podle důležitosti)
 (Ověřeno jen na PC/Chrome; na iPadu nic. Pokud něco spadne, napiš přesné kroky + screenshot. Po načtení stránky udělej reload, ať se nahraje nový build.)
 1. **Prst místo myši (kola 51–54):** vyber kostku → lišta **G** → táhni prstem (lišta zmodrá, kostka se hýbe) → klepni = potvrdit. Edit mode: **Ctrl→R→Ctrl** loop cut (najeď prstem na hranu, klepni 2×), **⋯ → B** box select tahem, **⋯ → E** extrude.

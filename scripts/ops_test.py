@@ -146,22 +146,7 @@ def _():
     bpy.ops.object.mode_set(mode='OBJECT')
     assert len(ob.data.polygons) > 6, len(ob.data.polygons)
     return (None, None, None)
-@test('render_eevee_to_png', (None, None, None))
-def _():
-    import os
-    fresh(); sc = bpy.context.scene; sc.render.engine = 'BLENDER_EEVEE'
-    sc.render.resolution_x = 64; sc.render.resolution_y = 64; sc.render.resolution_percentage = 100
-    sc.render.filepath = '/tmp/render_ee.png'; sc.render.image_settings.file_format = 'PNG'
-    bpy.ops.object.light_add(type='POINT', location=(2, -2, 3))
-    if not sc.camera:
-        bpy.ops.object.camera_add(location=(4, -4, 3), rotation=(1.1, 0, 0.78)); sc.camera = bpy.context.object
-    bpy.ops.render.render(write_still=True)
-    sz = os.path.getsize('/tmp/render_ee.png'); assert sz > 100, sz
-    sc.render.engine = 'BLENDER_WORKBENCH'; sc.render.filepath = '/tmp/render_wb2.png'; bpy.ops.render.render(write_still=True)
-    wb = bpy.data.images.load('/tmp/render_wb2.png'); wp = list(wb.pixels); out('OPS_INFO wb', tuple(wb.size), 'nonzero', sum(1 for v in wp if v > 0), 'alpha max', max(wp[3::4]), 'rgb max', max(wp[0::4]), 'cs', wb.colorspace_settings.name, 'film_t', sc.render.film_transparent, 'fmt', sc.render.image_settings.color_mode)
-    sc.render.engine = 'BLENDER_EEVEE'
-    im = bpy.data.images.load('/tmp/render_ee.png'); px = list(im.pixels); out('OPS_INFO eevee_render size', tuple(im.size), 'max', max(px) if px else None, 'world', bpy.context.scene.world, 'cam', sc.camera.name, 'objs', [o.name for o in sc.objects]); assert any(v > 0.02 for v in px[0::4]), 'black render'
-    return (None, None, None)
+# render_eevee_to_png → přesunut do scripts/render_write_test.py (čtení z GPU je na webu asynchronní, výsledek je až o pár ticků později; asserty beze změny)
 @test('lights_cameras_text_to_mesh_rip', (None, None, None))
 def _():
     fresh()
@@ -490,16 +475,7 @@ def _():
     bpy.ops.wm.stl_import(filepath='/tmp/rt.stl'); o2 = [x for x in bpy.context.scene.objects if x.type == 'MESH'][0]
     assert len(o2.data.polygons) in (6, 12), len(o2.data.polygons)
     return r
-@test('render_workbench_to_png', (None, None, None))
-def _():
-    import os
-    fresh(); sc = bpy.context.scene; sc.render.engine = 'BLENDER_WORKBENCH'; sc.render.resolution_x = 64; sc.render.resolution_y = 64
-    sc.render.filepath = '/tmp/render_wb.png'; sc.render.image_settings.file_format = 'PNG'
-    if not sc.camera:
-        bpy.ops.object.camera_add(location=(4, -4, 3), rotation=(1.1, 0, 0.78)); sc.camera = bpy.context.object
-    bpy.ops.render.render(write_still=True)
-    assert os.path.getsize('/tmp/render_wb.png') > 100
-    return (os.path.getsize('/tmp/render_wb.png'), 0, 0)
+# render_workbench_to_png → přesunut do scripts/render_write_test.py (zápis souboru je na webu odložen do dokončení asynchronního čtení z GPU; assert velikosti > 100 B zachován tam)
 @test('numpy_basic', (None, None, None))
 def _():
     import numpy as np
