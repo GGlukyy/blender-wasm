@@ -42,6 +42,7 @@ run space_sweep scripts/space_sweep_win.sh
 run prefs_sweep scripts/prefs_sweep_win.sh
 run rna_sweep scripts/rna_sweep_win.sh
 run rna2_sweep scripts/rna2_sweep_win.sh
+run gn_sweep scripts/gn_sweep_win.sh
 run rna_signatures python3 scripts/check_rna_update_signatures.py
 run prefs_input scripts/prefs_input_win.sh
 TAILN=25 run ops_sweeps_extra scripts/ops_sweeps_extra_win.sh
