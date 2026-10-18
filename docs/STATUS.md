@@ -22,6 +22,11 @@ Výsledek: 🟡 víkend: kola 41–66 (render animace, objemy, vlasy, GP viewpor
 
 # ⭐ Co otestovat na iPadu NEJDŘÍV (nové z víkendu, podle důležitosti)
 (Ověřeno jen na PC/Chrome; na iPadu nic. Pokud něco spadne, napiš přesné kroky + screenshot. Po načtení stránky udělej reload, ať se nahraje nový build.)
+0. **Nové z kola 65–66 (18. 10., vše ověřeno jen na PC/Chrome):**
+   - **Číslo do konzole Safari:** `(await navigator.gpu.requestAdapter()).limits.maxStorageBuffersPerShaderStage` → napiš mi ho (vlasy potřebují ≥ 11, stíny/objemy ≥ 10).
+   - **Hlavně nesmí spadnout:** Preferences ▸ Input ▸ *Emulate 3 Button Mouse* zaškrtnout (dřív pád); UV Editing ▸ Alt+klik na hranu (Edge Ring) a Select ▸ Select Overlap (dřív zamrzlo).
+   - **Nově vidět:** Add ▸ Grease Pencil ▸ Monkey (tahy ve viewportu); Add ▸ Curves ▸ Empty Hair (+ vlasy); materiál s Volume Absorption/Scatter; Solid + MatCap + Cavity ▸ Curvature.
+   - **Render:** Ctrl+F12 (animace, 3 snímky PNG, soubory nejsou černé); F12 ▸ Image ▸ Save As ▸ PNG nebo **TIFF**; Viewport Render hlásí „not supported“; compositor se přeskočí s varováním.
 1. **Prst místo myši (kola 51–54):** vyber kostku → lišta **G** → táhni prstem (lišta zmodrá, kostka se hýbe) → klepni = potvrdit. Edit mode: **Ctrl→R→Ctrl** loop cut (najeď prstem na hranu, klepni 2×), **⋯ → B** box select tahem, **⋯ → E** extrude.
 2. **Klávesnice sama (kolo 54):** dvojklepni na název objektu vpravo → vyjede klávesnice? Napiš „příšera“ — objeví se diakritika (kolo 41)? Když ne, tlačítko ⌨ v liště.
 3. **Lišta ⋯ (kolo 50):** Space (přehrát), H, I, F2, 💾 Ctrl+S.
