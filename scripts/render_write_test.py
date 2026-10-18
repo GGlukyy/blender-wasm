@@ -42,12 +42,15 @@ def tick():
         if os.path.exists(sc.render.filepath): os.remove(sc.render.filepath)
         win = bpy.context.window_manager.windows[0]
         area = next(a for a in win.screen.areas if a.type == 'VIEW_3D'); reg = next(r for r in area.regions if r.type == 'WINDOW')
+        msg = ''
         try:
             with bpy.context.temp_override(window=win, area=area, region=reg, scene=sc):
                 bpy.ops.render.opengl(write_still=True, view_context=False)
         except Exception as e:
-            out('OPS render_write opengl FAIL EXC', str(e)[:120]); state['step'] = 8; return 0.1
-        state['step'] = 7; state['waited'] = 0; return 1.0
+            msg = str(e)
+        # Web: Viewport Render není podporován (BACKLOG) — musí hlásit chybu, ne ticho ukládat prázdný obrázek
+        out('OPS render_write opengl_reports_unsupported', 'PASS' if ('not supported' in msg and not os.path.exists(sc.render.filepath)) else 'FAIL %r' % msg[:100])
+        state['step'] = 8; return 0.1
     if s == 7:
         p = '/tmp/rw_gl.png'
         if not os.path.exists(p) and state['waited'] < 12:

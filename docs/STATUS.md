@@ -6,7 +6,7 @@ Výsledek: 🟡 víkend: kola 41–60 hotová na PC (diakritika, šablony, vlasy
 - Nové ops testy: bridge/bevel, světla/kamery/text→mesh/merge, výběry/sharp/seam, atributy + Geometry Nodes (vše PASS).
 - ✅ UI fuzz `scripts/ui_fuzz_win.sh` (náhodné klávesy + myš, 4 seedy × 150 s, ~1100 akcí): bez pádu, bez PAGEERROR, render loop žije. Objektový fuzz `fuzz_obj_win.sh` (modifikátory, join, sculpt/paint módy, undo): 2 seedy PASS.
 - ✅ Fuzz `scripts/fuzz_win.sh` (náhodné edit-mode operace + undo/redo + přepínání módů; `FUZZ_SEED`, `FUZZ_N`): 3 seedy × ~860 operací bez pádu wasm.
-- 🟡 Viewport Render (`render.opengl`) ukládá prázdný obrázek (8bit čtení) — GAP v BACKLOGu, F12 funguje.
+- 🟡 Viewport Render (`render.opengl`) na webu teď hlásí „not supported, use F12“ místo tichého prázdného obrázku (`render_write_win.sh` PASS); skutečná oprava v BACKLOGu. Na iPadu: Render ▸ Viewport Render Image → objeví se chybová hláška.
 - ✅ **Animace (Ctrl+F12) píše skutečné snímky**: web teď renderuje po jednom snímku z hlavní smyčky a čeká na čtení z GPU (fork 82ae46e8). Důkaz: `scripts/render_anim_win.sh` PASS (Workbench, EEVEE, Ctrl+F12 z UI; 3 PNG se skutečnými pixely, `regress_all.sh` ho obsahuje). Starý test `render_animation_png_sequence` (jen existence souborů) přesunut do `render_anim_test.py` se silnějšími asserty. Omezení: jen PNG/EXR sekvence, ne video; Overwrite/Placeholders se ignorují.
 - Co otestovat na iPadu: Ctrl+F12 s 3 snímky (Output ▸ PNG, 64×64 stačí) → ve stavovém řádku proběhnou 3 snímky a soubory v `/opfs/home/` nejsou černé; F12 → Image ▸ Save As → PNG → 📁 stáhnout → obrázek není černý.
 
