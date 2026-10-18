@@ -28,6 +28,10 @@ cp -r "$SYSROOT/lib/python3.13" "$STAGE/lib/python3.13"
 ( cd "$STAGE/lib/python3.13" && rm -rf test tests idlelib lib2to3 turtledemo tkinter \
     config-3.13-wasm32-emscripten ensurepip \
     && find . -name '__pycache__' -type d -prune -exec rm -rf {} + )
+# `import sqlite3` HANGS the web build (the C module is not linked, the import machinery loops): replace the
+# package by a stub that fails fast with ImportError (scripts/pymods_win.sh).
+rm -rf "$STAGE/lib/python3.13/sqlite3"
+printf 'raise ImportError("sqlite3 is not available in the web build")\n' > "$STAGE/lib/python3.13/sqlite3.py"
 rm -f "$STAGE/5.3/datafiles/splash_template.xcf"
 python3 "$ROOT/scripts/trim_ocio.py" "$STAGE/5.3/datafiles/colormanagement"
 
