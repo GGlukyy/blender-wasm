@@ -251,7 +251,7 @@ CASES = [
     ('grid_emission', lambda: (reset(), c_displace_texture()), lambda c, k: c[1] > 0.5 and c[0] < 0.2),
     ('vertex_color_attr', lambda: (reset(), c_vertex_color_attr()), lambda c, k: c[1] > 0.3 and c[0] < 0.2 and c[2] < 0.2),
 ]
-KNOWN_GAPS = {'grease_pencil'}   # BACKLOG: GP render přes EEVEE (texel buffery už fungují, vlasy PASS)
+KNOWN_GAPS = {'grease_pencil'}   # BACKLOG: GP v F12 renderu (GP engine skládá přes CPU čtení výsledku EEVEE); viewport GP funguje (out/win/gp_viewport.png)
 state = {'i': 0, 'phase': 0, 'waited': 0}
 def tick():
     i = state['i']

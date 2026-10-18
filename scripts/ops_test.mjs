@@ -19,6 +19,7 @@ await page.goto("http://localhost:5173/", { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
 await page.getByRole("button", { name: /Launch Blender/ }).click();
 for (let i = 0; i < 280 && !done; i++) await new Promise(r => setTimeout(r, 1000));
+if (process.env.OPS_SHOT) { await page.mouse.move(700, 612); await page.keyboard.press("Escape"); await new Promise(r => setTimeout(r, 1000)); await page.keyboard.press("Escape"); await new Promise(r => setTimeout(r, 1000)); await page.mouse.move(150, 700, { steps: 10 }); await new Promise(r => setTimeout(r, 2500)); await page.mouse.move(160, 710); await new Promise(r => setTimeout(r, 1500)); }
 if (process.env.OPS_SHOT) await page.screenshot({ path: process.env.OPS_SHOT });
 lines.forEach(l => console.log(l));
 if (!done) console.log("OPS_TIMEOUT");

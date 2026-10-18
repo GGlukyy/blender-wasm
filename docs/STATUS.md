@@ -14,7 +14,7 @@ Výsledek: 🟡 víkend: kola 41–60 hotová na PC (diakritika, šablony, vlasy
 # Kolo 66 (víkend, 18. 10.) — lov chyb v EEVEE
 - ✅ Nový `scripts/render_features_win.sh` (11 případů, kontrola barev pixelů): emise, textura, svět, průhledný film, slunce, alpha blend, vertex color — vše PASS.
 - ✅ **Objemy v EEVEE** (Volume Scatter/Absorption) se nevykreslovaly: shader `eevee_volume_scatter` se nepřeložil (`extinction_tx`). Opraveno (fork, `eevee_volume.bsl.hh`); důkaz `render_features_win.sh` volume_absorb + volume_scatter_light PASS. Na iPadu: kostka s materiálem Volume Absorption/Scatter ve vykresleném náhledu (F12) má barevný objem.
-- 🟡 **Grease Pencil** v F12 renderu zůstává prázdný (GAP, BACKLOG).
+- ✅ **Grease Pencil a vlasy (Curves)**: ve viewportu se dřív vůbec nekreslily (chyběly texel buffery `samplerBuffer`, `max_buffer_texture_size`, vyplnění dummy depth textury). Teď vlasy v F12 i viewportu a GP ve viewportu fungují (`render_features_win.sh` hair_curves PASS, `out/win/gp_viewport.png`). **Na iPadu ověř:** Add ▸ Grease Pencil ▸ Monkey vidět; Add ▸ Curves ▸ Empty Hair + vlasy viditelné; hlavně nesmí spadnout (nové storage buffery — limit Safari). Lukáš: v konzoli Safari `(await navigator.gpu.requestAdapter()).limits.maxStorageBuffersPerShaderStage` a napiš číslo.\n- 🟡 GP v F12 renderu zůstává prázdný (GAP, BACKLOG).
 - 🟡 **Compositor** (Render ▸ Compositing) vracel prázdný/průhledný obraz. Web ho teď přeskočí s varováním a render zůstane bez kompozitingu (skutečná oprava v BACKLOGu). Na iPadu: scéna s compositing nodes → F12 → obraz je vidět + varování.
 
 # ⭐ Co otestovat na iPadu NEJDŘÍV (nové z víkendu, podle důležitosti)
