@@ -1,4 +1,4 @@
-Výsledek: 🟡 víkend: kola 41–66 (render animace, objemy, vlasy, GP viewport, compositor), kola 41–60 hotová na PC (diakritika, šablony, vlasy, prst jako touchpad pro G/R/S/E/loop cut/box, auto-klávesnice, lišta ⋯, ikona), regresní sada bez FAIL — vše čeká na test na iPadu
+Výsledek: 🟡 víkend 18. 10. (kola 65–66): na PC vše zelené (`regress_all.sh` bez FAIL, 50 sweepů PASS) — render do souboru/animace, objemy, vlasy, Grease Pencil ve viewportu, UV hangy, pád Emulate 3 Button, TIFF, **OpenVDB (Voxel Remesh), Bullet, Quadriflow, Fluid v buildu**. Na iPadu NIC z toho neotestováno — viz „Co otestovat NEJDŘÍV“.
 
 # Kolo 65 (víkend, 18. 10.) — render do souboru
 - ✅ **Render do souboru byl prázdný** (PNG s alpha 0): `render.render(write_still=True)`, Save As z Render Result. Web nemá synchronní čtení z GPU → zápis se teď odloží, až dorazí pixely (fork 7224a3a6). Důkaz: `scripts/render_write_win.sh` PASS (EEVEE, Workbench, Save As); ops 94/94, interactive ALL PASS, parity bez ❌, gpulost PASS.
