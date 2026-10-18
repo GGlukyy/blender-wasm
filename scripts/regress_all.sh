@@ -29,6 +29,15 @@ run overlay_sweep scripts/overlay_sweep_win.sh
 run node_sweep scripts/node_sweep_win.sh
 run eevee_sweep scripts/eevee_sweep_win.sh
 run modifier_sweep scripts/modifier_sweep_win.sh
+run mesh_ops_sweep scripts/mesh_ops_sweep_win.sh
+run obj_ops_sweep scripts/obj_ops_sweep_win.sh
+run curve_ops_sweep scripts/curve_ops_sweep_win.sh
+run armature_ops_sweep scripts/armature_ops_sweep_win.sh
+run pose_ops_sweep scripts/pose_ops_sweep_win.sh
+run uv_ops_sweep scripts/uv_ops_sweep_win.sh
+run sculpt_ops_sweep scripts/sculpt_ops_sweep_win.sh
+run paint_ops_sweep scripts/paint_ops_sweep_win.sh
+run lattice_ops_sweep scripts/lattice_ops_sweep_win.sh
 run fuzz scripts/fuzz_win.sh
 run ui_fuzz scripts/ui_fuzz_win.sh
 run fuzz_obj scripts/fuzz_obj_win.sh
