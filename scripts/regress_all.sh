@@ -43,6 +43,7 @@ run prefs_sweep scripts/prefs_sweep_win.sh
 run rna_sweep scripts/rna_sweep_win.sh
 run rna2_sweep scripts/rna2_sweep_win.sh
 run gn_sweep scripts/gn_sweep_win.sh
+run nodetypes_sweep scripts/nodetypes_sweep_win.sh
 run world_sweep scripts/world_sweep_win.sh
 run saveload_all scripts/saveload_all_win.sh
 run pymods scripts/pymods_win.sh
