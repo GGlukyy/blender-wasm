@@ -37,6 +37,25 @@ def tick():
         if os.path.exists(p): check(p, 'eevee_write_still' if s == 3 else 'workbench_write_still')
         else: out('OPS render_write %s FAIL no file' % p)
         state['step'] = s + 1; return 0.5
+    if s == 6:   # Viewport Render (render.opengl) — čte pixely z offscreen GPU bufferu
+        sc.render.filepath = '/tmp/rw_gl.png'
+        if os.path.exists(sc.render.filepath): os.remove(sc.render.filepath)
+        win = bpy.context.window_manager.windows[0]
+        area = next(a for a in win.screen.areas if a.type == 'VIEW_3D'); reg = next(r for r in area.regions if r.type == 'WINDOW')
+        try:
+            with bpy.context.temp_override(window=win, area=area, region=reg, scene=sc):
+                bpy.ops.render.opengl(write_still=True, view_context=False)
+        except Exception as e:
+            out('OPS render_write opengl FAIL EXC', str(e)[:120]); state['step'] = 8; return 0.1
+        state['step'] = 7; state['waited'] = 0; return 1.0
+    if s == 7:
+        p = '/tmp/rw_gl.png'
+        if not os.path.exists(p) and state['waited'] < 12:
+            state['waited'] += 1; return 1.0
+        if os.path.exists(p):   # ZNÁMÁ MEZERA (BACKLOG): 8bit offscreen read vrací nuly; hlásí se jako GAP, při opravě se změní na PASS
+            ok = check(p, 'opengl_write_still', quiet=True); out('OPS render_write opengl_write_still', 'PASS' if ok else 'GAP (prázdný soubor, viz BACKLOG)')
+        else: out('OPS render_write opengl FAIL no file')
+        state['step'] = 8; return 0.5
     out('OPS_DONE')
     return None
 bpy.app.timers.register(tick, first_interval=1.0)

@@ -22,6 +22,8 @@
 
 - [ ] **Render animace (Ctrl+F12 / `render.render(animation=True)`) zapisuje prázdné snímky** — oprava výše řeší jen jeden snímek. Návrh architekta: addon, který krokuje snímky přes timery (snímek → write_still → počkej na soubor → další), nebo spike v `demo/` se synchronním čtením přes OffscreenCanvas `getImageData` (odhad, neověřeno). Existující test `render_animation_png_sequence` kontroluje jen existenci souborů.
 
+- [ ] **Viewport Render (Render ▸ Viewport Render Image, `render.opengl`) uloží prázdný obrázek** — `GPU_offscreen_read_color(GPU_DATA_UBYTE)` je 8bit čtení, `read_color_sync` ho vrací jako nuly (`film_capture_async` bere jen RGBA16F/32F). Test: `render_write_win.sh` řádek `opengl_write_still … GAP`. Oprava by potřebovala stejné odložení zápisu + vložení pixelů do ibuf v `render_opengl.cc`. Priorita nízká (F12 funguje).
+
 ## Plán
 - [x] **P1** (PASS: `scripts/wgsl_seed_win.sh verify` → TOTAL translations: 0, seed 179 shaderů; BLENDER_REF=f077479e. Příčina: Blender běží na pthread workeru, cache z main.js tam nebyla vidět → nikdy nefungovala; seed se načítá sync XHR. Regenerace: `scripts/wgsl_seed_win.sh seed`, `wgsl-cache.json` je v .gitignore (generovaný). Zbývá iPad: čistá data webu, přepnutí workspace) shader seed (`wgsl-cache.json`) pro všechny workspaces + edit mode + shading módy;
   test: cache-miss = 0 při prvním přepnutí.
