@@ -26,6 +26,7 @@ run render_write scripts/render_write_win.sh
 run render_anim scripts/render_anim_win.sh
 run render_features scripts/render_features_win.sh
 run overlay_sweep scripts/overlay_sweep_win.sh
+run node_sweep scripts/node_sweep_win.sh
 run fuzz scripts/fuzz_win.sh
 run ui_fuzz scripts/ui_fuzz_win.sh
 run fuzz_obj scripts/fuzz_obj_win.sh
