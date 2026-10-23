@@ -18,6 +18,8 @@ Extra lov chyb po finálním buildu (destroy zapnutý): `fuzz_win` seed 77, `fuz
 
 **Důkaz:** `tel_win.sh`, `mem_win.sh`, `safe_win.sh`, `reload_lost_win.sh`, `parity_win.sh` (12/17/20 + celé), `regress_all.sh` (jen utf8 a touch_loopcut spadly jednou v sekvenci, samostatně PASS; `touch_win` občas vypadne hned po jiném testu, samostatně PASS).
 
+**První data z iPadu (23. 10. ~21:22, `out/ipad/`, Safari 26.5):** telemetrie funguje přes tunel. Adapter `apple`: `maxStorageBuffersPerShaderStage=44`, `maxBufferSize=1 GiB`, `maxStorageBufferBindingSize=1 GiB`, `maxBindGroups=11` → limit storage bufferů **není problém** (vlasy/GP by měly jít). Okno bylo 580×522 CSS px (obrazovka 954×1373, DPR 2 — asi Split View/Stage Manager). Tab byl celou dobu na pozadí (`hidden`, 157 s), Blender se nespustil (žádný `start` s framy) a skončilo `TypeError: Load failed` (zřejmě fetch při návratu z pozadí). Z toho se o pádech GPU nic nedozvíme — chci sezení, kde Blender opravdu běží.
+
 **Co otestovat na iPadu (podle důležitosti)**
 1. Na PC: `cd demo && pnpm dev --host` + `cloudflared tunnel --url http://localhost:5173`, na iPadu otevři **https** odkaz (nové okno, čistá data webu), pracuj jako obvykle až do pádu. Já pak čtu `out/ipad/tel_*.jsonl` — nic nemusíš fotit.
 2. Zkus to, co dřív padalo: UV Editing (A, G, táhnout), Material Preview, Sculpt po Subsurf 2, Monkey Subsurf 3. **Vydrží to déle než ~15 s?** Napiš, kolik minut.
