@@ -12,7 +12,7 @@ set -euo pipefail
 ROOT="${ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 export PATH="$ROOT/emsdk/upstream/emscripten:$PATH"
 BUILD="$ROOT/build-blender"
-OUT="$ROOT/demo/public"
+OUT="${OUT:-$ROOT/demo/public}"
 SYSROOT="$ROOT/wasm-sysroot"
 STAGE="$ROOT/demo/.stage"
 
@@ -141,7 +141,7 @@ WASMFS_INC="$ROOT/emsdk/upstream/emscripten/system/lib/wasmfs"
 WEB_FLAGS="-pthread \
   -sEXIT_RUNTIME=0 -g2 \
   -O1 \
-  -sALLOW_MEMORY_GROWTH=1 -sINITIAL_MEMORY=1073741824 -sMAXIMUM_MEMORY=4294967296 \
+  -sALLOW_MEMORY_GROWTH=1 -sINITIAL_MEMORY=${INITMEM:-1073741824} -sMAXIMUM_MEMORY=4294967296 \
   -sSTACK_SIZE=16777216 -sDEFAULT_PTHREAD_STACK_SIZE=4194304 \
   -sPTHREAD_POOL_SIZE=${POOL:-32} -sPTHREAD_POOL_SIZE_STRICT=0 \
   -sPROXY_TO_PTHREAD=1 \

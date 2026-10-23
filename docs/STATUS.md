@@ -1,3 +1,12 @@
+Výsledek: 🟡 23. 10. noc: M4 build pro iPad — **POOL=8 vláken + INITIAL_MEMORY 512 MB** (dřív 32 + 1 GB). Na PC zelené, na iPadu neotestováno.
+
+# Víkend — co je nového (23. 10. ~23:00)
+- Ověřeno: `device.destroy()` nevolá nikdo z nás (jen knihovna emdawnwebgpu v blender.js) → `lost=destroyed` je iOS (odhad: zabil GPU proces kvůli celkové paměti).
+- M4 build: `POOL=8 INITMEM=536870912 bash scripts/link_blender_release.sh` (skript teď bere `INITMEM` a `OUT`; výchozí hodnoty beze změny). Zálohu starého buildu mám v `out/bak_m4/`.
+- Důkaz PC: `mem_win.sh` PASS (heap 512 MB, JS paměť agenta 1840 MB místo ~3,4 GB), `parity_win.sh` bez ❌, ops 96/96, `regress_all.sh` viz níže.
+- **Co otestovat na iPadu:** stejný postup jako dřív (tunel, nové okno, čistá data webu), pracuj do pádu. Zajímá mě, jestli vydrží déle než 55–208 s. Pokud ne, `tel_summary.py` ukáže, zda heap rostl (512 → víc).
+- Blocked: nic. Další krok: M5 (watchdog submitu) až budou nová data z iPadu.
+
 Výsledek: 🟡 23. 10.: sprint „iPad vydrží“ — GPU buffery se teď ničí (dřív 0 z 10 820), telemetrie z iPadu běží; na PC zelené, na iPadu neotestováno (viz sekce Sprint níže). Starší stav z 18. 10. pod ní.
 
 # Sprint „iPad vydrží“ (23. 10., pátek odpoledne–večer)
