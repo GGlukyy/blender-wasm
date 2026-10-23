@@ -867,6 +867,25 @@ window.__blenderFileOpenHook = async () => {
  * the Launch button, which is enabled once both downloads finished above. The
  * WebGPU device itself is acquired on the render pthread (creator.cc bootstrap),
  * so we only sanity-check WebGPU availability here. ---- */
+/* M6: after a GPU loss / killed tab iOS can keep the dead page's OPFS file locks, so the next start hangs
+ * on "Loading Blender…" with no explanation. If no frame arrives in time, say what to do and offer a
+ * start without persistent storage (?safe=1: HOME in memory, no OPFS). */
+const SAFE_MODE = new URLSearchParams(location.search).get("safe") === "1";
+function startWatchdog() {
+  const ms = +(window.__WATCHDOG_MS || 45000);
+  setTimeout(() => {
+    if (window.__BGUI__.window || document.getElementById("start-hang")) return;
+    const b = document.createElement("div");
+    b.id = "start-hang";
+    b.style.cssText = "position:fixed;left:0;right:0;top:0;z-index:99999;padding:14px 18px;background:#8a5a00;color:#fff;font:16px system-ui;text-align:center";
+    b.innerHTML = "Start trvá nezvykle dlouho. Po pádu může iPad držet zámek souborů: <b>zavři tento tab úplně</b> (přepínač aplikací) a otevři stránku znovu. " +
+      "<button style='margin-left:12px;font-size:16px' onclick=\"location.search='?safe=1'\">Spustit bez ukládání</button>";
+    document.body.appendChild(b);
+    telEvent("start_hang", { ms });
+    const t = setInterval(() => { if (window.__BGUI__.window) { b.remove(); clearInterval(t); } }, 1000);
+  }, ms);
+}
+
 async function start() {
   /* WebGPU availability + software-renderer state were already probed and
    * surfaced (probeGpu / the Launch gate); a fatal GPU state keeps the button
@@ -881,6 +900,7 @@ async function start() {
   setUiPhase("console");
   startBtn.disabled = true;
   startBtn.textContent = "Starting…";
+  startWatchdog();
 
 // EEVEE Shadow Pool: výchozí 512 MB (jen shadow atlas) + sondy ≈ 1 GB GPU paměti při Material Preview (měřeno ?perf=1: 1080 MB).
 // iPad Safari má malý limit na tab → pro nové soubory / startup scénu 128 MB (-380 MB). Přepsat: ?shadowpool=512 (hodnoty enumu v MB).
@@ -953,8 +973,8 @@ window.Module = {
   },
   preRun: [function () {
     try {
-      ENV.BLENDER_WEB_OPFS = "1";
-      ENV.HOME = "/opfs/home";
+      if (!SAFE_MODE) ENV.BLENDER_WEB_OPFS = "1";
+      ENV.HOME = SAFE_MODE ? "/tmp" : "/opfs/home";
       /* Assets are mounted zero-copy at /assets (provider backend), not
        * extracted to OPFS. BLENDER_SYSTEM_RESOURCES holds scripts/ + datafiles/;
        * BLENDER_SYSTEM_PYTHON expects <dir>/lib/python3.13. */

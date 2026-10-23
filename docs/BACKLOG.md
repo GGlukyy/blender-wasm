@@ -25,7 +25,7 @@ Na PC (Chrome/NVIDIA) se to neprojeví → nehádej, MĚŘ. Cíl: 10 minut běž
   ~1,5–2 GB celkem (odhad, ověř z telemetrie).
 - [ ] **M5 Hypotéza D — watchdog dlouhého submitu** (Material Preview kompilace, velký sculpt). Pokud telemetrie ukáže
   device lost bez růstu paměti → rozdělit submit / createRenderPipelineAsync. Architekt.
-- [ ] **M6** „Loading Blender…“ zaseknutí po pádu (viz níže) a klávesnice při startu (viz níže).
+- [~] (částečně: watchdog po 45 s s návodem + `?safe=1` (HOME v paměti, bez OPFS) `scripts/safe_win.sh` PASS; lišta kláves se ukáže až po prvním snímku Blenderu — bar/touch_modal/autokbd PASS; reload po ztrátě GPU na PC naběhne `scripts/reload_lost_win.sh` PASS = na PC se zaseknutí nereprodukuje, iOS zámek OPFS jen odhad; čeká na iPad) **M6** „Loading Blender…“ zaseknutí po pádu (viz níže) a klávesnice při startu (viz níže).
 Každá změna: regresní sada `regress_all.sh` musí zůstat bez FAIL. Výsledek každého kroku 1 řádek do STATUS.md
 a do „Co otestovat na iPadu“ přesný postup pro Lukáše (s `?tel=1`).
 

@@ -522,5 +522,10 @@ export function installTouch(canvas) {
   const hide = btn("✕", () => bar.remove());
   hide.title = "Skrýt lištu";
   bar.appendChild(more);   /* last, so the 2nd row wraps below ALL first-row buttons */
+  /* M6: the bar used to sit on top of the splash / "Launch Blender" screen; show it only once Blender draws. */
+  bar.style.display = "none";
   document.body.appendChild(bar);
+  const showWhenReady = setInterval(() => {
+    if (window.__BGUI__ && window.__BGUI__.window) { bar.style.display = "flex"; clearInterval(showWhenReady); }
+  }, 300);
 }
