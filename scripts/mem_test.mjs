@@ -30,7 +30,7 @@ def _t():
     return 1.0
 bpy.app.timers.register(_t, first_interval=3.0)`;
 const browser = await chromium.launch({ headless: false, executablePath: process.env.CHROME, args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
-const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
+const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 }, deviceScaleFactor: +(process.env.DPR || 1) })).newPage();
 page.on("pageerror", e => console.log("PAGEERROR", String(e).slice(0, 300))); page.on("crash", () => console.log("PAGECRASH"));
 let step = -1; const rows = [];
 const names = ["idle", "uv_edit", "material_preview", "sculpt_subsurf2", "monkey_subsurf3"];

@@ -18,7 +18,7 @@ Na PC (Chrome/NVIDIA) se to neprojeví → nehádej, MĚŘ. Cíl: 10 minut běž
   `wgpuBufferDestroy` / `wgpuTextureDestroy` před Release všude ve `source/blender/gpu/webgpu/` (staging/readback
   buffery, immediate buffery, depth snapshot P2c každých 120 ms!, dočasné textury). Ověř počítadlem živých
   objektů z M0 (musí být v klidu konstantní).
-- [ ] **M3 Hypotéza B — velké framebuffery.** iPad kreslí v DPR 2 (2360×1640 → 4× pixelů) × mnoho passů/overlay
+- [x] (REFUTOVÁNO měřením: `DPR=2 scripts/mem_win.sh` — texturová paměť stejná jako při DPR 1 (49–79 MB), plátno se kreslí v CSS px (`fitCanvas` = innerWidth), ne ×DPR; viz docs/MEMORY.md) **M3 Hypotéza B — velké framebuffery.** iPad kreslí v DPR 2 (2360×1640 → 4× pixelů) × mnoho passů/overlay
   textur. Změř MB framebufferů; zvaž výchozí render scale 1× (UI ostré zůstane) nebo `?dpr=`. Pozor na čitelnost.
 - [ ] **M4 Hypotéza C — wasm heap.** INITIAL/MAXIMUM_MEMORY, růst při operacích, Python (numpy/OpenVDB načtené až
   při použití?), undo paměť (Preferences undo steps/memory limit na webu snížit). iOS Safari tab má odhadem
