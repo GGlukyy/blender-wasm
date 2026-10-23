@@ -1,9 +1,31 @@
 Výsledek: 🟡 víkend 18. 10. (kola 65–66): na PC vše zelené (`regress_all.sh` bez FAIL, 50 sweepů PASS) — render do souboru/animace, objemy, vlasy, Grease Pencil ve viewportu, UV hangy, pád Emulate 3 Button, TIFF, **OpenVDB (Voxel Remesh), Bullet, Quadriflow, Fluid v buildu**. Na iPadu NIC z toho neotestováno — viz „Co otestovat NEJDŘÍV“.
 
-# Sprint „iPad vydrží“ (23. 10.)
-- ✅ M0 telemetrie z iPadu: `demo/src/telemetry.js` + Vite plugin `/__telemetry` → `out/ipad/tel_<datum>.jsonl` (každé 2 s: FPS, textury MB, wasm heap, chyby, poslední vstupy/logy, adapter.limits, ztráta GPU). Důkaz: `scripts/tel_win.sh` PASS. Zapnuto vždy na dev serveru (`?tel=0` vypne), jinak `?tel=1`.
-- **Co otestovat na iPadu (nejdřív):** spusť `cd demo && pnpm dev --host` + `cloudflared tunnel --url http://localhost:5173`, otevři https odkaz, pracuj jako obvykle až do pádu. Data se objeví sama v `out/ipad/` na PC (nic nemusíš fotit).
+# Sprint „iPad vydrží“ (23. 10., pátek odpoledne–večer)
+Výsledek: 🟡 M0–M3 hotové a ověřené na PC; M4/M5/M6 jen částečně. **Na iPadu nic z toho neotestováno.**
 
+**Co jsem udělal**
+- ✅ **M0 telemetrie** iPad → PC: každé 2 s JSON (FPS, textury, wasm heap, **počet živých GPU bufferů/textur**, poslední vstupy a logy, adapter limity, důvod ztráty GPU) do `out/ipad/tel_<datum>.jsonl`. Důkaz: `scripts/tel_win.sh` PASS. Zapnuto samo na dev serveru v normálním prohlížeči (`?tel=0` vypne; Playwright testy ji nemají).
+- ✅ **M1 měření**: `scripts/mem_win.sh` → `docs/MEMORY.md`. **Hlavní nález: Blender nezavolal `destroy()` na ŽÁDNÝ GPU buffer (0 z 10 820), po 2 minutách ~10 000 živých bufferů a uvolňoval je jen garbage collector** (Safari to dělá mnohem později než Chrome → pamět roste → iOS zabije GPU proces). Přesně hypotéza A.
+- ✅ **M2 oprava**: buffery i textury se teď ničí hned po dalším odeslání příkazů (`wgpu_buffer_free`/`wgpu_texture_free`). Živých bufferů ~100 místo ~10 000 (`mem_win.sh`: 10 532 z 10 623 zničeno). Cesta byla trnitá: zničení rozbilo kreslení (UV Sphere bez povrchu, výběr), příčiny: (1) uniform arena držená shadery celou epochu, (2) flush po submitu jednoho kontextu zničil buffery rozepsané v jiném (DRW/preview kontext) — architekt to trefil. Teď `parity_win.sh` 12/17/20 PASS, `regress_all.sh` bez trvalého FAIL.
+- ✅ **M3 refutováno**: DPR 2 nemění texturovou paměť (plátno se kreslí v CSS px).
+- 🟡 **M4**: wasm heap je 1 GB od startu (INITIAL_MEMORY), neroste. Chrome ukazuje u celého agenta ~3,4 GB, ale to je z velké části 1 GB sdílené paměti započtené víckrát (hlavní vlákno + 2 workery) — skutečně spíš ~1,3–1,5 GB. `wasmBytes` (197 MB) se po instantiaci uvolňuje (odhad, nepotvrzeno měřením). `PTHREAD_POOL_SIZE` 8 vs 32 nic nezměnilo na měření.
+- 🟡 **M6**: po 45 s bez prvního snímku se ukáže pruh s návodem („zavři tab úplně“) + tlačítko **Spustit bez ukládání** (`?safe=1`, bez OPFS) — `scripts/safe_win.sh` PASS. Lišta kláves se ukáže až když Blender kreslí (dřív překrývala úvodní obrazovku). Reload po ztrátě GPU na PC naběhne (`reload_lost_win.sh`), takže zaseknutí je asi jen iOS (odhad: zámek OPFS po mrtvém tabu).
+- ⏸ **M5** (watchdog dlouhého submitu): nedělal jsem — bez iPad telemetrie by to byla jen spekulace.
+
+**Důkaz:** `tel_win.sh`, `mem_win.sh`, `safe_win.sh`, `reload_lost_win.sh`, `parity_win.sh` (12/17/20 + celé), `regress_all.sh` (jen utf8 a touch_loopcut spadly jednou v sekvenci, samostatně PASS; `touch_win` občas vypadne hned po jiném testu, samostatně PASS).
+
+**Co otestovat na iPadu (podle důležitosti)**
+1. Na PC: `cd demo && pnpm dev --host` + `cloudflared tunnel --url http://localhost:5173`, na iPadu otevři **https** odkaz (nové okno, čistá data webu), pracuj jako obvykle až do pádu. Já pak čtu `out/ipad/tel_*.jsonl` — nic nemusíš fotit.
+2. Zkus to, co dřív padalo: UV Editing (A, G, táhnout), Material Preview, Sculpt po Subsurf 2, Monkey Subsurf 3. **Vydrží to déle než ~15 s?** Napiš, kolik minut.
+3. Když spadne: otevři stránku znovu → pokud visí „Loading Blender…“, po 45 s se objeví oranžový pruh. Zkus tlačítko **Spustit bez ukládání**.
+4. Výběr/Add UV Sphere/Undo ve viewportu — jen ať se nic nerozbilo (kreslení bufferů se změnilo).
+
+**Co nefunguje / otevřené**
+- Nevíme, jestli ztráta GPU na iPadu byla opravdu paměť; telemetrie (`gpu.buf`, `lost_detail`) to ukáže.
+- `parity #12` a pár testů je občas flaky (1 z ~5) při zapnutém destroy; baseline bez destroy nikdy nespadl. Pokud na iPadu uvidíš, že výběr „blikne“, napiš.
+- Špička živých bufferů při UV Editing (~3000) než doběhne flush — ladit až s daty z iPadu.
+
+**Co dál**: až budou data z iPadu → M5 (watchdog submitu) / M4 (zmenšit INITIAL_MEMORY, undo paměť) podle toho, co telemetrie ukáže.
 
 # Kolo 65 (víkend, 18. 10.) — render do souboru
 - ✅ **Render do souboru byl prázdný** (PNG s alpha 0): `render.render(write_still=True)`, Save As z Render Result. Web nemá synchronní čtení z GPU → zápis se teď odloží, až dorazí pixely (fork 7224a3a6). Důkaz: `scripts/render_write_win.sh` PASS (EEVEE, Workbench, Save As); ops 94/94, interactive ALL PASS, parity bez ❌, gpulost PASS.

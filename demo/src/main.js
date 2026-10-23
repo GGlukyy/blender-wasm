@@ -326,7 +326,7 @@ probeGpu().then(applyGpuStatus).catch(() => {});
  * FsProvider) and `wasmBytes` are consumed when the user clicks Launch. ---- */
 setUiPhase("loading");
 await decoder.init();
-const [assetsTar, wasmBytes] = await Promise.all([
+let [assetsTar, wasmBytes] = await Promise.all([
   fetchZst("assets.tar.zst", "assets").then((z) => {
     setProgress({ phase: "decompressing", percent: 1, message: "Decompressing assets" });
     return decoder.decode(z, manifest["assets.tar.zst"]);
@@ -968,7 +968,8 @@ window.Module = {
   print: (t) => { log(t); scan(t); },
   printErr: (t) => { log("[err] " + t); scan(t); },
   instantiateWasm: (imports, cb) => {
-    WebAssembly.instantiate(wasmBytes, imports).then((o) => cb(o.instance, o.module));
+    /* The 197 MB decompressed wasm is only needed to compile; drop it afterwards (M4: -197 MB on iPad). */
+    WebAssembly.instantiate(wasmBytes, imports).then((o) => { wasmBytes = null; cb(o.instance, o.module); });
     return {};
   },
   preRun: [function () {
