@@ -20,6 +20,16 @@ Na PC (Chrome/NVIDIA) se to neprojeví → nehádej, MĚŘ. Cíl: 10 minut běž
   objektů z M0 (musí být v klidu konstantní).
 - [x] (REFUTOVÁNO měřením: `DPR=2 scripts/mem_win.sh` — texturová paměť stejná jako při DPR 1 (49–79 MB), plátno se kreslí v CSS px (`fitCanvas` = innerWidth), ne ×DPR; viz docs/MEMORY.md) **M3 Hypotéza B — velké framebuffery.** iPad kreslí v DPR 2 (2360×1640 → 4× pixelů) × mnoho passů/overlay
   textur. Změř MB framebufferů; zvaž výchozí render scale 1× (UI ostré zůstane) nebo `?dpr=`. Pozor na čitelnost.
+- [ ] **⭐⭐ SPOLEHLIVÉ REPRO pádu (Lukáš, iPad 23. 10. 23:28) — ZAČNI TÍMHLE.** Kostka → Tab → režim ploch →
+  vybrat plochu → **G → rychle hýbat prstem** ⇒ okamžitá ztráta GPU. Klid nepadá, Subsurf nepadá. **Nejde o čas, ale
+  o rychlost operací** (počet překreslení s měnící se geometrií za sekundu). Odhad: každý snímek transformace vytváří
+  nové VBO/IBO/uniform buffery (create + destroy), WebKit/Metal je nestíhá uvolnit nebo má limit na počet alokací/s →
+  GPU proces padne. Telemetrie viděla špičku 6855 živých bufferů před flush. Návrh: (a) reprodukuj na PC: `G` + rychlý
+  pohyb myši 10 s, zaloguj buf_new/s a max živých; (b) **znovupoužívání bufferů** (pool/ring podle velikosti místo
+  create/destroy každý snímek — viz Metal `MTLSafeFreeList`/buffer pool a Vulkan `VKBuffer` reuse), častější flush;
+  (c) zkusit omezit překreslení při tažení na 1× za snímek (coalesce pointermove). Architekt. Ověř iPadem (Lukáš).
+- [ ] **Po pádu + Obnovit se skoro vždy zasekne „Loading Blender…“** (potvrzeno znovu 23. 10.) — M6, iOS-only.
+- [ ] **2D Animation (File ▸ New / workspace) na iPadu hned zamrzne** — nejspíš stejné jako Grease Pencil Monkey freeze.
 - [ ] **⭐ VÝSLEDEK iPad testu 23. 10. 22:30 (po M2) — PŘEČTI PRVNÍ.** `out/ipad/tel_2026-10-23.jsonl`, `tel_summary.py`:
   Lukáš: v klidu 3 min bez pádu; pád vždy až při práci (Subsurf 2, sculpt, Ctrl+B…). Relace s Blenderem: ztráta GPU po
   **55 s, 122 s, 208 s** práce (dřív odhadem ~15 s). **V okamžiku pádu bylo GPU objektů málo**: buf 5–24 MB, tex 60–65 MB
