@@ -19,3 +19,7 @@ Mem test po opravě: živých bufferů 6975 místo 9834 (zničeno 1650 z 9515; z
 
 ## M3 DPR (refutováno)
 `DPR=2 scripts/mem_win.sh`: GPU textury 49–79 MB stejně jako při DPR 1. Framebuffer se kreslí v CSS pixelech (iPad Air ≈ 1180×820), takže DPR 2 paměť neznásobuje. Hypotéza B neplatí.
+
+## M2 hotovo (23. 10. večer, po opravě více kontextů)
+Mem test (limity Safari): živých bufferů 91–2973 (špička při UV Editing, než doběhne flush), na konci 91; vytvořeno 10 623, `destroy()` 10 532, GC 0. Předtím 9 834 živých a 0 zničených.
+**Otevřené:** `performance.measureUserAgentSpecificMemory()` (Chrome) ukazuje celý agent ~3,4 GB (nezávisle na `PTHREAD_POOL_SIZE` 8 vs 32, `POOL=8 link_blender_release.sh`) — z čeho je, ještě nevím (wasm heap je 1 GB od startu); tohle je hlavní podezřelý pro iPad (M4).

@@ -50,6 +50,8 @@ const end = Date.now() + (IDLE + 15 + 20 + 20 + 20 + 30) * 1000;
 let n = 0;
 while (Date.now() < end && step < 4) { await page.mouse.move(600 + (n++ % 2) * 40, 400); await new Promise(r => setTimeout(r, 500)); }
 await new Promise(r => setTimeout(r, 22000)); await snap();
+const uam = await page.evaluate(async () => { try { const r = await performance.measureUserAgentSpecificMemory(); const o = { total_mb: Math.round(r.bytes / 1048576), by: {} }; for (const b of r.breakdown) { const k = (b.types || []).join(",") + "|" + (b.attribution.length ? "attr" : "none"); o.by[k] = (o.by[k] || 0) + Math.round(b.bytes / 1048576); } return o; } catch (e) { return String(e); } });
+console.log("UAMEM " + JSON.stringify(uam));
 console.log("step              heap_mb tex_mb(js) bufs buf_mb buf_new destroyed gc fps");
 for (const r of rows) console.log(`MEMROW ${r.step.padEnd(17)} ${r.heap} ${r.tex_mb} ${r.buf} ${r.buf_mb} ${r.new} ${r.destroyed} ${r.gc} ${r.fps}`);
 console.log(rows.length >= 4 ? "PASS mem baseline" : "FAIL mem baseline");

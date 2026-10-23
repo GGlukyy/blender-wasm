@@ -13,7 +13,7 @@ Na PC (Chrome/NVIDIA) se to neprojeví → nehádej, MĚŘ. Cíl: 10 minut běž
 - [x] (PASS: `scripts/mem_win.sh`, tabulka v `docs/MEMORY.md`; ZJIŠTĚNÍ: 0 z 10 820 bufferů zničeno přes destroy(), živých ~10 000 po 2 min, uvolňuje jen GC → M2 potvrzena) **M1 Změřit baseline na PC s limity Safari** (`WGPU_CAP_*`): wasm heap a GPU MB po bootu, v klidu 60 s,
   UV Editing + G, Material Preview, Sculpt na Subsurf 2, Monkey Subsurf 3. Tabulka do `docs/MEMORY.md`.
   Klíčová otázka: **roste GPU paměť v klidu?** (Lukáš: padá už po ~15 s.)
-- [~] **M2 Hypotéza A — GPU objekty se neuvolňují hned.** V emdawnwebgpu `wgpu*Release` jen pustí JS referenci,
+- [x] (PASS na PC: `scripts/mem_win.sh` — živých bufferů ~100 místo ~10 000, `destroy()` 10 532 z 10 623; `regress_all.sh` bez trvalého FAIL: utf8 a touch_loopcut spadly jednou v sekvenci, samostatně PASS; parity 12/17/20 PASS. Příčina dřívějších pádů testů: flush destroy po submitu JEDNOHO kontextu zničil buffery, které měl rozepsané jiný kontext (DRW/preview); oprava = flush jen když žádný kontext nenahrává. Čeká na iPad: telemetrie `gpu.buf` musí zůstat plochá) **M2 Hypotéza A — GPU objekty se neuvolňují hned.** V emdawnwebgpu `wgpu*Release` jen pustí JS referenci,
   paměť uvolní až GC; Chrome uklízí rychle, Safari ne → paměť roste, iOS zabije GPU proces. Oprava: explicitní
   `wgpuBufferDestroy` / `wgpuTextureDestroy` před Release všude ve `source/blender/gpu/webgpu/` (staging/readback
   buffery, immediate buffery, depth snapshot P2c každých 120 ms!, dočasné textury). Ověř počítadlem živých
