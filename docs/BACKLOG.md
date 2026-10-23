@@ -305,3 +305,6 @@ Subsurf 2 na Monkey plynulý, glTF export + import zpět (triangulováno).
 - [x] (PASS: `scripts/fluid_win.sh` — Mantaflow: Domain (GAS, 16³) + Flow, `fluid.bake_data` upeče 5 snímků do `.uni`/`.vdb`; fluid modifikátor je v ops_test jen jako GAP odstraněn) **Fluid (kouř/voda, Mantaflow) v buildu**: `WITH_MOD_FLUID=ON` (bundlovaný `extern/mantaflow`), wasm +0,56 MB (blender.wasm.zst 26,5 MB). Quick Smoke/Liquid hlásily „Built without Fluid modifier“, teď fungují. Výkon simulací na iPadu neznámý (CPU, wasm vlákna).
 
 - [x] (PASS: `scripts/pymods_win.sh` — 26 stdlib/Blender modulů: buď fungují, nebo rychle ImportError) **`import sqlite3` zavěsil Blender** (Python konzole / skript) — nahrazeno stubem v `lib/python3.13/sqlite3.py` (`ImportError: sqlite3 is not available in the web build`), vytváří se v `link_blender_release.sh`. `_ssl`, `_ctypes`, `_lzma`, `fcntl`, `readline`, `curses` dál chybí (vyhodí ImportError rychle).
+
+## 🔜 Až po iPadu (Lukáš 24. 10.)
+- [ ] **Cycles na PC verzi** (CPU Cycles ve wasm, `WITH_CYCLES` je teď OFF; HeyPuter ho má v GL buildu — `cmake/blender-wasm-gl-cache.cmake`, commit e73ddff). Nejdřív změřit velikost buildu a rychlost renderu kostky/Monkey vs desktop. Ne pro iPad (paměť).
