@@ -9,10 +9,10 @@ a po každém kroku nasaď build do `demo/public/` jen když je `regress_all.sh`
   max živých, submity/s, překreslení/s. Zapiš do `docs/MEMORY.md`. To je náš „teploměr“ pro K2–K4.
 - [ ] **K2 Levný experiment: strop překreslení při tažení** (~30 fps, sloučit pointermove/touchmove do 1 události
   za snímek; JS v `demo/` nebo GHOST web). Pokud K1 ukáže výrazný pokles alokací/s → nasadit → Lukáš test.
-- [ ] **K2b Upstream check (15 min, před K3):** `git fetch upstream` v `./blender/` i tady; projdi nové commity HeyPuter
-  ve `source/blender/gpu/webgpu/` (buffer pool/reuse, destroy, iOS). Jejich aktuální demo (developer.puter.com/labs/
-  blender-web) na iPadu 24. 10. NEnaběhne: `wink: main-thread runner failed` (blender.js:5258), wasm 160 MB, seed 394
-  shaderů — dřív na iPadu běželo. Převzít jen konkrétní opravu, ne jejich nový „wink“ runner.
+- [x] **K2b Upstream check** (udělal Claude v chatu 24. 10. 01:10): HeyPuter od 29. 7. jen 2 commity ve forku Blenderu
+  (`c1e8e6c` GL backend na „wink“ = Mesa OpenGL přes WebGPU, `fe16888` glTF/FBX add-ony) a 1 v blender-wasm (`e73ddff`).
+  **Ve `source/blender/gpu/webgpu/` žádná změna** → k bufferům nic k převzetí. Opustili vlastní WebGPU backend a jdou cestou
+  GL→Mesa→WebGPU; to je to, co na iPadu padá (`wink: main-thread runner failed`). glTF/FBX opravy už máme vlastní.
 - [ ] **K3 Znovupoužívání bufferů** místo create/destroy každý snímek (pool podle velikosti / ring pro
   immediate+uniform; vzor Metal `MTLSafeFreeList`, Vulkan buffer reuse). Architekt PŘED začátkem. Cíl K1: buf_new/s
   v klidu tažení ≈ 0.
