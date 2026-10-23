@@ -32,7 +32,7 @@ Na PC (Chrome/NVIDIA) se to neprojeví → nehádej, MĚŘ. Cíl: 10 minut běž
   → M4: `POOL=4/8` + `INITIAL_MEMORY` 256–512 MB, každé zvlášť, A/B test na iPadu (Lukáš zavře ostatní appky);
   (3) watchdog dlouhého submitu (M5) — přidej do telemetrie délku posledního submitu/frame a název operace.
   Pozn.: UA Safari na iPadu se hlásí jako „Macintosh“ (desktop mode) — normální.
-- [ ] **M4 Hypotéza C — wasm heap.** INITIAL/MAXIMUM_MEMORY, růst při operacích, Python (numpy/OpenVDB načtené až
+- [~] (build POOL=8 + INITMEM 512 MB hotový: `mem_win.sh` PASS heap 512, parity bez ❌, ops 96/96, regress_all běží; čeká na iPad telemetrii) **M4 Hypotéza C — wasm heap.** INITIAL/MAXIMUM_MEMORY, růst při operacích, Python (numpy/OpenVDB načtené až
   při použití?), undo paměť (Preferences undo steps/memory limit na webu snížit). iOS Safari tab má odhadem
   ~1,5–2 GB celkem (odhad, ověř z telemetrie).
 - [ ] **M5 Hypotéza D — watchdog dlouhého submitu** (Material Preview kompilace, velký sculpt). Pokud telemetrie ukáže
