@@ -12,6 +12,8 @@ Výsledek: 🟡 M0–M3 hotové a ověřené na PC; M4/M5/M6 jen částečně. *
 - 🟡 **M6**: po 45 s bez prvního snímku se ukáže pruh s návodem („zavři tab úplně“) + tlačítko **Spustit bez ukládání** (`?safe=1`, bez OPFS) — `scripts/safe_win.sh` PASS. Lišta kláves se ukáže až když Blender kreslí (dřív překrývala úvodní obrazovku). Reload po ztrátě GPU na PC naběhne (`reload_lost_win.sh`), takže zaseknutí je asi jen iOS (odhad: zámek OPFS po mrtvém tabu).
 - ⏸ **M5** (watchdog dlouhého submitu): nedělal jsem — bez iPad telemetrie by to byla jen spekulace.
 
+**Finální gate (23. 10. 21:15, finální build):** `regress_all.sh` 59 sekcí, **0 FAIL** (dřívější flaky utf8/touch_loopcut tentokrát prošly). Navíc pruh „💾 Uloženo“ s odkazem do 📁 (`savednote_win.sh` PASS).
+
 **Důkaz:** `tel_win.sh`, `mem_win.sh`, `safe_win.sh`, `reload_lost_win.sh`, `parity_win.sh` (12/17/20 + celé), `regress_all.sh` (jen utf8 a touch_loopcut spadly jednou v sekvenci, samostatně PASS; `touch_win` občas vypadne hned po jiném testu, samostatně PASS).
 
 **Co otestovat na iPadu (podle důležitosti)**
