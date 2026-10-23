@@ -9,6 +9,10 @@ a po každém kroku nasaď build do `demo/public/` jen když je `regress_all.sh`
   max živých, submity/s, překreslení/s. Zapiš do `docs/MEMORY.md`. To je náš „teploměr“ pro K2–K4.
 - [ ] **K2 Levný experiment: strop překreslení při tažení** (~30 fps, sloučit pointermove/touchmove do 1 události
   za snímek; JS v `demo/` nebo GHOST web). Pokud K1 ukáže výrazný pokles alokací/s → nasadit → Lukáš test.
+- [ ] **K2b Upstream check (15 min, před K3):** `git fetch upstream` v `./blender/` i tady; projdi nové commity HeyPuter
+  ve `source/blender/gpu/webgpu/` (buffer pool/reuse, destroy, iOS). Jejich aktuální demo (developer.puter.com/labs/
+  blender-web) na iPadu 24. 10. NEnaběhne: `wink: main-thread runner failed` (blender.js:5258), wasm 160 MB, seed 394
+  shaderů — dřív na iPadu běželo. Převzít jen konkrétní opravu, ne jejich nový „wink“ runner.
 - [ ] **K3 Znovupoužívání bufferů** místo create/destroy každý snímek (pool podle velikosti / ring pro
   immediate+uniform; vzor Metal `MTLSafeFreeList`, Vulkan buffer reuse). Architekt PŘED začátkem. Cíl K1: buf_new/s
   v klidu tažení ≈ 0.
