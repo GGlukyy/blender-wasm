@@ -307,4 +307,7 @@ Subsurf 2 na Monkey plynulý, glTF export + import zpět (triangulováno).
 - [x] (PASS: `scripts/pymods_win.sh` — 26 stdlib/Blender modulů: buď fungují, nebo rychle ImportError) **`import sqlite3` zavěsil Blender** (Python konzole / skript) — nahrazeno stubem v `lib/python3.13/sqlite3.py` (`ImportError: sqlite3 is not available in the web build`), vytváří se v `link_blender_release.sh`. `_ssl`, `_ctypes`, `_lzma`, `fcntl`, `readline`, `curses` dál chybí (vyhodí ImportError rychle).
 
 ## 🔜 Až po iPadu (Lukáš 24. 10.)
+- [ ] **R: Rebase na Blender 5.3** (postup v `docs/PLAN.md` krok R) — až existuje tag `v5.3.0` (ověř `git ls-remote --tags
+  https://projects.blender.org/blender/blender.git v5.3.0`). Jsme na 5.3 alpha (main 25. 6.). Po rebase projet celý
+  `regress_all.sh` + parity a znovu otestovat bug list (alpha bugy mohou zmizet). Pak teprve Cycles.
 - [ ] **Cycles na PC verzi** (CPU Cycles ve wasm, `WITH_CYCLES` je teď OFF; HeyPuter ho má v GL buildu — `cmake/blender-wasm-gl-cache.cmake`, commit e73ddff). Nejdřív změřit velikost buildu a rychlost renderu kostky/Monkey vs desktop. Ne pro iPad (paměť).
