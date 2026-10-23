@@ -423,8 +423,30 @@ const showQuit = () => {
   b.innerHTML = "Blender skončil (File ▸ Quit / Ctrl+Q). Uložené soubory v 📁 zůstaly; rozdělaná práce je v <code>/opfs/home/_autosave.blend</code>. <button style='margin-left:12px;font-size:16px' onclick='location.reload()'>Spustit znovu</button>";
   document.body.appendChild(b);
 };
+/* "Where did my file go?": when Blender reports a written file, say where and offer the file manager. */
+const showSaved = (path) => {
+  let n = document.getElementById("saved-note");
+  if (!n) {
+    n = document.createElement("div");
+    n.id = "saved-note";
+    n.style.cssText = "position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:99997;background:rgba(20,60,20,.94);" +
+      "color:#fff;font:15px system-ui,sans-serif;padding:8px 14px;border-radius:8px;max-width:92vw";
+    document.body.appendChild(n);
+  }
+  n.innerHTML = "";
+  n.append("💾 Uloženo: " + path + " ");
+  const b = document.createElement("button");
+  b.textContent = "📁 Stáhnout / složka";
+  b.style.cssText = "margin-left:8px;font-size:15px";
+  b.onclick = () => { n.style.display = "none"; if (window.__openFileManager) window.__openFileManager(); };
+  n.append(b);
+  n.style.display = "block";
+  clearTimeout(n._t); n._t = setTimeout(() => { n.style.display = "none"; }, 9000);
+};
 const scan = (t) => {
   telLog(t);
+  const sv = /Writing to (\/\S+)|^Saved "([^"]+)"/.exec(t.trim());
+  if (sv) showSaved(sv[1] || sv[2]);
   if (/^Blender quit\b/.test(t.trim())) showQuit();
   if (t.startsWith("WEB_OPEN_URL ")) {
     const u = t.slice(13).trim();
@@ -440,6 +462,7 @@ const scan = (t) => {
     canvas.classList.add("ready");
   }
 };
+window.__scan = scan;
 const canvas = document.getElementById("canvas");
 const fitCanvas = () => {
   if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {

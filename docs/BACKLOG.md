@@ -50,7 +50,7 @@ Subsurf 2 na Monkey plynulý, glTF export + import zpět (triangulováno).
 - [x] ~~Ctrl+S → Open „špatný formát“~~ — NENÍ bug (Lukáš 18. 10. 19:43): save/open funguje, jen nevybral
   složku v souborovém dialogu Blenderu. UX: zvážit výchozí adresář `/opfs/home` v File Browseru (Save/Open).
 - [ ] **Grease Pencil ▸ Monkey = zamrznutí** (neodseklo se). Odhad: limit storage bufferů Safari (texel buffery).
-- [ ] **Kam se uložilo .glb?** Export prošel a import ho našel, ale Lukáš nevěděl kde je / jak stáhnout.
+- [~] (mitigace PASS: `scripts/savednote_win.sh` — po hlášce `Saved "x"` / `Writing to /…` se ukáže pruh „💾 Uloženo“ s tlačítkem do 📁; glTF/FBX exportér cestu nevypisuje → zatím jen .blend/.obj/…; čeká na iPad) **Kam se uložilo .glb?** Export prošel a import ho našel, ale Lukáš nevěděl kde je / jak stáhnout.
   Zviditelnit 📁 prohlížeč souborů nebo po exportu nabídnout stažení.
 - [ ] Voxel Remesh na holé kostce „nic neudělal“ — pravděpodobně OK (kostka zůstane kostkou), ověřit s větším
   Voxel Size / po sculptu.
