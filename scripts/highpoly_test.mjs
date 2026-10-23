@@ -19,7 +19,7 @@ bpy.ops.object.shade_smooth()
 print('HP_DONE faces=%d' % len(bpy.context.object.data.polygons)); sys.stdout.flush()
 `;
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
-if (ipad) await page.addInitScript(() => { window.__CAPENV = { WGPU_CAP_MAX_BUFFER: "268435456", WGPU_CAP_MAX_SSBO: "134217728" }; });
+if (ipad) await page.addInitScript(() => { window.__CAPENV = { WGPU_CAP_MAX_BUFFER: "268435456", WGPU_CAP_MAX_SSBO: "134217728", ...(process.env.HP_ND ? { WGPU_NO_DESTROY: process.env.HP_ND } : {}) }; });
 await page.goto("http://localhost:5173/?perf=1", { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
 await page.getByRole("button", { name: /Launch Blender/ }).click();
