@@ -1,4 +1,4 @@
-Výsledek: 🟡 víkend 18. 10. (kola 65–66): na PC vše zelené (`regress_all.sh` bez FAIL, 50 sweepů PASS) — render do souboru/animace, objemy, vlasy, Grease Pencil ve viewportu, UV hangy, pád Emulate 3 Button, TIFF, **OpenVDB (Voxel Remesh), Bullet, Quadriflow, Fluid v buildu**. Na iPadu NIC z toho neotestováno — viz „Co otestovat NEJDŘÍV“.
+Výsledek: 🟡 23. 10.: sprint „iPad vydrží“ — GPU buffery se teď ničí (dřív 0 z 10 820), telemetrie z iPadu běží; na PC zelené, na iPadu neotestováno (viz sekce Sprint níže). Starší stav z 18. 10. pod ní.
 
 # Sprint „iPad vydrží“ (23. 10., pátek odpoledne–večer)
 Výsledek: 🟡 M0–M3 hotové a ověřené na PC; M4/M5/M6 jen částečně. **Na iPadu nic z toho neotestováno.**
