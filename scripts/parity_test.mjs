@@ -38,6 +38,9 @@ async function boot(tag, env) {
     args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
   const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
   const log = []; page.on("console", (m) => log.push(m.text())); page.on("pageerror", (e) => log.push("PAGEERROR: " + e.message));
+  if (process.env.PARITY_DL) env = { ...(env || {}), WGPU_DESTROYLOG: "1" };
+  if (process.env.PARITY_NDU) env = { ...(env || {}), WGPU_NO_DESTROY_USAGE: process.env.PARITY_NDU };
+  if (process.env.PARITY_ND) env = { ...(env || {}), WGPU_NO_DESTROY: process.env.PARITY_ND };  // buf|tex|all: ladění M2
   if (env) await page.addInitScript((e) => { window.__CAPENV = e; }, env);
   await page.goto("http://localhost:5173/", { waitUntil: "load" });
   await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
