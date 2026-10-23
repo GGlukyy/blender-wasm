@@ -1,5 +1,24 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 🏁 CÍL Č. 1 (Lukáš, 24. 10.): RYCHLÉ TAŽENÍ PLOCHY NA iPADU NESPADNE
+Test (Lukáš, iPad): kostka → Tab → režim ploch → vyber plochu → G → **prudce táhni prstem přes celou obrazovku
+~10 s** → nesmí spadnout. Když tohle projde, je port pro iPad z velké části hotový. Pracuj PŘESNĚ v tomto pořadí
+a po každém kroku nasaď build do `demo/public/` jen když je `regress_all.sh` bez FAIL, a zapiš do STATUS.md
+„Co otestovat na iPadu“ = tenhle test:
+- [ ] **K1 Změř na PC** stejný scénář (Playwright: Tab, 3, klik, G, rychlé pohyby myši 10 s): buf_new/s, tex_new/s,
+  max živých, submity/s, překreslení/s. Zapiš do `docs/MEMORY.md`. To je náš „teploměr“ pro K2–K4.
+- [ ] **K2 Levný experiment: strop překreslení při tažení** (~30 fps, sloučit pointermove/touchmove do 1 události
+  za snímek; JS v `demo/` nebo GHOST web). Pokud K1 ukáže výrazný pokles alokací/s → nasadit → Lukáš test.
+- [ ] **K3 Znovupoužívání bufferů** místo create/destroy každý snímek (pool podle velikosti / ring pro
+  immediate+uniform; vzor Metal `MTLSafeFreeList`, Vulkan buffer reuse). Architekt PŘED začátkem. Cíl K1: buf_new/s
+  v klidu tažení ≈ 0.
+- [ ] **K4 Nouzovka (jen když K2+K3 nestačí):** na iPadu během modální transformace nekreslit editovanou geometrii
+  v reálném čase (jen obrys/kurzor, nebo překreslit max. ~5×/s), plné vykreslení po potvrzení. Přepínač `?lowdraw=1`.
+- [ ] **K5 Záchranná síť (paralelně, je to levné JS):** autosave každých 30 s (jen při změně) + po pádu/obnovení
+  nabídnout „Obnovit poslední práci“ (`/opfs/home/_autosave.blend`), oprava zaseknutí „Loading Blender…“ po reloadu (M6).
+- Rozhodnutí po K2–K4: pokud rychlé tažení pořád padá → STOP iPad (napiš do STATUS.md jasně), PC verze zůstává.
+M4 build (8 vláken + 512 MB, `out/bak_m4/`) zatím nenasazovat — nejdřív dořešit flaky `prefs_sweep` (viz STATUS).
+
 ## 🎯 SPRINT „iPad vydrží“ (od 23. 10.) — DĚLEJ V TOMHLE POŘADÍ
 Lukáš: na iPadu Blender teď vydrží jen ~15 s až pár operací, pak „GPU se odpojila“ / pád tabu.
 Na PC (Chrome/NVIDIA) se to neprojeví → nehádej, MĚŘ. Cíl: 10 minut běžné práce na iPadu bez pádu.
