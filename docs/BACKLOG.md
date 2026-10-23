@@ -3,7 +3,7 @@
 ## 🎯 SPRINT „iPad vydrží“ (od 23. 10.) — DĚLEJ V TOMHLE POŘADÍ
 Lukáš: na iPadu Blender teď vydrží jen ~15 s až pár operací, pak „GPU se odpojila“ / pád tabu.
 Na PC (Chrome/NVIDIA) se to neprojeví → nehádej, MĚŘ. Cíl: 10 minut běžné práce na iPadu bez pádu.
-- [ ] **M0 Telemetrie z iPadu do PC (bez Macu, bez fotek).** `demo/` posílá každé ~2 s JSON (wasm heap MB,
+- [x] (PASS: `scripts/tel_win.sh` — 20 vzorků (16 s heap_mb), adapter limits, lost; `out/ipad/tel_<datum>.jsonl`; JS-only. NEPOKRYTO: počet/MB GPU bufferů a reason/message device.lost přijdou s C++ změnou v M2) **M0 Telemetrie z iPadu do PC (bez Macu, bez fotek).** `demo/` posílá každé ~2 s JSON (wasm heap MB,
   odhad GPU paměti: součet živých bufferů + textur v MB a počet objektů, FPS, poslední operace/okno,
   `adapter.limits` jednou na startu, `device.lost` reason+message, `window.onerror`/unhandledrejection,
   `performance.memory` když je) na dev server: Vite plugin `POST /__telemetry` → `out/ipad/tel_<datum>.jsonl`.

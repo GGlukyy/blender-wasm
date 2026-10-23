@@ -13,6 +13,8 @@
  */
 import { ZSTDDecoder } from "zstddec";
 import { installTouch } from "./touch.js";
+import { installTelemetry, telEnabled, telLog, telEvent, telAdapterLimits } from "./telemetry.js";
+installTelemetry();
 
 /* ---- Splash UI: progress bar + startup console (ported from gecko-wasm's
  * demo/chrome/src/main.ts). ---- */
@@ -289,6 +291,7 @@ async function probeGpu() {
   }
   try {
     const adapter = await navigator.gpu.requestAdapter();
+    if (adapter) telAdapterLimits(adapter);
     if (!adapter) {
       return { ok: false, software: false, fatal: true, desc: "",
         message: "No <b>WebGPU adapter</b> is available, so Blender cannot start. " +
@@ -399,7 +402,8 @@ if (new URLSearchParams(location.search).get("perf") === "1") {
 }
 
 window.__BGUI__ = { booted: false, device: false, window: false };
-const showGpuLost = (reason) => {
+const showGpuLost = (reason, msg) => {
+  telEvent("lost", { reason, msg: msg || "" });
   if (document.getElementById("gpu-lost")) return;
   window.__GPU_LOST__ = reason;
   const b = document.createElement("div");
@@ -420,12 +424,13 @@ const showQuit = () => {
   document.body.appendChild(b);
 };
 const scan = (t) => {
+  telLog(t);
   if (/^Blender quit\b/.test(t.trim())) showQuit();
   if (t.startsWith("WEB_OPEN_URL ")) {
     const u = t.slice(13).trim();
     if (/^https?:\/\//.test(u)) { window.__LAST_OPEN_URL__ = u; window.open(u, "_blank", "noopener"); }
   }
-  if (t.includes("WEBGPU_LOST")) showGpuLost(t.split("WEBGPU_LOST ")[1].split(" ")[0]);
+  if (t.includes("WEBGPU_LOST")) showGpuLost(t.split("WEBGPU_LOST ")[1].split(" ")[0], t.split("WEBGPU_LOST ")[1]);
   if (t.includes("WEBGPU_CONTEXT") && t.includes("real device acquired")) window.__BGUI__.device = true;
   /* First frame that actually drew something (not the black startup clear):
    * swap the splash/console for the live canvas. */
@@ -957,7 +962,7 @@ window.Module = {
       ENV.BLENDER_SYSTEM_PYTHON = "/assets";
       ENV.PYTHONHOME = "/assets";
       if (window.__CAPENV) for (const k in window.__CAPENV) ENV[k] = window.__CAPENV[k];
-      if (new URLSearchParams(location.search).get("perf") === "1") ENV.WGPU_PERF = "1";
+      if (new URLSearchParams(location.search).get("perf") === "1" || telEnabled) ENV.WGPU_PERF = "1";
       if (new URLSearchParams(location.search).get("perf") === "1" && new URLSearchParams(location.search).get("reglog") === "1") ENV.WGPU_REGIONLOG = "1";
       if (new URLSearchParams(location.search).get("passlog") === "1") ENV.WGPU_PASSLOG = "1";
       if (new URLSearchParams(location.search).get("compilelog") === "1") ENV.WGPU_LOG_COMPILE = "1";

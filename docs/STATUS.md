@@ -1,5 +1,10 @@
 Výsledek: 🟡 víkend 18. 10. (kola 65–66): na PC vše zelené (`regress_all.sh` bez FAIL, 50 sweepů PASS) — render do souboru/animace, objemy, vlasy, Grease Pencil ve viewportu, UV hangy, pád Emulate 3 Button, TIFF, **OpenVDB (Voxel Remesh), Bullet, Quadriflow, Fluid v buildu**. Na iPadu NIC z toho neotestováno — viz „Co otestovat NEJDŘÍV“.
 
+# Sprint „iPad vydrží“ (23. 10.)
+- ✅ M0 telemetrie z iPadu: `demo/src/telemetry.js` + Vite plugin `/__telemetry` → `out/ipad/tel_<datum>.jsonl` (každé 2 s: FPS, textury MB, wasm heap, chyby, poslední vstupy/logy, adapter.limits, ztráta GPU). Důkaz: `scripts/tel_win.sh` PASS. Zapnuto vždy na dev serveru (`?tel=0` vypne), jinak `?tel=1`.
+- **Co otestovat na iPadu (nejdřív):** spusť `cd demo && pnpm dev --host` + `cloudflared tunnel --url http://localhost:5173`, otevři https odkaz, pracuj jako obvykle až do pádu. Data se objeví sama v `out/ipad/` na PC (nic nemusíš fotit).
+
+
 # Kolo 65 (víkend, 18. 10.) — render do souboru
 - ✅ **Render do souboru byl prázdný** (PNG s alpha 0): `render.render(write_still=True)`, Save As z Render Result. Web nemá synchronní čtení z GPU → zápis se teď odloží, až dorazí pixely (fork 7224a3a6). Důkaz: `scripts/render_write_win.sh` PASS (EEVEE, Workbench, Save As); ops 94/94, interactive ALL PASS, parity bez ❌, gpulost PASS.
 - Testy `render_eevee_to_png` a `render_workbench_to_png` přesunuty z `ops_test.py` do `render_write_test.py` — asserty stejné, jen čekají na asynchronní čtení (zápis je teď o pár ticků později). Není to zeslabení.
