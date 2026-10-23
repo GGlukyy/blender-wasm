@@ -7,7 +7,7 @@ const sid = Math.random().toString(36).slice(2, 8);
 const t0 = performance.now();
 const ring = (n) => { const a = []; return { push(x) { a.push(x); if (a.length > n) a.shift(); }, all: () => a.slice() }; };
 const logs = ring(15), inputs = ring(12), events = [];
-let perf = null, adapter = null, queue = [];
+let perf = null, gmem = null, adapter = null, queue = [];
 
 const send = (o, beacon) => {
   o.sid = sid; o.t = Math.round(performance.now() - t0);
@@ -35,6 +35,10 @@ export function installTelemetry() {
   send({ kind: "start", url: location.search, dpr: devicePixelRatio, screen: [screen.width, screen.height], inner: [innerWidth, innerHeight], isolated: crossOriginIsolated, mem: navigator.deviceMemory || null });
   try {
     new BroadcastChannel("blender-perf").onmessage = (e) => { perf = e.data; };
+    new BroadcastChannel("blender-gpumem").onmessage = (e) => {
+      gmem = e.data; window.__GPUMEM__ = gmem;
+      if (gmem.lost_reason) send({ kind: "lost_detail", reason: gmem.lost_reason, msg: gmem.lost_message, gpu: gmem }, true);
+    };
   } catch (e) {}
   addEventListener("error", (e) => send({ kind: "error", msg: String(e.message).slice(0, 300), src: e.filename, line: e.lineno }));
   addEventListener("unhandledrejection", (e) => send({ kind: "rejection", msg: String(e.reason && (e.reason.stack || e.reason)).slice(0, 400) }));
@@ -47,8 +51,8 @@ export function installTelemetry() {
       o.fps = Math.round(1000 / perf.dt_avg_ms); o.ms = +perf.dt_avg_ms.toFixed(1); o.msmax = Math.round(perf.dt_max_ms);
       o.submits = perf.submits; o.passes = perf.passes; o.tex = perf.tex; o.tex_mb = perf.tex_mb;
       o.imm_bufs = perf.imm_bufs; o.imm_kb = perf.imm_kb; o.heap_mb = Math.round(perf.heap_mb);
-      for (const k of ["buf_count", "buf_mb"]) if (perf[k] !== undefined) o[k] = perf[k];
     }
+    if (gmem) o.gpu = gmem;
     if (performance.memory) { o.js_used_mb = Math.round(performance.memory.usedJSHeapSize / 1048576); o.js_total_mb = Math.round(performance.memory.totalJSHeapSize / 1048576); }
     send(o);
   };
