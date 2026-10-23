@@ -5,6 +5,10 @@ session: read `CLAUDE.md`, `docs/STATUS.md`, `docs/PLAN.md` and `docs/BACKLOG.md
 Lukáš cannot test on the iPad until he is back — verify everything yourself in Windows
 Chrome on the real GPU (`scripts/p2_win.sh`, `scripts/parity_win.sh`).
 
+## Mission now (from 23. 10.)
+**iPad stability/memory sprint** — `docs/BACKLOG.md` section „SPRINT iPad vydrží“, in order M0 → M6.
+Start every run by reading new files in `out/ipad/` (iPad telemetry, if Lukáš tested). Measure before fixing.
+
 ## How to work
 1. Take the first unchecked item in `docs/BACKLOG.md`. Mark it `[~]` (in progress) and commit.
 2. Fix it with the smallest change; prove it with a script in `scripts/` (screenshot + PASS line).

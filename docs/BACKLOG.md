@@ -1,5 +1,34 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 🎯 SPRINT „iPad vydrží“ (od 23. 10.) — DĚLEJ V TOMHLE POŘADÍ
+Lukáš: na iPadu Blender teď vydrží jen ~15 s až pár operací, pak „GPU se odpojila“ / pád tabu.
+Na PC (Chrome/NVIDIA) se to neprojeví → nehádej, MĚŘ. Cíl: 10 minut běžné práce na iPadu bez pádu.
+- [ ] **M0 Telemetrie z iPadu do PC (bez Macu, bez fotek).** `demo/` posílá každé ~2 s JSON (wasm heap MB,
+  odhad GPU paměti: součet živých bufferů + textur v MB a počet objektů, FPS, poslední operace/okno,
+  `adapter.limits` jednou na startu, `device.lost` reason+message, `window.onerror`/unhandledrejection,
+  `performance.memory` když je) na dev server: Vite plugin `POST /__telemetry` → `out/ipad/tel_<datum>.jsonl`.
+  Při `pagehide`/`visibilitychange` `navigator.sendBeacon`. Zapnuto jen přes `?tel=1` (nebo vždy na dev serveru).
+  Důkaz: Windows Chrome přes `p2_win.sh` vytvoří jsonl s ≥10 vzorky + simulovaný device lost (gpulost_win.sh) je
+  v logu. Na začátku KAŽDÉHO běhu: pokud jsou v `out/ipad/` nové soubory, přečti je jako první a vyhodnoť.
+- [ ] **M1 Změřit baseline na PC s limity Safari** (`WGPU_CAP_*`): wasm heap a GPU MB po bootu, v klidu 60 s,
+  UV Editing + G, Material Preview, Sculpt na Subsurf 2, Monkey Subsurf 3. Tabulka do `docs/MEMORY.md`.
+  Klíčová otázka: **roste GPU paměť v klidu?** (Lukáš: padá už po ~15 s.)
+- [ ] **M2 Hypotéza A — GPU objekty se neuvolňují hned.** V emdawnwebgpu `wgpu*Release` jen pustí JS referenci,
+  paměť uvolní až GC; Chrome uklízí rychle, Safari ne → paměť roste, iOS zabije GPU proces. Oprava: explicitní
+  `wgpuBufferDestroy` / `wgpuTextureDestroy` před Release všude ve `source/blender/gpu/webgpu/` (staging/readback
+  buffery, immediate buffery, depth snapshot P2c každých 120 ms!, dočasné textury). Ověř počítadlem živých
+  objektů z M0 (musí být v klidu konstantní).
+- [ ] **M3 Hypotéza B — velké framebuffery.** iPad kreslí v DPR 2 (2360×1640 → 4× pixelů) × mnoho passů/overlay
+  textur. Změř MB framebufferů; zvaž výchozí render scale 1× (UI ostré zůstane) nebo `?dpr=`. Pozor na čitelnost.
+- [ ] **M4 Hypotéza C — wasm heap.** INITIAL/MAXIMUM_MEMORY, růst při operacích, Python (numpy/OpenVDB načtené až
+  při použití?), undo paměť (Preferences undo steps/memory limit na webu snížit). iOS Safari tab má odhadem
+  ~1,5–2 GB celkem (odhad, ověř z telemetrie).
+- [ ] **M5 Hypotéza D — watchdog dlouhého submitu** (Material Preview kompilace, velký sculpt). Pokud telemetrie ukáže
+  device lost bez růstu paměti → rozdělit submit / createRenderPipelineAsync. Architekt.
+- [ ] **M6** „Loading Blender…“ zaseknutí po pádu (viz níže) a klávesnice při startu (viz níže).
+Každá změna: regresní sada `regress_all.sh` musí zůstat bez FAIL. Výsledek každého kroku 1 řádek do STATUS.md
+a do „Co otestovat na iPadu“ přesný postup pro Lukáše (s `?tel=1`).
+
 ## ⭐ Bugy od Lukáše (iPad Air M1, Safari, 18. 10. večer) — NEJVYŠŠÍ PRIORITA
 Test na skutečném iPadu po víkendovém bloku. Start ~11 s (65 MB) + ~5 s. Funguje: výběr kostky, Tab
 z lišty, orbit/zoom prstem, G + prst, A/G v UV, Emulate 3 Button Mouse (nepadá), diakritika v Outlineru,
