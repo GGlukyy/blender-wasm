@@ -20,6 +20,13 @@ Extra lov chyb po finálním buildu (destroy zapnutý): `fuzz_win` seed 77, `fuz
 
 **První data z iPadu (23. 10. ~21:22, `out/ipad/`, Safari 26.5):** telemetrie funguje přes tunel. Adapter `apple`: `maxStorageBuffersPerShaderStage=44`, `maxBufferSize=1 GiB`, `maxStorageBufferBindingSize=1 GiB`, `maxBindGroups=11` → limit storage bufferů **není problém** (vlasy/GP by měly jít). Okno bylo 580×522 CSS px (obrazovka 954×1373, DPR 2 — asi Split View/Stage Manager). Tab byl celou dobu na pozadí (`hidden`, 157 s), Blender se nespustil (žádný `start` s framy) a skončilo `TypeError: Load failed` (zřejmě fetch při návratu z pozadí). Z toho se o pádech GPU nic nedozvíme — chci sezení, kde Blender opravdu běží.
 
+**Nová data z iPadu (23. 10. 21:28, `python3 scripts/tel_summary.py out/ipad/tel_2026-10-23.jsonl`)** — poprvé Blender opravdu běžel (sezení `s6xhui`, `adjjbf`, `cj7010`):
+- `adjjbf` (77 s, 14 FPS): `lost_reason: destroyed` ve 69 s, hned potom `Aborted(Assertion failed)`. Živých bufferů 4124 (špička 6394), `buf_destroyed` 38 423 z 42 547, `buf_gc` 0 → destroy na iPadu funguje, ale GPU se odpojila i tak. Poslední vstupy: klávesy `x`, `y`, pak klik. Důvod „destroyed“ = device zničen (ne OOM) — odhad: zavolal ho náš kód nebo Safari po pádu; nevyšetřeno.
+- `s6xhui` (109 s, 6 FPS): `TypeError: Type error` v `blender.js:87` ve 58 s, 3271 živých bufferů, 268 MB textur. Neprošetřeno.
+- `cj7010`: `RangeError: Out of memory` po 32 s (hned po kliknutí) — wasm heap / alokace; podporuje M4 (zmenšit paměť).
+- Tab byl často `hidden` (zase přepínání do pozadí).
+- **Dál (odhad pořadí):** 1) najít, kdo volá `device.destroy()` při `adjjbf` (grep `destroy` v `demo/src/main.js`, assertion v logu `msg` těsně před 69 s); 2) `Type error` blender.js:87 (stack); 3) M4 podle `Out of memory`. Dnes už na to nezbyl čas, nic z toho jsem neopravoval.
+
 **Co otestovat na iPadu (podle důležitosti)**
 1. Na PC: `cd demo && pnpm dev --host` + `cloudflared tunnel --url http://localhost:5173`, na iPadu otevři **https** odkaz (nové okno, čistá data webu), pracuj jako obvykle až do pádu. Já pak čtu `out/ipad/tel_*.jsonl` — nic nemusíš fotit.
 2. Zkus to, co dřív padalo: UV Editing (A, G, táhnout), Material Preview, Sculpt po Subsurf 2, Monkey Subsurf 3. **Vydrží to déle než ~15 s?** Napiš, kolik minut.
