@@ -20,6 +20,18 @@ Na PC (Chrome/NVIDIA) se to neprojeví → nehádej, MĚŘ. Cíl: 10 minut běž
   objektů z M0 (musí být v klidu konstantní).
 - [x] (REFUTOVÁNO měřením: `DPR=2 scripts/mem_win.sh` — texturová paměť stejná jako při DPR 1 (49–79 MB), plátno se kreslí v CSS px (`fitCanvas` = innerWidth), ne ×DPR; viz docs/MEMORY.md) **M3 Hypotéza B — velké framebuffery.** iPad kreslí v DPR 2 (2360×1640 → 4× pixelů) × mnoho passů/overlay
   textur. Změř MB framebufferů; zvaž výchozí render scale 1× (UI ostré zůstane) nebo `?dpr=`. Pozor na čitelnost.
+- [ ] **⭐ VÝSLEDEK iPad testu 23. 10. 22:30 (po M2) — PŘEČTI PRVNÍ.** `out/ipad/tel_2026-10-23.jsonl`, `tel_summary.py`:
+  Lukáš: v klidu 3 min bez pádu; pád vždy až při práci (Subsurf 2, sculpt, Ctrl+B…). Relace s Blenderem: ztráta GPU po
+  **55 s, 122 s, 208 s** práce (dřív odhadem ~15 s). **V okamžiku pádu bylo GPU objektů málo**: buf 5–24 MB, tex 60–65 MB
+  (185–6855 bufferů; 6855 = před flush), destroy funguje (135 735 z 135 920), `buf_gc 0`. wasm heap stále 1024 MB.
+  `device.lost` reason = **`destroyed`**, message prázdná; pak `Aborted(Assertion failed)` a chyby createPipelineLayout /
+  beginRenderPass / createCommandEncoder (následky). ⇒ **Naše GPU alokace NEJSOU příčina.** Kandidáti (v pořadí):
+  (1) `destroyed` = někdo volá `device.destroy()` / wgpuDeviceDestroy (grep fork + emdawnwebgpu; i při chybě/OOM) — ověř;
+  (2) iOS zabije GPU/WebContent proces kvůli CELKOVÉ paměti procesu: 1 GB heap od startu + **32 pthread workerů**
+  (v Safari může mít každý worker vlastní zkompilovaný kód z 197 MB wasm — Chrome ho sdílí, proto PC test nic neukázal)
+  → M4: `POOL=4/8` + `INITIAL_MEMORY` 256–512 MB, každé zvlášť, A/B test na iPadu (Lukáš zavře ostatní appky);
+  (3) watchdog dlouhého submitu (M5) — přidej do telemetrie délku posledního submitu/frame a název operace.
+  Pozn.: UA Safari na iPadu se hlásí jako „Macintosh“ (desktop mode) — normální.
 - [ ] **M4 Hypotéza C — wasm heap.** INITIAL/MAXIMUM_MEMORY, růst při operacích, Python (numpy/OpenVDB načtené až
   při použití?), undo paměť (Preferences undo steps/memory limit na webu snížit). iOS Safari tab má odhadem
   ~1,5–2 GB celkem (odhad, ověř z telemetrie).
