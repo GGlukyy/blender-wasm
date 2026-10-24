@@ -11,9 +11,9 @@ Test (Lukáš, iPad): kostka → Tab → režim ploch → vyber plochu → G →
 ~10 s** → nesmí spadnout. Když tohle projde, je port pro iPad z velké části hotový. Pracuj PŘESNĚ v tomto pořadí
 a po každém kroku nasaď build do `demo/public/` jen když je `regress_all.sh` bez FAIL, a zapiš do STATUS.md
 „Co otestovat na iPadu“ = tenhle test:
-- [~] **K1 Změř na PC** stejný scénář (Playwright: Tab, 3, klik, G, rychlé pohyby myši 10 s): buf_new/s, tex_new/s,
+- [x] (měřeno: buf_new ≈1220/s, tex_new ≈23/s, max živých 172; `scripts/drag_win.sh`, docs/MEMORY.md) **K1 Změř na PC** stejný scénář (Playwright: Tab, 3, klik, G, rychlé pohyby myši 10 s): buf_new/s, tex_new/s,
   max živých, submity/s, překreslení/s. Zapiš do `docs/MEMORY.md`. To je náš „teploměr“ pro K2–K4.
-- [ ] **K2 Levný experiment: strop překreslení při tažení** (~30 fps, sloučit pointermove/touchmove do 1 události
+- [~] **K2 Levný experiment: strop překreslení při tažení** (~30 fps, sloučit pointermove/touchmove do 1 události
   za snímek; JS v `demo/` nebo GHOST web). Pokud K1 ukáže výrazný pokles alokací/s → nasadit → Lukáš test.
 - [x] **K2b Upstream check** (udělal Claude v chatu 24. 10. 01:10): HeyPuter od 29. 7. jen 2 commity ve forku Blenderu
   (`c1e8e6c` GL backend na „wink“ = Mesa OpenGL přes WebGPU, `fe16888` glTF/FBX add-ony) a 1 v blender-wasm (`e73ddff`).

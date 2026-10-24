@@ -26,3 +26,9 @@ Mem test (limity Safari): živých bufferů 91–2973 (špička při UV Editing,
 
 ## High-poly s limity Safari + destroy (23. 10. večer, `highpoly_win.sh N ipad`)
 1,3 M ploch: 142 ms/snímek (bez destroy 256 ms, `HP_ND=all`); 5,2 M ploch: 521 ms, bez pádu a bez chyb. Dřívější měření z 18. 10. (38 ms) nešlo zopakovat — jiná zátěž PC, neřešit.
+
+## K1 — teploměr „rychlé tažení plochy“ (24. 10. 22:55, PC Chrome, `scripts/drag_win.sh 10`)
+Kostka → Edit → plocha → G → 10 s pohybů myši (Playwright; jen ~16 pohybů × 8 kroků, protože `mouse.move` je při zatíženém Blenderu pomalé). Screenshot `out/win/drag_end.png`: plocha se opravdu táhne (Dx/Dy/Dz v hlavičce).
+- **buf_new ≈ 1220/s** (vytvořeno 93 098 bufferů za 10 s), destroyed ≈ 1220/s, **živých max 172** (destroy drží krok), **tex_new ≈ 23/s**, 9 FPS, 13 submitů / 45 passů na vzorek.
+- Pozor (odhad): běh obsahoval první kompilaci shaderů (pruh „Kompiluji shadery“, cold cache), takže FPS je nízké; a při předchozích dvou během (bez skutečného tažení, FPS ~1) bylo buf_new jen 30–50/s. Číslo 1220/s je tedy horní odhad za „plné překreslování“.
+- Závěr K1: při tažení vzniká ~1000+ bufferů a ~20 textur za sekundu → splňuje hypotézu z BACKLOGu (alokace/s). Strop překreslení (K2) by to měl úměrně snížit; K3 (pool) je až dál.
