@@ -1,5 +1,11 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 🚨 PŘÍKAZ 24. 10. 22:40 (Lukáš): UŽ NEDĚLEJ FUZZ / REGRESE / VÝKON PC
+Poslední 3 hodiny běžely jen testy, K1-K4 jsou pořád nezačaté. Lukášovi dochází týdenní limit.
+Dělej TEĎ rovnou K1, pak K2 (strop překreslení ~30 fps, sloučení pointermove v demo/), build, nasazení,
+zapiš do STATUS.md "Co otestovat na iPadu: rychlé tažení plochy" a COMMIT+PUSH.
+Žádný další fuzz ani nové *_win testy, dokud K2 není nasazená. Pak K3 (architekt první).
+
 ## 🏁 CÍL Č. 1 (Lukáš, 24. 10.): RYCHLÉ TAŽENÍ PLOCHY NA iPADU NESPADNE
 Test (Lukáš, iPad): kostka → Tab → režim ploch → vyber plochu → G → **prudce táhni prstem přes celou obrazovku
 ~10 s** → nesmí spadnout. Když tohle projde, je port pro iPad z velké části hotový. Pracuj PŘESNĚ v tomto pořadí
