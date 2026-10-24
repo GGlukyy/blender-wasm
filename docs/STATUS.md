@@ -1,4 +1,5 @@
 # Víkend — 24. 10. večer
+Nový test `scripts/model_ops_win.sh` (UV smart project + unwrap, materiál, subdivide+merge, inset+extrude, bevel, save/reload): 7/7 PASS.
 Lov chyb 24. 10. po finálním buildu (+ seedy 201/202 fuzz, 203 fuzz_obj PASS): `fuzz_win` seed 101 (281 op), `fuzz_obj_win` seed 102 (332 op), `ui_fuzz_win` (1531 akcí) — vše PASS, bez pádu. M5 netknuto (čeká na iPad telemetrii; `msmax` už v telemetrii je).
 Výkon (PC, `drawtime_win.sh`): monkey subsurf3 15,6 ms/snímek, ico6 edit 19 ms, ico7 edit 33 ms (api 51 ms – nejhorší), submity 25–33, passy 73–82. Nic nepadá; skutečné úzké hrdlo se ukáže až z iPad telemetrie (`msmax`).
 Výsledek: ✅ na PC — nasazený build (1 GB, 32 vláken, bez present-flush) prošel `regress_all.sh` 59 sekcí, **0 FAIL**. Na iPadu neotestováno; žádná nová iPad telemetrie (`out/ipad/tel_2026-10-24.jsonl` je z PC).
