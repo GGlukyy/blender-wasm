@@ -24,7 +24,7 @@ a po každém kroku nasaď build do `demo/public/` jen když je `regress_all.sh`
   v klidu tažení ≈ 0.
 - [ ] **K4 Nouzovka (jen když K2+K3 nestačí):** na iPadu během modální transformace nekreslit editovanou geometrii
   v reálném čase (jen obrys/kurzor, nebo překreslit max. ~5×/s), plné vykreslení po potvrzení. Přepínač `?lowdraw=1`.
-- [ ] **K5 Záchranná síť (paralelně, je to levné JS):** autosave každých 30 s (jen při změně) + po pádu/obnovení
+- [~] (autosave už existoval; výchozí interval 120→30 s, `autosave_win.sh` PASS, uložení 0,02 s; ZBÝVÁ nabídka „Obnovit poslední práci“ po pádu + M6 zaseknutí) **K5 Záchranná síť (paralelně, je to levné JS):** autosave každých 30 s (jen při změně) + po pádu/obnovení
   nabídnout „Obnovit poslední práci“ (`/opfs/home/_autosave.blend`), oprava zaseknutí „Loading Blender…“ po reloadu (M6).
 - Rozhodnutí po K2–K4: pokud rychlé tažení pořád padá → STOP iPad (napiš do STATUS.md jasně), PC verze zůstává.
 M4 build (8 vláken) NENASAZOVAT: `prefs_sweep` padá ~40 % i s 1 GB (starý 32 vláken 5/5 PASS) → vinu má POOL=8 (24. 10. A/B, viz STATUS). Paměť 512 MB zatím netestována samostatně s POOL=32.

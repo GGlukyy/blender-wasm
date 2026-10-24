@@ -4,7 +4,8 @@ Výsledek: 🟡 PC ověřeno, **iPad neotestován**.
 - **Důkaz:** `touch_modal`, `touch_boxsel`, `touch_loopcut`, `touch` — PASS (pad dál potvrzuje/ruší klepnutím). **Nezměřeno**, o kolik klesne buf_new/s při dotyku (drag_win používá myš, ne dotyk) → odhad: úměrně počtu pohybů, na iPadu rozhodne až test.
 - **Co nefunguje / neví se:** jestli omezení pohybů stačí, aby GPU na iPadu nespadla. Pokud ne → K3 (pool bufferů, architekt první), K4 (`?lowdraw`).
 - **Co otestovat na iPadu (nejdůležitější):** čistá data webu / soukromý tab → kostka → Tab → režim ploch → vyber plochu → klepni na **G** v liště → **prudce táhni prstem 10 s** přes obrazovku → klepnutím potvrď. Spadlo? Napiš po jaké době. Pro srovnání: `…/?movecap=0` (bez omezení) a `…/?movecap=66` (~15/s). Telemetrie sama přistane v `out/ipad/`.
-- **Co dál:** K3 s architektem, K5 autosave.
+- K5 část: autosave každých **30 s** (dřív 120), jen při změně, uložení 0,02 s (`autosave_win.sh` PASS). Chybí tlačítko „Obnovit poslední práci“ — teď se soubor `_autosave.blend` otevře ručně přes 📁.
+- **Co dál:** K3 s architektem (běží).
 
 # Víkend — 24. 10. večer
 Nový test `scripts/model_ops_win.sh` (UV smart project + unwrap, materiál, subdivide+merge, inset+extrude, bevel, save/reload): 7/7 PASS.

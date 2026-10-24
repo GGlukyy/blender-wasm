@@ -928,7 +928,7 @@ async function start() {
 // EEVEE Shadow Pool: výchozí 512 MB (jen shadow atlas) + sondy ≈ 1 GB GPU paměti při Material Preview (měřeno ?perf=1: 1080 MB).
 // iPad Safari má malý limit na tab → pro nové soubory / startup scénu 128 MB (-380 MB). Přepsat: ?shadowpool=512 (hodnoty enumu v MB).
 const SHADOW_POOL = (new URLSearchParams(location.search).get("shadowpool") || "128").replace(/[^0-9]/g, "") || "128";
-const AUTOSAVE_S = (new URLSearchParams(location.search).get("autosave") || "120").replace(/[^0-9]/g, "") || "120";
+const AUTOSAVE_S = (new URLSearchParams(location.search).get("autosave") || "30").replace(/[^0-9]/g, "") || "30";
 const RESET_PREFS = new URLSearchParams(location.search).get("resetprefs") === "1" ? "1" : "0"; // ?resetprefs=1 smaže uložené Preferences
 const UI_SCALE = (new URLSearchParams(location.search).get("uiscale") || "").replace(/[^0-9.]/g, ""); // ?uiscale=1.3 → větší UI pro prsty (uloží se do Preferences)
 const SHADOW_POOL_PY = `import bpy
