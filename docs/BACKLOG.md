@@ -31,7 +31,7 @@ a po každém kroku nasaď build do `demo/public/` jen když je `regress_all.sh`
   (`c1e8e6c` GL backend na „wink“ = Mesa OpenGL přes WebGPU, `fe16888` glTF/FBX add-ony) a 1 v blender-wasm (`e73ddff`).
   **Ve `source/blender/gpu/webgpu/` žádná změna** → k bufferům nic k převzetí. Opustili vlastní WebGPU backend a jdou cestou
   GL→Mesa→WebGPU; to je to, co na iPadu padá (`wink: main-thread runner failed`). glTF/FBX opravy už máme vlastní.
-- [!] BLOCKED/odloženo: pool bufferů (out/k3_pool.patch) zvýšil reuse jen z 328→281 buf_new/s; skutečný problém = flush se při tažení nespouští (živých +300/s, destroyed 0), viz MEMORY.md K3. NOVÝ úkol **K3b: najdi, proč se při G-tažení neflushuje `wgpu_flush_buffer_frees`**, pak teprve pool. **K3 Znovupoužívání bufferů** místo create/destroy každý snímek (pool podle velikosti / ring pro
+- [!] BLOCKED/odloženo: pool bufferů (out/k3_pool.patch) zvýšil reuse jen z 328→281 buf_new/s; skutečný problém = flush se při tažení nespouští (živých +300/s, destroyed 0), viz MEMORY.md K3. NOVÝ úkol (tip: flush se volá jen z `WebGPUContext::flush_encoder`, `webgpu_context.cc:562`, a vynechá se, když `pass_open()` je true v KTERÉMKOLI kontextu — zkus zalogovat, který kontext při G-tažení drží pass otevřený; telemetrie ukazuje submits=2 / passes=24 na vzorek) **K3b: najdi, proč se při G-tažení neflushuje `wgpu_flush_buffer_frees`**, pak teprve pool. **K3 Znovupoužívání bufferů** místo create/destroy každý snímek (pool podle velikosti / ring pro
   immediate+uniform; vzor Metal `MTLSafeFreeList`, Vulkan buffer reuse). Architekt PŘED začátkem. Cíl K1: buf_new/s
   v klidu tažení ≈ 0.
 - [ ] **K4 Nouzovka (jen když K2+K3 nestačí):** na iPadu během modální transformace nekreslit editovanou geometrii
