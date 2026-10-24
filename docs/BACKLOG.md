@@ -21,7 +21,7 @@ a po každém kroku nasaď build do `demo/public/` jen když je `regress_all.sh`
 - [ ] **K5 Záchranná síť (paralelně, je to levné JS):** autosave každých 30 s (jen při změně) + po pádu/obnovení
   nabídnout „Obnovit poslední práci“ (`/opfs/home/_autosave.blend`), oprava zaseknutí „Loading Blender…“ po reloadu (M6).
 - Rozhodnutí po K2–K4: pokud rychlé tažení pořád padá → STOP iPad (napiš do STATUS.md jasně), PC verze zůstává.
-M4 build (8 vláken + 512 MB, `out/bak_m4/`) zatím nenasazovat — nejdřív dořešit flaky `prefs_sweep` (viz STATUS).
+M4 build (8 vláken) NENASAZOVAT: `prefs_sweep` padá ~40 % i s 1 GB (starý 32 vláken 5/5 PASS) → vinu má POOL=8 (24. 10. A/B, viz STATUS). Paměť 512 MB zatím netestována samostatně s POOL=32.
 
 ## 🎯 SPRINT „iPad vydrží“ (od 23. 10.) — DĚLEJ V TOMHLE POŘADÍ
 Lukáš: na iPadu Blender teď vydrží jen ~15 s až pár operací, pak „GPU se odpojila“ / pád tabu.

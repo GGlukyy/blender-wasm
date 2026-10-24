@@ -1,7 +1,7 @@
 # Víkend — 24. 10. večer
 - **Příčina „zaseknutého“ testu:** v `demo/public/manifest.json` byla velikost nového buildu, ale byl nasazen starý → wasm se rozbalil jako prázdný. Nový skript `scripts/swap_build.sh old|new` přepíná build i manifest.
 - **A/B `prefs_sweep` (PC):** starý build (1 GB, 32 vláken) 5/5 PASS; **nový build (512 MB, 8 vláken) 2 PASS / 2 FAIL** (pád u `use_mouse_emulate_3_button`) → chyba je v novém nastavení paměti/vláken, ne starší. Nový build zůstává nenasazen (v `public/` je starý).
-- Dál: link varianty 8 vláken + 1 GB (`out/m4_1g/`), A/B znovu.
+- **Varianta 1 GB + 8 vláken** (`out/m4_1g/`): taky 2 FAIL / 6 (stejný pád `mouse_emulate_3_button`) → **příčina je `PTHREAD_POOL_SIZE=8`, ne paměť**. Nasazen zůstává starý build (32 vláken, 1 GB). Dál zkusit POOL=16 nebo hledat, proč Preferences-sweep potřebuje >8 vláken (odhad: vlákno vytvořené za běhu, když je pool vyčerpaný, → OOB).
 
 Výsledek: 🟡 23. 10. noc: M4 build (8 vláken + 512 MB) je hotový, ale **NENASAZENÝ** — v `demo/public/` je zase starý ověřený build (1 GB, 32 vláken). Důvod níže.
 
