@@ -1,3 +1,8 @@
+# Víkend — 24. 10. večer
+- **Příčina „zaseknutého“ testu:** v `demo/public/manifest.json` byla velikost nového buildu, ale byl nasazen starý → wasm se rozbalil jako prázdný. Nový skript `scripts/swap_build.sh old|new` přepíná build i manifest.
+- **A/B `prefs_sweep` (PC):** starý build (1 GB, 32 vláken) 5/5 PASS; **nový build (512 MB, 8 vláken) 2 PASS / 2 FAIL** (pád u `use_mouse_emulate_3_button`) → chyba je v novém nastavení paměti/vláken, ne starší. Nový build zůstává nenasazen (v `public/` je starý).
+- Dál: link varianty 8 vláken + 1 GB (`out/m4_1g/`), A/B znovu.
+
 Výsledek: 🟡 23. 10. noc: M4 build (8 vláken + 512 MB) je hotový, ale **NENASAZENÝ** — v `demo/public/` je zase starý ověřený build (1 GB, 32 vláken). Důvod níže.
 
 # Víkend — co je nového (23. 10. ~24:00)
