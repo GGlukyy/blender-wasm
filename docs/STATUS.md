@@ -1,3 +1,6 @@
+# Víkend — 24. 10. 23:50 — K3b jen rozbor
+Výsledek: 🟡 Bez změny kódu a buildu (zbývalo 15 min). Čtením kódu: `wgpu_flush_buffer_frees` se přeskočí, když KTERÝKOLI kontext drží nesubmitnutý encoder (`pass_open()` = `render_pass_||encoder_`) → pravděpodobná příčina, že se při tažení buffery neuvolňují (odhad, neměřeno). Detail a další krok v BACKLOGu u K3b. Na iPadu nic nového k testování.
+
 # Víkend — 24. 10. 23:10 — K1 + K2 hotové (cíl č. 1: rychlé tažení plochy)
 Výsledek: 🟡 PC ověřeno, **iPad neotestován**.
 - **Co jsem udělal:** K1 teploměr `scripts/drag_win.sh` (kostka → plocha → G → pohyby 10 s): při tažení vzniká **~1220 bufferů/s a ~23 textur/s**, živých max 172 (`docs/MEMORY.md`). K2: v `demo/src/touch.js` se pohyby prstu v režimu „trackpad“ (po G/R/S z lišty kláves) slučují na **max. 1 pohyb za 33 ms (~30/s)**; `?movecap=0` to vypne, `?movecap=50` zpomalí víc. Jen JS, žádný rebuild.
