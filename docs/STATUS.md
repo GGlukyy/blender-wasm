@@ -1,3 +1,11 @@
+# Víkend — 24. 10. 23:10 — K1 + K2 hotové (cíl č. 1: rychlé tažení plochy)
+Výsledek: 🟡 PC ověřeno, **iPad neotestován**.
+- **Co jsem udělal:** K1 teploměr `scripts/drag_win.sh` (kostka → plocha → G → pohyby 10 s): při tažení vzniká **~1220 bufferů/s a ~23 textur/s**, živých max 172 (`docs/MEMORY.md`). K2: v `demo/src/touch.js` se pohyby prstu v režimu „trackpad“ (po G/R/S z lišty kláves) slučují na **max. 1 pohyb za 33 ms (~30/s)**; `?movecap=0` to vypne, `?movecap=50` zpomalí víc. Jen JS, žádný rebuild.
+- **Důkaz:** `touch_modal`, `touch_boxsel`, `touch_loopcut`, `touch` — PASS (pad dál potvrzuje/ruší klepnutím). **Nezměřeno**, o kolik klesne buf_new/s při dotyku (drag_win používá myš, ne dotyk) → odhad: úměrně počtu pohybů, na iPadu rozhodne až test.
+- **Co nefunguje / neví se:** jestli omezení pohybů stačí, aby GPU na iPadu nespadla. Pokud ne → K3 (pool bufferů, architekt první), K4 (`?lowdraw`).
+- **Co otestovat na iPadu (nejdůležitější):** čistá data webu / soukromý tab → kostka → Tab → režim ploch → vyber plochu → klepni na **G** v liště → **prudce táhni prstem 10 s** přes obrazovku → klepnutím potvrď. Spadlo? Napiš po jaké době. Pro srovnání: `…/?movecap=0` (bez omezení) a `…/?movecap=66` (~15/s). Telemetrie sama přistane v `out/ipad/`.
+- **Co dál:** K3 s architektem, K5 autosave.
+
 # Víkend — 24. 10. večer
 Nový test `scripts/model_ops_win.sh` (UV smart project + unwrap, materiál, subdivide+merge, inset+extrude, bevel, save/reload): 7/7 PASS.
 Lov chyb 24. 10. po finálním buildu (+ seedy 201/202 fuzz, 203 fuzz_obj PASS): `fuzz_win` seed 101 (281 op), `fuzz_obj_win` seed 102 (332 op), `ui_fuzz_win` (1531 akcí) — vše PASS, bez pádu. M5 netknuto (čeká na iPad telemetrii; `msmax` už v telemetrii je).

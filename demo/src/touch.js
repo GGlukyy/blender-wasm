@@ -43,7 +43,27 @@ export function installTouch(canvas) {
   canvas.addEventListener("mousemove", (e) => { if (e.isTrusted) { curX = e.clientX; curY = e.clientY; } }, true);   /* real mouse/trackpad */
   let padNoMods = false;    /* pad moves/taps must not carry the sticky Ctrl/Shift used to start the operator */
   let padBase = null;       /* {bx, by, px, py} for the current trackpad drag */
-  const mouse = (type, x, y, button, buttons, extra = {}) => {
+  /* K2: during a trackpad drag (modal G/R/S…) every pointermove would redraw the edited mesh and allocate
+   * ~1000 GPU buffers/s (docs/MEMORY.md K1) — iPad's GPU process dies. Coalesce to one move per
+   * MOVE_CAP_MS (default 33 ≈ 30 fps; `?movecap=0` turns it off). */
+  const MOVE_CAP_MS = qs.has("movecap") ? +qs.get("movecap") : 33;
+  let padPending = null, padTimer = 0, padLast = 0;
+  const flushPad = () => {
+    padTimer = 0;
+    if (!padPending) return;
+    const q = padPending; padPending = null; padLast = performance.now();
+    mouse("mousemove", q.x, q.y, 0, q.buttons, {}, true);
+  };
+  const padMove = (x, y, buttons) => {
+    if (!MOVE_CAP_MS) { mouse("mousemove", x, y, 0, buttons); return; }
+    padPending = { x, y, buttons };
+    if (!padTimer) padTimer = setTimeout(flushPad, Math.max(0, MOVE_CAP_MS - (performance.now() - padLast)));
+  };
+  const mouse = (type, x, y, button, buttons, extra = {}, fromPad = false) => {
+    if (padPending && !fromPad) {   /* anything else (press/release/other move) must see the latest pad position first */
+      clearTimeout(padTimer); padTimer = 0;
+      if (type === "mousemove") padPending = null; else flushPad();
+    }
     curX = x; curY = y;
     canvas.dispatchEvent(new MouseEvent(type, {
       bubbles: true, cancelable: true, view: window,
@@ -183,7 +203,7 @@ export function installTouch(canvas) {
     p.x = e.clientX; p.y = e.clientY;
 
     if (mode === "pad") {
-      mouse("mousemove", padBase.bx + (p.x - padBase.px), padBase.by + (p.y - padBase.py), 0, padBase.down ? 1 : 0);
+      padMove(padBase.bx + (p.x - padBase.px), padBase.by + (p.y - padBase.py), padBase.down ? 1 : 0);
       return;
     }
     if (mode === "pending") {
