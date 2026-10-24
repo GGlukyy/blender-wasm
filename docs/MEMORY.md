@@ -32,3 +32,9 @@ Kostka → Edit → plocha → G → 10 s pohybů myši (Playwright; jen ~16 poh
 - **buf_new ≈ 1220/s** (vytvořeno 93 098 bufferů za 10 s), destroyed ≈ 1220/s, **živých max 172** (destroy drží krok), **tex_new ≈ 23/s**, 9 FPS, 13 submitů / 45 passů na vzorek.
 - Pozor (odhad): běh obsahoval první kompilaci shaderů (pruh „Kompiluji shadery“, cold cache), takže FPS je nízké; a při předchozích dvou během (bez skutečného tažení, FPS ~1) bylo buf_new jen 30–50/s. Číslo 1220/s je tedy horní odhad za „plné překreslování“.
 - Závěr K1: při tažení vzniká ~1000+ bufferů a ~20 textur za sekundu → splňuje hypotézu z BACKLOGu (alokace/s). Strop překreslení (K2) by to měl úměrně snížit; K3 (pool) je až dál.
+
+### K3 pokus (24. 10. 23:40) — pool bufferů NEPOMOHL, vrácen
+Architekt navrhl pool podle (velikost, usage) v `wgpu_flush_buffer_frees` + `wgpu_buffer_acquire` na 9 místech (patch: `out/k3_pool.patch`, nenasazeno). Srovnání při STEJNÉ zátěži (1670 pohybů myši / 10 s, `drag_win.sh`, `NOPOOL=1` = bez poolu):
+- s poolem: buf_new/s **281**, bez poolu **328** → pool nic podstatného neušetří.
+- **Nový nález (důležitější):** při tomto tažení **buf_destroyed/s = 0 a živých bufferů roste o ~300/s (až 3400 za 10 s)** i bez poolu. Flush `wgpu_flush_buffer_frees` se při plynulém tažení nespustí (`wgpu_any_context_recording()` je stále true / chybí submit), takže buffery se hromadí do pauzy. To odpovídá iPad telemetrii (špička 6855 živých před flush). K1 měření s 16 pohyby (buf_destroyed 1220/s) bylo tedy jiný režim.
+- Další krok (K3b): zjistit, proč se při modální transformaci neflushuje (který kontext zůstává „recording“), a flushovat každých N snímků / na konci snímku. Až potom má smysl pool.

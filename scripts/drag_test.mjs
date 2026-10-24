@@ -14,12 +14,13 @@ const page = await (await browser.newContext({ viewport: { width: 1400, height: 
 page.on("pageerror", e => console.log("PAGEERROR", String(e).slice(0, 300))); page.on("crash", () => console.log("PAGECRASH"));
 let ready = false, lost = false;
 page.on("console", m => { const t = m.text(); if (/DRAGREADY/.test(t)) ready = true; if (/WEBGPU_LOST/.test(t)) { lost = true; console.log("LOST", t.slice(0, 200)); } });
-await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
+await page.addInitScript(([e, nopool]) => { window.__BARGS = ["--python-expr", e]; if (nopool) window.__CAPENV = { WGPU_NO_POOL: "1" }; }, [expr, !!process.env.NOPOOL]);
 await page.goto("http://localhost:5173/?perf=1&tel=1", { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
 await page.getByRole("button", { name: /Launch Blender/ }).click();
 for (let i = 0; i < 300 && !ready; i++) await new Promise(r => setTimeout(r, 1000));
-await new Promise(r => setTimeout(r, 3000));
+// zahřátí: počkej, až se shadery přeloží a Blender kreslí plynule (jinak tažení "stojí", FPS ~1)
+for (let i = 0; i < 120; i++) { const d = await page.evaluate(() => window.__PERF__ ? window.__PERF__.dt_avg_ms : 9999); if (d < 150) break; await page.mouse.move(700 + (i % 2) * 30, 400); await new Promise(r => setTimeout(r, 1000)); }
 const snap = () => page.evaluate(() => ({ g: window.__GPUMEM__ || {}, p: window.__PERF__ || {}, t: performance.now() }));
 await page.mouse.move(700, 400); await new Promise(r => setTimeout(r, 500));
 await page.keyboard.press("g");

@@ -5,7 +5,8 @@ Výsledek: 🟡 PC ověřeno, **iPad neotestován**.
 - **Co nefunguje / neví se:** jestli omezení pohybů stačí, aby GPU na iPadu nespadla. Pokud ne → K3 (pool bufferů, architekt první), K4 (`?lowdraw`).
 - **Co otestovat na iPadu (nejdůležitější):** čistá data webu / soukromý tab → kostka → Tab → režim ploch → vyber plochu → klepni na **G** v liště → **prudce táhni prstem 10 s** přes obrazovku → klepnutím potvrď. Spadlo? Napiš po jaké době. Pro srovnání: `…/?movecap=0` (bez omezení) a `…/?movecap=66` (~15/s). Telemetrie sama přistane v `out/ipad/`.
 - K5 část: autosave každých **30 s** (dřív 120), jen při změně, uložení 0,02 s (`autosave_win.sh` PASS). Chybí tlačítko „Obnovit poslední práci“ — teď se soubor `_autosave.blend` otevře ručně přes 📁.
-- **Co dál:** K3 s architektem (běží).
+- **K3 (pool bufferů) vyzkoušen a VRÁCEN** (nasazený build = původní, wasm + manifest obnoveny): pool snížil nové buffery jen 328→281/s. **Důležitější nález:** při plynulém tažení se buffery NEUVOLŇUJÍ (destroyed 0, živých +300/s až 3400 za 10 s) — flush se nespustí. To je pravděpodobná příčina pádu na iPadu (viz MEMORY.md). **Další krok K3b:** zjistit, proč `wgpu_any_context_recording()` při tažení stále vrací true, a flushovat častěji. Patch poolu: `out/k3_pool.patch`.
+- Pozn.: build-blender má teď objekty s poolem; příští `ninja` je přeloží zpět (zdroj vrácen).
 
 # Víkend — 24. 10. večer
 Nový test `scripts/model_ops_win.sh` (UV smart project + unwrap, materiál, subdivide+merge, inset+extrude, bevel, save/reload): 7/7 PASS.
