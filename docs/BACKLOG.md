@@ -1,5 +1,17 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 📱 iPad test K2 (Lukáš 24. 10. 23:35, sezení `w8z38v` + `fkjmt5`) — K2 NESTAČÍ, jdi na K3
+- Scénář: G z lišty (keydown g 33,6 s) → tažení prstem → **device lost `destroyed` v 36,9 s = po ~3 s tažení.**
+  Pak `createBindGroup: Unable to make bind group` + `Aborted(Assertion failed)` (následek). Lukáš: „hýbe se a padá stejně jako minule“.
+- **Klíčové číslo: max živých bufferů na iPadu 10 645** (na PC v K1 max 172!), na konci jen 2302 / 9 MB, textury 60 MB.
+  → Na iPadu destroy nestíhá (málo snímků/submitů → fronta k zničení roste). Bajtů je málo, ale **objektů hodně** —
+  hypotéza (odhad): iOS/Metal zabije GPU proces kvůli POČTU alokací/objektů, ne MB. To přesně míří na **K3 (pool/ring,
+  žádné create za snímek)**. K3 je teď jediná priorita. V K1 testu na PC přidej metriku „max živých“ při zpomaleném
+  snímkování (např. CPU throttle v Playwright CDP `Emulation.setCPUThrottlingRate` 4×), ať se iPad napodobí.
+- `fkjmt5` (reload po pádu): `RangeError: Out of memory` ve 12,7 s, Blender se vůbec nespustil (heap 0) = **to je
+  „visí Loading Blender…“ po pádu**: iOS po pádu nedá znovu 1 GB INITIAL_MEMORY. Až po K3: zkusit menší INITMEM
+  (ale POOL nech 32 — viz M4 nález) a/nebo zachytit RangeError v loaderu → hláška „Zavři tab a otevři znovu“.
+
 ## 🚨 PŘÍKAZ 24. 10. 22:40 (Lukáš): UŽ NEDĚLEJ FUZZ / REGRESE / VÝKON PC
 Poslední 3 hodiny běžely jen testy, K1-K4 jsou pořád nezačaté. Lukášovi dochází týdenní limit.
 Dělej TEĎ rovnou K1, pak K2 (strop překreslení ~30 fps, sloučení pointermove v demo/), build, nasazení,
