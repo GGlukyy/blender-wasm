@@ -19,7 +19,7 @@ a po každém kroku nasaď build do `demo/public/` jen když je `regress_all.sh`
   (`c1e8e6c` GL backend na „wink“ = Mesa OpenGL přes WebGPU, `fe16888` glTF/FBX add-ony) a 1 v blender-wasm (`e73ddff`).
   **Ve `source/blender/gpu/webgpu/` žádná změna** → k bufferům nic k převzetí. Opustili vlastní WebGPU backend a jdou cestou
   GL→Mesa→WebGPU; to je to, co na iPadu padá (`wink: main-thread runner failed`). glTF/FBX opravy už máme vlastní.
-- [ ] **K3 Znovupoužívání bufferů** místo create/destroy každý snímek (pool podle velikosti / ring pro
+- [~] **K3 Znovupoužívání bufferů** místo create/destroy každý snímek (pool podle velikosti / ring pro
   immediate+uniform; vzor Metal `MTLSafeFreeList`, Vulkan buffer reuse). Architekt PŘED začátkem. Cíl K1: buf_new/s
   v klidu tažení ≈ 0.
 - [ ] **K4 Nouzovka (jen když K2+K3 nestačí):** na iPadu během modální transformace nekreslit editovanou geometrii
