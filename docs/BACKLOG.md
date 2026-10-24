@@ -11,7 +11,7 @@ Test (Lukáš, iPad): kostka → Tab → režim ploch → vyber plochu → G →
 ~10 s** → nesmí spadnout. Když tohle projde, je port pro iPad z velké části hotový. Pracuj PŘESNĚ v tomto pořadí
 a po každém kroku nasaď build do `demo/public/` jen když je `regress_all.sh` bez FAIL, a zapiš do STATUS.md
 „Co otestovat na iPadu“ = tenhle test:
-- [ ] **K1 Změř na PC** stejný scénář (Playwright: Tab, 3, klik, G, rychlé pohyby myši 10 s): buf_new/s, tex_new/s,
+- [~] **K1 Změř na PC** stejný scénář (Playwright: Tab, 3, klik, G, rychlé pohyby myši 10 s): buf_new/s, tex_new/s,
   max živých, submity/s, překreslení/s. Zapiš do `docs/MEMORY.md`. To je náš „teploměr“ pro K2–K4.
 - [ ] **K2 Levný experiment: strop překreslení při tažení** (~30 fps, sloučit pointermove/touchmove do 1 události
   za snímek; JS v `demo/` nebo GHOST web). Pokud K1 ukáže výrazný pokles alokací/s → nasadit → Lukáš test.
