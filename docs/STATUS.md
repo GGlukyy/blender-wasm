@@ -1,3 +1,6 @@
+# Víkend — 25. 10. 11:40 — ui_fuzz seed 701 (800 akcí)
+Výsledek: ✅ na PC. `ui_fuzz_win` FULL, 800 akcí: 0 chyb, bez pádu. Backlog: zbývají jen položky čekající na iPad nebo nízká priorita (Subsurf na trojúhelnících, Skin); výkon je změřený (viz BACKLOG „Výkon“), nový hotspot nenalezen.
+
 # Víkend — 25. 10. 11:10 — model_ops8
 Výsledek: ✅ na PC. Nový `scripts/model_ops8_win.sh`: 15/15 PASS (subdivide řez, split, separate loose, flip normals, auto smooth, crease, mark sharp + edge split, fill holes, tris↔quads, apply stack, collection instance, decimate planar, text→mesh, undo/redo). Žádná chyba portu (FAIL byly chyby testu: `mesh.split` s vybraným vším nic nedělá, `edge_bevel_weight` v 5.x není, screw/sculpt stroke potřebují view3d kontext → vyřazeno). iPad neotestován.
 
