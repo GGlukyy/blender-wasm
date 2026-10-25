@@ -15,14 +15,24 @@ const page = await (await browser.newContext({ viewport: { width: 1400, height: 
 page.on("pageerror", e => console.log("PAGEERROR", String(e).slice(0, 300))); page.on("crash", () => console.log("PAGECRASH"));
 let ready = false, lost = false;
 page.on("console", m => { const t = m.text(); if (/DRAGREADY/.test(t)) ready = true; if (/WGPU_FREES/.test(t)) console.log(t.slice(0, 160)); if (/WEBGPU_LOST/.test(t)) { lost = true; console.log("LOST", t.slice(0, 200)); } });
-await page.addInitScript(() => {}); await page.addInitScript(([e, nopool]) => { window.__BARGS = ["--python-expr", e]; window.__LOGFREES = true; if (nopool) window.__CAPENV = { WGPU_NO_POOL: "1" }; if (window.__LOGFREES) window.__CAPENV = { ...(window.__CAPENV||{}), WGPU_LOG_FREES: "1" }; }, [expr, !!process.env.NOPOOL]);
+await page.addInitScript(() => {
+  // H1-0: počítadla bind groups / views / submit lag (jen měření, nic nemění)
+  window.__H1 = { bg: 0, view: 0, lag: [], lagMax: 0 };
+  const D = window.GPUDevice && GPUDevice.prototype;
+  if (D) { const cb = D.createBindGroup; D.createBindGroup = function (...a) { window.__H1.bg++; return cb.apply(this, a); }; }
+  const T = window.GPUTexture && GPUTexture.prototype;
+  if (T) { const cv = T.createView; T.createView = function (...a) { window.__H1.view++; return cv.apply(this, a); }; }
+  const Q = window.GPUQueue && GPUQueue.prototype;
+  if (Q) { const sub = Q.submit; let last = 0; Q.submit = function (...a) { const r = sub.apply(this, a); const now = performance.now();
+    if (now - last > 2000) { last = now; const t0 = now; this.onSubmittedWorkDone().then(() => { const d = performance.now() - t0; window.__H1.lag.push(d); window.__H1.lagMax = Math.max(window.__H1.lagMax, d); }); } return r; }; }
+}); await page.addInitScript(([e, nopool]) => { window.__BARGS = ["--python-expr", e]; window.__LOGFREES = true; if (nopool) window.__CAPENV = { WGPU_NO_POOL: "1" }; if (window.__LOGFREES) window.__CAPENV = { ...(window.__CAPENV||{}), WGPU_LOG_FREES: "1" }; }, [expr, !!process.env.NOPOOL]);
 await page.goto("http://localhost:5173/?perf=1&tel=1", { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
 await page.getByRole("button", { name: /Launch Blender/ }).click();
 for (let i = 0; i < 300 && !ready; i++) await new Promise(r => setTimeout(r, 1000));
 // zahřátí: počkej, až se shadery přeloží a Blender kreslí plynule (jinak tažení "stojí", FPS ~1)
 for (let i = 0; i < 120; i++) { const d = await page.evaluate(() => window.__PERF__ ? window.__PERF__.dt_avg_ms : 9999); if (d < 150) break; await page.mouse.move(700 + (i % 2) * 30, 400); await new Promise(r => setTimeout(r, 1000)); }
-const snap = () => page.evaluate(() => ({ g: window.__GPUMEM__ || {}, p: window.__PERF__ || {}, t: performance.now() }));
+const snap = () => page.evaluate(() => ({ g: window.__GPUMEM__ || {}, p: window.__PERF__ || {}, h: { bg: window.__H1.bg, view: window.__H1.view, lag: window.__H1.lag.slice(-1)[0] || 0, lagMax: window.__H1.lagMax }, t: performance.now() }));
 await page.mouse.move(700, 400); await new Promise(r => setTimeout(r, 500));
 await page.keyboard.press("g");
 await new Promise(r => setTimeout(r, 500));
@@ -34,13 +44,14 @@ while (Date.now() < end) {
   await page.mouse.move(700 + Math.cos(a) * 450, 400 + Math.sin(a * 1.3) * 300, { steps: +(process.env.STEPS || 8) }); moves += +(process.env.STEPS || 8); if (process.env.PAUSE) await new Promise(r => setTimeout(r, +process.env.PAUSE));
   if (Date.now() - lastSnap >= 1000) {
     lastSnap = Date.now(); const s = await snap(); const dt = (s.t - prev.t) / 1000;
-    const r = { buf_new: (s.g.buf_new - prev.g.buf_new) / dt, destroyed: (s.g.buf_destroyed - prev.g.buf_destroyed) / dt, live: s.g.buf, submits: s.p.submits, passes: s.p.passes, fps: s.p.dt_avg_ms ? 1000 / s.p.dt_avg_ms : 0 };
+    const r = { buf_new: (s.g.buf_new - prev.g.buf_new) / dt, destroyed: (s.g.buf_destroyed - prev.g.buf_destroyed) / dt, live: s.g.buf, submits: s.p.submits, passes: s.p.passes, fps: s.p.dt_avg_ms ? 1000 / s.p.dt_avg_ms : 0, bg_new: (s.h.bg - prev.h.bg) / dt, view_new: (s.h.view - prev.h.view) / dt, lag: s.h.lag };
     maxLive = Math.max(maxLive, s.g.buf || 0); rows.push(r); prev = s;
-    console.log(`DRAGROW buf_new/s=${r.buf_new.toFixed(0)} destroyed/s=${r.destroyed.toFixed(0)} live=${r.live} submits=${r.submits} passes=${r.passes} fps=${r.fps.toFixed(0)} frame=${s.p.frame} ms=${s.p.dt_avg_ms && s.p.dt_avg_ms.toFixed(0)} max=${s.p.dt_max_ms && s.p.dt_max_ms.toFixed(0)}`);
+    console.log(`DRAGROW bg_new/s=${r.bg_new.toFixed(0)} view_new/s=${r.view_new.toFixed(0)} submit_lag_ms=${r.lag.toFixed(0)} buf_new/s=${r.buf_new.toFixed(0)} destroyed/s=${r.destroyed.toFixed(0)} live=${r.live} submits=${r.submits} passes=${r.passes} fps=${r.fps.toFixed(0)} frame=${s.p.frame} ms=${s.p.dt_avg_ms && s.p.dt_avg_ms.toFixed(0)} max=${s.p.dt_max_ms && s.p.dt_max_ms.toFixed(0)}`);
   }
 }
 const sN = await snap(); console.log("PERFEND " + JSON.stringify(sN.p)); const tot = (sN.t - s0.t) / 1000;
 const keys = Object.keys(sN.g).filter(k => /tex.*new|new/.test(k));
+console.log(`DRAGH1 bg_new/s=${((sN.h.bg - s0.h.bg) / tot).toFixed(0)} view_new/s=${((sN.h.view - s0.h.view) / tot).toFixed(0)} submit_lag_max_ms=${sN.h.lagMax.toFixed(0)}`);
 console.log(`DRAGSUM dur=${tot.toFixed(1)}s mouse_moves=${moves} buf_new/s=${((sN.g.buf_new - s0.g.buf_new) / tot).toFixed(0)} max_live=${maxLive} new_keys=${keys.join(",")} tex_new/s=${sN.g.tex_new !== undefined ? ((sN.g.tex_new - s0.g.tex_new) / tot).toFixed(1) : "n/a"} gpumem=${JSON.stringify(sN.g)}`);
 await page.screenshot({ path: "drag_end.png" }).catch(() => {});
 await page.keyboard.press("Escape");

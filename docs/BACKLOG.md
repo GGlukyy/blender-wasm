@@ -1,7 +1,7 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
 ## ▶️ AKTUÁLNÍ ÚKOLY (25. 10.) — první nezaškrtnutý dělej TEĎ, detail v `docs/IPAD_CRASH.md`
-- [ ] **H1-0 Změř:** do `drag_win.sh` (a telemetrie) přidej `bg_new/s` (vytvořené bind groups = `g_stat_bindgroups - g_stat_bg_hits`
+- [~] **H1-0 Změř:** do `drag_win.sh` (a telemetrie) přidej `bg_new/s` (vytvořené bind groups = `g_stat_bindgroups - g_stat_bg_hits`
   nebo JS obal createBindGroup), `view_new/s` a `submit_lag_ms` (onSubmittedWorkDone). Zapiš čísla při G-tažení do `docs/MEMORY.md`.
 - [ ] **H1-A Immediate ring buffer** (architekt PŘED): `webgpu_immediate.cc` už nevytváří buffer na každé immEnd; perzistentní
   ring + offset. Cíl: `buf_new/s` a `bg_new/s` výrazně dolů. Pak `parity_win.sh` 0 ❌ + `regress_all.sh` 1× → NASADIT →
