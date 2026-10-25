@@ -1,3 +1,6 @@
+# Víkend — 25. 10. 11:50 — touch_fuzz Material Preview
+Výsledek: ✅ na PC. `touch_fuzz_win.sh` s `TF_SHADING=MATERIAL` (viewport v Material Preview): seed 61 × 200 gest PASS (0 chyb, Blender odpovídá). Backlog: zbývají jen položky čekající na iPad nebo nízká priorita. iPad neotestován.
+
 # Víkend — 25. 10. 12:50 — dotykový fuzz (nový)
 Výsledek: ✅ na PC. Nový `scripts/touch_fuzz_win.sh` (`TF_SEED`, `TF_N` přes WSLENV): náhodná gesta přes CDP — tap, tah, pinch, 2prstý pan, dlouhý stisk, touchCancel, 3 prsty, tlačítka lišty, klávesy. Seed 11/12/13 × 250 gest: 0 chyb stránky, bez ztráty GPU, Blender po všem odpoví (Python timer). Dotek na iPadu to ale nenahradí. Edit mód (`TF_EDIT=1`): oprava — první edit běhy dřív neběžely v edit módu (klávesa Tab šla mimo viewport, myš nebyla nad plátnem); teď test myš přesune nad viewport a vypíše `start mode=`. Znovu seed 21/22/23 × 400 gest v EDIT: PASS (0 chyb, Blender odpovídá). Dřívější zápisy o `TF_PRE` (Ctrl+Tab,1 / Shift+Z) neplatí — pie menu přes klávesy mód nezmění, `TF_PRE` je jen obecné předstisknutí kláves (např. `Tab`). Sculpt a paint módy: `TF_MODE=SCULPT|WEIGHT_PAINT|VERTEX_PAINT` (Python timer přepne mód), start mode ověřen výpisem — seed 52 × 300 gest SCULPT i WEIGHT_PAINT PASS (0 chyb). Žádná nová BACKLOG položka.
 

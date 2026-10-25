@@ -14,6 +14,10 @@ def setmode():
     if m:
         try: bpy.ops.object.mode_set(mode=m)
         except Exception as e: print('TFMODEERR', e)
+    sh = '${process.env.TF_SHADING || ""}'
+    if sh:
+        for a in bpy.context.window_manager.windows[0].screen.areas:
+            if a.type == 'VIEW_3D': a.spaces[0].shading.type = sh; print('TFSHADE ' + a.spaces[0].shading.type); sys.stdout.flush()
 bpy.app.timers.register(setmode, first_interval=14.0)`;
 const browser = await chromium.launch({ headless: false, executablePath: process.env.CHROME,
   args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
@@ -21,7 +25,7 @@ const ctx = await browser.newContext({ viewport: { width: 1400, height: 850 } })
 const page = await ctx.newPage();
 let probes = 0, bad = [], lastMode = '?';
 page.on("pageerror", (e) => bad.push("pageerror " + String(e).slice(0, 200)));
-page.on("console", (m) => { const t = m.text(); if (t.includes("TFPROBE")) { probes++; lastMode = t.split(" ").pop(); } else if (/WEBGPU_LOST|abort\(|RuntimeError|memory access|Aborted/.test(t)) bad.push(t.slice(0, 200)); });
+page.on("console", (m) => { const t = m.text(); if (t.includes("TFSHADE")) console.log("shading=" + t.split("TFSHADE ").pop()); else if (t.includes("TFPROBE")) { probes++; lastMode = t.split(" ").pop(); } else if (/WEBGPU_LOST|abort\(|RuntimeError|memory access|Aborted/.test(t)) bad.push(t.slice(0, 200)); });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
 await page.goto("http://localhost:5173/?touch=1", { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
@@ -49,7 +53,7 @@ const gestures = {
 await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
 if (process.env.TF_EDIT) { await page.keyboard.press("Tab"); await wait(1000); await page.keyboard.press("3"); await wait(500); }
 if (process.env.TF_PRE) for (const k of process.env.TF_PRE.split(",")) { await page.keyboard.press(k); await wait(900); }
-await wait(process.env.TF_MODE ? 14000 : 2500); console.log('start mode=' + lastMode);
+await wait((process.env.TF_MODE || process.env.TF_SHADING) ? 14000 : 2500); console.log('start mode=' + lastMode);
 const names = Object.keys(gestures);
 for (let i = 0; i < N; i++) {
   const g = names[ri(0, names.length)];
