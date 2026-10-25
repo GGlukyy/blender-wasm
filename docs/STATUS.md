@@ -1,3 +1,6 @@
+# Víkend — 25. 10. 09:15 — model_ops5
+Výsledek: ✅ na PC. Nový `scripts/model_ops5_win.sh`: 19/19 PASS (inset, ring+subdivide, bridge loops, fill grid, extrude hran, edge slide, remove doubles, normály, convex hull, seam+unwrap, cube project/lightmap, přiřazení materiálu, mirror/weld/shrinkwrap, select similar, bisect fill, apply scale, uložit+znovu otevřít .blend). Žádná chyba portu (všechny prvotní FAIL byly chyby testu: špatné názvy operátorů 5.x, inset celé kostky, špatný očekávaný počet). Nasazený build beze změny; iPad neotestován, žádná nová iPad telemetrie.
+
 # Víkend — 25. 10. 09:30 — regress_all po P87–P91
 Výsledek: ✅ `regress_all.sh` 59 sekcí, **0 FAIL** (log `out/regress_p91.log`). Nasazený build beze změny, od rána jen JS (hláška OOM) + nové testy. iPad stále neotestován.
 
