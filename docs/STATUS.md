@@ -1,3 +1,6 @@
+# Víkend — 25. 10. 08:40 — modtime + Subsurf obejití
+Výsledek: ✅ na PC. `scripts/modtime_win.sh`: 17 modifikátorů na UV sphere 8k vrcholů, všechny < 1 s kromě Subsurf level 2 (2,4 s při prvním výpočtu, 130k vrcholů). Žádný nový hotspot. `subq_win.sh`: u trojúhelníků pomůže vypnout „Use Limit Surface“ (0,03 s místo 2,65 s) — viz BACKLOG.
+
 # Víkend — 25. 10. 08:10 — model_ops4
 Výsledek: ✅ na PC. `scripts/model_ops4_win.sh` 12/12 PASS (armature auto-weights, keyframy, lattice, cast, edge split, remesh blocks, multires, uzly materiálu, color attribute, Geometry Nodes subdiv + apply, kolekce, kamera/světlo). Žádná chyba portu (1 FAIL byl chyba testu: kostka v jiné kolekci).
 
