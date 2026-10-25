@@ -11,6 +11,7 @@ Výsledek: ✅ na PC, **iPad neotestován**.
 - Dotykový teploměr `scripts/drag_touch_win.sh` (G z lišty + tah prstem přes CDP, `MOVECAP=0|33|66`): živých bufferů max 86 i při dotyku; buf_new/s na PC stejné pro movecap 0 i 33 (PC je omezené ~3 fps, ne počtem pohybů) → vliv movecap se ukáže jen na iPadu.
 - Pozor: nízké FPS (3–10) v `drag_win.sh` není výkon Blenderu (v Object módu stejně, api_ms < 1) — omezuje to dávkování událostí v Playwrightu; `OBJMODE=1`, `STEPS`, `PAUSE` přidány do testu.
 - 🔎 M4 zkouška: **512 MB + 32 vláken** (`out/m4c/`) taky padá v `prefs_sweep` (`memory access out of bounds`, `mouse_emulate_3_button`) → pád souvisí s **počáteční velikostí paměti (<1 GB) = růst haldy s vlákny**, ne s počtem vláken. Hypotéza (odhad): když halda roste za běhu (`ALLOW_MEMORY_GROWTH` + pthreads), vlákna mají zastaralý pohled → OOB. Důsledek: na iPadu by růst nad 1 GB mohl padat stejně → raději nezmenšovat INITIAL_MEMORY. Nasazený build zůstal 1 GB/32 vláken (záloha `out/bak_k3b/`).
+- Výkon operací (`optime_win.sh`, 30 operací na 10k vrcholů): vše < 1 s kromě Subsurf na trojúhelnících (10 s při 1. výpočtu) a Skin na hustší síti (34 s) — obojí v BACKLOGu, nízká priorita pro modelování z kvádrů.
 - **Co otestovat na iPadu:** čisté data webu → kostka → Tab → plochy → vyber → G → prudké tažení 10+ s → potvrdit. Vydrží? Telemetrie `gpu.buf` by měla zůstat plochá (~100).
 
 # Víkend — 24. 10. 23:50 — K3b jen rozbor
