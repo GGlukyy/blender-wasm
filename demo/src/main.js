@@ -1079,6 +1079,7 @@ window.Module = {
       ENV.WGPU_PERF = "1"; /* cheap; also feeds the memory guard */
       if (new URLSearchParams(location.search).get("perf") === "1" && new URLSearchParams(location.search).get("reglog") === "1") ENV.WGPU_REGIONLOG = "1";
       if (new URLSearchParams(location.search).get("passlog") === "1") ENV.WGPU_PASSLOG = "1";
+      if (new URLSearchParams(location.search).get("nocompute") === "1") ENV.WGPU_NO_COMPUTE = "1";
       if (new URLSearchParams(location.search).get("compilelog") === "1") ENV.WGPU_LOG_COMPILE = "1";
       if (new URLSearchParams(location.search).get("drawlog") === "1") ENV.WGPU_LOG_DRAWS = "1";
       if (new URLSearchParams(location.search).get("iconprev") === "1") ENV.BLENDER_WEB_ICON_PREVIEWS = "1";
@@ -1123,7 +1124,11 @@ window.Module = {
                           [window.showDirectoryPicker ? 1 : 0]);
     } catch (e) { log("set_has_fsaccess: " + e); }
   },
-  onAbort: (w) => { log("ABORT: " + w); status("Failed to start: " + w); },
+  onAbort: (w) => {
+    let st = ""; try { st = String(new Error().stack).slice(0, 1500); } catch (e) {}
+    telEvent("abort", { what: String(w).slice(0, 200), stack: st });
+    log("ABORT: " + w); status("Failed to start: " + w);
+  },
 };
 
 /* iOS gives no 1 GB wasm memory right after a GPU crash: instantiation throws "RangeError: Out of memory"

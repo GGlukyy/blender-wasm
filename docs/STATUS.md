@@ -1,3 +1,10 @@
+# Víkend — 25. 10. 18:30 — H4 diagnostika (abort v Material Preview)
+Výsledek: 🟡 diagnostika nasazena, příčina zatím neznámá (odhad: compute cesta na Safari).
+**Co jsem udělal:** telemetrie teď při abortu pošle JS stack (`kind:abort`); compute dispatch loguje každý krok; přepínač `?nocompute=1` compute vypne. Fork `883a0fa4`.
+**Důkaz:** PC Chrome, `shading_win.sh` (Material Preview) ERRORS 0.
+**Co otestovat na iPadu:** 1) smaž data webu, otevři s `?tel=1`, kostka → Material Preview. Když padne, telemetrie řekne poslední krok. 2) Zkus znovu s `?tel=1&nocompute=1` — nesmí spadnout (kreslení bude špatně, to je v pořádku). Napiš oba výsledky.
+**Co dál:** po výsledku opravit příčinu; pak H5 (depth_snapshot), H1-B.
+
 # Víkend — 25. 10. 21:00 — H1 + H3 hotovo, nasazeno, čeká na iPad
 Výsledek: ✅ na PC (regress_all 59 sekcí 0 FAIL, parity 0 ❌), 🟡 iPad neotestován.
 **Nové od 17:00:** H3 — zdroj textur byl `immDrawPixels` (`editors/screen/glutil.cc`, obrázek 495×247, vytvářel se a ničil při každém překreslení, ~20×/s). Teď cache 4 textur: `tex_new` 20 → 0,1/s. Fork `a0720ed8`, `BLENDER_REF` aktualizován.

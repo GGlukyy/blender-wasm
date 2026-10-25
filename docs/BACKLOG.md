@@ -1,5 +1,9 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## ⏳ H4 diagnostika NASAZENA (25. 10. 18:30, fork 883a0fa4) — čeká na iPad
+- [~] Hotovo: `Module.onAbort` posílá do telemetrie `kind:abort` + JS stack; `compute_dispatch` loguje kroky `WGPU_DISPATCH step #n …` (prvních 16); `?nocompute=1` přeskočí všechny compute dispatche. PC: shading_win (Material Preview) ERRORS 0.
+- Zbývá po iPad testu: podle posledního `step` řádku a stacku opravit příčinu.
+
 ## 🔎 H4 upřesnění (25. 10. 18:05, log z iPadu `ogtllg`, poslední stderr řádky před abortem)
 ```
 WGPU_DISPATCH entry/#0 shader='draw_resource_finalize'   groups=1,1,1
