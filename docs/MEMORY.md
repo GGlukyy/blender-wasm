@@ -38,3 +38,6 @@ Architekt navrhl pool podle (velikost, usage) v `wgpu_flush_buffer_frees` + `wgp
 - s poolem: buf_new/s **281**, bez poolu **328** → pool nic podstatného neušetří.
 - **Nový nález (důležitější):** při tomto tažení **buf_destroyed/s = 0 a živých bufferů roste o ~300/s (až 3400 za 10 s)** i bez poolu. Flush `wgpu_flush_buffer_frees` se při plynulém tažení nespustí (`wgpu_any_context_recording()` je stále true / chybí submit), takže buffery se hromadí do pauzy. To odpovídá iPad telemetrii (špička 6855 živých před flush). K1 měření s 16 pohyby (buf_destroyed 1220/s) bylo tedy jiný režim.
 - Další krok (K3b): zjistit, proč se při modální transformaci neflushuje (který kontext zůstává „recording“), a flushovat každých N snímků / na konci snímku. Až potom má smysl pool.
+
+## Po K3b (25. 10.)
+`mem_win.sh`: živých bufferů idle 82, uv_edit 120, material_preview 84, sculpt_subsurf2 79, monkey_subsurf3 88 (dřív až 2901). `drag_win.sh`: max 86 (dřív 1639 za 10 s).

@@ -61,7 +61,7 @@ Na PC (Chrome/NVIDIA) se to neprojeví → nehádej, MĚŘ. Cíl: 10 minut běž
   objektů z M0 (musí být v klidu konstantní).
 - [x] (REFUTOVÁNO měřením: `DPR=2 scripts/mem_win.sh` — texturová paměť stejná jako při DPR 1 (49–79 MB), plátno se kreslí v CSS px (`fitCanvas` = innerWidth), ne ×DPR; viz docs/MEMORY.md) **M3 Hypotéza B — velké framebuffery.** iPad kreslí v DPR 2 (2360×1640 → 4× pixelů) × mnoho passů/overlay
   textur. Změř MB framebufferů; zvaž výchozí render scale 1× (UI ostré zůstane) nebo `?dpr=`. Pozor na čitelnost.
-- [ ] **⭐⭐ SPOLEHLIVÉ REPRO pádu (Lukáš, iPad 23. 10. 23:28) — ZAČNI TÍMHLE.** Kostka → Tab → režim ploch →
+- [~] (PC: příčina nalezena a opravena K3b, drag_win živých 86; čeká na iPad) **⭐⭐ SPOLEHLIVÉ REPRO pádu (Lukáš, iPad 23. 10. 23:28) — ZAČNI TÍMHLE.** Kostka → Tab → režim ploch →
   vybrat plochu → **G → rychle hýbat prstem** ⇒ okamžitá ztráta GPU. Klid nepadá, Subsurf nepadá. **Nejde o čas, ale
   o rychlost operací** (počet překreslení s měnící se geometrií za sekundu). Odhad: každý snímek transformace vytváří
   nové VBO/IBO/uniform buffery (create + destroy), WebKit/Metal je nestíhá uvolnit nebo má limit na počet alokací/s →
