@@ -1,3 +1,6 @@
+# Víkend — 25. 10. 10:00 — regress_all po P94 (neúplný)
+Výsledek: 🟡 `regress_all.sh` dosud 51 z 59 sekcí, **0 FAIL** v dosavadním logu (`out/regress.log`); poslední sekce ještě běžela při konci času. Kód portu se od posledního úplného běhu (P91, 0 FAIL) nezměnil, přibyly jen testy model_ops5–7. iPad neotestován.
+
 # Víkend — 25. 10. 09:10 — model_ops7
 Výsledek: ✅ na PC. `scripts/model_ops7_win.sh` 11/11 PASS: cyklus módů (edit/sculpt/vertex/weight/texture paint), vertex color fill, weight normalize, particles (50), cloth 10 snímků (pohyb ověřen), rigid body, fluid domain, soft body, uzly materiálu, render nastavení. Žádná chyba portu (FAIL byly chyby testu: particles čtu z evaluated objektu, barva štětce je v 5.x v `unified_paint_settings`, počet linků včetně výchozího). iPad neotestován.
 
