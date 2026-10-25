@@ -1,3 +1,6 @@
+# Víkend — 25. 10. 11:10 — model_ops8
+Výsledek: ✅ na PC. Nový `scripts/model_ops8_win.sh`: 15/15 PASS (subdivide řez, split, separate loose, flip normals, auto smooth, crease, mark sharp + edge split, fill holes, tris↔quads, apply stack, collection instance, decimate planar, text→mesh, undo/redo). Žádná chyba portu (FAIL byly chyby testu: `mesh.split` s vybraným vším nic nedělá, `edge_bevel_weight` v 5.x není, screw/sculpt stroke potřebují view3d kontext → vyřazeno). iPad neotestován.
+
 # Víkend — 25. 10. 10:50 — lov chyb fuzz (seed 601–603)
 Výsledek: ✅ na PC. `fuzz_win` 601, `fuzz_obj_win` 602 (340 op), `ui_fuzz_win` 603 FULL: bez pádu, 0 chyb. Žádná nová BACKLOG položka. iPad neotestován.
 
