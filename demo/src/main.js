@@ -1126,6 +1126,16 @@ window.Module = {
   onAbort: (w) => { log("ABORT: " + w); status("Failed to start: " + w); },
 };
 
+/* iOS gives no 1 GB wasm memory right after a GPU crash: instantiation throws "RangeError: Out of memory"
+ * and the splash would stay on "Loading Blender…" forever. Tell the user what to do instead. */
+addEventListener("unhandledrejection", (e) => {
+  const m = String(e.reason && (e.reason.message || e.reason));
+  if (/out of memory|Cannot allocate Wasm memory/i.test(m)) {
+    status("Nedostatek paměti. Zavři tento tab (a ostatní těžké taby), otevři stránku znovu.");
+    alert("Safari nedalo Blenderu paměť (po pádu GPU). Zavři tab a otevři stránku znovu.");
+  }
+});
+
   log("loading Blender…");
   const s = document.createElement("script");
   s.src = "blender.js";

@@ -1,3 +1,8 @@
+# Víkend — 25. 10. 07:40 — P87 hláška při nedostatku paměti
+Výsledek: ✅ na PC, 🟡 iPad neotestován (žádná nová iPad telemetrie).
+- Když Safari po pádu GPU nedá wasm paměť (`RangeError: Out of memory`, iPad telemetrie 23. 10.), stránka teď ukáže „Zavři tento tab…“ + alert místo věčného „Loading Blender…“. `scripts/oomhint_win.sh` PASS (simulovaný reject; skutečné OOM jen na iPadu). fetchretry_win PASS.
+- Co otestovat na iPadu: po pádu GPU hned znovu otevři stránku — pokud se objeví hláška o paměti, napiš.
+
 # SOUHRN PRO LUKÁŠE — sobota 25. 10. ráno (čti první)
 Výsledek: ✅ na PC, 🟡 iPad neotestován (žádná nová iPad telemetrie od 23. 10.).
 **Hlavní oprava:** při tažení (G) se GPU buffery nikdy neuvolňovaly (+300/s → pád) — příčina nalezena a opravena (K3b). Drag test: živých bufferů plochých (86 místo 1639).
