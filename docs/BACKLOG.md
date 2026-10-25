@@ -1,5 +1,20 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 🎉 25. 10. 17:55 — iPad test H1-A/C/H3: G + rychlé tažení UŽ NEPADÁ (Lukáš potvrdil). Zbývá Material Preview.
+Telemetrie `out/ipad/tel_2026-10-25.jsonl` (sezení `y7kbmv` 146 s = přežilo G-tažení; `ogtllg` 30 s = Material Preview pád):
+- **`ogtllg` (Material Preview, pád ~17 s po startu): `Aborted(native code called abort())` na ts 17560 PŘED `lost` (17561)**
+  → opačné pořadí než dřív (tam GPU zmizelo první). Blender abortoval SÁM; `device lost: destroyed` je následek.
+  Paměť malá (buf 2 MB, tex 38 MB), `lag_ms 795` (submit trval ~0,8 s — EEVEE kompilace shaderů v Material Preview).
+  **H4 = zjisti, KDO volá abort()**: telemetrie nese posledních N řádků stderr (zkontroluj `demo/src/telemetry.js`, jestli
+  posílá `console.error`/`printErr`); případně přidej do wasm `abort` hook s JS stackem (`Module.onAbort`) a pošli ho do
+  telemetrie. Reprodukuj na PC: Material Preview na kostce (výchozí scéna) v `?tel=1`, sleduj `abort`. Možné příčiny
+  (odhady): chyba při překladu/vytvoření EEVEE shaderu (Tint/WGSL, limit bindingů či uniform bufferů iPadu — adapter
+  `maxBindGroups=11`), `std::terminate` z výjimky, OOB ve vlákně, malloc selhání. Nejdřív log, pak oprava.
+- `y7kbmv`: `depth_snapshot` vytvořil 44 bufferů = **145 MB** (největší jednotlivý spotřebitel), `uniform_arena` 204 × 256 KB = 53 MB;
+  **`bg_new` kumulativně 109 788** (~750/s) → H1-B (dynamic offsets) je pořád potřeba. `tex_mb` 215.
+  → H5: `depth_snapshot` znovupoužít jeden buffer (nealokovat 3,3 MB při každém snímku).
+- Pořadí práce: H4 (abort v Material Preview) → H1-B → H5. Žádný fuzz.
+
 ## ▶️ AKTUÁLNÍ ÚKOLY (25. 10.) — první nezaškrtnutý dělej TEĎ, detail v `docs/IPAD_CRASH.md`
 - [x] (bg_new≈690/s, view_new≈39/s, buf_new≈1190/s, submit_lag≈0 na PC; docs/MEMORY.md; `drag_win.sh` vypisuje DRAGH1) **H1-0 Změř:** do `drag_win.sh` (a telemetrie) přidej `bg_new/s` (vytvořené bind groups = `g_stat_bindgroups - g_stat_bg_hits`
   nebo JS obal createBindGroup), `view_new/s` a `submit_lag_ms` (onSubmittedWorkDone). Zapiš čísla při G-tažení do `docs/MEMORY.md`.
