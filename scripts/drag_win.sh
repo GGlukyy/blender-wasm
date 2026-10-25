@@ -3,4 +3,4 @@
 U=${WINUSER:-$(ls /mnt/c/Users | grep -v -i -E 'public|default|all users|desktop.ini' | head -1)}
 W=/mnt/c/Users/$U/p2win; ROOT=$(cd "$(dirname "$0")/.." && pwd)
 cp "$ROOT/scripts/drag_test.mjs" "$W/"
-cd "$W" && cmd.exe /c "set DPR=$DPR&& set NOPOOL=$NOPOOL&& set OBJMODE=$OBJMODE&& set STEPS=$STEPS&& set PAUSE=$PAUSE&& set CHROME=C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe&& set PW=playwright-core&& node drag_test.mjs $1" 2>&1 | tr -d "\r" | tee "$ROOT/out/drag_full.log" | grep -v "\[err\]" | tail -14
+cd "$W" && cmd.exe /c "set DPR=$DPR&& set NOPOOL=$NOPOOL&& set OBJMODE=$OBJMODE&& set RING0=$RING0&& set VERB=$VERB&& set STEPS=$STEPS&& set PAUSE=$PAUSE&& set CHROME=C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe&& set PW=playwright-core&& node drag_test.mjs $1" 2>&1 | tr -d "\r" | tee "$ROOT/out/drag_full.log" | grep -v "\[err\]" | tail -14

@@ -3,9 +3,10 @@
 ## ▶️ AKTUÁLNÍ ÚKOLY (25. 10.) — první nezaškrtnutý dělej TEĎ, detail v `docs/IPAD_CRASH.md`
 - [x] (bg_new≈690/s, view_new≈39/s, buf_new≈1190/s, submit_lag≈0 na PC; docs/MEMORY.md; `drag_win.sh` vypisuje DRAGH1) **H1-0 Změř:** do `drag_win.sh` (a telemetrie) přidej `bg_new/s` (vytvořené bind groups = `g_stat_bindgroups - g_stat_bg_hits`
   nebo JS obal createBindGroup), `view_new/s` a `submit_lag_ms` (onSubmittedWorkDone). Zapiš čísla při G-tažení do `docs/MEMORY.md`.
-- [~] **H1-A Immediate ring buffer** (architekt PŘED): `webgpu_immediate.cc` už nevytváří buffer na každé immEnd; perzistentní
+- [x] (ring HOTOVO: imm_ring 0 nových/s; parity 0 ❌, regress_all 59 sekcí 0 FAIL; ALE buf_new zůstal ~1130/s — histogram: SSBO `/1ac` 620/s, VBO `/ac` 480/s = copy-on-write, ne immediate → viz H1-C; fork 59cb282e) **H1-A Immediate ring buffer** (architekt PŘED): `webgpu_immediate.cc` už nevytváří buffer na každé immEnd; perzistentní
   ring + offset. Cíl: `buf_new/s` a `bg_new/s` výrazně dolů. Pak `parity_win.sh` 0 ❌ + `regress_all.sh` 1× → NASADIT →
   STATUS.md „Co otestovat na iPadu: rychlé tažení plochy“.
+- [~] **H1-C Pool pro SSBO/VBO copy-on-write** (nový, z histogramu): `wgpu_buffer_acquire` + pool po sekvenčním uvolnění (WGPU_NO_POOL=1 vypne). Cíl `/1ac` a `/ac` ≈ 0/s v `DRAGHIST`.
 - [ ] **H1-B Dynamic offsets** pro uniform arenu / push constants (pozor na starý bug „všechny draw četly první offset“).
 - [ ] **H2 Max 2 snímky v letu**, jen pokud `submit_lag_ms` při tažení roste.
 - [ ] **H3 Textury ~30/s** — najdi zdroj, `webgpu_texture_pool`.

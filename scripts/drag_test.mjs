@@ -10,12 +10,12 @@ def go():
     print('DRAGREADY')
     return None
 bpy.app.timers.register(go, first_interval=3.0)`;
-const browser = await chromium.launch({ headless: false, executablePath: process.env.CHROME, args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
+const browser = await chromium.launch({ headless: false, executablePath: process.env.CHROME, args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950", "--disable-renderer-backgrounding", "--disable-background-timer-throttling", "--disable-backgrounding-occluded-windows"] });
 const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
 page.on("pageerror", e => console.log("PAGEERROR", String(e).slice(0, 300))); page.on("crash", () => console.log("PAGECRASH"));
 let ready = false, lost = false;
-page.on("console", m => { const t = m.text(); if (/DRAGREADY/.test(t)) ready = true; if (/WGPU_FREES/.test(t)) console.log(t.slice(0, 160)); if (/WEBGPU_LOST/.test(t)) { lost = true; console.log("LOST", t.slice(0, 200)); } });
-await page.addInitScript(() => {}); await page.addInitScript(([e, nopool]) => { window.__BARGS = ["--python-expr", e]; window.__LOGFREES = true; if (nopool) window.__CAPENV = { WGPU_NO_POOL: "1" }; if (window.__LOGFREES) window.__CAPENV = { ...(window.__CAPENV||{}), WGPU_LOG_FREES: "1" }; }, [expr, !!process.env.NOPOOL]);
+page.on("console", m => { const t = m.text(); if (process.env.VERB && (!/WGPU_/.test(t) || /WGPU_(STATS|IMM|ERR|FAIL)|WEBGPU/.test(t))) console.log("C:", Math.round(performance.now()/1000), t.slice(0, 200)); if (/DRAGREADY/.test(t)) ready = true; if (/WGPU_FREES/.test(t)) console.log(t.slice(0, 160)); if (/WEBGPU_LOST/.test(t)) { lost = true; console.log("LOST", t.slice(0, 200)); } });
+await page.addInitScript(() => {}); await page.addInitScript(([e, nopool, ring0]) => { window.__BARGS = ["--python-expr", e]; window.__LOGFREES = true; if (nopool) window.__CAPENV = { WGPU_NO_POOL: "1" }; if (window.__LOGFREES) window.__CAPENV = { ...(window.__CAPENV||{}), WGPU_LOG_FREES: "1" }; if (ring0) window.__CAPENV = { ...(window.__CAPENV||{}), WGPU_IMM_RING: "0" }; }, [expr, !!process.env.NOPOOL, !!process.env.RING0]);
 await page.goto("http://localhost:5173/?perf=1&tel=1", { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
 await page.getByRole("button", { name: /Launch Blender/ }).click();
@@ -42,7 +42,9 @@ while (Date.now() < end) {
 const sN = await snap(); console.log("PERFEND " + JSON.stringify(sN.p)); const tot = (sN.t - s0.t) / 1000;
 const keys = Object.keys(sN.g).filter(k => /tex.*new|new/.test(k));
 console.log(`DRAGH1 bg_new/s=${((sN.g.bg_new - s0.g.bg_new) / tot).toFixed(0)} view_new/s=${((sN.g.view_new - s0.g.view_new) / tot).toFixed(0)} submit_lag_max_ms=${sN.g.lag_max}`);
-console.log(`DRAGSUM dur=${tot.toFixed(1)}s mouse_moves=${moves} buf_new/s=${((sN.g.buf_new - s0.g.buf_new) / tot).toFixed(0)} max_live=${maxLive} new_keys=${keys.join(",")} tex_new/s=${sN.g.tex_new !== undefined ? ((sN.g.tex_new - s0.g.tex_new) / tot).toFixed(1) : "n/a"} gpumem=${JSON.stringify(sN.g)}`);
+{ const hs = []; for (const k of Object.keys(sN.g.hist || {})) hs.push([k, ((sN.g.hist[k] - ((s0.g.hist || {})[k] || 0)) / tot), ((sN.g.hbytes[k] - ((s0.g.hbytes || {})[k] || 0)) / tot / 1024)]);
+  hs.sort((a, b) => b[1] - a[1]); console.log("DRAGHIST " + hs.slice(0, 12).map(h => `${h[0]}=${h[1].toFixed(0)}/s(${h[2].toFixed(0)}KB/s)`).join("  ")); }
+console.log(`DRAGSUM dur=${tot.toFixed(1)}s mouse_moves=${moves} buf_new/s=${((sN.g.buf_new - s0.g.buf_new) / tot).toFixed(0)} max_live=${maxLive} new_keys=${keys.join(",")} tex_new/s=${sN.g.tex_new !== undefined ? ((sN.g.tex_new - s0.g.tex_new) / tot).toFixed(1) : "n/a"} gpumem=${JSON.stringify({ ...sN.g, hist: undefined, hbytes: undefined })}`);
 await page.screenshot({ path: "drag_end.png" }).catch(() => {});
 await page.keyboard.press("Escape");
 await new Promise(r => setTimeout(r, 1500));
