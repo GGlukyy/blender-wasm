@@ -44,9 +44,9 @@ Telemetrie `out/ipad/tel_2026-10-25.jsonl` (sezení `y7kbmv` 146 s = přežilo G
   ring + offset. Cíl: `buf_new/s` a `bg_new/s` výrazně dolů. Pak `parity_win.sh` 0 ❌ + `regress_all.sh` 1× → NASADIT →
   STATUS.md „Co otestovat na iPadu: rychlé tažení plochy“.
 - [x] (drag_win 12 s: buf_new 1130→0/s, bg_new 690→59/s, `/1ac` a `/ac` 0/s; parity 0 ❌; regress_all 59 sekcí 0 FAIL; fork 5d0f6d8f; NASAZENO v demo/public, čeká na iPad) **H1-C Pool pro SSBO/VBO copy-on-write** (nový, z histogramu): `wgpu_buffer_acquire` + pool po sekvenčním uvolnění (WGPU_NO_POOL=1 vypne). Cíl `/1ac` a `/ac` ≈ 0/s v `DRAGHIST`.
-- [ ] **H1-B Dynamic offsets** pro uniform arenu / push constants (pozor na starý bug „všechny draw četly první offset“).
-- [ ] **H2 Max 2 snímky v letu**, jen pokud `submit_lag_ms` při tažení roste.
-- [x] (zdroj: `immDrawPixels` v `editors/screen/glutil.cc` 495×247 ×20/s; cache 4 textur; tex_new 20→0,1/s; parity 0 ❌; regress běží) **H3 Textury ~30/s** — najdi zdroj, `webgpu_texture_pool`.
+- [ ] (zatím NEdělat: bg_new už jen ~40/s; vrátit se, jen když iPad po H1-A/C/H3 pořád padá) **H1-B Dynamic offsets** pro uniform arenu / push constants (pozor na starý bug „všechny draw četly první offset“).
+- [ ] (zatím NEdělat: submit_lag≈0 na PC; rozhodne iPad telemetrie) **H2 Max 2 snímky v letu**, jen pokud `submit_lag_ms` při tažení roste.
+- [x] (zdroj: `immDrawPixels` v `editors/screen/glutil.cc` 495×247 ×20/s; cache 4 textur; tex_new 20→0,1/s; parity 0 ❌; regress_all 59 sekcí 0 FAIL; fork a0720ed8; NASAZENO) **H3 Textury ~30/s** — najdi zdroj, `webgpu_texture_pool`.
 
 ## 🧭 25. 10. 10:30 — NOVÝ PLÁN: přečti `docs/IPAD_CRASH.md` a dělej PŘESNĚ to (nahrazuje K3c)
 Nejpravděpodobnější příčina = známý bug WebKitu (destroy() neuvolní paměť, dokud ji drží bind group; uvolní až GC).

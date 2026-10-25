@@ -1,3 +1,11 @@
+# Víkend — 25. 10. 21:00 — H1 + H3 hotovo, nasazeno, čeká na iPad
+Výsledek: ✅ na PC (regress_all 59 sekcí 0 FAIL, parity 0 ❌), 🟡 iPad neotestován.
+**Nové od 17:00:** H3 — zdroj textur byl `immDrawPixels` (`editors/screen/glutil.cc`, obrázek 495×247, vytvářel se a ničil při každém překreslení, ~20×/s). Teď cache 4 textur: `tex_new` 20 → 0,1/s. Fork `a0720ed8`, `BLENDER_REF` aktualizován.
+**Při tažení G na PC (12 s):** nové buffery 0/s (bylo ~1130), bind groups ~40/s (bylo ~690), textury 0,1/s (bylo ~20), views ~21/s. Nasazený build v `demo/public/` je tenhle.
+**Co otestovat na iPadu (pořadí):** viz blok výš (smazat data webu → kostka → Tab → plocha → G → prudké tažení 10 s → pak 2 min běžné práce). Když padne, napiš čas od startu; telemetrie řekne víc.
+**Blocked:** nic. H1-B a H2 záměrně neděláme, dokud iPad neřekne, že pád trvá (bg_new už je nízko, submit_lag ≈ 0 na PC).
+**Poznámka (LESSONS):** po `timeout` zůstanou viset node/Chrome — před každým testem `taskkill`; jinak testy „visí“.
+
 # Víkend — 25. 10. 17:00 — iPad pád: H1 (buffery + bind groups) hotovo na PC
 Výsledek: ✅ na PC, 🟡 iPad neotestován (NASAZENO v `demo/public/`, stačí reload).
 **Co jsem udělal**
