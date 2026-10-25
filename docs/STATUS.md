@@ -12,6 +12,7 @@ Výsledek: ✅ na PC, **iPad neotestován**.
 - Pozor: nízké FPS (3–10) v `drag_win.sh` není výkon Blenderu (v Object módu stejně, api_ms < 1) — omezuje to dávkování událostí v Playwrightu; `OBJMODE=1`, `STEPS`, `PAUSE` přidány do testu.
 - 🔎 M4 zkouška: **512 MB + 32 vláken** (`out/m4c/`) taky padá v `prefs_sweep` (`memory access out of bounds`, `mouse_emulate_3_button`) → pád souvisí s **počáteční velikostí paměti (<1 GB) = růst haldy s vlákny**, ne s počtem vláken. Hypotéza (odhad): když halda roste za běhu (`ALLOW_MEMORY_GROWTH` + pthreads), vlákna mají zastaralý pohled → OOB. Důsledek: na iPadu by růst nad 1 GB mohl padat stejně → raději nezmenšovat INITIAL_MEMORY. Nasazený build zůstal 1 GB/32 vláken (záloha `out/bak_k3b/`).
 - Výkon operací (`optime_win.sh`, 30 operací na 10k vrcholů): vše < 1 s kromě Subsurf na trojúhelnících (10 s při 1. výpočtu) a Skin na hustší síti (34 s) — obojí v BACKLOGu, nízká priorita pro modelování z kvádrů.
+- 🆕 **Hlídač paměti** (JS): oranžový pruh při haldě ≥ 1500 MB, červený ≥ 2000 MB (fuzz test rostl na 2,7 GB za 80 s). `memwarn_win.sh` PASS; tel/perf_panel/restore/savednote/safe PASS po změně (WGPU_PERF je teď vždy zapnuté, aby hlídač dostával heap_mb). Na iPadu sleduj, zda se pruh objeví při těžké operaci (Subsurf 5+) před pádem.
 - **Co otestovat na iPadu:** čisté data webu → kostka → Tab → plochy → vyber → G → prudké tažení 10+ s → potvrdit. Vydrží? Telemetrie `gpu.buf` by měla zůstat plochá (~100).
 
 # Víkend — 24. 10. 23:50 — K3b jen rozbor

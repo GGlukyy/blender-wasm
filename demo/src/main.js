@@ -423,6 +423,31 @@ const showQuit = () => {
   b.innerHTML = "Blender skončil (File ▸ Quit / Ctrl+Q). Uložené soubory v 📁 zůstaly; rozdělaná práce je v <code>/opfs/home/_autosave.blend</code>. <button style='margin-left:12px;font-size:16px' onclick='location.reload()'>Spustit znovu</button>";
   document.body.appendChild(b);
 };
+/* Memory guard: the wasm heap only grows (never shrinks). Safari on iPad kills the tab somewhere around 1.5–2 GB,
+ * and heavy ops (Subsurf 5+, big Remesh/Array) can jump there in seconds → warn while the autosave (30 s) still can run. */
+const MEM_WARN_MB = +(new URLSearchParams(location.search).get("memwarn") || 1500);
+let memWarnLevel = 0;
+const checkMem = (mb) => {
+  try {
+    mb = Math.round(mb); window.__HEAP_MB__ = mb;
+    const level = mb >= MEM_WARN_MB + 500 ? 2 : mb >= MEM_WARN_MB ? 1 : 0;
+    if (level <= memWarnLevel) return;
+    memWarnLevel = level;
+    let n = document.getElementById("mem-warn");
+    if (!n) {
+      n = document.createElement("div"); n.id = "mem-warn";
+      n.style.cssText = "position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:99996;color:#fff;font:15px system-ui,sans-serif;padding:8px 14px;border-radius:8px;max-width:92vw";
+      document.body.appendChild(n);
+    }
+    n.style.background = level === 2 ? "rgba(179,38,30,.95)" : "rgba(160,100,0,.95)";
+    n.textContent = (level === 2 ? "⚠️ Paměť " + mb + " MB — iPad může tab zabít! " : "Paměť " + mb + " MB — blíží se limit iPadu. ") +
+      "Ulož práci (autosave běží) a smaž těžké objekty / sniž Subdivision. ";
+    const b = document.createElement("button"); b.textContent = "OK"; b.style.cssText = "margin-left:8px;font-size:15px";
+    b.onclick = () => { n.style.display = "none"; }; n.append(b); n.style.display = "block";
+  } catch (_) {}
+};
+/* The render pthread reports heap_mb with its perf sample (WGPU_PERF is always on, see preRun). */
+new BroadcastChannel("blender-perf").addEventListener("message", (e) => { if (e.data && e.data.heap_mb) checkMem(e.data.heap_mb); });
 /* "Where did my file go?": when Blender reports a written file, say where and offer the file manager. */
 const showSaved = (path) => {
   let n = document.getElementById("saved-note");
@@ -1031,7 +1056,7 @@ window.Module = {
       ENV.BLENDER_SYSTEM_PYTHON = "/assets";
       ENV.PYTHONHOME = "/assets";
       if (window.__CAPENV) for (const k in window.__CAPENV) ENV[k] = window.__CAPENV[k];
-      if (new URLSearchParams(location.search).get("perf") === "1" || telEnabled) ENV.WGPU_PERF = "1";
+      ENV.WGPU_PERF = "1"; /* cheap; also feeds the memory guard */
       if (new URLSearchParams(location.search).get("perf") === "1" && new URLSearchParams(location.search).get("reglog") === "1") ENV.WGPU_REGIONLOG = "1";
       if (new URLSearchParams(location.search).get("passlog") === "1") ENV.WGPU_PASSLOG = "1";
       if (new URLSearchParams(location.search).get("compilelog") === "1") ENV.WGPU_LOG_COMPILE = "1";
