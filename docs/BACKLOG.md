@@ -30,7 +30,7 @@ Material Preview/Rendered na iPadu zatím padá (790 MB GPU textur). Dokud to ne
   4. Měř `tex_mb` v `shading_win.sh` (Material Preview na kostce) před/po; cíl < 300 MB, pak iPad test.
 - Pozn.: Solid mód je pro modelování malých assetů hlavní cíl a ten teď drží (G-tažení OK). Material Preview je bonus.
 
-- [x] (H5 depth_snapshot: 2 readback buffery se znovupoužívají místo create/destroy; parity 0 ❌; regress_all běží, výsledek doplnit; NASAZENO) **H5 depth_snapshot**
+- [x] (H5 depth_snapshot: 2 readback buffery se znovupoužívají místo create/destroy; parity 0 ❌; regress_all: 1 FAIL `prefs_sweep` (done=0, známý nestabilní test), samostatně 3× PASS; NASAZENO) **H5 depth_snapshot**
 
 ## ⏳ H4 diagnostika NASAZENA (25. 10. 18:30, fork 883a0fa4) — čeká na iPad
 - [~] Hotovo: `Module.onAbort` posílá do telemetrie `kind:abort` + JS stack; `compute_dispatch` loguje kroky `WGPU_DISPATCH step #n …` (prvních 16); `?nocompute=1` přeskočí všechny compute dispatche. PC: shading_win (Material Preview) ERRORS 0.

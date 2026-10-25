@@ -1,3 +1,10 @@
+# Víkend — 25. 10. 20:30 — H5 depth_snapshot hotovo, nasazeno
+Výsledek: ✅ na PC (s poznámkou), 🟡 iPad neotestován.
+**Co jsem udělal:** `depth_snapshot` (čtení hloubky pro výběr) už nevytváří a neničí buffer při každém snímku, ale znovupoužívá až 2 buffery (fork `f37cd1c9`).
+**Důkaz:** `parity_win.sh` 0 ❌. `regress_all.sh`: 1 FAIL v `prefs_sweep` (`done=0`, pád u `mouse_emulate_3_button`). Ten test je dřív zaznamenaný jako nestabilní (~50 %); samostatně teď 3× PASS, takže to **nejspíš není moje změna** (odhad, ostatní sekce bez FAIL).
+**Co otestovat na iPadu:** to samé co dřív (G + prudké tažení 10 s, pak 2 min práce) + **Material Preview s `?tel=1`**, a pak ještě s `?tel=1&nocompute=1` (viz H4 výš). Hlavně pošli, jestli padá a za jak dlouho.
+**Blocked:** nic. H1-B, H2 záměrně nedělám, dokud nebude iPad výsledek.
+
 # Víkend — 25. 10. 18:30 — H4 diagnostika (abort v Material Preview)
 Výsledek: 🟡 diagnostika nasazena, příčina zatím neznámá (odhad: compute cesta na Safari).
 **Co jsem udělal:** telemetrie teď při abortu pošle JS stack (`kind:abort`); compute dispatch loguje každý krok; přepínač `?nocompute=1` compute vypne. Fork `883a0fa4`.
