@@ -1,3 +1,6 @@
+# Víkend — 25. 10. 09:40 — model_ops6
+Výsledek: ✅ na PC. `scripts/model_ops6_win.sh` 12/12 PASS (všechny primitiva mesh/curve/metaball/empty/světlo/kamera/armature, separate+join, constraint, driver, origin_set, mirror objektu, křivka s bevel → mesh, metaball → mesh, boolean EXACT union, OBJ export+import, smart project layout, undo). Žádná chyba portu; FAIL byly chyby testu (neexistující operátor lattice_add, view3d operátor bez viewportu, špatné očekávání rozložení UV). iPad neotestován.
+
 # Víkend — 25. 10. 09:15 — model_ops5
 Výsledek: ✅ na PC. Nový `scripts/model_ops5_win.sh`: 19/19 PASS (inset, ring+subdivide, bridge loops, fill grid, extrude hran, edge slide, remove doubles, normály, convex hull, seam+unwrap, cube project/lightmap, přiřazení materiálu, mirror/weld/shrinkwrap, select similar, bisect fill, apply scale, uložit+znovu otevřít .blend). Žádná chyba portu (všechny prvotní FAIL byly chyby testu: špatné názvy operátorů 5.x, inset celé kostky, špatný očekávaný počet). Nasazený build beze změny; iPad neotestován, žádná nová iPad telemetrie.
 
