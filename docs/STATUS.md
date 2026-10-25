@@ -15,6 +15,7 @@ Výsledek: ✅ na PC, **iPad neotestován**.
 - 🆕 **Hlídač paměti** (JS): oranžový pruh při haldě ≥ 1500 MB, červený ≥ 2000 MB (fuzz test rostl na 2,7 GB za 80 s). `memwarn_win.sh` PASS; tel/perf_panel/restore/savednote/safe PASS po změně (WGPU_PERF je teď vždy zapnuté, aby hlídač dostával heap_mb). Na iPadu sleduj, zda se pruh objeví při těžké operaci (Subsurf 5+) před pádem.
 - ✅ `regress_all.sh` po hlídači paměti (WGPU_PERF vždy zapnuté): 59 sekcí, **0 FAIL**.
 - 🧠 **Příčina růstu paměti nalezena (`leak_win.sh`, bisekce):** není to únik, jsou to **undo kroky** — každý krok s velkým meshem drží plnou kopii (40 těžkých kroků: halda 1→3,7 GB; bez `undo_push` zůstane 1 GB). Oprava (JS/Python, bez rebuildu): výchozí **Undo Memory Limit 300 MB** (`?undomem=N`, 0 = bez limitu; mění se v Preferences ▸ System). Stejný test: halda po 61 s 1,66 GB místo 2,49 GB. undo_win / prefs_input / restore / model_ops2 PASS. Čeká na iPad.
+- ✅ `regress_all.sh` po undo limitu (P83): 59 sekcí, **0 FAIL**.
 - **Co otestovat na iPadu:** čisté data webu → kostka → Tab → plochy → vyber → G → prudké tažení 10+ s → potvrdit. Vydrží? Telemetrie `gpu.buf` by měla zůstat plochá (~100).
 
 # Víkend — 24. 10. 23:50 — K3b jen rozbor
