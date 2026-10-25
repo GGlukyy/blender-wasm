@@ -1,5 +1,5 @@
 # Víkend — 25. 10. 12:50 — dotykový fuzz (nový)
-Výsledek: ✅ na PC. Nový `scripts/touch_fuzz_win.sh` (`TF_SEED`, `TF_N` přes WSLENV): náhodná gesta přes CDP — tap, tah, pinch, 2prstý pan, dlouhý stisk, touchCancel, 3 prsty, tlačítka lišty, klávesy. Seed 11/12/13 × 250 gest: 0 chyb stránky, bez ztráty GPU, Blender po všem odpoví (Python timer). Dotek na iPadu to ale nenahradí. Žádná nová BACKLOG položka.
+Výsledek: ✅ na PC. Nový `scripts/touch_fuzz_win.sh` (`TF_SEED`, `TF_N` přes WSLENV): náhodná gesta přes CDP — tap, tah, pinch, 2prstý pan, dlouhý stisk, touchCancel, 3 prsty, tlačítka lišty, klávesy. Seed 11/12/13 × 250 gest: 0 chyb stránky, bez ztráty GPU, Blender po všem odpoví (Python timer). Dotek na iPadu to ale nenahradí. Navíc `TF_EDIT=1` (Tab + face select): seed 21–23 × 400 gest PASS. Žádná nová BACKLOG položka.
 
 # Víkend — 25. 10. 12:20 — fuzz seed 901/902
 Výsledek: ✅ na PC. `fuzz_win` (325 a 317 op) a `fuzz_obj_win` (372 a 380 op) seed 901, 902: bez pádu wasm. Žádná nová BACKLOG položka.

@@ -40,6 +40,7 @@ const gestures = {
   async bar() { const b = page.locator("#touchbar button", { hasText: new RegExp("^" + labels[ri(0, labels.length)] + "$") }); if (await b.count()) await b.first().click({ timeout: 1000 }).catch(() => {}); },
   async key() { await page.keyboard.press(["Home", "Tab", "a", "Escape", "Numpad1", "1", "3"][ri(0, 7)]); },
 };
+if (process.env.TF_EDIT) { await page.keyboard.press("Tab"); await wait(1000); await page.keyboard.press("3"); await wait(500); }
 const names = Object.keys(gestures);
 for (let i = 0; i < N; i++) {
   const g = names[ri(0, names.length)];
