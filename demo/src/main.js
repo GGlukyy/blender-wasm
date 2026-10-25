@@ -109,6 +109,20 @@ function renderDownloads() {
 }
 /* Stream `url` with progress into `dl[key]`, return the compressed bytes. */
 async function fetchZst(url, key) {
+  /* iOS suspends/kills fetches when the tab goes to the background ("TypeError: Load failed", seen in iPad telemetry
+   * 23. 10.): wait until visible again and retry the whole download (up to 3×). */
+  for (let attempt = 1; ; attempt++) {
+    try { return await fetchZstOnce(url, key); }
+    catch (e) {
+      if (attempt >= 4) throw e;
+      console.warn("fetch retry", attempt, url, String(e));
+      dl[key].loaded = 0; dl[key].total = 0;
+      while (document.hidden) await new Promise((res) => setTimeout(res, 500));
+      await new Promise((res) => setTimeout(res, 800 * attempt));
+    }
+  }
+}
+async function fetchZstOnce(url, key) {
   const r = await fetch(url);
   if (!r.ok || !r.body) throw new Error(`${url}: HTTP ${r.status}`);
   dl[key].total = Number(r.headers.get("Content-Length")) || 0;
