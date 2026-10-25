@@ -1,3 +1,6 @@
+# Víkend — 25. 10. 09:10 — model_ops7
+Výsledek: ✅ na PC. `scripts/model_ops7_win.sh` 11/11 PASS: cyklus módů (edit/sculpt/vertex/weight/texture paint), vertex color fill, weight normalize, particles (50), cloth 10 snímků (pohyb ověřen), rigid body, fluid domain, soft body, uzly materiálu, render nastavení. Žádná chyba portu (FAIL byly chyby testu: particles čtu z evaluated objektu, barva štětce je v 5.x v `unified_paint_settings`, počet linků včetně výchozího). iPad neotestován.
+
 # Víkend — 25. 10. 08:59 — lov chyb fuzz
 Výsledek: ✅ na PC. `ui_fuzz_win` seed 511 (400 akcí) a 512 FULL (500 akcí): 0 chyb. `fuzz_win` seed 501 (291 op) a `fuzz_obj_win` seed 503/504 (~425 op každý) — bez pádu wasm (operator_errors jsou očekávané špatné kontexty). Žádná nová chyba, žádná nová BACKLOG položka. Výkon už je v BACKLOGu změřený (žádný nový hotspot). Co otestovat na iPadu: beze změny (viz „SOUHRN PRO LUKÁŠE“ níže, bod 1–3).
 
