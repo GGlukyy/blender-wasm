@@ -1,5 +1,10 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 🧭 25. 10. 10:30 — NOVÝ PLÁN: přečti `docs/IPAD_CRASH.md` a dělej PŘESNĚ to (nahrazuje K3c)
+Nejpravděpodobnější příčina = známý bug WebKitu (destroy() neuvolní paměť, dokud ji drží bind group; uvolní až GC).
+Pořadí: (1) změř `bg_new/s` + `submit_lag_ms` v `drag_win.sh`, (2) immediate ring buffer (krok A), (3) nasadit + test
+pro Lukáše, (4) dynamic offsets (krok B). Architekt před (2). Žádný fuzz, žádné nové *_win testy mimo tento plán.
+
 ## 📱 iPad test K3b (Lukáš 25. 10. 10:05, sezení `v9h99q`, `59xpfa`, `5kyvux`) — POŘÁD PADÁ, ale víme víc
 - K3b na iPadu FUNGUJE: živých bufferů max **104–245** (dřív 10 645), na konci ~100 / 5–14 MB, textury 60 MB.
   → hypotéza „moc živých objektů“ je **VYVRÁCENA**. Přesto `device lost: destroyed` ve **32,9 s / 39,4 s / 36,8 s** od startu
