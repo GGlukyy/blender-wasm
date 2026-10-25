@@ -1,5 +1,5 @@
 # Víkend — 25. 10. 08:59 — lov chyb fuzz
-Výsledek: ✅ na PC. `fuzz_win` seed 501 (291 op) a `fuzz_obj_win` seed 503/504 (~425 op každý) — bez pádu wasm (operator_errors jsou očekávané špatné kontexty). Žádná nová chyba, žádná nová BACKLOG položka. Výkon už je v BACKLOGu změřený (žádný nový hotspot). Co otestovat na iPadu: beze změny (viz „SOUHRN PRO LUKÁŠE“ níže, bod 1–3).
+Výsledek: ✅ na PC. `ui_fuzz_win` seed 511 (400 akcí) a 512 FULL (500 akcí): 0 chyb. `fuzz_win` seed 501 (291 op) a `fuzz_obj_win` seed 503/504 (~425 op každý) — bez pádu wasm (operator_errors jsou očekávané špatné kontexty). Žádná nová chyba, žádná nová BACKLOG položka. Výkon už je v BACKLOGu změřený (žádný nový hotspot). Co otestovat na iPadu: beze změny (viz „SOUHRN PRO LUKÁŠE“ níže, bod 1–3).
 
 # Víkend — 25. 10. 08:58 — model_ops6
 Výsledek: ✅ na PC. `scripts/model_ops6_win.sh` 12/12 PASS (všechny primitiva mesh/curve/metaball/empty/světlo/kamera/armature, separate+join, constraint, driver, origin_set, mirror objektu, křivka s bevel → mesh, metaball → mesh, boolean EXACT union, OBJ export+import, smart project layout, undo). Žádná chyba portu; FAIL byly chyby testu (neexistující operátor lattice_add, view3d operátor bez viewportu, špatné očekávání rozložení UV). iPad neotestován.
