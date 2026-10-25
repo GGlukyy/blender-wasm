@@ -1,3 +1,11 @@
+# SOUHRN PRO LUKÁŠE — sobota 25. 10. ráno (čti první)
+Výsledek: ✅ na PC, 🟡 iPad neotestován (žádná nová iPad telemetrie od 23. 10.).
+**Hlavní oprava:** při tažení (G) se GPU buffery nikdy neuvolňovaly (+300/s → pád) — příčina nalezena a opravena (K3b). Drag test: živých bufferů plochých (86 místo 1639).
+**Další změny (vše bez zásahu do tvého workflow):** obnovení práce po pádu (popup + File menu), hlídač paměti (pruh při ≥1500 MB), Undo Memory Limit 300 MB (příčina růstu paměti = undo kroky), víc testů (model_ops2, formats, optime, leak, soak).
+**Otestuj na iPadu v tomto pořadí:** (1) čistá data webu → kostka → Tab → plochy → vyber → G v liště → prudce táhni 10+ s → potvrdit; (2) zavři tab, otevři znovu → popup „Obnovit poslední práci“; (3) těžká operace (Subdivision level 5) → objeví se pruh s pamětí?
+**Nalezené, neopravené (BACKLOG):** Subsurf na trojúhelnících 10 s při prvním výpočtu, Skin na hustší síti, DPX načtení zamrzne, chybí WEBP/USD/Alembic/Collada, AVIF uložení selže, žádná čeština v UI.
+**Regrese:** `regress_all.sh` 59 sekcí, 0 FAIL (po každé změně).
+
 # Víkend — 25. 10. 02:45 — K3b HOTOVO (příčina pádu při tažení nalezena a opravena na PC)
 Výsledek: ✅ na PC, **iPad neotestován**.
 - **Příčina:** při tažení držel jiný (neaktivní) GPU kontext nesubmitnutý příkaz po celou dobu → buffery se nikdy neničily (+300 živých/s).
