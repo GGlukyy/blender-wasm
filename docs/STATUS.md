@@ -1,3 +1,11 @@
+# Víkend — 25. 10. 21:30 — H6 krok 1: menší atlas odrazů v Material Preview
+Výsledek: ✅ na PC, 🟡 iPad neotestován.
+**Co jsem udělal:** EEVEE atlas sphere probes byl 4096² (rgba16float, 2 textury po ~179 MB). Změna na 2048² (`SPHERE_PROBE_ATLAS_MAX_SUBDIV` 11) → každá ~45 MB, dohromady úspora ~270 MB z ~790 MB. Fork `7498d505`.
+**Důkaz:** log vytvořených textur před/po (`scripts/texmem_test.mjs`): `Probes` a `world_sphere_probe_` 4096² → 2048². `shading_win` ERRORS 0, screenshot Material Preview vypadá správně (odrazy na kovové opici). `parity_win.sh` 0 ❌. `regress_all.sh` běží (výsledek doplním).
+**Nezměněno:** `fb_dummy_attachment` 8192² (64 MB) — viewport nesmí přesáhnout attachment, nechal jsem být. Celkově po změně odhadem ~520 MB, stále nad cílem 300 MB (odhad).
+**Co otestovat na iPadu:** Material Preview je pořád zablokovaný ochranou H7. Zkus s `?mp=1` v adrese: kostka → Material Preview → drž 2 min; pošli, jestli padá, a telemetrii (`tex_mb`).
+**Co dál:** shadow atlas 2048²×8 r32uint a G-buffery (viz BACKLOG H6, krok 3), jen pokud iPad ukáže, že to pořád padá.
+
 # Víkend — 25. 10. 21:15 — H7 ochrana Material Preview na iPadu
 Výsledek: ✅ na PC, 🟡 iPad neotestován.
 **Co jsem udělal:** na iPadu (dotyk + Mac/iPad UA) Python timer každých 0,5 s vrátí 3D viewport z Material Preview/Rendered na Solid a ukáže pruh „Material Preview na iPadu zatím nefunguje… přidej ?mp=1“. `?mp=1` ochranu vypne. Jen `demo/src/main.js`, bez rebuildu.
