@@ -1,3 +1,6 @@
+# Víkend — 25. 10. 07:55 — model_ops3
+Výsledek: ✅ na PC. Nový `scripts/model_ops3_win.sh`: 13/13 PASS (array, solidify, bevel hran, smazat plochu+fill, tris↔quads, proportional edit, spin, křivka→mesh, text→mesh, vertex group, shape key, linked duplicate, UV pack). Žádná nová chyba portu. (2 prvotní FAIL byly chyby testu — špatný vybraný vrchol, špatné počítání meshí — opraveno v testu, ne v kódu.)
+
 # Víkend — 25. 10. 07:40 — P87 hláška při nedostatku paměti
 Výsledek: ✅ na PC, 🟡 iPad neotestován (žádná nová iPad telemetrie).
 - Když Safari po pádu GPU nedá wasm paměť (`RangeError: Out of memory`, iPad telemetrie 23. 10.), stránka teď ukáže „Zavři tento tab…“ + alert místo věčného „Loading Blender…“. `scripts/oomhint_win.sh` PASS (simulovaný reject; skutečné OOM jen na iPadu). fetchretry_win PASS.
