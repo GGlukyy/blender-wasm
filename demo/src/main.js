@@ -954,6 +954,7 @@ async function start() {
 // iPad Safari má malý limit na tab → pro nové soubory / startup scénu 128 MB (-380 MB). Přepsat: ?shadowpool=512 (hodnoty enumu v MB).
 const SHADOW_POOL = (new URLSearchParams(location.search).get("shadowpool") || "128").replace(/[^0-9]/g, "") || "128";
 const AUTOSAVE_S = (new URLSearchParams(location.search).get("autosave") || "30").replace(/[^0-9]/g, "") || "30";
+const UNDO_MB = (new URLSearchParams(location.search).get("undomem") || "300").replace(/[^0-9]/g, "") || "300"; // ?undomem=N limit paměti undo v MB (0 = bez limitu)
 const RESET_PREFS = new URLSearchParams(location.search).get("resetprefs") === "1" ? "1" : "0"; // ?resetprefs=1 smaže uložené Preferences
 const UI_SCALE = (new URLSearchParams(location.search).get("uiscale") || "").replace(/[^0-9.]/g, ""); // ?uiscale=1.3 → větší UI pro prsty (uloží se do Preferences)
 const SHADOW_POOL_PY = `import bpy
@@ -976,6 +977,11 @@ except Exception as e: print('USERPREF load ERR', e)
 try:
     if '${UI_SCALE}': bpy.context.preferences.view.ui_scale = max(0.5, min(3.0, float('${UI_SCALE}'))); print('UISCALE set ${UI_SCALE}', flush=True)
 except Exception as e: print('UISCALE ERR', e)
+# Undo paměť: každý undo krok s velkou změnou meshe drží plnou kopii (fuzz: halda 1→3,7 GB za 40 těžkých kroků).
+# iPad to nepřežije → výchozí limit ${UNDO_MB} MB (Preferences ▸ System ▸ Undo Memory Limit; ?undomem=0 = bez limitu).
+try:
+    if float('${UNDO_MB}') > 0 and bpy.context.preferences.edit.undo_memory_limit == 0: bpy.context.preferences.edit.undo_memory_limit = int(float('${UNDO_MB}'))
+except Exception as e: print('UNDOMEM ERR', e)
 def _save_prefs():
     try:
         if bpy.context.preferences.is_dirty: bpy.ops.wm.save_userpref(); print('USERPREF saved')
