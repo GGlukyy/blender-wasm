@@ -1,3 +1,10 @@
+# Víkend — 25. 10. 02:45 — K3b HOTOVO (příčina pádu při tažení nalezena a opravena na PC)
+Výsledek: ✅ na PC, **iPad neotestován**.
+- **Příčina:** při tažení držel jiný (neaktivní) GPU kontext nesubmitnutý příkaz po celou dobu → buffery se nikdy neničily (+300 živých/s).
+- **Oprava:** kontext při přepnutí pryč příkazy odešle; mazání buffer jen těch, které nemůže odesílaný příkaz už používat (fork `e97a363d`, `BLENDER_REF`).
+- **Důkaz:** `scripts/drag_win.sh`: živých bufferů max 86 (dřív 1639 za 10 s), zničeno 4029 z 4115. `regress_all.sh` 59 sekcí 0 FAIL; `parity_win.sh` 0 ❌. Nasazený build = nový.
+- **Co otestovat na iPadu:** čisté data webu → kostka → Tab → plochy → vyber → G → prudké tažení 10+ s → potvrdit. Vydrží? Telemetrie `gpu.buf` by měla zůstat plochá (~100).
+
 # Víkend — 24. 10. 23:50 — K3b jen rozbor
 Výsledek: 🟡 Bez změny kódu a buildu (zbývalo 15 min). Čtením kódu: `wgpu_flush_buffer_frees` se přeskočí, když KTERÝKOLI kontext drží nesubmitnutý encoder (`pass_open()` = `render_pass_||encoder_`) → pravděpodobná příčina, že se při tažení buffery neuvolňují (odhad, neměřeno). Detail a další krok v BACKLOGu u K3b. Na iPadu nic nového k testování.
 

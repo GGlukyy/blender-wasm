@@ -13,8 +13,8 @@ const browser = await chromium.launch({ headless: false, executablePath: process
 const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
 page.on("pageerror", e => console.log("PAGEERROR", String(e).slice(0, 300))); page.on("crash", () => console.log("PAGECRASH"));
 let ready = false, lost = false;
-page.on("console", m => { const t = m.text(); if (/DRAGREADY/.test(t)) ready = true; if (/WEBGPU_LOST/.test(t)) { lost = true; console.log("LOST", t.slice(0, 200)); } });
-await page.addInitScript(([e, nopool]) => { window.__BARGS = ["--python-expr", e]; if (nopool) window.__CAPENV = { WGPU_NO_POOL: "1" }; }, [expr, !!process.env.NOPOOL]);
+page.on("console", m => { const t = m.text(); if (/DRAGREADY/.test(t)) ready = true; if (/WGPU_FREES/.test(t)) console.log(t.slice(0, 160)); if (/WEBGPU_LOST/.test(t)) { lost = true; console.log("LOST", t.slice(0, 200)); } });
+await page.addInitScript(() => {}); await page.addInitScript(([e, nopool]) => { window.__BARGS = ["--python-expr", e]; window.__LOGFREES = true; if (nopool) window.__CAPENV = { WGPU_NO_POOL: "1" }; if (window.__LOGFREES) window.__CAPENV = { ...(window.__CAPENV||{}), WGPU_LOG_FREES: "1" }; }, [expr, !!process.env.NOPOOL]);
 await page.goto("http://localhost:5173/?perf=1&tel=1", { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
 await page.getByRole("button", { name: /Launch Blender/ }).click();
