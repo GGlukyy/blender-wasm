@@ -1,3 +1,6 @@
+# Víkend — 25. 10. 08:10 — model_ops4
+Výsledek: ✅ na PC. `scripts/model_ops4_win.sh` 12/12 PASS (armature auto-weights, keyframy, lattice, cast, edge split, remesh blocks, multires, uzly materiálu, color attribute, Geometry Nodes subdiv + apply, kolekce, kamera/světlo). Žádná chyba portu (1 FAIL byl chyba testu: kostka v jiné kolekci).
+
 # Víkend — 25. 10. 07:55 — model_ops3
 Výsledek: ✅ na PC. Nový `scripts/model_ops3_win.sh`: 13/13 PASS (array, solidify, bevel hran, smazat plochu+fill, tris↔quads, proportional edit, spin, křivka→mesh, text→mesh, vertex group, shape key, linked duplicate, UV pack). Žádná nová chyba portu. (2 prvotní FAIL byly chyby testu — špatný vybraný vrchol, špatné počítání meshí — opraveno v testu, ne v kódu.)
 
