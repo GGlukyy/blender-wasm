@@ -9,6 +9,7 @@ Výsledek: ✅ na PC, **iPad neotestován**.
 - Nový test `scripts/model_ops2_win.sh` (subdivide, extrude podél normál, bisect, mirror apply, boolean, merge, dissolve, undo/redo, join, shade smooth, decimate, symmetrize): 12/12 PASS. Nález: skriptové `ed.undo()` bez `undo_push` zamrzne (jen skript, viz BACKLOG; Ctrl+Z klávesou OK).
 - Výkon po K3b (`drawtime_win.sh`): monkey subsurf3 15,1 ms, ico6 edit 18,8, ico7 edit 29,7 (api 49 ms), ico8 17,9; submity 25–33, passy 73–82 = **beze změny proti dřívějšku** (submit při deactivate nic nezpomalil).
 - Dotykový teploměr `scripts/drag_touch_win.sh` (G z lišty + tah prstem přes CDP, `MOVECAP=0|33|66`): živých bufferů max 86 i při dotyku; buf_new/s na PC stejné pro movecap 0 i 33 (PC je omezené ~3 fps, ne počtem pohybů) → vliv movecap se ukáže jen na iPadu.
+- Pozor: nízké FPS (3–10) v `drag_win.sh` není výkon Blenderu (v Object módu stejně, api_ms < 1) — omezuje to dávkování událostí v Playwrightu; `OBJMODE=1`, `STEPS`, `PAUSE` přidány do testu.
 - **Co otestovat na iPadu:** čisté data webu → kostka → Tab → plochy → vyber → G → prudké tažení 10+ s → potvrdit. Vydrží? Telemetrie `gpu.buf` by měla zůstat plochá (~100).
 
 # Víkend — 24. 10. 23:50 — K3b jen rozbor
