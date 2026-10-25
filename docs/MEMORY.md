@@ -41,3 +41,9 @@ Architekt navrhl pool podle (velikost, usage) v `wgpu_flush_buffer_frees` + `wgp
 
 ## Po K3b (25. 10.)
 `mem_win.sh`: živých bufferů idle 82, uv_edit 120, material_preview 84, sculpt_subsurf2 79, monkey_subsurf3 88 (dřív až 2901). `drag_win.sh`: max 86 (dřív 1639 za 10 s).
+
+## H1-0 — bind groups / views / submit lag při G-tažení (25. 10. 11:50, PC Chrome, `scripts/drag_win.sh 12`)
+(Počítadla `bg_new`, `view_new`, `lag_ms`, `lag_max` už existovala v `gpumem` z workeru; JS obal na hlavním vlákně nic nevidí, protože WebGPU běží ve workeru.)
+- **bg_new ≈ 690/s** (505–870/s po sekundách), **view_new ≈ 39/s**, buf_new ≈ 1190/s, tex_new ≈ 19/s, živých bufferů 86, ~15–23 FPS.
+- **submit_lag_ms ≈ 0** při tažení (onSubmittedWorkDone se vyřeší hned); `lag_max` 685 ms je špička při startu/kompilaci. → H2 (brzda snímků) na PC nic neukazuje; na iPadu nezměřeno.
+- Závěr: H1 měření potvrzuje vzorec „stovky bind groups/s“ (jedna bind group na ~1,7 nového bufferu). Další krok H1-A (immediate ring buffer).
