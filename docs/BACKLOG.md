@@ -1,5 +1,25 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 📱 25. 10. 19:30 — iPad test Material Preview (sezení `ytfuf1`, `xieygo`, `cf9hgg`): PŘÍČINA = TEXTURY ~790 MB (EEVEE)
+- Ve VŠECH třech sezeních je `tex_mb = 791` (Solid mód měl 38–60 MB). Z toho podle `thist`:
+  **3× `rgba16float 4096x4096` ≈ 400 MB**, **`fb_dummy_attachment/r8unorm 8192x8192` ≈ 64 MB (to je NÁŠ backend!)**,
+  2× `r32uint 2048x2048` ≈ 32 MB, 12× `rgba16float 1124x715` ≈ 77 MB, 15× `depth32float-stencil8 1124x715` ≈ 70 MB, `r32float 1152x768` ...
+- Výsledek: `ytfuf1` lost ve 60 s (GPU první → `createCommandEncoder`), `cf9hgg` lost v 80 s (+ Assertion), **`xieygo` přežil 7,6 min**
+  se stejnými 791 MB → hranice není pevná (iOS zabije GPU proces podle celkové paměti zařízení/procesu). `bg_new` jen ~60/s, buf_new ~0
+  → H1 vyřešilo vytváření; tohle je jiný problém = **objem živé GPU paměti**. (`ogtllg` abort po compute z 17:55 je jiný pád; zatím
+  nevíme, jestli se opakoval — Lukáš tentokrát nepsal o `?nocompute`.)
+- **H6 (priorita 1): snížit GPU paměť v Material Preview na iPadu < ~300 MB.** Postup:
+  1. `fb_dummy_attachment 8192x8192` (náš kód, webgpu_framebuffer.cc) — proč 8192²? Zmenši na nejmenší nutné (např. 32x32/dle
+     největšího attachmentu) nebo sdílej jednu; ušetří 64 MB okamžitě.
+  2. Označ ty 4096² rgba16float textury (kdo je tvoří? pravděpodobně EEVEE light-probe sphere/volume atlas nebo shadow atlas;
+     v telemetrii mají prázdný label — doplň `GPU_texture_create` jméno do `thist`) a zjisti nastavení, které je zmenší
+     (EEVEE: Render ▸ Shadows ▸ Pool Size / Light Probes ▸ Sphere resolution; Python `scene.eevee.*`). Na webu (`__EMSCRIPTEN__`
+     / `?lowmem=1`) nastav při startu scény menší hodnoty, pokud jde o výchozí scénu bez .blend nastavení uživatele.
+  3. Dál: `depth32float-stencil8` ×15 a `rgba16float 1124x715` ×12 jsou G-buffer/render targets EEVEE — zkus `texture_pool`
+     (`webgpu_texture_pool.cc`) používat pro dočasné, ať se neduplikují.
+  4. Měř `tex_mb` v `shading_win.sh` (Material Preview na kostce) před/po; cíl < 300 MB, pak iPad test.
+- Pozn.: Solid mód je pro modelování malých assetů hlavní cíl a ten teď drží (G-tažení OK). Material Preview je bonus.
+
 - [x] (H5 depth_snapshot: 2 readback buffery se znovupoužívají místo create/destroy; parity 0 ❌; regress_all běží, výsledek doplnit; NASAZENO) **H5 depth_snapshot**
 
 ## ⏳ H4 diagnostika NASAZENA (25. 10. 18:30, fork 883a0fa4) — čeká na iPad
