@@ -1,3 +1,6 @@
+# Víkend — 25. 10. 12:20 — fuzz seed 901/902
+Výsledek: ✅ na PC. `fuzz_win` (325 a 317 op) a `fuzz_obj_win` (372 a 380 op) seed 901, 902: bez pádu wasm. Žádná nová BACKLOG položka.
+
 # Víkend — 25. 10. 12:00 — model_ops9
 Výsledek: ✅ na PC. Nový `scripts/model_ops9_win.sh`: 13/13 PASS (křivka subdivide/bevel→mesh, NURBS plocha, shape key, Geometry Nodes Transform + Instance on Points (114 instancí), UV sphere project + pack, obrázek pixely + uložit PNG, bmesh subdivide, lattice, array, boolean EXACT difference). Žádná chyba portu (2 FAIL byly chyby testu: 8bitová přesnost pixelů, instance se nepočítají jako vrcholy). iPad neotestován.
 
