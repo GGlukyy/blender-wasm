@@ -1,5 +1,27 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 🔎 H4 upřesnění (25. 10. 18:05, log z iPadu `ogtllg`, poslední stderr řádky před abortem)
+```
+WGPU_DISPATCH entry/#0 shader='draw_resource_finalize'   groups=1,1,1
+WGPU_DISPATCH entry/#1 shader='draw_visibility_compute'  groups=1,1,1
+WGPU_DISPATCH entry/#2 shader='draw_command_generate'    groups=1,1,1
+Aborted(native code called abort())      ← vlákno 0x03fb1a00, blender.js:87
+WEBGPU_LOST device lost
+```
+- To jsou **úplně první 3 compute dispatche v celém sezení** (`webgpu_backend.hh` `compute_dispatch` loguje prvních 16) →
+  Solid mód compute nepoužívá; Material Preview je poprvé spustil a hned po `draw_command_generate` přišel abort.
+  **Hypotéza (odhad): compute cesta na Safari nikdy neběžela a něco v ní (pipeline, bind group, dispatch, `debug_sum_ssbos`,
+  nebo následný krok draw manageru) volá abort().** Na PC (Chrome) compute funguje (parity) → rozdíl je WebKit.
+- Úkoly: (1) `Module.onAbort` + `stackTrace()` do telemetrie (JS stack je na wasm abort k ničemu bez názvů funkcí →
+  ověř, že link má `-g2`/names nebo přidej `--profiling-funcs` jen do tohoto buildu; případně `emscripten_get_callstack` z
+  `abort` handleru), (2) do `compute_dispatch` loguj KAŽDÝ krok (po `compute_pipeline_get`, po `build_bind_group`,
+  po `EndPass`, po `flush_encoder`) a zvlášť `WGPU_DISPATCH done #n`, (3) zkontroluj, co dělá draw manager hned po
+  `draw_command_generate` (indirect draws? `wgpuRenderPassEncoderDrawIndirect`/`DrawIndexedIndirect` v batch.cc — WebKit
+  může mít omezení indirect draw, např. `indirect-first-instance`), (4) přidej `?nocompute=1`/ENV, který compute
+  dispatche přeskočí, ať Lukáš na iPadu zjistí, jestli je to to (Material Preview bez compute se bude kreslit špatně,
+  ale nesmí abortovat).
+- Pak další iPad test: Material Preview na kostce, telemetrie pošle stack.
+
 ## 🎉 25. 10. 17:55 — iPad test H1-A/C/H3: G + rychlé tažení UŽ NEPADÁ (Lukáš potvrdil). Zbývá Material Preview.
 Telemetrie `out/ipad/tel_2026-10-25.jsonl` (sezení `y7kbmv` 146 s = přežilo G-tažení; `ogtllg` 30 s = Material Preview pád):
 - **`ogtllg` (Material Preview, pád ~17 s po startu): `Aborted(native code called abort())` na ts 17560 PŘED `lost` (17561)**
