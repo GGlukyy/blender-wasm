@@ -1,5 +1,15 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 🛡️ H7 (Lukáš 25. 10. 19:30, DĚLEJ PŘED H6, je to levné — jen Python/JS, bez rebuildu): ochrana Material Preview na iPadu
+Material Preview/Rendered na iPadu zatím padá (790 MB GPU textur). Dokud to neopravíme (H6), na iPadu:
+- Python timer v demo startu (kde už jsou timery pro autosave/prefs): detekuj iPad (`navigator.maxTouchPoints>1` + Safari/Macintosh UA,
+  předat do Pythonu přes env/flag) a každých ~0,5 s projdi všechny `SpaceView3D`; když `shading.type in {'MATERIAL','RENDERED'}`
+  a **není** `?mp=1`, přepni zpět na `'SOLID'` a vypiš hlášku (`self.report`/`bpy.ops.wm.report` nebo JS pruh jako u 💾 Uloženo):
+  „Material Preview na iPadu zatím nefunguje (v práci). Zkusit na vlastní riziko: přidej ?mp=1 do adresy.“
+- Na PC (Chrome) a s `?mp=1` nic neomezuj. Test: `shading_win.sh` s emulovaným iPad UA → vrátí Solid; bez emulace zůstane Material.
+- Po H6: když paměť < ~300 MB a iPad test projde, ochranu vypni (nech `?mp=0` jako opt-out).
+- H6 časově omezit: max ~2 hodiny, jen snadné výhry (dummy 8192² → malá, EEVEE shadow pool / probe resolution). Nedaří se → nech na `[!]`.
+
 ## 📱 25. 10. 19:30 — iPad test Material Preview (sezení `ytfuf1`, `xieygo`, `cf9hgg`): PŘÍČINA = TEXTURY ~790 MB (EEVEE)
 - Ve VŠECH třech sezeních je `tex_mb = 791` (Solid mód měl 38–60 MB). Z toho podle `thist`:
   **3× `rgba16float 4096x4096` ≈ 400 MB**, **`fb_dummy_attachment/r8unorm 8192x8192` ≈ 64 MB (to je NÁŠ backend!)**,
