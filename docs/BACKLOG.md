@@ -1,5 +1,15 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## ▶️ AKTUÁLNÍ ÚKOLY (25. 10.) — první nezaškrtnutý dělej TEĎ, detail v `docs/IPAD_CRASH.md`
+- [ ] **H1-0 Změř:** do `drag_win.sh` (a telemetrie) přidej `bg_new/s` (vytvořené bind groups = `g_stat_bindgroups - g_stat_bg_hits`
+  nebo JS obal createBindGroup), `view_new/s` a `submit_lag_ms` (onSubmittedWorkDone). Zapiš čísla při G-tažení do `docs/MEMORY.md`.
+- [ ] **H1-A Immediate ring buffer** (architekt PŘED): `webgpu_immediate.cc` už nevytváří buffer na každé immEnd; perzistentní
+  ring + offset. Cíl: `buf_new/s` a `bg_new/s` výrazně dolů. Pak `parity_win.sh` 0 ❌ + `regress_all.sh` 1× → NASADIT →
+  STATUS.md „Co otestovat na iPadu: rychlé tažení plochy“.
+- [ ] **H1-B Dynamic offsets** pro uniform arenu / push constants (pozor na starý bug „všechny draw četly první offset“).
+- [ ] **H2 Max 2 snímky v letu**, jen pokud `submit_lag_ms` při tažení roste.
+- [ ] **H3 Textury ~30/s** — najdi zdroj, `webgpu_texture_pool`.
+
 ## 🧭 25. 10. 10:30 — NOVÝ PLÁN: přečti `docs/IPAD_CRASH.md` a dělej PŘESNĚ to (nahrazuje K3c)
 Nejpravděpodobnější příčina = známý bug WebKitu (destroy() neuvolní paměť, dokud ji drží bind group; uvolní až GC).
 Pořadí: (1) změř `bg_new/s` + `submit_lag_ms` v `drag_win.sh`, (2) immediate ring buffer (krok A), (3) nasadit + test
