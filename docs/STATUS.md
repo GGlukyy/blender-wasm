@@ -3,6 +3,7 @@ Výsledek: ✅ na PC, **iPad neotestován**.
 - **Příčina:** při tažení držel jiný (neaktivní) GPU kontext nesubmitnutý příkaz po celou dobu → buffery se nikdy neničily (+300 živých/s).
 - **Oprava:** kontext při přepnutí pryč příkazy odešle; mazání buffer jen těch, které nemůže odesílaný příkaz už používat (fork `e97a363d`, `BLENDER_REF`).
 - **Důkaz:** `scripts/drag_win.sh`: živých bufferů max 86 (dřív 1639 za 10 s), zničeno 4029 z 4115. `regress_all.sh` 59 sekcí 0 FAIL; `parity_win.sh` 0 ❌. Nasazený build = nový.
+- **K5 hotovo:** po pádu a novém načtení se po ~5 s ukáže popup „Obnovit poslední práci“ (a trvale File ▸ Obnovit poslední práci). `scripts/restore_win.sh` PASS. Na iPadu: pracuj, zavři tab, otevři znovu → popup / File menu.
 - **Co otestovat na iPadu:** čisté data webu → kostka → Tab → plochy → vyber → G → prudké tažení 10+ s → potvrdit. Vydrží? Telemetrie `gpu.buf` by měla zůstat plochá (~100).
 
 # Víkend — 24. 10. 23:50 — K3b jen rozbor

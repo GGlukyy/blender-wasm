@@ -974,6 +974,31 @@ _as = {'wait': _AS_EVERY}
 try:
     if os.path.exists(_AS): os.replace(_AS, '/opfs/home/_autosave_prev.blend'); print('AUTOSAVE previous session kept as /opfs/home/_autosave_prev.blend')
 except Exception as e: print('AUTOSAVE rotate ERR', e)
+_PREV = '/opfs/home/_autosave_prev.blend'
+_offer = {'tries': 0}
+def _offer_restore():
+    # Po pádu/zavření tabu nabídnout poslední autosave (popup v Blenderu, funguje i prstem).
+    _offer['tries'] += 1
+    try:
+        wm = bpy.context.window_manager
+        if not wm.windows:
+            return 2.0 if _offer['tries'] < 30 else None
+        if bpy.data.filepath or not os.path.exists(_PREV) or os.path.getsize(_PREV) < 1000: return None
+        def _draw(self, ctx):
+            op = self.layout.operator('wm.open_mainfile', text='Obnovit poslední práci', icon='FILE_REFRESH')
+            op.filepath = _PREV
+            self.layout.label(text='Soubor: _autosave_prev.blend (též v 📁)')
+        print('RESTORE_OFFER', os.path.getsize(_PREV), flush=True)
+        wm.popup_menu(_draw, title='Našel jsem rozdělanou práci', icon='INFO')
+    except Exception as e: print('RESTORE_OFFER ERR', e)
+    return None
+def _file_menu_restore(self, ctx):
+    if os.path.exists(_PREV) and os.path.getsize(_PREV) > 1000:
+        self.layout.separator()
+        self.layout.operator('wm.open_mainfile', text='Obnovit poslední práci (autosave)', icon='FILE_REFRESH').filepath = _PREV
+try: bpy.types.TOPBAR_MT_file.append(_file_menu_restore)
+except Exception as e: print('RESTORE menu ERR', e)
+bpy.app.timers.register(_offer_restore, first_interval=5.0, persistent=True)
 def _autosave():
     try:
         if bpy.data.is_dirty and bpy.context.window_manager.windows:
