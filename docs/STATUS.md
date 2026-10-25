@@ -1,10 +1,10 @@
-# Víkend — 25. 10. 09:55 — lov chyb fuzz
+# Víkend — 25. 10. 08:59 — lov chyb fuzz
 Výsledek: ✅ na PC. `fuzz_win` seed 501 (291 op) a `fuzz_obj_win` seed 503/504 (~425 op každý) — bez pádu wasm (operator_errors jsou očekávané špatné kontexty). Žádná nová chyba, žádná nová BACKLOG položka. Výkon už je v BACKLOGu změřený (žádný nový hotspot). Co otestovat na iPadu: beze změny (viz „SOUHRN PRO LUKÁŠE“ níže, bod 1–3).
 
-# Víkend — 25. 10. 09:40 — model_ops6
+# Víkend — 25. 10. 08:58 — model_ops6
 Výsledek: ✅ na PC. `scripts/model_ops6_win.sh` 12/12 PASS (všechny primitiva mesh/curve/metaball/empty/světlo/kamera/armature, separate+join, constraint, driver, origin_set, mirror objektu, křivka s bevel → mesh, metaball → mesh, boolean EXACT union, OBJ export+import, smart project layout, undo). Žádná chyba portu; FAIL byly chyby testu (neexistující operátor lattice_add, view3d operátor bez viewportu, špatné očekávání rozložení UV). iPad neotestován.
 
-# Víkend — 25. 10. 09:15 — model_ops5
+# Víkend — 25. 10. 08:56 — model_ops5
 Výsledek: ✅ na PC. Nový `scripts/model_ops5_win.sh`: 19/19 PASS (inset, ring+subdivide, bridge loops, fill grid, extrude hran, edge slide, remove doubles, normály, convex hull, seam+unwrap, cube project/lightmap, přiřazení materiálu, mirror/weld/shrinkwrap, select similar, bisect fill, apply scale, uložit+znovu otevřít .blend). Žádná chyba portu (všechny prvotní FAIL byly chyby testu: špatné názvy operátorů 5.x, inset celé kostky, špatný očekávaný počet). Nasazený build beze změny; iPad neotestován, žádná nová iPad telemetrie.
 
 # Víkend — 25. 10. 09:30 — regress_all po P87–P91
