@@ -1,3 +1,6 @@
+# Víkend — 25. 10. 10:30 — regress_all po P94 dokončen
+Výsledek: ✅ na PC. `regress_all.sh` doběhl: 59 sekcí, **0 FAIL** (`out/regress.log`, 10:08). Nasazený build beze změny. Nová iPad telemetrie není (sezení z 10:05–10:10 jsou z PC, bufmax 104–245, ploché). iPad stále neotestován — pořadí testů viz „SOUHRN PRO LUKÁŠE“ níže.
+
 # Víkend — 25. 10. 10:00 — regress_all po P94 (neúplný)
 Výsledek: 🟡 `regress_all.sh` dosud 51 z 59 sekcí, **0 FAIL** v dosavadním logu (`out/regress.log`); poslední sekce ještě běžela při konci času. Kód portu se od posledního úplného běhu (P91, 0 FAIL) nezměnil, přibyly jen testy model_ops5–7. iPad neotestován.
 
