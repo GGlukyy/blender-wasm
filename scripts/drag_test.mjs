@@ -44,7 +44,9 @@ const keys = Object.keys(sN.g).filter(k => /tex.*new|new/.test(k));
 console.log(`DRAGH1 bg_new/s=${((sN.g.bg_new - s0.g.bg_new) / tot).toFixed(0)} view_new/s=${((sN.g.view_new - s0.g.view_new) / tot).toFixed(0)} submit_lag_max_ms=${sN.g.lag_max}`);
 { const hs = []; for (const k of Object.keys(sN.g.hist || {})) hs.push([k, ((sN.g.hist[k] - ((s0.g.hist || {})[k] || 0)) / tot), ((sN.g.hbytes[k] - ((s0.g.hbytes || {})[k] || 0)) / tot / 1024)]);
   hs.sort((a, b) => b[1] - a[1]); console.log("DRAGHIST " + hs.slice(0, 12).map(h => `${h[0]}=${h[1].toFixed(0)}/s(${h[2].toFixed(0)}KB/s)`).join("  ")); }
-console.log(`DRAGSUM dur=${tot.toFixed(1)}s mouse_moves=${moves} buf_new/s=${((sN.g.buf_new - s0.g.buf_new) / tot).toFixed(0)} max_live=${maxLive} new_keys=${keys.join(",")} tex_new/s=${sN.g.tex_new !== undefined ? ((sN.g.tex_new - s0.g.tex_new) / tot).toFixed(1) : "n/a"} gpumem=${JSON.stringify({ ...sN.g, hist: undefined, hbytes: undefined })}`);
+{ const ts = []; for (const k of Object.keys(sN.g.thist || {})) ts.push([k, ((sN.g.thist[k] - ((s0.g.thist || {})[k] || 0)) / tot)]);
+  ts.sort((a, b) => b[1] - a[1]); console.log("DRAGTEX " + ts.filter(t => t[1] > 0).slice(0, 12).map(h => `${h[0]}=${h[1].toFixed(1)}/s`).join("  ")); }
+console.log(`DRAGSUM dur=${tot.toFixed(1)}s mouse_moves=${moves} buf_new/s=${((sN.g.buf_new - s0.g.buf_new) / tot).toFixed(0)} max_live=${maxLive} new_keys=${keys.join(",")} tex_new/s=${sN.g.tex_new !== undefined ? ((sN.g.tex_new - s0.g.tex_new) / tot).toFixed(1) : "n/a"} gpumem=${JSON.stringify({ ...sN.g, hist: undefined, hbytes: undefined, thist: undefined })}`);
 await page.screenshot({ path: "drag_end.png" }).catch(() => {});
 await page.keyboard.press("Escape");
 await new Promise(r => setTimeout(r, 1500));

@@ -6,7 +6,7 @@
 - [x] (ring HOTOVO: imm_ring 0 nových/s; parity 0 ❌, regress_all 59 sekcí 0 FAIL; ALE buf_new zůstal ~1130/s — histogram: SSBO `/1ac` 620/s, VBO `/ac` 480/s = copy-on-write, ne immediate → viz H1-C; fork 59cb282e) **H1-A Immediate ring buffer** (architekt PŘED): `webgpu_immediate.cc` už nevytváří buffer na každé immEnd; perzistentní
   ring + offset. Cíl: `buf_new/s` a `bg_new/s` výrazně dolů. Pak `parity_win.sh` 0 ❌ + `regress_all.sh` 1× → NASADIT →
   STATUS.md „Co otestovat na iPadu: rychlé tažení plochy“.
-- [~] **H1-C Pool pro SSBO/VBO copy-on-write** (nový, z histogramu): `wgpu_buffer_acquire` + pool po sekvenčním uvolnění (WGPU_NO_POOL=1 vypne). Cíl `/1ac` a `/ac` ≈ 0/s v `DRAGHIST`.
+- [x] (drag_win 12 s: buf_new 1130→0/s, bg_new 690→59/s, `/1ac` a `/ac` 0/s; parity 0 ❌; regress_all 59 sekcí 0 FAIL; fork 5d0f6d8f; NASAZENO v demo/public, čeká na iPad) **H1-C Pool pro SSBO/VBO copy-on-write** (nový, z histogramu): `wgpu_buffer_acquire` + pool po sekvenčním uvolnění (WGPU_NO_POOL=1 vypne). Cíl `/1ac` a `/ac` ≈ 0/s v `DRAGHIST`.
 - [ ] **H1-B Dynamic offsets** pro uniform arenu / push constants (pozor na starý bug „všechny draw četly první offset“).
 - [ ] **H2 Max 2 snímky v letu**, jen pokud `submit_lag_ms` při tažení roste.
 - [ ] **H3 Textury ~30/s** — najdi zdroj, `webgpu_texture_pool`.

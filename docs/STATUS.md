@@ -1,3 +1,17 @@
+# Víkend — 25. 10. 17:00 — iPad pád: H1 (buffery + bind groups) hotovo na PC
+Výsledek: ✅ na PC, 🟡 iPad neotestován (NASAZENO v `demo/public/`, stačí reload).
+**Co jsem udělal**
+- Změřil jsem, co při tažení (G) vzniká: ~1130 bufferů/s, ~690 bind groups/s, ~40 views/s, ~20 textur/s (`drag_win.sh`, `docs/MEMORY.md`). Zpoždění submitů ≈ 0 → H2 (brzda snímků) se na PC neprojevuje.
+- H1-A: immediate mode má jeden trvalý ring buffer místo bufferu na každé immEnd (0 nových/s). Vypínač `WGPU_IMM_RING=0`.
+- Histogram (`DRAGHIST`) ukázal, že hlavní zdroj jsou SSBO (620/s) a VBO (480/s) z copy-on-write → H1-C: pool bufferů, který znovupoužívá buffery po odeslání (místo destroy). Vypínač `WGPU_NO_POOL=1`.
+**Důkaz (PC Chrome, drag 12 s):** buf_new 1130 → **0**/s, bg_new 690 → **59**/s, živých bufferů max 325. `parity_win.sh` 0 ❌, `regress_all.sh` 59 sekcí 0 FAIL (po ringu i po poolu). Fork `GGlukyy/blender` větev `ipad` 5d0f6d8f, `BLENDER_REF` aktualizován.
+**Co nefunguje / zbývá:** nové textury ~20/s (H3), `uniform_arena` offsety v klíči cache (H1-B) — `bg_new` je už jen 59/s. Na iPadu nic z toho neověřeno.
+**Co otestovat na iPadu (podle důležitosti)**
+1. Smaž data webu (Nastavení → Safari → Pokročilé → Data webových stránek) nebo soukromý tab, načti stránku.
+2. Kostka → Tab → režim ploch → vyber plochu → G → **prudce táhni prstem ~10 s**. Nesmí spadnout (dřív pád za 33–40 s od startu).
+3. Pak běžná práce ~2 min (sculpt, Material Preview, UV). Pokud padne, pošli čas pádu — telemetrie je zapnutá.
+**Co dál:** H3 textury, pak H1-B.
+
 # Víkend — 25. 10. 11:50 — touch_fuzz Material Preview
 Výsledek: ✅ na PC. `touch_fuzz_win.sh` s `TF_SHADING=MATERIAL` (viewport v Material Preview): seed 61 × 200 gest PASS (0 chyb, Blender odpovídá). Backlog: zbývají jen položky čekající na iPad nebo nízká priorita. iPad neotestován.
 
