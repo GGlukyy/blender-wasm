@@ -8,7 +8,13 @@ const expr = `import bpy, sys
 n=[0]
 def probe():
     n[0]+=1; a=bpy.context.view_layer.objects.active; print('TFPROBE %d %d %s' % (n[0], len(bpy.data.objects), a.mode if a else '-')); sys.stdout.flush(); return 1.0
-bpy.app.timers.register(probe, first_interval=2.0)`;
+bpy.app.timers.register(probe, first_interval=2.0)
+def setmode():
+    m = '${process.env.TF_MODE || ""}'
+    if m:
+        try: bpy.ops.object.mode_set(mode=m)
+        except Exception as e: print('TFMODEERR', e)
+bpy.app.timers.register(setmode, first_interval=14.0)`;
 const browser = await chromium.launch({ headless: false, executablePath: process.env.CHROME,
   args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
 const ctx = await browser.newContext({ viewport: { width: 1400, height: 850 } });
@@ -43,7 +49,7 @@ const gestures = {
 await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
 if (process.env.TF_EDIT) { await page.keyboard.press("Tab"); await wait(1000); await page.keyboard.press("3"); await wait(500); }
 if (process.env.TF_PRE) for (const k of process.env.TF_PRE.split(",")) { await page.keyboard.press(k); await wait(900); }
-await wait(2500); console.log('start mode=' + lastMode);
+await wait(process.env.TF_MODE ? 14000 : 2500); console.log('start mode=' + lastMode);
 const names = Object.keys(gestures);
 for (let i = 0; i < N; i++) {
   const g = names[ri(0, names.length)];
