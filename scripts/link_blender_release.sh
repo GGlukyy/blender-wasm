@@ -151,7 +151,7 @@ WEB_FLAGS="-pthread \
   --js-library $ROOT/demo/localdir_lib.js \
   --js-library $ROOT/demo/provider-fs.js \
   -sEXPORTED_RUNTIME_METHODS=FS,callMain,ccall,cwrap,ENV,HEAPU8,HEAPU16,HEAPF32 \
-  -sENVIRONMENT=web,worker -sASSERTIONS=1 -sERROR_ON_UNDEFINED_SYMBOLS=0"
+  -sENVIRONMENT=web,worker -sASSERTIONS=1 -sERROR_ON_UNDEFINED_SYMBOLS=0 ${EXTRA_LINK:-}"
 
 echo ">> relinking blender → $OUT/blender.js (release, no preload)"
 ( cd "$BUILD" && eval "$cmd $WEB_FLAGS" )
