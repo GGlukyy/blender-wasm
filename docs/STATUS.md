@@ -1,3 +1,6 @@
+# Víkend — 25. 10. 10:50 — lov chyb fuzz (seed 601–603)
+Výsledek: ✅ na PC. `fuzz_win` 601, `fuzz_obj_win` 602 (340 op), `ui_fuzz_win` 603 FULL: bez pádu, 0 chyb. Žádná nová BACKLOG položka. iPad neotestován.
+
 # Víkend — 25. 10. 10:30 — regress_all po P94 dokončen
 Výsledek: ✅ na PC. `regress_all.sh` doběhl: 59 sekcí, **0 FAIL** (`out/regress.log`, 10:08). Nasazený build beze změny. Nová iPad telemetrie není (sezení z 10:05–10:10 jsou z PC, bufmax 104–245, ploché). iPad stále neotestován — pořadí testů viz „SOUHRN PRO LUKÁŠE“ níže.
 
