@@ -5,6 +5,7 @@ Výsledek: ✅ na PC, 🟡 iPad neotestován (žádná nová iPad telemetrie od 
 **Otestuj na iPadu v tomto pořadí:** (1) čistá data webu → kostka → Tab → plochy → vyber → G v liště → prudce táhni 10+ s → potvrdit; (2) zavři tab, otevři znovu → popup „Obnovit poslední práci“; (3) těžká operace (Subdivision level 5) → objeví se pruh s pamětí?
 **Nalezené, neopravené (BACKLOG):** Subsurf na trojúhelnících 10 s při prvním výpočtu, Skin na hustší síti, DPX načtení zamrzne, chybí WEBP/USD/Alembic/Collada, AVIF uložení selže, žádná čeština v UI.
 **Otočení iPadu:** `rotate_stress_win.sh` (40× portrait↔landscape v edit módu) PASS — bez ztráty GPU, bez chyb.
+**Tab na pozadí:** `freeze_win.sh` (Page lifecycle frozen 20 s → active) PASS — Blender pokračuje, bez ztráty GPU. (Pád „TypeError: Load failed“ z iPad telemetrie 23. 10. se na PC nereprodukuje.)
 **Regrese:** `regress_all.sh` 59 sekcí, 0 FAIL (po každé změně).
 
 # Víkend — 25. 10. 02:45 — K3b HOTOVO (příčina pádu při tažení nalezena a opravena na PC)

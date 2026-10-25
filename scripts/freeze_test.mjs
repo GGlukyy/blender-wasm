@@ -1,0 +1,24 @@
+// iPad uspí tab na pozadí: Page.setWebLifecycleState frozen 20 s → active; Blender musí pokračovat (bez ztráty GPU/pádu).
+const { chromium } = await import(process.env.PW || "playwright");
+const browser = await chromium.launch({ headless: false, executablePath: process.env.CHROME, args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
+const ctx = await browser.newContext({ viewport: { width: 1400, height: 850 } });
+const page = await ctx.newPage();
+let lost = false, errs = 0, frames = [];
+page.on("console", m => { const t = m.text(); if (/WEBGPU_LOST/.test(t)) { lost = true; console.log("LOST", t.slice(0, 160)); } const i = t.indexOf("WGPU_STATS frame="); if (i >= 0) frames.push(+/frame=(\d+)/.exec(t)[1]); });
+page.on("pageerror", e => { errs++; console.log("PAGEERROR", String(e).slice(0, 200)); });
+await page.goto("http://localhost:5173/?perf=1&tel=0", { waitUntil: "load" });
+await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
+await page.getByRole("button", { name: /Launch Blender/ }).click();
+for (let i = 0; i < 300 && frames.length < 3; i++) await new Promise(r => setTimeout(r, 1000));
+await new Promise(r => setTimeout(r, 4000));
+const cdp = await ctx.newCDPSession(page);
+const s0 = (await page.screenshot()).toString("base64");
+await cdp.send("Page.setWebLifecycleState", { state: "frozen" });
+await new Promise(r => setTimeout(r, 20000));
+await cdp.send("Page.setWebLifecycleState", { state: "active" });
+await new Promise(r => setTimeout(r, 4000));
+await page.mouse.move(700, 450); await page.keyboard.press("n"); await new Promise(r => setTimeout(r, 3000));
+const s1 = (await page.screenshot()).toString("base64");
+console.log(`freeze lost=${lost} pageerrors=${errs} responsive=${s0 !== s1}`);
+console.log(!lost && !errs && s0 !== s1 ? "PASS freeze" : "FAIL freeze");
+await browser.close();
