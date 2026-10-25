@@ -1,5 +1,21 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 📱 iPad test K3b (Lukáš 25. 10. 10:05, sezení `v9h99q`, `59xpfa`, `5kyvux`) — POŘÁD PADÁ, ale víme víc
+- K3b na iPadu FUNGUJE: živých bufferů max **104–245** (dřív 10 645), na konci ~100 / 5–14 MB, textury 60 MB.
+  → hypotéza „moc živých objektů“ je **VYVRÁCENA**. Přesto `device lost: destroyed` ve **32,9 s / 39,4 s / 36,8 s** od startu
+  (a 23. 10. `w8z38v` 36,9 s). Pád vždy ~33–40 s po načtení při práci; v klidu 3 min OK.
+- Co zůstává vysoké: **VYTVÁŘENÍ** objektů. `buf_new` 45–54 tisíc za ~40 s = **~1 200–1 600 nových bufferů/s**,
+  `tex_new` ~1 000–1 600 za 40 s = **~30 nových textur/s** (v sezení `5kyvux` jen 218 textur a padlo taky).
+- **Nová hypotéza (odhad):** Safari/WebKit GPU proces neuvolní paměť zničeného bufferu hned (MTLBuffer drží JS wrapper do GC,
+  nebo WebKit recykluje lazy) → kumulativní objem vytvořeného roste → po ~50 tis. vytvořených bufferech iOS zabije GPU proces.
+  Proto pád závisí na **množství práce od startu**, ne na živých objektech ani na čase.
+- **K3c = TEĎ JEDINÁ PRIORITA: skoro nulové vytváření za snímek.** Cíl v `drag_win.sh`: `buf_new` < 50/s, `tex_new` ≈ 0/s
+  při tažení. Pool z K3 (328→281) nestačil — architekt PŘED začátkem: ring buffer (jeden velký buffer + offsety) pro
+  uniform/immediate/vertex streaming (vzor Metal `MTLCircularBuffer`/scratch buffer, Vulkan `VKStreamingBuffer`), znovupoužití
+  render-target textur (proč vzniká 30 textur/s? najdi kdo — framebuffer/offscreen při každém překreslení?).
+  Navíc v telemetrii přidej `buf_new_mb` (kumulativní MB vytvořených) — ověří hypotézu.
+- Pokud K3c srazí vytváření a iPad pořád padá ~35 s → K4 nouzovka, pak rozhodnutí STOP/pokračovat (Lukáš).
+
 ## 📱 iPad test K2 (Lukáš 24. 10. 23:35, sezení `w8z38v` + `fkjmt5`) — K2 NESTAČÍ, jdi na K3
 - Scénář: G z lišty (keydown g 33,6 s) → tažení prstem → **device lost `destroyed` v 36,9 s = po ~3 s tažení.**
   Pak `createBindGroup: Unable to make bind group` + `Aborted(Assertion failed)` (následek). Lukáš: „hýbe se a padá stejně jako minule“.
