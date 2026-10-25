@@ -1,3 +1,6 @@
+# Víkend — 25. 10. 12:00 — model_ops9
+Výsledek: ✅ na PC. Nový `scripts/model_ops9_win.sh`: 13/13 PASS (křivka subdivide/bevel→mesh, NURBS plocha, shape key, Geometry Nodes Transform + Instance on Points (114 instancí), UV sphere project + pack, obrázek pixely + uložit PNG, bmesh subdivide, lattice, array, boolean EXACT difference). Žádná chyba portu (2 FAIL byly chyby testu: 8bitová přesnost pixelů, instance se nepočítají jako vrcholy). iPad neotestován.
+
 # Víkend — 25. 10. 11:40 — ui_fuzz seed 701 (800 akcí)
 Výsledek: ✅ na PC. `ui_fuzz_win` FULL seed 701 (800 akcí), 801 (869), 802 (900): 0 chyb, bez pádu. Backlog: zbývají jen položky čekající na iPad nebo nízká priorita (Subsurf na trojúhelnících, Skin); výkon je změřený (viz BACKLOG „Výkon“), nový hotspot nenalezen.
 
