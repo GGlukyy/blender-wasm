@@ -1,5 +1,31 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 📱 25. 10. 21:45 — iPad test po H1–H7 (Lukáš + telemetrie `c5l0sb`, `8ekvti`, + 1 další)
+**Lukáš:** G+tažení přežilo; pak bevel OK; **Sculpt mód → PADÁ**; UV Editing OK (jednou přestala fungovat Magic Keyboard, po přepnutí
+tabu a zpět OK); Shading: H7 ochrana funguje (vrací Solid + hláška); s `?mp=1` Material Preview funguje, ale **při opakovaném
+zapnutí skoro hned spadne**; **Wireframe shading nefunguje a buguje „viewpoint preset“** (numpad pohledy?) — upřesnění: zeptat se Lukáše.
+**Telemetrie:**
+- `c5l0sb` (Sculpt, perem `pen:0`): lost ve **156,8 s**, `beginRenderPass: Unable to begin render pass`. `tex_mb` jen 65, buf 44 MB (malé!).
+  `buf_new` 4 773 celkem (~29/s, daleko míň než dřív při pádu — 54 000), `bg_new` 86 501 (~530/s), `tex_new` 632 (**166× 256x256 a 106× 146x146
+  = textury štětce/kurzoru se tvoří znovu pořád**, ~3/s). → pád NEKORELUJE s počtem vytvořených bufferů; model „kumulativní vytváření“
+  už sám nestačí. Možná: celková paměť PROCESU (wasm halda + GPU), ne GPU objekty.
+- `8ekvti` (Material Preview, `tex_mb` 401, fps 1): lost ve 439 s po 7 min. Množí se velikosti textur (`401x773`, `720x747`, …
+  desítky různých rozměrů = region se přepočítává při každé změně okna/klávesnice/rotaci a pro KAŽDÝ rozměr vznikne celá sada
+  offscreen textur, `tex_new` 972). `depth_snapshot` vytvořil 71 bufferů = **109 MB** (H5 nestačí, když se mění velikost).
+**Úkoly (pořadí):**
+- [ ] **H8-0 Měř skutečnou paměť:** do telemetrie přidej **použitou** wasm haldu (`mallinfo().uordblks + hblkhd` nebo `emscripten_get_heap_size`
+  vs. in-use; `heap_mb` 1024 je jen rezervace!) a `performance.measureUserAgentSpecificMemory()` pokud existuje (Safari ne). Cíl: zjistit,
+  jestli při Sculptu halda roste k 1 GB. Reprodukuj Sculpt na PC (Playwright tahy štětcem 2 min, `scripts/` už má sculpt testy?) a vypiš
+  graf: halda in-use, tex_mb, buf_mb, bg_new. **Povoleno udělat nový test jen tento jeden (sculpt+paměť).**
+- [ ] **H8-1 depth_snapshot:** drž JEDEN buffer podle maxima velikosti (nebo uvolni při změně velikosti), 109 MB → < 10 MB.
+- [ ] **H8-2 Textury štětce/kurzoru ve Sculptu** (256² ×166, 146² ×106): najdi kdo je tvoří (brush cursor / `immDrawPixels`-podobný kód) → cache jako u H3.
+- [ ] **H1-B Dynamic offsets** (bg_new ~530/s ve Sculptu) — nyní odemčeno.
+- [ ] **H8-3 Region/offscreen sady podle velikosti:** při změně velikosti vieportu uvolni staré sady dřív (`texture_pool` — nepoužité > 2 s zničit).
+- [ ] **H9 Wireframe shading + view presets na iPadu:** reprodukuj na PC (`shading_win` WIREFRAME, numpad 1/3/7 + Ctrl) — v Chrome? Pokud OK → iPad-only
+  (touch/UI: view preset = gizmo klepnutí?). Zeptat se Lukáše, co přesně „nefunguje“, neuhaduj.
+- [ ] **H10 Magic Keyboard přestala fungovat** (po přepnutí tabu OK): ztráta focusu canvasu — po `visibilitychange`/`focus` refocus
+  `canvas`; zkontroluj `demo/src/main.js` (hidden input pro klávesnici?). Nízká priorita.
+
 - [x] (H7 HOTOVO: `scripts/mpguard_win.sh` 3× PASS — `?ipad=1` → Solid + pruh, `?ipad=1&mp=1` a PC → Material zůstane; jen demo/src/main.js, bez rebuildu) **H7 ochrana Material Preview**
 
 - [~] (H6 krok 1 HOTOVO: EEVEE sphere probe atlas 4096²→2048² (`Probes` a `world_sphere_probe_` 179→45 MB každý, fork 7498d505; PC: shading_win ERRORS 0, vzhled Material Preview OK, parity 0 ❌; regress_all 67 sekcí 0 FAIL; `fb_dummy_attachment` 8192² NEZMENŠENO — viewport musí být uvnitř attachmentu, riziko; zbývá změřit `tex_mb` na iPadu) **H6 snížit GPU paměť Material Preview**
