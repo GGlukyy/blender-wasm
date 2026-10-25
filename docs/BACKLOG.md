@@ -345,3 +345,5 @@ Subsurf 2 na Monkey plynulý, glTF export + import zpět (triangulováno).
   ty s vlastními binárkami (.so/.pyd) ve wasm nepůjdou. Online Extensions zůstávají WONTFIX (`multiprocessing`).
   RetopoFlow až potom (těžký, nízká priorita).
 - [ ] **Cycles na PC verzi** (CPU Cycles ve wasm, `WITH_CYCLES` je teď OFF; HeyPuter ho má v GL buildu — `cmake/blender-wasm-gl-cache.cmake`, commit e73ddff). Nejdřív změřit velikost buildu a rychlost renderu kostky/Monkey vs desktop. Ne pro iPad (paměť).
+
+- [ ] (nízká priorita, 25. 10., jen skript; neověřeno na desktopu) `bpy.ops.ed.undo()` z Python timeru **bez předchozího `ed.undo_push`** (prázdný undo zásobník) se nikdy nevrátí (zamrzne i v Object módu). Skutečné Ctrl+Z hned po startu funguje (`scripts/undo_fresh_win.sh` PASS). Obejít: `undo_push` před operací (jako `ops_test.py`). Ověřit na desktopu: `bpy.ops.ed.undo()` ve Scripting konzoli hned po startu.

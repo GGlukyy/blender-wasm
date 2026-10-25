@@ -1,0 +1,20 @@
+// Ctrl+Z hned po startu (prázdný undo stack) nesmí zamrznout Blender.
+const { chromium } = await import(process.env.PW || "playwright");
+const browser = await chromium.launch({ headless: false, executablePath: process.env.CHROME, args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
+const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
+const stats = []; page.on("console", m => { const t = m.text(); if (t.includes("WGPU_STATS frame=")) stats.push(+/frame=(\d+)/.exec(t)[1]); });
+page.on("pageerror", e => console.log("PAGEERROR", String(e).slice(0, 200)));
+await page.goto("http://localhost:5173/?perf=1&tel=0", { waitUntil: "load" });
+await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
+await page.getByRole("button", { name: /Launch Blender/ }).click();
+for (let i = 0; i < 200 && stats.length < 2; i++) await new Promise(r => setTimeout(r, 1000));
+await page.mouse.click(700, 700); await new Promise(r => setTimeout(r, 1500));
+await page.mouse.move(600, 400);
+if (!process.env.NOUNDO) await page.keyboard.press("Control+z");
+await new Promise(r => setTimeout(r, 1500));
+const s0 = (await page.screenshot()).toString("base64");
+await page.mouse.move(700, 450); await page.keyboard.press("n"); await new Promise(r => setTimeout(r, 2500));
+const s1 = (await page.screenshot()).toString("base64");
+console.log(`undo_fresh screen changed after N: ${s0 !== s1}`);
+console.log(s0 !== s1 ? "PASS undo_fresh" : "FAIL undo_fresh (zamrzlo)");
+await browser.close();
