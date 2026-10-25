@@ -1,3 +1,6 @@
+# Víkend — 25. 10. 09:30 — regress_all po P87–P91
+Výsledek: ✅ `regress_all.sh` 59 sekcí, **0 FAIL** (log `out/regress_p91.log`). Nasazený build beze změny, od rána jen JS (hláška OOM) + nové testy. iPad stále neotestován.
+
 # Víkend — 25. 10. 08:40 — modtime + Subsurf obejití
 Výsledek: ✅ na PC. `scripts/modtime_win.sh`: 17 modifikátorů na UV sphere 8k vrcholů, všechny < 1 s kromě Subsurf level 2 (2,4 s při prvním výpočtu, 130k vrcholů). Žádný nový hotspot. `subq_win.sh`: u trojúhelníků pomůže vypnout „Use Limit Surface“ (0,03 s místo 2,65 s) — viz BACKLOG.
 
