@@ -1,3 +1,9 @@
+# Víkend — 25. 10. 21:30 — konec běhu, čekám na iPad
+Výsledek: 🟡 nic nového k opravě bez iPadu.
+**Stav:** v `out/ipad/` není nová telemetrie (poslední 19:30). H1 A/C, H3, H5, H7, H6 krok 1 jsou hotové a nasazené. Zbylé položky (H1-B, H2, H6 krok 3) jsou podle zadání zakázané, dokud iPad neřekne výsledek; nové testy nespouštím.
+**Co otestovat na iPadu (podle důležitosti):** 1) G + prudké tažení 10 s, pak 2 min práce (Solid). 2) `?mp=1&tel=1` Material Preview 2 min — pošli, jestli padá a `tex_mb`. 3) bez `?mp=1` se musí viewport sám vrátit na Solid.
+**Blocked:** nic.
+
 # Víkend — 25. 10. 21:30 — H6 krok 1: menší atlas odrazů v Material Preview
 Výsledek: ✅ na PC, 🟡 iPad neotestován.
 **Co jsem udělal:** EEVEE atlas sphere probes byl 4096² (rgba16float, 2 textury po ~179 MB). Změna na 2048² (`SPHERE_PROBE_ATLAS_MAX_SUBDIV` 11) → každá ~45 MB, dohromady úspora ~270 MB z ~790 MB. Fork `7498d505`.
