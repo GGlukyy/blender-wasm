@@ -7,15 +7,15 @@ const ri = (a, b) => a + Math.floor(rnd() * (b - a));
 const expr = `import bpy, sys
 n=[0]
 def probe():
-    n[0]+=1; print('TFPROBE %d %d' % (n[0], len(bpy.data.objects))); sys.stdout.flush(); return 1.0
+    n[0]+=1; a=bpy.context.view_layer.objects.active; print('TFPROBE %d %d %s' % (n[0], len(bpy.data.objects), a.mode if a else '-')); sys.stdout.flush(); return 1.0
 bpy.app.timers.register(probe, first_interval=2.0)`;
 const browser = await chromium.launch({ headless: false, executablePath: process.env.CHROME,
   args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
 const ctx = await browser.newContext({ viewport: { width: 1400, height: 850 } });
 const page = await ctx.newPage();
-let probes = 0, bad = [];
+let probes = 0, bad = [], lastMode = '?';
 page.on("pageerror", (e) => bad.push("pageerror " + String(e).slice(0, 200)));
-page.on("console", (m) => { const t = m.text(); if (t.includes("TFPROBE")) probes++; else if (/WEBGPU_LOST|abort\(|RuntimeError|memory access|Aborted/.test(t)) bad.push(t.slice(0, 200)); });
+page.on("console", (m) => { const t = m.text(); if (t.includes("TFPROBE")) { probes++; lastMode = t.split(" ").pop(); } else if (/WEBGPU_LOST|abort\(|RuntimeError|memory access|Aborted/.test(t)) bad.push(t.slice(0, 200)); });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
 await page.goto("http://localhost:5173/?touch=1", { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
@@ -40,8 +40,10 @@ const gestures = {
   async bar() { const b = page.locator("#touchbar button", { hasText: new RegExp("^" + labels[ri(0, labels.length)] + "$") }); if (await b.count()) await b.first().click({ timeout: 1000 }).catch(() => {}); },
   async key() { await page.keyboard.press(["Home", "Tab", "a", "Escape", "Numpad1", "1", "3"][ri(0, 7)]); },
 };
+await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
 if (process.env.TF_EDIT) { await page.keyboard.press("Tab"); await wait(1000); await page.keyboard.press("3"); await wait(500); }
 if (process.env.TF_PRE) for (const k of process.env.TF_PRE.split(",")) { await page.keyboard.press(k); await wait(900); }
+await wait(2500); console.log('start mode=' + lastMode);
 const names = Object.keys(gestures);
 for (let i = 0; i < N; i++) {
   const g = names[ri(0, names.length)];
@@ -53,6 +55,6 @@ await page.keyboard.press("Escape"); await touch("touchEnd", []).catch(() => {})
 const p0 = probes; await wait(4000);
 const alive = probes > p0;
 await page.screenshot({ path: "out/touch_fuzz.png" });
-console.log(`touch_fuzz seed=${SEED} gest=${N} errors=${bad.length} alive=${alive}`); bad.slice(0, 5).forEach(b => console.log("BAD " + b));
+console.log(`touch_fuzz seed=${SEED} gest=${N} errors=${bad.length} alive=${alive} mode=${lastMode}`); bad.slice(0, 5).forEach(b => console.log("BAD " + b));
 console.log(bad.length === 0 && alive ? "PASS touch_fuzz" : "FAIL touch_fuzz");
 await browser.close();
