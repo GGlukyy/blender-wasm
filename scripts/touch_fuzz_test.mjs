@@ -41,6 +41,7 @@ const gestures = {
   async key() { await page.keyboard.press(["Home", "Tab", "a", "Escape", "Numpad1", "1", "3"][ri(0, 7)]); },
 };
 if (process.env.TF_EDIT) { await page.keyboard.press("Tab"); await wait(1000); await page.keyboard.press("3"); await wait(500); }
+if (process.env.TF_PRE) for (const k of process.env.TF_PRE.split(",")) { await page.keyboard.press(k); await wait(900); }
 const names = Object.keys(gestures);
 for (let i = 0; i < N; i++) {
   const g = names[ri(0, names.length)];
