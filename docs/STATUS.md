@@ -1,7 +1,7 @@
 # Víkend — 25. 10. 21:30 — H6 krok 1: menší atlas odrazů v Material Preview
 Výsledek: ✅ na PC, 🟡 iPad neotestován.
 **Co jsem udělal:** EEVEE atlas sphere probes byl 4096² (rgba16float, 2 textury po ~179 MB). Změna na 2048² (`SPHERE_PROBE_ATLAS_MAX_SUBDIV` 11) → každá ~45 MB, dohromady úspora ~270 MB z ~790 MB. Fork `7498d505`.
-**Důkaz:** log vytvořených textur před/po (`scripts/texmem_test.mjs`): `Probes` a `world_sphere_probe_` 4096² → 2048². `shading_win` ERRORS 0, screenshot Material Preview vypadá správně (odrazy na kovové opici). `parity_win.sh` 0 ❌. `regress_all.sh` běží (výsledek doplním).
+**Důkaz:** log vytvořených textur před/po (`scripts/texmem_test.mjs`): `Probes` a `world_sphere_probe_` 4096² → 2048². `shading_win` ERRORS 0, screenshot Material Preview vypadá správně (odrazy na kovové opici). `parity_win.sh` 0 ❌. `regress_all.sh` 67 sekcí, **0 FAIL**. Poznámka: `seed_verify` hlásí 55 shaderů mimo WGSL seed (dřív 2) — Material Preview shadery se po změně defines překládají znovu; první Material Preview na iPadu bude o něco pomalejší (seed jsem nepřegenerovával; podle LESSONS překlad není úzké hrdlo).
 **Nezměněno:** `fb_dummy_attachment` 8192² (64 MB) — viewport nesmí přesáhnout attachment, nechal jsem být. Celkově po změně odhadem ~520 MB, stále nad cílem 300 MB (odhad).
 **Co otestovat na iPadu:** Material Preview je pořád zablokovaný ochranou H7. Zkus s `?mp=1` v adrese: kostka → Material Preview → drž 2 min; pošli, jestli padá, a telemetrii (`tex_mb`).
 **Co dál:** shadow atlas 2048²×8 r32uint a G-buffery (viz BACKLOG H6, krok 3), jen pokud iPad ukáže, že to pořád padá.

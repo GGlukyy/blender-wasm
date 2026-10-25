@@ -2,7 +2,7 @@
 
 - [x] (H7 HOTOVO: `scripts/mpguard_win.sh` 3× PASS — `?ipad=1` → Solid + pruh, `?ipad=1&mp=1` a PC → Material zůstane; jen demo/src/main.js, bez rebuildu) **H7 ochrana Material Preview**
 
-- [~] (H6 krok 1 HOTOVO: EEVEE sphere probe atlas 4096²→2048² (`Probes` a `world_sphere_probe_` 179→45 MB každý, fork 7498d505; PC: shading_win ERRORS 0, vzhled Material Preview OK, parity 0 ❌; regress_all běží; `fb_dummy_attachment` 8192² NEZMENŠENO — viewport musí být uvnitř attachmentu, riziko; zbývá změřit `tex_mb` na iPadu) **H6 snížit GPU paměť Material Preview**
+- [~] (H6 krok 1 HOTOVO: EEVEE sphere probe atlas 4096²→2048² (`Probes` a `world_sphere_probe_` 179→45 MB každý, fork 7498d505; PC: shading_win ERRORS 0, vzhled Material Preview OK, parity 0 ❌; regress_all 67 sekcí 0 FAIL; `fb_dummy_attachment` 8192² NEZMENŠENO — viewport musí být uvnitř attachmentu, riziko; zbývá změřit `tex_mb` na iPadu) **H6 snížit GPU paměť Material Preview**
 
 ## 🛡️ H7 (Lukáš 25. 10. 19:30, DĚLEJ PŘED H6, je to levné — jen Python/JS, bez rebuildu): ochrana Material Preview na iPadu
 Material Preview/Rendered na iPadu zatím padá (790 MB GPU textur). Dokud to neopravíme (H6), na iPadu:
