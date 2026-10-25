@@ -1,4 +1,5 @@
 #!/bin/bash
+export IN_REGRESS=1  # povolí fuzz skripty s GUARDem
 # Celá regresní sada ve Windows Chrome (vyžaduje dev server :5173). Trvá ~25 min. Výstup: out/regress.log
 cd "$(dirname "$0")/.."
 L=out/regress.log; : > $L
