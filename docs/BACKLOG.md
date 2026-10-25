@@ -21,8 +21,16 @@ zapnutí skoro hned spadne**; **Wireframe shading nefunguje a buguje „viewpoin
 - [ ] **H8-2 Textury štětce/kurzoru ve Sculptu** (256² ×166, 146² ×106): najdi kdo je tvoří (brush cursor / `immDrawPixels`-podobný kód) → cache jako u H3.
 - [ ] **H1-B Dynamic offsets** (bg_new ~530/s ve Sculptu) — nyní odemčeno.
 - [ ] **H8-3 Region/offscreen sady podle velikosti:** při změně velikosti vieportu uvolni staré sady dřív (`texture_pool` — nepoužité > 2 s zničit).
-- [ ] **H9 Wireframe shading + view presets na iPadu:** reprodukuj na PC (`shading_win` WIREFRAME, numpad 1/3/7 + Ctrl) — v Chrome? Pokud OK → iPad-only
-  (touch/UI: view preset = gizmo klepnutí?). Zeptat se Lukáše, co přesně „nefunguje“, neuhaduj.
+- [ ] **H9 Wireframe shading na iPadu (Lukáš upřesnil 25. 10. 21:50):** (a) viewport v Wireframe je **celý černý, nevidět žádné tvary**;
+  (b) **navigační gizmo (barevný XYZ kříž vpravo nahoře) se po každém pohybu pohledu DUPLIKUJE místo aktualizace** (stará kresba se nepřemazává
+  → nejspíš se nečistí/neřeší `loadOp`/clear přesně v tomto režimu, nebo se gizmo kreslí do textury bez clear). Na PC otestuj `shading_win`
+  WIREFRAME + screenshot po otočení pohledu (zda se gizmo duplikuje i v Chrome — pokud ne, hledej, co je na iPadu jiné: depth/stencil
+  formát `depth32float-stencil8`, loadOp Load vs Clear, `WGPU_BLEND UNMAPPED`, MSAA/anti-aliasing overlay). Pozn.: Lukáš s „viewpoint preset“ myslel
+  gizmo, ne numpad. Porovnej s Material Preview/Solid, kde gizmo funguje.
+- [ ] **H7b (opravit H7!):** **s `?mp=1` Material Preview po zapnutí spadne CELÝ Blender do ~2 s, pokaždé** (Lukáš). Ochrana bez `?mp=1` je OK. Pád do 2 s
+  po přepnutí = pravděpodobně první snímek (kompilace EEVEE shaderů/compute — viz `ogtllg` abort po `draw_command_generate`, `?nocompute=1`
+  zkouška stále chybí). Zkus: iPad `?mp=1&nocompute=1&tel=1`. Mezitím nech ochranu H7 zapnutou i s `?mp=1`
+  (na iPadu `?mp=1` stejně vrátit na Solid, dokud nebude oprava) — nebo jasně popiš v hlášce „zatím padá“.
 - [ ] **H10 Magic Keyboard přestala fungovat** (po přepnutí tabu OK): ztráta focusu canvasu — po `visibilitychange`/`focus` refocus
   `canvas`; zkontroluj `demo/src/main.js` (hidden input pro klávesnici?). Nízká priorita.
 
