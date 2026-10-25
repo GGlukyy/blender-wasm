@@ -70,6 +70,7 @@ Na PC (Chrome/NVIDIA) se to neprojeví → nehádej, MĚŘ. Cíl: 10 minut běž
   create/destroy každý snímek — viz Metal `MTLSafeFreeList`/buffer pool a Vulkan `VKBuffer` reuse), častější flush;
   (c) zkusit omezit překreslení při tažení na 1× za snímek (coalesce pointermove). Architekt. Ověř iPadem (Lukáš).
 - [ ] **Po pádu + Obnovit se skoro vždy zasekne „Loading Blender…“** (potvrzeno znovu 23. 10.) — M6, iOS-only.
+  - 25. 10. P87: RangeError Out of memory při startu se zachytí a ukáže „Zavři tab“ (`oomhint_win.sh` PASS, simulace); čeká na iPad.
 - [ ] **2D Animation (File ▸ New / workspace) na iPadu hned zamrzne** — nejspíš stejné jako Grease Pencil Monkey freeze.
 - [ ] **⭐ VÝSLEDEK iPad testu 23. 10. 22:30 (po M2) — PŘEČTI PRVNÍ.** `out/ipad/tel_2026-10-23.jsonl`, `tel_summary.py`:
   Lukáš: v klidu 3 min bez pádu; pád vždy až při práci (Subsurf 2, sculpt, Ctrl+B…). Relace s Blenderem: ztráta GPU po
