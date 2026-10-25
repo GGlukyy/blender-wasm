@@ -1,5 +1,7 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+- [x] (H7 HOTOVO: `scripts/mpguard_win.sh` 3× PASS — `?ipad=1` → Solid + pruh, `?ipad=1&mp=1` a PC → Material zůstane; jen demo/src/main.js, bez rebuildu) **H7 ochrana Material Preview**
+
 ## 🛡️ H7 (Lukáš 25. 10. 19:30, DĚLEJ PŘED H6, je to levné — jen Python/JS, bez rebuildu): ochrana Material Preview na iPadu
 Material Preview/Rendered na iPadu zatím padá (790 MB GPU textur). Dokud to neopravíme (H6), na iPadu:
 - Python timer v demo startu (kde už jsou timery pro autosave/prefs): detekuj iPad (`navigator.maxTouchPoints>1` + Safari/Macintosh UA,

@@ -482,11 +482,25 @@ const showSaved = (path) => {
   n.style.display = "block";
   clearTimeout(n._t); n._t = setTimeout(() => { n.style.display = "none"; }, 9000);
 };
+const showMpBlocked = () => {
+  let n = document.getElementById("mp-note");
+  if (!n) {
+    n = document.createElement("div");
+    n.id = "mp-note";
+    n.style.cssText = "position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:99997;background:rgba(90,50,10,.95);" +
+      "color:#fff;font:15px system-ui,sans-serif;padding:8px 14px;border-radius:8px;max-width:92vw";
+    n.textContent = "Material Preview na iPadu zatím nefunguje (v práci). Zkusit na vlastní riziko: přidej ?mp=1 do adresy.";
+    document.body.appendChild(n);
+  }
+  n.style.display = "block";
+  clearTimeout(n._t); n._t = setTimeout(() => { n.style.display = "none"; }, 9000);
+};
 const scan = (t) => {
   telLog(t);
   const sv = /Writing to (\/\S+)|^Saved "([^"]+)"/.exec(t.trim());
   if (sv) showSaved(sv[1] || sv[2]);
   if (/^Blender quit\b/.test(t.trim())) showQuit();
+  if (t.includes("WEB_MP_BLOCKED")) showMpBlocked();
   if (t.startsWith("WEB_OPEN_URL ")) {
     const u = t.slice(13).trim();
     if (/^https?:\/\//.test(u)) { window.__LAST_OPEN_URL__ = u; window.open(u, "_blank", "noopener"); }
@@ -971,6 +985,11 @@ const AUTOSAVE_S = (new URLSearchParams(location.search).get("autosave") || "30"
 const UNDO_MB = (new URLSearchParams(location.search).get("undomem") || "300").replace(/[^0-9]/g, "") || "300"; // ?undomem=N limit paměti undo v MB (0 = bez limitu)
 const RESET_PREFS = new URLSearchParams(location.search).get("resetprefs") === "1" ? "1" : "0"; // ?resetprefs=1 smaže uložené Preferences
 const UI_SCALE = (new URLSearchParams(location.search).get("uiscale") || "").replace(/[^0-9.]/g, ""); // ?uiscale=1.3 → větší UI pro prsty (uloží se do Preferences)
+/* H7: Material Preview/Rendered crashes the iPad GPU process (790 MB textures, H6). iPad = touch + Macintosh/iPad UA
+ * (iPadOS Safari sends a Mac UA). ?mp=1 opts out, ?ipad=1 forces the guard on (PC test). */
+const _qp = new URLSearchParams(location.search);
+const MP_GUARD = _qp.get("mp") === "1" ? "0" :
+  (_qp.get("ipad") === "1" || (navigator.maxTouchPoints > 1 && /Macintosh|iPad/.test(navigator.userAgent))) ? "1" : "0";
 const SHADOW_POOL_PY = `import bpy
 from bpy.app.handlers import persistent
 def _cap_pool():
@@ -996,6 +1015,18 @@ except Exception as e: print('UISCALE ERR', e)
 try:
     if float('${UNDO_MB}') > 0 and bpy.context.preferences.edit.undo_memory_limit == 0: bpy.context.preferences.edit.undo_memory_limit = int(float('${UNDO_MB}'))
 except Exception as e: print('UNDOMEM ERR', e)
+# H7: na iPadu zatím Material Preview/Rendered shazuje GPU → vrať Solid + hláška (JS ji zachytí z WEB_MP_BLOCKED).
+def _mp_guard():
+    try:
+        for win in bpy.context.window_manager.windows:
+            for a in win.screen.areas:
+                if a.type == 'VIEW_3D':
+                    for sp in a.spaces:
+                        if sp.type == 'VIEW_3D' and sp.shading.type in {'MATERIAL', 'RENDERED'}:
+                            sp.shading.type = 'SOLID'; print('WEB_MP_BLOCKED', flush=True)
+    except Exception as e: print('MPGUARD ERR', e)
+    return 0.5
+if '${MP_GUARD}' == '1': bpy.app.timers.register(_mp_guard, first_interval=1.0, persistent=True)
 def _save_prefs():
     try:
         if bpy.context.preferences.is_dirty: bpy.ops.wm.save_userpref(); print('USERPREF saved')

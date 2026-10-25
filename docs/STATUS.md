@@ -1,3 +1,10 @@
+# Víkend — 25. 10. 21:15 — H7 ochrana Material Preview na iPadu
+Výsledek: ✅ na PC, 🟡 iPad neotestován.
+**Co jsem udělal:** na iPadu (dotyk + Mac/iPad UA) Python timer každých 0,5 s vrátí 3D viewport z Material Preview/Rendered na Solid a ukáže pruh „Material Preview na iPadu zatím nefunguje… přidej ?mp=1“. `?mp=1` ochranu vypne. Jen `demo/src/main.js`, bez rebuildu.
+**Důkaz:** `scripts/mpguard_win.sh` 3× PASS (`?ipad=1` → SOLID + pruh; `?ipad=1&mp=1` → MATERIAL; PC bez parametru → MATERIAL).
+**Co otestovat na iPadu:** reload stránky (vite dev stačí), kostka → přepni na Material Preview → viewport se musí sám vrátit na Solid a ukázat oranžový pruh. S `?mp=1` v adrese Material Preview zůstane (může spadnout).
+**Co dál:** H6 (snížit GPU paměť Material Preview, ~2 h max) — viz BACKLOG.
+
 # Víkend — 25. 10. 20:30 — H5 depth_snapshot hotovo, nasazeno
 Výsledek: ✅ na PC (s poznámkou), 🟡 iPad neotestován.
 **Co jsem udělal:** `depth_snapshot` (čtení hloubky pro výběr) už nevytváří a neničí buffer při každém snímku, ale znovupoužívá až 2 buffery (fork `f37cd1c9`).
