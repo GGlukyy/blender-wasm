@@ -64,3 +64,22 @@
 
 ## Rozhodovací pravidlo
 H1 měření → H1 krok A → iPad test → (B, C, H2, H3 podle dat). Každý krok max 1 hodina bez výsledku → architekt.
+
+## Doplněk 25. 10. 12:10 (připomínky Gemini, prověřené Claudem v chatu)
+- **PLATÍ — A samo nestačí na bind groups:** immediate draw posílá i push constants (matice/barva) přes `uniform_arena`;
+  při tažení se mění každý snímek → nový offset → miss v cache → nová bind group. Po kroku A klesne hlavně `buf_new`,
+  `bg_new` jen trochu. **Na iPad nasaď až A + B dohromady** (pokud po A `bg_new/s` zůstane vysoké). Jestli po A klesne
+  i `bg_new` výrazně, nasaď hned.
+- **PLATÍ — měř i MB, ne jen kusy:** do telemetrie/`drag_win.sh` přidej `buf_destroyed_mb/s` a `tex_destroyed_mb/s`
+  (součet velikostí při destroy). Ukáže, jestli objem „mrtvé“ paměti dělají buffery (H1) nebo textury (H3) —
+  pár velkých textur/s může být víc MB než tisíce malých bufferů.
+- **PLATÍ — nejlepší obejití bugu WebKitu = neničit, ale znovupoužívat:** buffer/textura vrácená do poolu/ringu a jen
+  přepsaná daty se bug #76225 netýká. Bind group cache nezahazovat celou při 2048 (`clear_bind_group_cache`) → LRU.
+  (Vysvětlení „líného GC“: JSC spouští GC podle tlaku na JS haldu; wrapper bind group je malý, takže GC nepřijde,
+  zatímco GPU proces drží MB — odhad, ale sedí.)
+- **NEPLATÍ — `createCommandEncoder` chyba = limit 64 command bufferů Metalu:** chyba přišla 30–40 ms PO `device lost`
+  ve všech sezeních → je to následek ztráty zařízení, ne příčina. (Metal při plné frontě blokuje, nehází chybu.)
+  H2 zůstává jen jako hypotéza k ověření přes `submit_lag_ms`.
+- **ČÁSTEČNĚ — reload `Out of memory`:** pravděpodobné, že iOS po pádu ještě neuvolnil starou 1GB paměť (stejný
+  WebContent proces) a nová stránka si řekne o další 1 GB. Snížení `PTHREAD_POOL_SIZE` na 8 už jsme zkoušeli → padá
+  `prefs_sweep`. Až po H1: zkusit `POOL=16` a změřit paměť workerů. Nízká priorita.
