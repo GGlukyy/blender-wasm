@@ -1,3 +1,8 @@
+# Víkend — 26. 10. 21:10 — kontrola, beze změny
+Výsledek: 🟡 nic nového k opravě bez iPadu.
+`out/ipad/` bez nového zápisu od 20:19. H15 (Material Preview) a H16 (soukromý tab) hotové na PC, čekají na iPad; H9/H7b potřebují iPad data; H1-C a H12 blocked. Nic jsem neměnil ani nespouštěl.
+**Co otestovat na iPadu (nejdůležitější):** smaž data webu → `?tel=1&mp=1` → Material Preview: kreslí se objekt? Pošli ID relace (nesmí tam být `Storage texture layout not valid`). Pak soukromý tab → červený panel.
+
 # Víkend — 26. 10. 20:40 — kontrola, beze změny
 Výsledek: 🟡 nic nového k opravě bez iPadu.
 `out/ipad/` bez nového zápisu od 20:19 (to už je zpracované: H15, H16). Backlog: H15 čeká na iPad, H9/H7b potřebují iPad data, H1-C a H12 blocked. Nic jsem neměnil ani nespouštěl.
