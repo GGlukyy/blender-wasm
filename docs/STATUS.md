@@ -1,3 +1,8 @@
+# Víkend — 26. 10. 12:50 — H9-1: pojistka proti nevalidní kopii hloubky
+Výsledek: 🟡 na PC beze změny chování (wire_win ERRORS 0, parity 0 ❌), iPad neotestován.
+**Co:** `blit_to` a `Texture::copy_to` už nekopírují hloubku, když kopie není celý subresource / cíl je menší; přeskočí a zalogují. Odhad: možná příčina zamrzlého wireframe overlaye, na PC se nic nepřeskočilo, takže jistota až z `gpuerr` na iPadu.
+**Test na iPadu:** stejný jako v bloku 12:15 (Wireframe, `?tel=1`, pošli ID relace).
+
 # Víkend — 26. 10. 12:15 — H9-0: validační chyby Safari jdou do telemetrie
 Výsledek: ✅ na PC, 🟡 iPad neotestován (nasazeno v `demo/public/`, fork `fc7301c3`).
 **Co jsem udělal:** každá `uncapturederror` (hláška Safari) se teď pošle jako záznam `"kind":"gpuerr"` (text + posledních 6 passů + posledních 15 logů, max 20/sezení). Dřív šla jen do logu, který se do telemetrie nedostal.

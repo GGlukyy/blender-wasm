@@ -48,7 +48,7 @@
 **Úkoly (pořadí):**
 - [x] (hotovo 26. 10. 12:15, fork fc7301c3: PC wire_win ERRORS 0, parity_win 0 ❌; čeká na iPad: v `tel_*.jsonl` hledej `"kind":"gpuerr"`) **H9-0 Zviditelni validační chyby:** každá `uncapturederror` (message z Safari) → telemetrie `kind:"gpuerr"` s textem a jménem posledního passu/shaderu,
   max 20 za sezení. To samo nejspíš ukáže viníka při dalším iPad testu. Zkontroluj i `logs` v `vak2p5`, jestli tam už něco není.
-- [ ] **H9-1 Audit blitu hloubky (a):** v `webgpu_framebuffer.cc` blit — u depth/stencil formátů kopíruj jen celý subresource se STEJNOU velikostí
+- [x] (26. 10. 12:50, fork 8bb75de3: nevalidní částečná kopie depth/copy_to přes dst se přeskočí s logem `WGPU_FB blit_to depth copy skipped` / `WGPU_TEX copy_to skipped`; PC: wire_win ERRORS 0, parity 0 ❌; na PC se nic nepřeskočilo = není to prokázaná příčina, čeká na iPad `gpuerr`) **H9-1 Audit blitu hloubky (a):** v `webgpu_framebuffer.cc` blit — u depth/stencil formátů kopíruj jen celý subresource se STEJNOU velikostí
   (jinak fallback: draw-based depth copy shaderem, nebo přeskoč s logem). Přidej validaci velikostí do debug logu.
 - [ ] **H9-2 PC repro se Safari-like přísností:** v Chrome zapni `--enable-dawn-features=...`? Nejjistější: v `drag_win`/`shading_win` přidej
   `device.pushErrorScope('validation')` kolem viewport passů ve wireframe a vypiš chyby — Dawn by měl hlásit stejné porušení spec, pokud tam je.
