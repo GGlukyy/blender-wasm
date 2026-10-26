@@ -1194,7 +1194,18 @@ addEventListener("unhandledrejection", (e) => {
   const m = String(e.reason && (e.reason.message || e.reason));
   if (/out of memory|Cannot allocate Wasm memory/i.test(m)) {
     status("Nedostatek paměti. Zavři tento tab (a ostatní těžké taby), otevři stránku znovu.");
-    alert("Safari nedalo Blenderu paměť (po pádu GPU). Zavři tab a otevři stránku znovu.");
+    if (!document.getElementById("oom-overlay")) {
+      const o = document.createElement("div");
+      o.id = "oom-overlay";
+      o.style.cssText = "position:fixed;inset:0;z-index:99999;background:#b00020;color:#fff;display:flex;" +
+        "flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;" +
+        "font:600 28px/1.4 -apple-system,sans-serif";
+      o.innerHTML = "<div style='font-size:64px'>⚠️</div><div>Safari nedalo Blenderu paměť</div>" +
+        "<div style='font-weight:400;font-size:22px;margin-top:16px;max-width:640px'>" +
+        "Zavři ostatní taby s Blenderem (i cizí), pak tento tab úplně zavři (přejeď a zavři) " +
+        "a otevři stránku znovu. Po pádu GPU může paměť uvolnit až chvíli po zavření.</div>";
+      document.body.appendChild(o);
+    }
   }
 });
 

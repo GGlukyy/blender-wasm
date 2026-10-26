@@ -15,7 +15,7 @@
   `createShaderModule`** (log/assert). iPad: Wireframe + Material Preview → `gpuerr` nesmí být žádný.
 - Pozn.: dost možná je to **i příčina pádu Material Preview** (EEVEE používá specializační konstanty hojně) → H4/H7b/H14 společně.
 - Zvlášť: dnes 6 sezení skončilo při startu (`RangeError: Out of memory`, heap 0) — Lukáš měl otevřené 2 Blendery v tabech (jeden cizí
-  „Blender Web — Online Blender“). Hlášku P87 při RangeError udělej výraznou + text „Zavři ostatní taby s Blenderem“.
+  „Blender Web — Online Blender“). [x] (26. 10. 19:30, `scripts/oom_test.mjs` PASS) Hlášku P87 při RangeError udělej výraznou + text „Zavři ostatní taby s Blenderem“.
 
 ## 🎯 H9 POTVRZENO fotkou (Lukáš 26. 10. 11:12): Solid + Overlays ▸ Wireframe → „zamrzne“ overlay
 - Po zaškrtnutí Overlay ▸ Wireframe v Solid: na místě objektu zůstane **černá skvrna s oranžovým obrysem výběru z TOHO okamžiku**; objekt pak

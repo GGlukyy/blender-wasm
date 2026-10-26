@@ -1,3 +1,9 @@
+# Víkend — 26. 10. 19:30 — hláška při `Out of memory` je teď přes celou obrazovku
+Výsledek: ✅ na PC (`scripts/oom_test.mjs` PASS, `out/win/oom_1.png`), 🟡 iPad neotestován (JS, stačí reload).
+**Co:** při `RangeError: Out of memory` při startu se ukáže červený celoobrazovkový panel „Zavři ostatní taby s Blenderem, tento tab úplně zavři a otevři znovu“ (dřív jen drobný stavový řádek + alert).
+**Poznámka:** panel se vyvolá uměle (odmítnutý promise s RangeError); skutečný iOS OOM na PC nejde vyvolat.
+**Co otestovat na iPadu:** otevři 2 taby s Blenderem a v druhém spusť Launch; při nedostatku paměti má naskočit červený panel.
+
 # Víkend — 26. 10. 19:10 — H14: parity ověřena
 Výsledek: ✅ na PC (`parity_win.sh` 0 ❌, report `out/parity/report.md`), 🟡 iPad stále neotestován.
 Od 14:14 nepřibyla žádná iPad telemetrie, takže jsem jen doměřil, co zbývalo: H14 (žádný `override` pro Safari) nic nerozbil.
