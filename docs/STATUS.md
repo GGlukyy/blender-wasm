@@ -1,3 +1,6 @@
+# Víkend — 26. 10. 13:05 — H9-2: PC nehlásí žádnou validační chybu
+Výsledek: 🟡 H9 se na PC nedá reprodukovat. `wire_win.sh` teď testuje i Solid + Overlay Wireframe a chytá `WGPU_UNCAPTURED`: ERRORS 0, vykreslí se správně. Příčina je tedy Safari-specifická a víc bez `gpuerr` z iPadu nezjistím (test na iPadu viz blok 12:15).
+
 # Víkend — 26. 10. 12:50 — H9-1: pojistka proti nevalidní kopii hloubky
 Výsledek: 🟡 na PC beze změny chování (wire_win ERRORS 0, parity 0 ❌), iPad neotestován.
 **Co:** `blit_to` a `Texture::copy_to` už nekopírují hloubku, když kopie není celý subresource / cíl je menší; přeskočí a zalogují. Odhad: možná příčina zamrzlého wireframe overlaye, na PC se nic nepřeskočilo, takže jistota až z `gpuerr` na iPadu.

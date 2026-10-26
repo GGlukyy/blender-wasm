@@ -50,7 +50,7 @@
   max 20 za sezení. To samo nejspíš ukáže viníka při dalším iPad testu. Zkontroluj i `logs` v `vak2p5`, jestli tam už něco není.
 - [x] (26. 10. 12:50, fork 8bb75de3: nevalidní částečná kopie depth/copy_to přes dst se přeskočí s logem `WGPU_FB blit_to depth copy skipped` / `WGPU_TEX copy_to skipped`; PC: wire_win ERRORS 0, parity 0 ❌; na PC se nic nepřeskočilo = není to prokázaná příčina, čeká na iPad `gpuerr`) **H9-1 Audit blitu hloubky (a):** v `webgpu_framebuffer.cc` blit — u depth/stencil formátů kopíruj jen celý subresource se STEJNOU velikostí
   (jinak fallback: draw-based depth copy shaderem, nebo přeskoč s logem). Přidej validaci velikostí do debug logu.
-- [ ] **H9-2 PC repro se Safari-like přísností:** v Chrome zapni `--enable-dawn-features=...`? Nejjistější: v `drag_win`/`shading_win` přidej
+- [x] (26. 10. 13:05: `wire_test.mjs` teď chytá `WGPU_UNCAPTURED` a testuje i Solid + Overlay Wireframe; PC: ERRORS 0, screenshot `out/win/wire_4.png` správně → Dawn žádné porušení spec nehlásí = příčina je Safari-specifická, čeká na `gpuerr` z iPadu) **H9-2 PC repro se Safari-like přísností:** v Chrome zapni `--enable-dawn-features=...`? Nejjistější: v `drag_win`/`shading_win` přidej
   `device.pushErrorScope('validation')` kolem viewport passů ve wireframe a vypiš chyby — Dawn by měl hlásit stejné porušení spec, pokud tam je.
 **Rychlý test pro Lukáše (rozliší X-ray hypotézu za 1 minutu):** Wireframe + vypnout X-ray (Alt+Z nebo ikona X-ray v hlavičce) → kreslí se?
   Solid + zapnout X-ray → zčerná? Výsledek zapiš sem.

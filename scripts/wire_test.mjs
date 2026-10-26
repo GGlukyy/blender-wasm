@@ -11,12 +11,18 @@ def shade(t):
     for a in bpy.context.window_manager.windows[0].screen.areas:
         if a.type == 'VIEW_3D': a.spaces[0].shading.type = t
     print('SHADE ' + t); sys.stdout.flush(); return None
-bpy.app.timers.register(lambda: shade('WIREFRAME'), first_interval=10.0)`;
+def overlay_wire():
+    for a in bpy.context.window_manager.windows[0].screen.areas:
+        if a.type == 'VIEW_3D':
+            a.spaces[0].shading.type = 'SOLID'; a.spaces[0].overlay.show_wireframes = True; a.spaces[0].overlay.wireframe_opacity = 1.0
+    print('SHADE SOLID+OVERLAY_WIRE'); sys.stdout.flush(); return None
+bpy.app.timers.register(lambda: shade('WIREFRAME'), first_interval=10.0)
+bpy.app.timers.register(overlay_wire, first_interval=45.0)`;
 const browser = await chromium.launch({ headless: false, executablePath: process.env.CHROME,
   args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
 const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
 let errors = 0;
-page.on("console", (m) => { const t = m.text(); if (/RuntimeError|abort\(|unreachable|memory access|tint-ICE|shaderc FAIL/i.test(t)) { errors++; console.log("CONSOLE-ERR " + t.slice(0, 200)); } });
+page.on("console", (m) => { const t = m.text(); if (/WGPU_UNCAPTURED|RuntimeError|abort\(|unreachable|memory access|tint-ICE|shaderc FAIL/i.test(t)) { errors++; console.log("CONSOLE-ERR " + t.slice(0, 200)); } });
 page.on("pageerror", (e) => { errors++; console.log("PAGEERROR " + e.message.slice(0, 200)); });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
 await page.goto("http://localhost:5173/", { waitUntil: "load" });
@@ -32,5 +38,8 @@ for (let i = 0; i < 3; i++) { await page.keyboard.press("Numpad4"); await wait(7
 await page.keyboard.press("Numpad8"); await wait(1500); await page.screenshot({ path: "out/wire_1.png" });
 for (let i = 0; i < 3; i++) { await page.keyboard.press("Numpad6"); await wait(700); }
 await wait(1500); await page.screenshot({ path: "out/wire_2.png" });
+await wait(20000); await page.screenshot({ path: "out/wire_3.png" });
+for (let i = 0; i < 2; i++) { await page.keyboard.press("Numpad4"); await wait(700); }
+await wait(1500); await page.screenshot({ path: "out/wire_4.png" });
 console.log("ERRORS " + errors);
 await browser.close();
