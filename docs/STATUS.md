@@ -1,3 +1,9 @@
+# Víkend — 26. 10. 06:50 — LRU cache bind groups
+Výsledek: ✅ na PC, 🟡 iPad neotestován.
+**Co jsem udělal:** při 2048 bind groups se už nevyhodí celá cache, ale jen starší polovina (LRU). Fork `bb1ac2d2`. Důkaz: `parity_win.sh` 0 ❌, `regress_all.sh` 67 sekcí 0 FAIL, `sculpt_mem_win.sh` PASS.
+**Co dál (až po iPad testu):** H9 wireframe, H7b `?mp=1` pád (potřebují telemetrii z iPadu), H1 krok C (handly UBO/SSBO).
+**Blocked:** nic; backlog bez dalších úkolů, které jdou dělat bez iPadu.
+
 # Víkend — 26. 10. 05:00 — H1-B: bind groups přes dynamic offset
 Výsledek: ✅ na PC, 🟡 iPad neotestován (nasazeno v `demo/public/`).
 **Co jsem udělal:** změřil jsem (`WGPU_BG_WHY=1`), proč cache bind groups chybuje: 83 % kvůli offsetu push constants v klíči. Teď je offset dynamický (předává se v `SetBindGroup`), klíč ho neobsahuje. Fork `4c4fc907`.
