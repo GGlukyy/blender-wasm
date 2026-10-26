@@ -50,7 +50,7 @@ export function installTelemetry() {
     if (perf) {
       o.fps = Math.round(1000 / perf.dt_avg_ms); o.ms = +perf.dt_avg_ms.toFixed(1); o.msmax = Math.round(perf.dt_max_ms);
       o.submits = perf.submits; o.passes = perf.passes; o.tex = perf.tex; o.tex_mb = perf.tex_mb;
-      o.imm_bufs = perf.imm_bufs; o.imm_kb = perf.imm_kb; o.heap_mb = Math.round(perf.heap_mb);
+      o.imm_bufs = perf.imm_bufs; o.imm_kb = perf.imm_kb; o.heap_mb = Math.round(perf.heap_mb); o.heap_used_mb = Math.round(perf.heap_used_mb);
     }
     if (gmem) o.gpu = gmem;
     if (performance.memory) { o.js_used_mb = Math.round(performance.memory.usedJSHeapSize / 1048576); o.js_total_mb = Math.round(performance.memory.totalJSHeapSize / 1048576); }

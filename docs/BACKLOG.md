@@ -13,11 +13,11 @@ zapnutí skoro hned spadne**; **Wireframe shading nefunguje a buguje „viewpoin
   desítky různých rozměrů = region se přepočítává při každé změně okna/klávesnice/rotaci a pro KAŽDÝ rozměr vznikne celá sada
   offscreen textur, `tex_new` 972). `depth_snapshot` vytvořil 71 bufferů = **109 MB** (H5 nestačí, když se mění velikost).
 **Úkoly (pořadí):**
-- [ ] **H8-0 Měř skutečnou paměť:** do telemetrie přidej **použitou** wasm haldu (`mallinfo().uordblks + hblkhd` nebo `emscripten_get_heap_size`
+- [x] (HOTOVO: `scripts/sculpt_mem_win.sh` — wasm halda in-use plochých 297 MB (NErůstá); ale `buf_mb` rostlo 9→107 MB/2 min = únik `uniform_arena` chunků v kontextech, které nikdy nepresentují → opraveno v flush_encoder, po opravě 23 MB; fork 1824e0bd, parity 0 ❌, regress 1 náhodný FAIL rna_sweep, samostatně PASS) **H8-0 Měř skutečnou paměť:** do telemetrie přidej **použitou** wasm haldu (`mallinfo().uordblks + hblkhd` nebo `emscripten_get_heap_size`
   vs. in-use; `heap_mb` 1024 je jen rezervace!) a `performance.measureUserAgentSpecificMemory()` pokud existuje (Safari ne). Cíl: zjistit,
   jestli při Sculptu halda roste k 1 GB. Reprodukuj Sculpt na PC (Playwright tahy štětcem 2 min, `scripts/` už má sculpt testy?) a vypiš
   graf: halda in-use, tex_mb, buf_mb, bg_new. **Povoleno udělat nový test jen tento jeden (sculpt+paměť).**
-- [ ] **H8-1 depth_snapshot:** drž JEDEN buffer podle maxima velikosti (nebo uvolni při změně velikosti), 109 MB → < 10 MB.
+- [x] (HOTOVO: buffer se znovupoužije, pokud je dost velký; drží 2 největší; p2_cursor_check PASS, shading_win ERRORS 0 — na iPadu neověřeno) **H8-1 depth_snapshot:** drž JEDEN buffer podle maxima velikosti (nebo uvolni při změně velikosti), 109 MB → < 10 MB.
 - [ ] **H8-2 Textury štětce/kurzoru ve Sculptu** (256² ×166, 146² ×106): najdi kdo je tvoří (brush cursor / `immDrawPixels`-podobný kód) → cache jako u H3.
 - [ ] **H1-B Dynamic offsets** (bg_new ~530/s ve Sculptu) — nyní odemčeno.
 - [ ] **H8-3 Region/offscreen sady podle velikosti:** při změně velikosti vieportu uvolni staré sady dřív (`texture_pool` — nepoužité > 2 s zničit).
