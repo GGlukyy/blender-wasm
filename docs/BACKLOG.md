@@ -1,5 +1,22 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 🎯🎯 26. 10. 14:20 — SAFARI ŘEKL PŘÍČINU: `gpuerr: "Failed to evaluate override value"` (H9-0 telemetrie zafungovala)
+- Architektova hypotéza (WGSL `override`) je SPRÁVNÁ, ale oprava H9-4 (inline jen `override X: T = EXPR;` bez `@id`) **nestačí** — Lukáš po ní
+  (14:07) má pořád zamrzlý overlay ve Wireframe, Material Preview padá (`8tgihv` lost 88 s, předtím 2× gpuerr). Buď existují další tvary
+  overrides, které WebKit neumí vyhodnotit (override odkazující na jiný override i S `@id`, override v array size / workgroup_size, bool
+  konstanty předávané jako double přes `constants`, …), nebo část shaderů jde mimo opravenou cestu.
+- **H14 (PRIORITA 1, nahrazuje ladění tvarů): na webu NEPOSÍLEJ Safari ŽÁDNÉ `override`.** Hodnoty specializačních konstant známe při tvorbě
+  pipeline (`spec_entries`) → vygeneruj **specializovaný WGSL text**: každé `override NAME : T (= default)?;` nahraď `const NAME : T = <hodnota>;`
+  (a odvozené `override X = EXPR` → `const X = EXPR`, `const` výrazy WGSL umí), vytvoř shader module pro danou kombinaci (cache podle
+  `shader + spec_hash`), `d.compute.constants`/`fragment.constants` = prázdné. Platí pro render i compute pipeline.
+  Cena: víc shader modulů (EEVEE má víc variant) — měř `seed_verify`/čas překladu; seed může dál obsahovat obecný WGSL, specializace je jen
+  textová náhrada (levná). Zapnuto na webu vždy; `?overrides=1` vrátí původní cestu pro srovnání.
+- Ověření na PC: `wire_win`, `shading_win` (Material Preview), `parity_win` 0 ❌, a hlavně **0 výskytů `override` v každém WGSL předaném do
+  `createShaderModule`** (log/assert). iPad: Wireframe + Material Preview → `gpuerr` nesmí být žádný.
+- Pozn.: dost možná je to **i příčina pádu Material Preview** (EEVEE používá specializační konstanty hojně) → H4/H7b/H14 společně.
+- Zvlášť: dnes 6 sezení skončilo při startu (`RangeError: Out of memory`, heap 0) — Lukáš měl otevřené 2 Blendery v tabech (jeden cizí
+  „Blender Web — Online Blender“). Hlášku P87 při RangeError udělej výraznou + text „Zavři ostatní taby s Blenderem“.
+
 ## 🎯 H9 POTVRZENO fotkou (Lukáš 26. 10. 11:12): Solid + Overlays ▸ Wireframe → „zamrzne“ overlay
 - Po zaškrtnutí Overlay ▸ Wireframe v Solid: na místě objektu zůstane **černá skvrna s oranžovým obrysem výběru z TOHO okamžiku**; objekt pak
   otočený/zmenšený se kreslí správně jinde, mřížka se kreslí, gizmo se začne duplikovat. ⇒ **Overlay framebuffer se od zapnutí wireframe passu
