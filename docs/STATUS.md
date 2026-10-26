@@ -1,3 +1,8 @@
+# Víkend — 26. 10. 19:50 — kontrola, beze změny
+Výsledek: 🟡 nic nového k opravě bez iPadu.
+`out/ipad/` bez nového zápisu od 14:14. H14 a OOM panel hotové na PC, čekají na iPad; H9 a H7b potřebují iPad data; H1-C a H12 blocked. Nic jsem neměnil ani nespouštěl.
+**Co otestovat na iPadu:** smaž data webu → `?tel=1` → Solid → Overlays ▸ Wireframe → otoč pohled → Material Preview (`?mp=1`). Pošli ID relace; `gpuerr` tam už nesmí být.
+
 # Víkend — 26. 10. 19:20 — kontrola, beze změny
 Výsledek: 🟡 nic nového k opravě bez iPadu.
 `out/ipad/` bez nového zápisu od 14:14 (`tel_2026-10-26.jsonl`). Backlog: H14 a OOM panel hotové na PC a čekají na iPad; H9, H7b potřebují iPad data; H1-C a H12 blocked. Nic jsem neměnil ani nespouštěl.
