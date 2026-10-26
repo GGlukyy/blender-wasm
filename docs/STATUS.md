@@ -1,3 +1,8 @@
+# Víkend — 26. 10. 19:15 — kontrola, beze změny
+Výsledek: 🟡 nic nového k opravě bez iPadu.
+`out/ipad/` bez nové iPad telemetrie (poslední zápis 14:14). Backlog: H14 (override → const) a OOM panel jsou hotové na PC a čekají na iPad; H9, H7b potřebují iPad data; H1-C a H12 jsou blocked. Nic jsem neměnil ani nespouštěl (nové testy jsou zakázané).
+**Co otestovat na iPadu (nejdůležitější):** smaž data webu → `?tel=1` → Solid → Overlays ▸ Wireframe → otoč pohled → Material Preview (`?mp=1`). Pošli ID relace; `gpuerr` tam už nesmí být. Při problému porovnej s `&overrides=1`.
+
 # Víkend — 26. 10. 19:30 — hláška při `Out of memory` je teď přes celou obrazovku
 Výsledek: ✅ na PC (`scripts/oom_test.mjs` PASS, `out/win/oom_1.png`), 🟡 iPad neotestován (JS, stačí reload).
 **Co:** při `RangeError: Out of memory` při startu se ukáže červený celoobrazovkový panel „Zavři ostatní taby s Blenderem, tento tab úplně zavři a otevři znovu“ (dřív jen drobný stavový řádek + alert).
