@@ -1,3 +1,9 @@
+# Víkend — 26. 10. 13:50 — H11b: Apple Pencil v modálním F/G/R/S/E
+Výsledek: ✅ na PC, 🟡 iPad neotestován (JS, stačí reload; `demo/src/touch.js`).
+**Co:** když běží modální operátor (klávesa nebo lišta), Pencil dotyk už nemačká levé tlačítko (to potvrdilo/zrušilo operaci na „přeskočené“ pozici). Teď jen posouvá kurzor, zvednutí potvrdí.
+**Důkaz:** `scripts/brush_pen_win.sh` — F, Pencil dotyk + tah 70 px → režim `penmodal`, po zvednutí `idle`, hlavička ukazuje Size 500 px; `touch_win`, `touch_modal_win`, `pen_pressure_win`, `touch_sculpt_win` PASS.
+**Co otestovat na iPadu:** Sculpt → F (Magic Keyboard nebo ⌨) → Pencilem se dotkni a táhni: velikost se mění plynule, zvednutím se potvrdí. Totéž G ve výběru. Pokud ne, napiš, co se stalo.
+
 # Víkend — 26. 10. 13:25 — H11a: černý čtverec kolem kurzoru štětce opraven (na PC)
 Výsledek: ✅ na PC (reprodukováno i opraveno), 🟡 iPad neotestován (nasazeno v `demo/public/`).
 **Příčina:** WebGPU neumí swizzle textur, náš backend `GPU_texture_swizzle_set` ignoruje. Radial control (klávesa F) kreslí R8 masku se swizzlem `111r` → četla se jako neprůhledná → čtverec. Opraveno: na webu se textura vyrobí jako RGBA8 už s vypečeným swizzlem (stejně i `cursor overlay`). Fork `5a67d7d2`.

@@ -39,6 +39,14 @@ export function installTouch(canvas) {
   let modalArmed = false;
   let modalDrag = false;    /* B (box select) needs press-drag-release: pad finger acts as the left button */
   let modalTaps = 1;        /* taps that confirm before the pad switches off (loop cut = 2, knife = until Enter) */
+  /* H11b: a modal operator is running (key bar OR hardware keyboard F/G/R/S/E). Pencil down must not press
+   * LMB (= confirm at a jumped cursor position, size/transform jumps); it moves the cursor and confirms on lift. */
+  let penModal = false;
+  window.addEventListener("keydown", (e) => {
+    if (!e.isTrusted || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.code === "Escape" || e.code === "Enter") penModal = false;
+    else if (/^Key[FGRSE]$/.test(e.code) && !/^(INPUT|TEXTAREA)$/.test(e.target.tagName || "")) penModal = true;
+  }, true);
   let curX = 0, curY = 0;   /* last cursor position we sent to Blender */
   canvas.addEventListener("mousemove", (e) => { if (e.isTrusted) { curX = e.clientX; curY = e.clientY; } }, true);   /* real mouse/trackpad */
   let padNoMods = false;    /* pad moves/taps must not carry the sticky Ctrl/Shift used to start the operator */
@@ -136,6 +144,11 @@ export function installTouch(canvas) {
     canvas.setPointerCapture(e.pointerId);
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, type: e.pointerType, x0: e.clientX, y0: e.clientY, t0: performance.now() });
 
+    if (e.pointerType === "pen" && (penModal || modalArmed) && !modalDrag && inViewport(e.clientX, e.clientY)) {
+      mode = "penmodal"; penData(true, e);
+      mouse("mousemove", e.clientX, e.clientY, 0, 0);
+      return;
+    }
     if (e.pointerType === "pen") {
       mode = "pen";
       penData(true, e);
@@ -195,7 +208,7 @@ export function installTouch(canvas) {
     if (e.pointerType === "pen") {
       if (p) { p.x = e.clientX; p.y = e.clientY; }
       /* Hover (no contact) moves the cursor too. */
-      penData(mode === "pen", e);
+      penData(mode === "pen" || mode === "penmodal", e);
       mouse("mousemove", e.clientX, e.clientY, 0, mode === "pen" ? 1 : 0);
       return;
     }
@@ -259,7 +272,14 @@ export function installTouch(canvas) {
     try { canvas.releasePointerCapture(e.pointerId); } catch (_) { /* already released */ }
 
     if (e.pointerType === "pen") {
-      if (mode === "pen") {
+      if (mode === "penmodal") {
+        const x = p ? p.x : e.clientX, y = p ? p.y : e.clientY;
+        penData(false, e);
+        click(x, y, 0);   /* lift = confirm the modal operator where the Pencil is */
+        penModal = false; modalArmed = false; modalDrag = false; updateArmed();
+        mode = pointers.size ? "ignore" : "idle";
+      }
+      else if (mode === "pen") {
         mouse("mouseup", p ? p.x : e.clientX, p ? p.y : e.clientY, 0, 0);
         penData(false, e);
         mode = pointers.size ? "ignore" : "idle";
