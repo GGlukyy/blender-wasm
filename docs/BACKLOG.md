@@ -1,5 +1,21 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 📱 26. 10. 10:30 — iPad test po H8/H1-B (Lukáš + `qxrdji`, `anacq3`, `yo6b3c`)
+**Lukáš:** ✅ **Sculpt už NEPADÁ** (qxrdji: 378 s, tex 65 MB, buf 14 MB). ✅ Magic Keyboard OK. ❌ Wireframe pořád černý + gizmo se duplikuje (fotky pošle).
+❌ Material Preview pořád padá (yo6b3c: lost po 32 s, `tex_mb` **610**, `buf_new 531` ale **`buf_destroyed` jen 5** → v MP se buffery NEUVOLŇUJÍ
+(živých 526) = stejný vzor jako dřív K3b, tady asi druhý kontext drží encoder / flush se nespustí; spolu s 610 MB textur).
+**Nové chyby od Lukáše:**
+- [ ] **H11 Sculpt: změna velikosti štětce klávesou F** — (a) kolem/uvnitř kurzoru je **černý čtverec** (i s touchpadem; zmenšování/zvětšování jinak
+  funguje); (b) **Apple Pencil táhnutí hned zruší** operaci a velikost se skokově zvětší (pen pointer v modálním F/G/S nehandluje `touch.js`
+  jako touchpad — zkontroluj `pointerType==='pen'`). Reprodukuj (a) na PC: Sculpt → F → screenshot kurzoru; černý čtverec = textura kurzoru
+  štětce (256²/146² z H8-2 cache?) bez alfa/šedé → mohl to způsobit H8-2 (cache `immDrawPixels` textur) — ověř `WGPU_` přepínačem vrácení cache.
+- [ ] **H12 UI na iPadu je rozpixelované** (Retina DPR 2, plátno se kreslí v CSS px → zvětšené 2×; M3 to dřív „refutovalo“ jen pro paměť).
+  Přidej přepínač `?dpr=1.5|2` (canvas backing store = CSS px × dpr, Blender `resolution_scale`/UI scale přizpůsobit, ať UI nezmizí).
+  Změř na PC `tex_mb`/FPS při dpr 2 (4× pixelů viewportu: Solid 65 → odhad ~250 MB) a nech jako **volitelné** (default beze změny), dokud nebude jisté,
+  že iPad nepadne. Lukáš otestuje `?dpr=2` ve Sculptu.
+- [ ] **H6b Material Preview 610 MB:** zbývá `fb_dummy_attachment 8192² (64 MB, náš backend — udělej menší)`, 3× `rgba16float 2048²` (~100 MB),
+  4× `r32uint 2048²` (64 MB), 15× `rgba16float 1125x715` (~96 MB) + depth 14×. A **zjisti, proč se v MP neflushuje destroy** (`buf_destroyed` 5 z 531).
+
 ## 📱 25. 10. 21:45 — iPad test po H1–H7 (Lukáš + telemetrie `c5l0sb`, `8ekvti`, + 1 další)
 **Lukáš:** G+tažení přežilo; pak bevel OK; **Sculpt mód → PADÁ**; UV Editing OK (jednou přestala fungovat Magic Keyboard, po přepnutí
 tabu a zpět OK); Shading: H7 ochrana funguje (vrací Solid + hláška); s `?mp=1` Material Preview funguje, ale **při opakovaném
