@@ -1,3 +1,10 @@
+# Víkend — 26. 10. 14:50 — H14: Safari už nedostane žádný `override` (JS, čeká na iPad)
+Výsledek: 🟡 na PC funguje (wire_win ERRORS 0, shading_win ERRORS 0, screenshot Wireframe správně), `parity_win` jsem nestihl dokončit (vypršel čas) — **parity NEOVĚŘENO**. iPad neotestován.
+**Co:** `demo/src/main.js` (`ovrPatch`, běží i v pthread workerech, kde jsou GPU volání): při `createRenderPipeline/createComputePipeline` se WGSL modulu přepíše — každý `override` → `const` s hodnotou z `constants` (nebo default) a `constants` se zahodí. `?overrides=1` vrátí původní cestu. Log `OVR_SPEC {...,"leftover":0}` v konzoli (leftover = zbylé overrides, na PC 0).
+**Odhad/omezení:** na PC jen 3 specializované moduly v testu wireframe; EEVEE varianty nezměřeny (čas/počet modulů). Původní modul se pořád kompiluje (zbytečně).
+**Co otestovat na iPadu:** smaž data webu → `?tel=1` → Solid → Overlays ▸ Wireframe → otoč pohled; pak Material Preview (`?mp=1`). Pošli ID relace; v telemetrii nesmí být `gpuerr`. Při problému porovnej s `&overrides=1`.
+**Co dál:** pustit `parity_win.sh` a `seed_verify`, změřit počet modulů v MP.
+
 # Víkend — 26. 10. 14:06 — kontrola, beze změny
 Výsledek: 🟡 nic nového k opravě bez iPadu.
 V `out/ipad/tel_2026-10-26.jsonl` je 0 záznamů `gpuerr` a žádná nová iPad relace po `wa4u55` (ostatní nové relace jsou moje PC testy). Zbývá H9 (wireframe), H7b — obojí čeká na iPad data; H1-C a H12 jsou blocked. Nic jsem neměnil ani nespouštěl.

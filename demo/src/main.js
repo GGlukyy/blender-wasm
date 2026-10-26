@@ -1198,6 +1198,81 @@ addEventListener("unhandledrejection", (e) => {
   }
 });
 
+  /* H14: Safari fails pipelines with "Failed to evaluate override value". Never send it an
+   * `override`: at pipeline creation, rewrite the module's WGSL so every override becomes a
+   * `const` with the value from `constants` (or its default), and drop `constants`.
+   * ?overrides=1 keeps the original path. */
+  const ovrPatch = function () {
+    if (!globalThis.GPUDevice) return;
+    const P = GPUDevice.prototype;
+    const srcOf = new WeakMap(), specCache = new Map();
+    const stats = (globalThis.__OVR_STATS = { specialized: 0, leftover: 0, modules: 0, ovModules: 0, pipes: 0 });
+    const rep = () => { if (stats.specialized <= 3 || stats.specialized % 100 === 0) console.log("OVR_SPEC " + JSON.stringify(stats)); };
+    const origCSM = P.createShaderModule;
+    P.createShaderModule = function (desc) {
+      const m = origCSM.call(this, desc);
+      stats.modules++;
+      if (desc && typeof desc.code === "string" && /\boverride\b/.test(desc.code)) { srcOf.set(m, desc); stats.ovModules++; }
+      return m;
+    };
+    const lit = (t, v) => {
+      if (t === "bool") return v ? "true" : "false";
+      if (t === "u32") return String(v >>> 0);
+      if (t === "i32") return String(v | 0);
+      return Number.isInteger(v) ? v.toFixed(1) : String(v);
+    };
+    const specialize = (dev, stage) => {
+      if (!stage) return;
+      const desc = srcOf.get(stage.module);
+      if (!desc) return;
+      const consts = stage.constants || {};
+      const key = desc.code + "\0" + JSON.stringify(consts);
+      let mod = specCache.get(key);
+      if (!mod) {
+        const code = desc.code.replace(
+          /(?:@id\((\d+)\)\s*)?override\s+(\w+)\s*:\s*(\w+)\s*(?:=\s*([^;]+))?;/g,
+          (all, id, name, type, def) => {
+            let v = consts[name];
+            if (v === undefined && id !== undefined) v = consts[id];
+            if (v !== undefined) return `const ${name} : ${type} = ${lit(type, v)};`;
+            if (def !== undefined) return `const ${name} : ${type} = ${def.trim()};`;
+            return all;
+          });
+        if (/\boverride\b/.test(code)) stats.leftover++;
+        stats.specialized++;
+        mod = origCSM.call(dev, { ...desc, code });
+        specCache.set(key, mod);
+        rep();
+      }
+      stage.module = mod;
+      delete stage.constants;
+    };
+    const origRP = P.createRenderPipeline, origCP = P.createComputePipeline;
+    P.createRenderPipeline = function (d) {
+      stats.pipes++;
+      specialize(this, d.vertex); specialize(this, d.fragment);
+      return origRP.call(this, d);
+    };
+    P.createComputePipeline = function (d) {
+      specialize(this, d.compute);
+      return origCP.call(this, d);
+    };
+  };
+  if (!new URLSearchParams(location.search).has("overrides")) {
+    ovrPatch(); /* GPU calls run in a pthread worker: patch workers too */
+    const OrigWorker = globalThis.Worker;
+    globalThis.Worker = class extends OrigWorker {
+      constructor(url, opts) {
+        if (opts && String(opts.name).startsWith("em-pthread") && !opts.type) {
+          const abs = new URL(String(url), location.href).href;
+          url = URL.createObjectURL(new Blob(["(" + ovrPatch + ")();importScripts(" + JSON.stringify(abs) + ");"],
+                                              { type: "text/javascript" }));
+        }
+        super(url, opts);
+      }
+    };
+  }
+
   log("loading Blender…");
   const s = document.createElement("script");
   s.src = "blender.js";

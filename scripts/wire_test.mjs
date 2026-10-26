@@ -23,6 +23,7 @@ const browser = await chromium.launch({ headless: false, executablePath: process
 const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
 let errors = 0;
 page.on("console", (m) => { const t = m.text(); if (/WGPU_UNCAPTURED|RuntimeError|abort\(|unreachable|memory access|tint-ICE|shaderc FAIL/i.test(t)) { errors++; console.log("CONSOLE-ERR " + t.slice(0, 200)); } });
+page.on("console", (m) => { const t = m.text(); if (t.startsWith("OVR_SPEC")) globalThis.__lastOvr = t; });
 page.on("pageerror", (e) => { errors++; console.log("PAGEERROR " + e.message.slice(0, 200)); });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
 await page.goto("http://localhost:5173/", { waitUntil: "load" });
@@ -41,5 +42,6 @@ await wait(1500); await page.screenshot({ path: "out/wire_2.png" });
 await wait(20000); await page.screenshot({ path: "out/wire_3.png" });
 for (let i = 0; i < 2; i++) { await page.keyboard.press("Numpad4"); await wait(700); }
 await wait(1500); await page.screenshot({ path: "out/wire_4.png" });
+console.log("OVR " + (globalThis.__lastOvr || "none"));
 console.log("ERRORS " + errors);
 await browser.close();
