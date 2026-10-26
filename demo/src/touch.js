@@ -382,6 +382,19 @@ export function installTouch(canvas) {
   };
   window.__touchTextEditing = textEditing;
   canvas.addEventListener("pointerup", (e) => { if (e.pointerType !== "mouse" && !qs.get("autokbd")?.startsWith("0")) watchTextEdit(); }, true);
+  /* H10: after app/tab switches iPadOS sometimes leaves focus on nothing (or on the hidden kbd-input),
+   * and the Magic Keyboard stops reaching Blender. Give focus back to the canvas on return and on tap. */
+  const refocusCanvas = () => {
+    if (document.hidden || kbdUp || (window.Module && textEditing())) return;
+    const a = document.activeElement;
+    if (a === canvas || (a && a !== document.body && a.id !== "kbd-input" && /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(a.tagName))) return;
+    if (a && a.id === "kbd-input") a.blur();
+    try { canvas.focus({ preventScroll: true }); } catch (_) {}
+  };
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) setTimeout(refocusCanvas, 50); });
+  window.addEventListener("pageshow", () => setTimeout(refocusCanvas, 50));
+  window.addEventListener("focus", () => setTimeout(refocusCanvas, 50));
+  canvas.addEventListener("pointerdown", () => setTimeout(refocusCanvas, 0), true);
   /* editing can also end without a tap (Enter/Esc on the key bar): drop the keyboard state then */
   setInterval(() => { if (kbdUp && !textEditing()) { kbdUp = false; const i = document.getElementById("kbd-input"); if (i) i.blur(); } }, 500);
 

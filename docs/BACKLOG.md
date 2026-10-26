@@ -20,18 +20,18 @@ zapnutí skoro hned spadne**; **Wireframe shading nefunguje a buguje „viewpoin
 - [x] (HOTOVO: buffer se znovupoužije, pokud je dost velký; drží 2 největší; p2_cursor_check PASS, shading_win ERRORS 0 — na iPadu neověřeno) **H8-1 depth_snapshot:** drž JEDEN buffer podle maxima velikosti (nebo uvolni při změně velikosti), 109 MB → < 10 MB.
 - [x] (HOTOVO: příčina = `immDrawPixels` s mipmapou (zmenšený obrázek) se nekešoval; teď keš i pro mip. `sculpt_mem_win.sh`: tex_new 160/2 min → 5/min, parity 0 ❌; fork 1dcda418) **H8-2 Textury štětce/kurzoru ve Sculptu** (256² ×166, 146² ×106): najdi kdo je tvoří (brush cursor / `immDrawPixels`-podobný kód) → cache jako u H3.
 - [ ] **H1-B Dynamic offsets** (bg_new ~530/s ve Sculptu) — nyní odemčeno.
-- [ ] **H8-3 Region/offscreen sady podle velikosti:** při změně velikosti vieportu uvolni staré sady dřív (`texture_pool` — nepoužité > 2 s zničit).
-- [ ] **H9 Wireframe shading na iPadu (Lukáš upřesnil 25. 10. 21:50):** (a) viewport v Wireframe je **celý černý, nevidět žádné tvary**;
+- [x] (NEPOTŘEBNÉ: `texture_pool` už uvolňuje nepoužité po 8 cyklech; `fb_dummy_attachment` 8192² je nutný — shadow pass rasterizuje do viewportu 8192², zmenšení by ořezalo stíny; reálná GPU paměť Material Preview ≈ 330 MB: 3× rgba16f 2048² probes 96, viewport rgba16f ×10 65, dummy 64, depth ×9 36, shadow 32) **H8-3 Region/offscreen sady podle velikosti:** při změně velikosti vieportu uvolni staré sady dřív (`texture_pool` — nepoužité > 2 s zničit).
+- [~] (PC: `scripts/wire_win.sh` — Wireframe vykreslí tvary, gizmo se po otočení NEduplikuje → iPad-specifické; chybí data z iPadu: Lukáš ať v Wireframe otevře `?tel=1`, otočí pohled a pošle ID relace) **H9 Wireframe shading na iPadu (Lukáš upřesnil 25. 10. 21:50):** (a) viewport v Wireframe je **celý černý, nevidět žádné tvary**;
   (b) **navigační gizmo (barevný XYZ kříž vpravo nahoře) se po každém pohybu pohledu DUPLIKUJE místo aktualizace** (stará kresba se nepřemazává
   → nejspíš se nečistí/neřeší `loadOp`/clear přesně v tomto režimu, nebo se gizmo kreslí do textury bez clear). Na PC otestuj `shading_win`
   WIREFRAME + screenshot po otočení pohledu (zda se gizmo duplikuje i v Chrome — pokud ne, hledej, co je na iPadu jiné: depth/stencil
   formát `depth32float-stencil8`, loadOp Load vs Clear, `WGPU_BLEND UNMAPPED`, MSAA/anti-aliasing overlay). Pozn.: Lukáš s „viewpoint preset“ myslel
   gizmo, ne numpad. Porovnej s Material Preview/Solid, kde gizmo funguje.
-- [ ] **H7b (opravit H7!):** **s `?mp=1` Material Preview po zapnutí spadne CELÝ Blender do ~2 s, pokaždé** (Lukáš). Ochrana bez `?mp=1` je OK. Pád do 2 s
+- [~] (bez iPad dat nelze; hypotéza: iOS zabije stránku (jetsam) při přepnutí do MP — wasm halda in-use jen ~370 MB, GPU ~330 MB; `?mp=1&tel=1` + ID relace potřeba) **H7b (opravit H7!):** **s `?mp=1` Material Preview po zapnutí spadne CELÝ Blender do ~2 s, pokaždé** (Lukáš). Ochrana bez `?mp=1` je OK. Pád do 2 s
   po přepnutí = pravděpodobně první snímek (kompilace EEVEE shaderů/compute — viz `ogtllg` abort po `draw_command_generate`, `?nocompute=1`
   zkouška stále chybí). Zkus: iPad `?mp=1&nocompute=1&tel=1`. Mezitím nech ochranu H7 zapnutou i s `?mp=1`
   (na iPadu `?mp=1` stejně vrátit na Solid, dokud nebude oprava) — nebo jasně popiš v hlášce „zatím padá“.
-- [ ] **H10 Magic Keyboard přestala fungovat** (po přepnutí tabu OK): ztráta focusu canvasu — po `visibilitychange`/`focus` refocus
+- [x] (HOTOVO naslepo: `demo/src/touch.js` vrací focus na canvas po návratu do appky/tabu a po doteku; touch_win + touch_modal PASS; iPad neověřeno) **H10 Magic Keyboard přestala fungovat** (po přepnutí tabu OK): ztráta focusu canvasu — po `visibilitychange`/`focus` refocus
   `canvas`; zkontroluj `demo/src/main.js` (hidden input pro klávesnici?). Nízká priorita.
 
 - [x] (H7 HOTOVO: `scripts/mpguard_win.sh` 3× PASS — `?ipad=1` → Solid + pruh, `?ipad=1&mp=1` a PC → Material zůstane; jen demo/src/main.js, bez rebuildu) **H7 ochrana Material Preview**
