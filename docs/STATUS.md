@@ -1,3 +1,6 @@
+# Víkend — 26. 10. 14:10 — H9-4 i v C++ (čerstvé shadery)
+Výsledek: ✅ na PC, 🟡 iPad neotestován. Stejný přepis computed overrides je teď i v `webgpu_shader.cc` (fork `3ea461d2`), takže se týká i shaderů mimo seed. Nasazeno do `demo/public/` (nový `blender.wasm.zst`, záloha starého v `out/bak_ovfix/`). Důkaz: C++ funkce dává na všech 193 seed shaderech stejný výsledek jako JS; `wire_win` ERRORS 0, `shading_win` ERRORS 0, `parity_win` 0 ❌. `?noovfix=1` vypíná jen JS část; C++ část je vždy zapnutá.
+
 # Víkend — 26. 10. 14:00 — H9-4: nový podezřelý na černý Wireframe (JS, čeká na iPad)
 Výsledek: ✅ na PC, 🟡 iPad neotestován (stačí reload, bez rebuildu).
 **Co:** architekt našel, že wireframe shadery (a edit-mode hrany, EEVEE) mají v WGSL `override` bez `@id` s hodnotou počítanou z jiného override. WebKit s tím měl bug 275010; kdyby ho iPadOS 26.5 měl, pipeline je nevalidní a zahodí se celý command buffer overlaye = přesně zamrzlý wireframe. Odhad, ne jistota. `main.js` teď tyto řádky při načtení shaderů přepíše na vložený výraz (stejný význam).
