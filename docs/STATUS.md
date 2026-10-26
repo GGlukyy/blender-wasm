@@ -1,3 +1,9 @@
+# Víkend — 26. 10. 19:10 — H14: parity ověřena
+Výsledek: ✅ na PC (`parity_win.sh` 0 ❌, report `out/parity/report.md`), 🟡 iPad stále neotestován.
+Od 14:14 nepřibyla žádná iPad telemetrie, takže jsem jen doměřil, co zbývalo: H14 (žádný `override` pro Safari) nic nerozbil.
+**Co otestovat na iPadu (nejdůležitější):** smaž data webu → `?tel=1` → Solid → Overlays ▸ Wireframe → otoč pohled → Material Preview (`?mp=1`). Pošli ID relace; `gpuerr` tam už nesmí být. Při problému porovnej s `&overrides=1`.
+**Co dál:** čekám na iPad data. `seed_verify` a počet modulů v MP zůstávají nezměřené.
+
 # Víkend — 26. 10. 14:50 — H14: Safari už nedostane žádný `override` (JS, čeká na iPad)
 Výsledek: 🟡 na PC funguje (wire_win ERRORS 0, shading_win ERRORS 0, screenshot Wireframe správně), `parity_win` jsem nestihl dokončit (vypršel čas) — **parity NEOVĚŘENO**. iPad neotestován.
 **Co:** `demo/src/main.js` (`ovrPatch`, běží i v pthread workerech, kde jsou GPU volání): při `createRenderPipeline/createComputePipeline` se WGSL modulu přepíše — každý `override` → `const` s hodnotou z `constants` (nebo default) a `constants` se zahodí. `?overrides=1` vrátí původní cestu. Log `OVR_SPEC {...,"leftover":0}` v konzoli (leftover = zbylé overrides, na PC 0).

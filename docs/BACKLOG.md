@@ -5,7 +5,7 @@
   (14:07) má pořád zamrzlý overlay ve Wireframe, Material Preview padá (`8tgihv` lost 88 s, předtím 2× gpuerr). Buď existují další tvary
   overrides, které WebKit neumí vyhodnotit (override odkazující na jiný override i S `@id`, override v array size / workgroup_size, bool
   konstanty předávané jako double přes `constants`, …), nebo část shaderů jde mimo opravenou cestu.
-- [~] (14:50 JS hotovo v main.js `ovrPatch`, PC wire/shading ERRORS 0, parity neověřeno, čeká na iPad) **H14 (PRIORITA 1, nahrazuje ladění tvarů): na webu NEPOSÍLEJ Safari ŽÁDNÉ `override`.** Hodnoty specializačních konstant známe při tvorbě
+- [~] (14:50 JS hotovo v main.js `ovrPatch`, PC wire/shading ERRORS 0, 26. 10. 19:10 parity_win 0 ❌, čeká na iPad) **H14 (PRIORITA 1, nahrazuje ladění tvarů): na webu NEPOSÍLEJ Safari ŽÁDNÉ `override`.** Hodnoty specializačních konstant známe při tvorbě
   pipeline (`spec_entries`) → vygeneruj **specializovaný WGSL text**: každé `override NAME : T (= default)?;` nahraď `const NAME : T = <hodnota>;`
   (a odvozené `override X = EXPR` → `const X = EXPR`, `const` výrazy WGSL umí), vytvoř shader module pro danou kombinaci (cache podle
   `shader + spec_hash`), `d.compute.constants`/`fragment.constants` = prázdné. Platí pro render i compute pipeline.
