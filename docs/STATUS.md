@@ -1,3 +1,10 @@
+# Víkend — 26. 10. 20:35 — H15: příčina prázdného Material Preview nalezena (čeká na iPad)
+Výsledek: ✅ na PC (`shading_win` ERRORS 0, MP se kreslí, `out/win/shading_material.png`), 🟡 iPad neotestován.
+**Příčina (jistá z kódu + telemetrie):** Safari má `texture-formats-tier1`, ale ne tier2. EEVEE film shader používá `value_accum_img` jako `r16float` s `read_write` — to tier1 nepovoluje (jen write) → „Storage texture layout not valid“ → zahodí se celý command buffer. Ostatní storage formáty v seedu (r16float write, rgb10a2, rg16unorm write) jsou pro tier1 v pořádku.
+**Co:** `eevee_film.cc` + `eevee_film.bsl.hh`: value_accum je R32F (fork `d5109753`). Nasazeno v `demo/public/`, záloha starého v `out/bak_h15/`. Film shadery nejsou v seedu přegenerované → přeloží se za běhu (první start MP o chvíli delší).
+**Co otestovat na iPadu:** smaž data webu → `?tel=1&mp=1` → Material Preview: kreslí se objekt? Pošli ID relace (v telemetrii nesmí být `Storage texture layout not valid`).
+**Nezměřeno:** jestli v MP je ještě jiná chyba po této; H16 (soukromý tab) zatím neudělán.
+
 # Víkend — 26. 10. 19:50 — kontrola, beze změny
 Výsledek: 🟡 nic nového k opravě bez iPadu.
 `out/ipad/` bez nového zápisu od 14:14. H14 a OOM panel hotové na PC, čekají na iPad; H9 a H7b potřebují iPad data; H1-C a H12 blocked. Nic jsem neměnil ani nespouštěl.
