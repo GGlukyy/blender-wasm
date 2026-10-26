@@ -506,3 +506,5 @@ Subsurf 2 na Monkey plynulý, glTF export + import zpět (triangulováno).
 - [x] (25. 10., PASS `scripts/memwarn_win.sh`) **Hlídač paměti:** při 2 min fuzz testu (`soak_win.sh`, 2500 náhodných operací) halda wasm narostla z 1 GB na **2,7 GB** za 80 s (halda se nikdy nezmenšuje) — na iPadu by to zabilo tab (viz `RangeError: Out of memory`). JS teď při ≥ 1500 MB ukáže oranžový pruh, při ≥ 2000 MB červený („ulož, smaž těžké objekty“; `?memwarn=N` mění práh). Čeká na iPad: zda pruh přijde dřív než pád.
 
 - [x] (25. 10., PASS `scripts/leak_win.sh`) Růst haldy při opakovaném těžkém modelování = undo kroky (ne únik). Výchozí Undo Memory Limit 300 MB. Zbývá ověřit na iPadu a případně doladit hodnotu (`?undomem=`).
+
+- [ ] (26. 10. 06:15, jen poznámka) `upstream` (HeyPuter) má nový commit `e73ddff` „GL backend on wink + numpy for Python add-ons" — neřeší iPad pády/WebGPU; numpy už máme. Neslučováno; Lukáš ať rozhodne po víkendu.
