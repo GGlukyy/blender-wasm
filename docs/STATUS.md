@@ -1,3 +1,14 @@
+# Víkend — 26. 10. 06:20 — konec běhu, čekám na iPad
+Výsledek: 🟡 nic nového k opravě bez iPadu.
+**Stav:** v `out/ipad/` není od 25. 10. 21:45 žádná nová iPad telemetrie (dnešní soubor obsahuje jen moje testy z PC Chrome). Hotové a nasazené: H1 A/B, H3, H5, H7, H8, H10, LRU cache bind groups. Fork `bb1ac2d2`.
+**Zbývá (potřebuje iPad data, nebo je nízká priorita):** H9 wireframe, H7b `?mp=1` pád, H1-C (`glyphs@gpu_shader_text`, nízká priorita, až po iPad testu). Nové testy nespouštím (zakázáno zadáním).
+**Co otestovat na iPadu (podle důležitosti):**
+1. Smaž data webu → `?tel=1` → kostka → Sculpt → maluj 3 min. Pošli, jestli padá + ID relace.
+2. Wireframe: `?tel=1`, přepni na Wireframe, otoč pohled, pošli ID relace (H9).
+3. `?mp=1&tel=1`: zapni Material Preview jednou, drž 2 min, pošli ID relace i při pádu (H7b).
+4. Magic Keyboard: přepni do jiné appky a zpět, klávesy musí fungovat.
+**Blocked:** nic technického; čekám na iPad.
+
 # Víkend — 26. 10. 06:50 — LRU cache bind groups
 Výsledek: ✅ na PC, 🟡 iPad neotestován.
 **Co jsem udělal:** při 2048 bind groups se už nevyhodí celá cache, ale jen starší polovina (LRU). Fork `bb1ac2d2`. Důkaz: `parity_win.sh` 0 ❌, `regress_all.sh` 67 sekcí 0 FAIL, `sculpt_mem_win.sh` PASS.
