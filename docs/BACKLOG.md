@@ -1,5 +1,22 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 🎯 H9 POTVRZENO fotkou (Lukáš 26. 10. 11:12): Solid + Overlays ▸ Wireframe → „zamrzne“ overlay
+- Po zaškrtnutí Overlay ▸ Wireframe v Solid: na místě objektu zůstane **černá skvrna s oranžovým obrysem výběru z TOHO okamžiku**; objekt pak
+  otočený/zmenšený se kreslí správně jinde, mřížka se kreslí, gizmo se začne duplikovat. ⇒ **Overlay framebuffer se od zapnutí wireframe passu
+  už nikdy nepřepíše ani nevyčistí** (zamrzlý obrys = důkaz). Viník = **overlay wireframe pass** (`overlay_wireframe.hh`, shader
+  `overlay_wireframe*`). Mechanismus nejspíš „1 nevalidní příkaz → Safari zahodí celý command buffer overlaye“.
+- Co je na wireframe passu jedinečné (kandidáti, ověř v tomto pořadí):
+  (1) **GPU-driven kreslení**: `manager.generate_commands(wireframe_ps_)` + `submit_only` → compute `draw_command_generate` + `DrawIndexedIndirect`
+      s `firstInstance` (resource id) → vyžaduje feature **`indirect-first-instance`** (`webgpu_batch.cc:1253` „requested by the harness“) —
+      **ověř v iPad telemetrii `adapter`/`features`, jestli ji Safari má a jestli ji device opravdu dostal.** Pozn.: Material Preview (H4/H7b) padá
+      HNED PO prvních compute `draw_command_generate` → **možná společná příčina H4 + H9 = GPU-driven cesta draw manageru na Safari.**
+  (2) `SAMPLER(0, sampler2DDepth, depth_tx)` — vzorkování `depth32float-stencil8`: musí být view s `aspect=DepthOnly` a NEfiltrovací sampler;
+      a nesmí to být textura připojená jako depth attachment téhož passu (WRITE_DEPTH).
+  (3) bez X-ray: `GPU_texture_copy(tmp_depth_tx_, depth_tx)` = kopie depth-stencil (v Safari může být přísnější).
+  (4) 2 fragment výstupy (`frag_color` + `line_output`) do overlay fb + `DEPTH_WRITE(ANY)` (frag_depth).
+- Rychlé iPad testy, které to rozliší: `?nocompute=1&tel=1` + Wireframe (když se pozadí/obrys přestane „zamrzat“ (hrany chybět budou) → (1)).
+- **H9-0 (gpuerr telemetrie) dělej jako PRVNÍ** — Safari validační hláška řekne přesně který z (1)–(4).
+
 ## ❌ H9 X-ray hypotéza VYVRÁCENA (Lukáš 26. 10. 11:03)
 - Wireframe BEZ X-ray → pořád černý. Solid S X-ray → funguje správně (průhledný objekt). ⇒ Viník NENÍ X-ray/blit hloubky, je to něco,
   co běží JEN ve wireframe shadingu: hlavně **overlay wireframe pass** (`overlay_wireframe*` shadery — ve wireframe kreslí hrany VŠECH objektů;
