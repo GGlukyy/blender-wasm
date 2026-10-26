@@ -1,3 +1,6 @@
+# Víkend — 26. 10. 06:45 — kontrola, beze změny
+Výsledek: 🟡 `out/ipad/` bez nové iPad telemetrie (poslední zápis 06:12 = PC testy). Nic jsem neměnil ani nespouštěl; seznam „Co otestovat na iPadu“ je v bloku níž.
+
 # Víkend — 26. 10. 06:20 — konec běhu, čekám na iPad
 Výsledek: 🟡 nic nového k opravě bez iPadu.
 **Stav:** v `out/ipad/` není od 25. 10. 21:45 žádná nová iPad telemetrie (dnešní soubor obsahuje jen moje testy z PC Chrome). Hotové a nasazené: H1 A/B, H3, H5, H7, H8, H10, LRU cache bind groups. Fork `bb1ac2d2`.
