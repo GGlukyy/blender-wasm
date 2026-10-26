@@ -1,3 +1,10 @@
+# Víkend — 26. 10. 12:15 — H9-0: validační chyby Safari jdou do telemetrie
+Výsledek: ✅ na PC, 🟡 iPad neotestován (nasazeno v `demo/public/`, fork `fc7301c3`).
+**Co jsem udělal:** každá `uncapturederror` (hláška Safari) se teď pošle jako záznam `"kind":"gpuerr"` (text + posledních 6 passů + posledních 15 logů, max 20/sezení). Dřív šla jen do logu, který se do telemetrie nedostal.
+**Důkaz:** `wire_win.sh` ERRORS 0, `parity_win.sh` 0 ❌. Samotný záznam jsem na PC nevyvolal (Chrome chyby nehlásí) — odhad, že na iPadu dorazí.
+**Co otestovat na iPadu:** smaž data webu → `?tel=1` → Solid → Overlays ▸ Wireframe (zaškrtnout) → otoč pohled → pošli ID relace. Já pak v `out/ipad/` najdu `gpuerr` a uvidím, který příkaz Safari odmítá.
+**Co dál:** H9-1 (audit blitu hloubky) a H9-2 dělat až podle `gpuerr` z iPadu, ať neopravuju naslepo.
+
 # Víkend — 26. 10. 07:15 — kontrola, beze změny
 Výsledek: 🟡 `out/ipad/` bez nové iPad telemetrie (poslední zápis 06:12 = PC testy). Backlog: zbývá jen H9, H7b (potřebují iPad data) a H1-C (blocked). Nic jsem neměnil ani nespouštěl. Seznam „Co otestovat na iPadu“ je v bloku „26. 10. 06:20“ níž.
 

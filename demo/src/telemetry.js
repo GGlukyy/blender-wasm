@@ -21,7 +21,19 @@ const flush = () => {
   fetch("/__telemetry", { method: "POST", body, keepalive: true }).catch(() => {});
 };
 
-export function telLog(t) { if (telEnabled && !/^WGPU_(RP|FIRST|BATCH|FLUSH_WHY)/.test(t)) logs.push(String(t).slice(0, 200)); }
+const rpRing = ring(6); let gpuerrs = 0;
+/* H9-0: Safari validation messages (uncapturederror) -> own record with the last passes/logs, max 20 per session. */
+let lastErr = "", lastErrT = 0;
+const gpuErr = (msg) => {
+  const n = performance.now(); if (msg === lastErr && n - lastErrT < 1000) return; lastErr = msg; lastErrT = n;
+  if (gpuerrs++ < 20) send({ kind: "gpuerr", msg: String(msg).slice(0, 500), passes: rpRing.all(), logs: logs.all() }, true);
+};
+export function telLog(t) {
+  if (!telEnabled) return;
+  if (/^WGPU_RP/.test(t)) rpRing.push(String(t).slice(0, 160));
+  if (t.startsWith("WGPU_UNCAPTURED")) gpuErr(t.slice(15).trim());
+  if (!/^WGPU_(RP|FIRST|BATCH|FLUSH_WHY)/.test(t)) logs.push(String(t).slice(0, 200));
+}
 export function telEvent(kind, data) { if (telEnabled) send({ kind, ...data }, kind === "lost"); }
 export function telAdapterLimits(a) {
   if (!telEnabled || adapter) return;
@@ -35,6 +47,7 @@ export function installTelemetry() {
   send({ kind: "start", url: location.search, dpr: devicePixelRatio, screen: [screen.width, screen.height], inner: [innerWidth, innerHeight], isolated: crossOriginIsolated, mem: navigator.deviceMemory || null });
   try {
     new BroadcastChannel("blender-perf").onmessage = (e) => { perf = e.data; };
+    new BroadcastChannel("blender-gpuerr").onmessage = (e) => gpuErr(e.data);
     new BroadcastChannel("blender-gpumem").onmessage = (e) => {
       gmem = e.data; window.__GPUMEM__ = gmem;
       if (gmem.lost_reason) send({ kind: "lost_detail", reason: gmem.lost_reason, msg: gmem.lost_message, gpu: gmem }, true);

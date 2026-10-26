@@ -46,7 +46,7 @@
       JEN pro CELÝ subresource; pokud blit kopíruje jen region (velikost viewportu ≠ velikost textury, např. 1124×715 vs 1125×715 — v telemetrii
       jsou OBĚ velikosti!), je to nevalidní; (b) vzorkování depth textury s filtrovacím samplerem; (c) polyline/wide-line SSBO ve vertex stage.
 **Úkoly (pořadí):**
-- [~] **H9-0 Zviditelni validační chyby:** každá `uncapturederror` (message z Safari) → telemetrie `kind:"gpuerr"` s textem a jménem posledního passu/shaderu,
+- [x] (hotovo 26. 10. 12:15, fork fc7301c3: PC wire_win ERRORS 0, parity_win 0 ❌; čeká na iPad: v `tel_*.jsonl` hledej `"kind":"gpuerr"`) **H9-0 Zviditelni validační chyby:** každá `uncapturederror` (message z Safari) → telemetrie `kind:"gpuerr"` s textem a jménem posledního passu/shaderu,
   max 20 za sezení. To samo nejspíš ukáže viníka při dalším iPad testu. Zkontroluj i `logs` v `vak2p5`, jestli tam už něco není.
 - [ ] **H9-1 Audit blitu hloubky (a):** v `webgpu_framebuffer.cc` blit — u depth/stencil formátů kopíruj jen celý subresource se STEJNOU velikostí
   (jinak fallback: draw-based depth copy shaderem, nebo přeskoč s logem). Přidej validaci velikostí do debug logu.
