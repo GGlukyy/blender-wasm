@@ -1,5 +1,17 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## ❌ H9 X-ray hypotéza VYVRÁCENA (Lukáš 26. 10. 11:03)
+- Wireframe BEZ X-ray → pořád černý. Solid S X-ray → funguje správně (průhledný objekt). ⇒ Viník NENÍ X-ray/blit hloubky, je to něco,
+  co běží JEN ve wireframe shadingu: hlavně **overlay wireframe pass** (`overlay_wireframe*` shadery — ve wireframe kreslí hrany VŠECH objektů;
+  v Solid se nepoužívá, pokud není zapnutý Overlay ▸ Wireframe) a workbench ve wireframe režimu.
+- Mechanismus „jedna Safari validační chyba zahodí celý command buffer“ platí dál (gizmo přežije, clear/pozadí ne).
+- **Další rozlišovací test pro Lukáše:** Solid + Overlays ▸ **Wireframe** (zaškrtnout, Opacity 1) → když Solid zčerná, je to wireframe overlay shader.
+- **Úkol H9-3:** prozkoumej `overlay_wireframe` create-info/shader (vertex pulling ze SSBO? `gpu_attr_load`, flat/noperspective varyingy, `in_front`,
+  per-vertex `wd` atributy, line topology bez index bufferu, `GPU_PRIM_LINES` + polyline workaround) a jeho WGSL v seedu; hledej, co Safari odmítne
+  (např. storage buffer ve vertex stage — WebGPU limit `maxStorageBuffersInVertexStage` (nový limit, Safari ho může mít 0/menší!), interpolace
+  `flat` u integerů, `@builtin(vertex_index)` + `first_vertex`, alignment). Vypiš na PC adapter limity a porovnej s iPad telemetrií (`adapter` záznam).
+- H9-0 (telemetrie `gpuerr` z `uncapturederror`) je pořád nejrychlejší cesta k jistotě — udělej první.
+
 ## 🧭 H9 s nadhledem (Claude v chatu 26. 10. 11:10) — wireframe černý + duplikující se gizmo
 **Co ty dva příznaky spolu říkají (logika, ne hádání):**
 - Gizmo se kreslí VŽDY a vidíme ho → kompozice viewportu na obrazovku funguje a hlavní smyčka DRW běží (gizmo kreslí DRW na konci své smyčky
