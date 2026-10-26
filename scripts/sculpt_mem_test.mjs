@@ -19,7 +19,7 @@ const browser = await chromium.launch({ headless: false, executablePath: process
   args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
 const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
 let last = "", errors = 0;
-page.on("console", (m) => { const t = m.text(); const i = t.indexOf("SPROBE"); if (i >= 0) last = t.slice(i + 7); else if (/WGPU_BGWHY/.test(t)) { console.log("BGW " + t.slice(0, 120)); } else if (/WGPU_FREEDBG|^\s+ctx 0x/.test(t)) { if (process.env.FREEDBG) console.log("FD " + t.slice(0, 160)); } else if (/RuntimeError|abort\(|unreachable|memory access/i.test(t)) { errors++; console.log("CONSOLE-ERR " + t.slice(0, 160)); } });
+page.on("console", (m) => { const t = m.text(); const i = t.indexOf("SPROBE"); if (i >= 0) last = t.slice(i + 7); else if (/WGPU_BGWHY2/.test(t)) { console.log("BGW2 " + t.slice(0, 160)); } else if (/WGPU_BGWHY/.test(t)) { console.log("BGW " + t.slice(0, 120)); } else if (/WGPU_FREEDBG|^\s+ctx 0x/.test(t)) { if (process.env.FREEDBG) console.log("FD " + t.slice(0, 160)); } else if (/RuntimeError|abort\(|unreachable|memory access/i.test(t)) { errors++; console.log("CONSOLE-ERR " + t.slice(0, 160)); } });
 page.on("pageerror", (e) => { errors++; console.log("PAGEERROR " + e.message.slice(0, 160)); });
 await page.addInitScript((w) => { window.__BGWHY = w; }, !!process.env.BGWHY);
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; if (window.__BGWHY) window.__CAPENV = { WGPU_BG_WHY: "1" }; }, expr);
