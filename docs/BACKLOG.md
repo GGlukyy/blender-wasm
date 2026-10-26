@@ -1,5 +1,19 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 🔬 26. 10. 10:55 — telemetrie `tel_2026-10-26.jsonl`: wireframe = sezení `vak2p5`; OOM při startu = `mr9ubg`, `rfn1fw`, `t030cb`
+- **`vak2p5` = pravděpodobně ten černý Wireframe:** běžel 306 s, **35 FPS, žádná chyba, žádná ztráta GPU**, tex 60 MB, buf 9 MB (jako Solid).
+  → NEJDE o zaseknutou kompilaci (FPS je zdravé) a nic nespadlo: viewport se **tiše nevykreslí**. Hypotéza H13 (nedokompilované shadery)
+  je tím spíš VYVRÁCENA/oslabena. **První úkol: přečti `logs` ve vzorcích sezení `vak2p5`** (WGPU_* hlášky, `uncapturederror`, validace)
+  — hledej `rror|nvalid|alid|WGPU_BLEND|skipped|NO_PIPE` a počty pass/draw na vzorek (`passes`, `submits`). Porovnej se Solid
+  sezením `qxrdji`. Wireframe v Chrome na PC funguje → hledej, co je v Safari jinak (např. `depth32float-stencil8`, line topology,
+  polyline/wide-line SSBO workaround `is_polyline` v `webgpu_immediate.cc`/`polyline_draw_workaround` — **wireframe kreslí hrany přes
+  polyline SSBO!** a limity `maxStorageBuffersPerShaderStage`/`maxStorageBufferBindingSize` na Safari, nebo `point_expand_vbo`).
+- **Ztlumit duplikaci gizma** (nečištěná plocha při přeskočeném draw) — viz H13 bod 3, to platí dál.
+- **`RangeError: Out of memory` při STARTU (12–21 s, heap 0, `start_hang` v t030cb):** to je ten „Loading Blender…“ po pádu/reloadu.
+  iOS dá dalších 1 GB wasm paměti, až se starý mrtvý tab opravdu zavře. **Není to chyba wireframe.** Hláška P87 („zavři tab a otevři znovu“)
+  musí být vidět: ověř, že se při `RangeError` opravdu ukáže (Lukáš ji neviděl nebo nepoznal) a že je výrazná (celá obrazovka, ne drobný pruh).
+  Zvážit: po ztrátě GPU **neposkytovat „Reload“ tlačítko**, ale „Zavři tab úplně (přejeď a zavři), pak otevři znovu“.
+
 ## 🖼️ 26. 10. 10:40 — FOTKY z iPadu (wireframe + kurzor štětce) — NOVÁ HYPOTÉZA pro H9 + H11
 Na OBOU fotkách je dole banner **„⏳ Kompiluji shadery… (jen poprvé, může to trvat několik sekund)“**.
 - **Wireframe:** celý viewport černý (ani mřížka, ani objekty), toolbar/outliner OK; **navigační gizmo vpravo nahoře je rozmazané =
