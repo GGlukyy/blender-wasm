@@ -1,3 +1,23 @@
+# Víkend — 26. 10. 03:45 — H8: dva úniky GPU paměti ve Sculptu opraveny (na PC)
+Výsledek: ✅ na PC, 🟡 iPad neotestován (nasazeno v `demo/public/`, stačí vite + reload; vymaž data webu).
+**Co jsem udělal**
+- **Měření (H8-0):** nový test `scripts/sculpt_mem_win.sh` (2 min tahů štětcem, řádek každých 10 s). wasm halda in-use je plochá (~297 MB, nerůstá) → pád Sculptu NENÍ wasm paměť. Telemetrie má nově `heap_used_mb`.
+- **Únik 1 (hlavní):** `uniform_arena` bloky se ve vedlejších GPU kontextech (které nikdy „nepresentují“) nikdy neuvolnily → +~1 MB/s živých bufferů (9 → 107 MB za 2 min). Oprava: uvolnění po každém submitu (`flush_encoder`). Po opravě 23 MB za 2 min. Fork `1824e0bd`.
+- **Únik 2 (H8-2):** zmenšený obrázek přes `immDrawPixels` (mipmapy) se nekešoval → 2 nové textury/s (256², 146² = přesně ty z tvé telemetrie). Teď keš; textur 160/2 min → ~5/min. Fork `1dcda418`.
+- **H8-1:** `depth_snapshot` znovupoužije dost velký buffer (neměnit při každé změně velikosti okna).
+- **H10:** `touch.js` vrací focus na canvas po návratu do appky/tabu a po doteku (naslepo).
+**Důkaz:** `sculpt_mem_win.sh` před/po (buf_mb 107→23, tex_new 160→5), `parity_win.sh` 0 ❌ (po každé změně), `regress_all.sh` 67 sekcí: 1 FAIL `rna_sweep` (pád paměti v RNA setteru, samostatně PASS = nestabilní test), `p2_cursor_check` PASS, `shading_win` ERRORS 0, `touch_win` ALL PASS, `touch_modal` PASS.
+**Co otestovat na iPadu (podle důležitosti)**
+1. Smaž data webu → `?tel=1` → kostka → **Sculpt** → maluj štětcem 3 min (dřív pád ~157 s). Napiš, jestli padá + ID relace.
+2. Wireframe shading (H9): `?tel=1`, přepni na Wireframe, otoč pohled a pošli ID relace (na PC to funguje → potřebuju data z iPadu).
+3. `?mp=1&tel=1`: Material Preview zapnout jednou a držet 2 min; pošli ID relace, i když spadne (H7b).
+4. Magic Keyboard: přepni do jiné appky a zpět — klávesy musí fungovat (H10).
+**Co nefunguje / zbývá**
+- H9 wireframe a H7b `?mp=1` pád: bez dat z iPadu nejdou opravit; PC reprodukce ne. Hypotéza H7b: iOS zabije stránku při přepnutí do Material Preview (GPU ~330 MB + wasm ~370 MB), odhad.
+- Material Preview GPU ≈ 330 MB reálně (probes 96, viewport rgba16f 65, dummy 8192² 64 — nutný pro stíny, depth 36, shadow 32); dál zmenšit jen riskantně.
+- H1-B (dynamic offsets) odloženo: bind groups ~1 500/s ve Sculptu na PC, ale bufferů/textur už vzniká málo; nejdřív výsledek iPad testu.
+**Blocked:** nic technického; čekám na iPad.
+
 # Víkend — 25. 10. 21:30 — konec běhu, čekám na iPad
 Výsledek: 🟡 nic nového k opravě bez iPadu.
 **Stav:** v `out/ipad/` není nová telemetrie (poslední 19:30). H1 A/C, H3, H5, H7, H6 krok 1 jsou hotové a nasazené. Zbylé položky (H1-B, H2, H6 krok 3) jsou podle zadání zakázané, dokud iPad neřekne výsledek; nové testy nespouštím.
