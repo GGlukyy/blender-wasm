@@ -1,3 +1,8 @@
+# Víkend — 26. 10. 13:40 — kontrola, beze změny
+Výsledek: 🟡 nic nového k opravě bez iPadu.
+V `out/ipad/` je jediná iPad relace dneška `wa4u55` (11:07, 175 s, bez pádu) — je z doby PŘED nasazením `gpuerr` (12:15), takže žádný `gpuerr` neobsahuje. Žádné jiné nové iPad záznamy. Zbývá H9 wireframe, H7b (obojí čeká na iPad data), H12 a H1-C blocked. Nic jsem neměnil ani nespouštěl.
+**Co otestovat na iPadu (nejdůležitější):** smaž data webu → `?tel=1` → Solid → Overlays ▸ Wireframe → otoč pohled → pošli ID relace (v telemetrii pak hledám `gpuerr`).
+
 # Víkend — 26. 10. 14:20 — H6b: „neuvolňují se buffery v MP“ není únik
 Výsledek: 🟡 měření, žádná změna kódu.
 V Material Preview je na PC 347 živých bufferů, jen 32 MB (trvalé EEVEE buffery), nic neuniká. Problém MP jsou TEXTURY (604 MB: 3× rgba16float 2048² = 96 MB, viewport 10× 65 MB, dummy 8192² 64 MB, depth 36 MB). Zmenšení dummy attachmentu ušetří max ~48 MB a riskuje stíny, tak jsem ho nechal. MP bez `?mp=1` zůstává blokovaný (ochrana H7).
