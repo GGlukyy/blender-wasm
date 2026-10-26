@@ -1,5 +1,31 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 🧭 H9 s nadhledem (Claude v chatu 26. 10. 11:10) — wireframe černý + duplikující se gizmo
+**Co ty dva příznaky spolu říkají (logika, ne hádání):**
+- Gizmo se kreslí VŽDY a vidíme ho → kompozice viewportu na obrazovku funguje a hlavní smyčka DRW běží (gizmo kreslí DRW na konci své smyčky
+  do overlay framebufferu viewportu, `DRW_draw_gizmo_2d`).
+- Gizmo se HROMADÍ → overlay framebuffer se mezi snímky NEČISTÍ. Ten čistí overlay engine na začátku svého kreslení (a kreslí pozadí, mřížku,
+  hrany). Černo = barevná textura viewportu se nikdy nenaplní.
+- ⇒ **V wireframe se na Safari ztratí VEŠKERÁ práce engines (workbench + overlay) včetně jejich clearů, ale imm/gizmo kreslení přežije.**
+  Clear je u nás okamžitý (`execute_pending_clears` otevře prázdný pass), takže „ztracený clear“ by se musel ztratit spolu s celým command bufferem.
+- Nejpravděpodobnější mechanismus: **validační chyba WebGPU, kterou Safari hlásí a Chrome/Dawn ne (nebo jinak), zneplatní celý command buffer**
+  → při submitu se zahodí všechny passy v něm (komentář v `webgpu_backend.hh`: „validation error POISONS the whole command buffer at submit
+  (dropping all sibling passes)“). Nic nespadne, FPS 35, jen se nic nenakreslí = přesně `vak2p5`.
+- Co je ve wireframe jinak než v Solid: **X-ray je ve wireframe ve výchozím stavu ZAPNUTÝ** → overlay jede X-ray cestou (in-front depth,
+  kopie/blit hloubky, jiné framebuffery, antialiasing čar). Kandidáti na Safari-only validační chybu:
+  (a) `WebGPUFrameBuffer::blit` → `copyTextureToTexture` hloubky `depth32float-stencil8` s `aspect=All` — spec povoluje depth/stencil kopii
+      JEN pro CELÝ subresource; pokud blit kopíruje jen region (velikost viewportu ≠ velikost textury, např. 1124×715 vs 1125×715 — v telemetrii
+      jsou OBĚ velikosti!), je to nevalidní; (b) vzorkování depth textury s filtrovacím samplerem; (c) polyline/wide-line SSBO ve vertex stage.
+**Úkoly (pořadí):**
+- [ ] **H9-0 Zviditelni validační chyby:** každá `uncapturederror` (message z Safari) → telemetrie `kind:"gpuerr"` s textem a jménem posledního passu/shaderu,
+  max 20 za sezení. To samo nejspíš ukáže viníka při dalším iPad testu. Zkontroluj i `logs` v `vak2p5`, jestli tam už něco není.
+- [ ] **H9-1 Audit blitu hloubky (a):** v `webgpu_framebuffer.cc` blit — u depth/stencil formátů kopíruj jen celý subresource se STEJNOU velikostí
+  (jinak fallback: draw-based depth copy shaderem, nebo přeskoč s logem). Přidej validaci velikostí do debug logu.
+- [ ] **H9-2 PC repro se Safari-like přísností:** v Chrome zapni `--enable-dawn-features=...`? Nejjistější: v `drag_win`/`shading_win` přidej
+  `device.pushErrorScope('validation')` kolem viewport passů ve wireframe a vypiš chyby — Dawn by měl hlásit stejné porušení spec, pokud tam je.
+**Rychlý test pro Lukáše (rozliší X-ray hypotézu za 1 minutu):** Wireframe + vypnout X-ray (Alt+Z nebo ikona X-ray v hlavičce) → kreslí se?
+  Solid + zapnout X-ray → zčerná? Výsledek zapiš sem.
+
 ## 🔬 26. 10. 10:55 — telemetrie `tel_2026-10-26.jsonl`: wireframe = sezení `vak2p5`; OOM při startu = `mr9ubg`, `rfn1fw`, `t030cb`
 - **`vak2p5` = pravděpodobně ten černý Wireframe:** běžel 306 s, **35 FPS, žádná chyba, žádná ztráta GPU**, tex 60 MB, buf 9 MB (jako Solid).
   → NEJDE o zaseknutou kompilaci (FPS je zdravé) a nic nespadlo: viewport se **tiše nevykreslí**. Hypotéza H13 (nedokompilované shadery)
