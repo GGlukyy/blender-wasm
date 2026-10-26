@@ -1,3 +1,8 @@
+# Víkend — 26. 10. 14:06 — kontrola, beze změny
+Výsledek: 🟡 nic nového k opravě bez iPadu.
+V `out/ipad/tel_2026-10-26.jsonl` je 0 záznamů `gpuerr` a žádná nová iPad relace po `wa4u55` (ostatní nové relace jsou moje PC testy). Zbývá H9 (wireframe), H7b — obojí čeká na iPad data; H1-C a H12 jsou blocked. Nic jsem neměnil ani nespouštěl.
+**Co otestovat na iPadu (nejdůležitější):** smaž data webu → `?tel=1` → Solid → Overlays ▸ Wireframe → otoč pohled → pošli ID relace; pak totéž s `&noovfix=1`.
+
 # Víkend — 26. 10. 14:10 — H9-4 i v C++ (čerstvé shadery)
 Výsledek: ✅ na PC, 🟡 iPad neotestován. Stejný přepis computed overrides je teď i v `webgpu_shader.cc` (fork `3ea461d2`), takže se týká i shaderů mimo seed. Nasazeno do `demo/public/` (nový `blender.wasm.zst`, záloha starého v `out/bak_ovfix/`). Důkaz: C++ funkce dává na všech 193 seed shaderech stejný výsledek jako JS; `wire_win` ERRORS 0, `shading_win` ERRORS 0, `parity_win` 0 ❌. `?noovfix=1` vypíná jen JS část; C++ část je vždy zapnutá.
 
