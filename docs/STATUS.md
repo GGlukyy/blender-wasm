@@ -1,3 +1,10 @@
+# Víkend — 26. 10. 05:00 — H1-B: bind groups přes dynamic offset
+Výsledek: ✅ na PC, 🟡 iPad neotestován (nasazeno v `demo/public/`).
+**Co jsem udělal:** změřil jsem (`WGPU_BG_WHY=1`), proč cache bind groups chybuje: 83 % kvůli offsetu push constants v klíči. Teď je offset dynamický (předává se v `SetBindGroup`), klíč ho neobsahuje. Fork `4c4fc907`.
+**Důkaz:** miss kvůli offsetu 2 500 → 0 za 2 s ve Sculptu; `parity_win.sh` 0 ❌; `regress_all.sh` 67 sekcí 0 FAIL; screenshot UI — ikony různé, žádné blikání (starý bug „všechny ikony stejné“ se nevrátil). Při problémech na iPadu: `WGPU_PC_DYN_OFF=1` vrátí staré chování.
+**Co otestovat na iPadu:** to samé co výš + zkontroluj, že ikony v panelech jsou různé a nic nebliká.
+**Zbývá:** krok C (měnící se handly UBO/SSBO, ~330 missů/2 s), LRU místo vymazání celé cache při 2048.
+
 # Víkend — 26. 10. 03:45 — H8: dva úniky GPU paměti ve Sculptu opraveny (na PC)
 Výsledek: ✅ na PC, 🟡 iPad neotestován (nasazeno v `demo/public/`, stačí vite + reload; vymaž data webu).
 **Co jsem udělal**
