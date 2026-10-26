@@ -18,7 +18,7 @@ zapnutí skoro hned spadne**; **Wireframe shading nefunguje a buguje „viewpoin
   jestli při Sculptu halda roste k 1 GB. Reprodukuj Sculpt na PC (Playwright tahy štětcem 2 min, `scripts/` už má sculpt testy?) a vypiš
   graf: halda in-use, tex_mb, buf_mb, bg_new. **Povoleno udělat nový test jen tento jeden (sculpt+paměť).**
 - [x] (HOTOVO: buffer se znovupoužije, pokud je dost velký; drží 2 největší; p2_cursor_check PASS, shading_win ERRORS 0 — na iPadu neověřeno) **H8-1 depth_snapshot:** drž JEDEN buffer podle maxima velikosti (nebo uvolni při změně velikosti), 109 MB → < 10 MB.
-- [ ] **H8-2 Textury štětce/kurzoru ve Sculptu** (256² ×166, 146² ×106): najdi kdo je tvoří (brush cursor / `immDrawPixels`-podobný kód) → cache jako u H3.
+- [x] (HOTOVO: příčina = `immDrawPixels` s mipmapou (zmenšený obrázek) se nekešoval; teď keš i pro mip. `sculpt_mem_win.sh`: tex_new 160/2 min → 5/min, parity 0 ❌; fork 1dcda418) **H8-2 Textury štětce/kurzoru ve Sculptu** (256² ×166, 146² ×106): najdi kdo je tvoří (brush cursor / `immDrawPixels`-podobný kód) → cache jako u H3.
 - [ ] **H1-B Dynamic offsets** (bg_new ~530/s ve Sculptu) — nyní odemčeno.
 - [ ] **H8-3 Region/offscreen sady podle velikosti:** při změně velikosti vieportu uvolni staré sady dřív (`texture_pool` — nepoužité > 2 s zničit).
 - [ ] **H9 Wireframe shading na iPadu (Lukáš upřesnil 25. 10. 21:50):** (a) viewport v Wireframe je **celý černý, nevidět žádné tvary**;

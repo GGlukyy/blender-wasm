@@ -47,7 +47,7 @@ while (Date.now() - t0 < DUR) {
 }
 const g2 = await page.evaluate(() => window.__GPUMEM__ || {});
 console.log("GHIST " + JSON.stringify({buf:g2.buf,destroyed:g2.buf_destroyed,gc:g2.buf_gc,hist:g2.hist,hbytes:g2.hbytes}).slice(0, 900));
-console.log("THIST " + JSON.stringify(g2.thist || {}).slice(0, 600));
+console.log("THIST " + JSON.stringify(Object.fromEntries(Object.entries(g2.thist || {}).sort((a, b) => b[1] - a[1]).slice(0, 8))));
 console.log(rows.length >= 3 && errors === 0 && maxUsed > 0 ? `PASS: sculpt+paměť, max heap_used=${Math.round(maxUsed)} MB` : `FAIL: rows=${rows.length} errors=${errors} maxUsed=${maxUsed}`);
 await page.screenshot({ path: "out/sculptmem.png" });
 await browser.close();
