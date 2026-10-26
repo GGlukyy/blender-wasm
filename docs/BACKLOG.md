@@ -1,5 +1,25 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 🖼️ 26. 10. 10:40 — FOTKY z iPadu (wireframe + kurzor štětce) — NOVÁ HYPOTÉZA pro H9 + H11
+Na OBOU fotkách je dole banner **„⏳ Kompiluji shadery… (jen poprvé, může to trvat několik sekund)“**.
+- **Wireframe:** celý viewport černý (ani mřížka, ani objekty), toolbar/outliner OK; **navigační gizmo vpravo nahoře je rozmazané =
+  nakreslené mnohokrát přes sebe** (každý pohyb pohledu přidá další kopii). Znamená to, že se 3D viewport vůbec nepřekreslí (nečistí se pozadí),
+  ale gizmo (jiný kód/jiné shadery) se kreslí dál. Odhad: při wireframe se viewport přeskakuje, **dokud se nedokompilují jeho shadery**
+  (async compile), a gizmo se kreslí do nevyčištěné plochy.
+- **Sculpt F (velikost štětce):** kolem kruhu kurzoru je **černý čtverec** přesně o velikosti ohraničující kružnice (335×335) = quad se
+  shaderem/texturou, která se nedokreslila správně — taky během „Kompiluji shadery“.
+- **Hypotéza H13 (odhad, ale sedí na obě):** shadery pro **wireframe** a **kurzor štětce (brush cursor)** nejsou ve WGSL seedu (`demo/public/wgsl-cache.json`,
+  generuje `scripts/wgsl_seed.mjs`) → na iPadu se překládají/kompilují za běhu; dokud nejsou hotové, draw se přeskočí nebo nakreslí prázdně.
+  Dřív `seed_verify` hlásil 55 shaderů mimo seed po změně EEVEE defines → seed je neúplný.
+- **Úkoly:** (1) na PC s **vymazanou IndexedDB cache a bez seedu** (cold) zapni Wireframe a Sculpt+F a pořiď screenshot během kompilace i po ní —
+  zopakuje se černá/duplikace? (`?nocache=1` nebo smaž IndexedDB v testu); (2) pokud ano → **přegeneruj seed** pro všechny běžné režimy: Solid,
+  Wireframe, X-ray, Sculpt (kurzor, štětec, maska), Edit Mode (všechny typy výběru), UV Editing, Weight/Vertex Paint, Overlays, gizmo
+  (`wgsl_seed.mjs` + `seed_verify`), cíl: **0 shaderů mimo seed** v těchto režimech; (3) navíc: když draw čeká na shader, **nikdy nenechávej
+  region nevyčištěný** — vyčisti na barvu pozadí a přeskoč jen kresbu (a zobraz banner), ať se gizmo neduplikuje; (4) iPad test: wireframe
+  počkej ~30 s, jestli se banner ztratí a viewport se vykreslí.
+- **H12 (UI ostrost) — ODLOŽENO (Lukáš: nevadí, nech být).** SVG není cesta: Blender kreslí UI sám do jednoho canvasu (text z atlasu písma,
+  ikony z bitmap atlasu), prohlížeč SVG nepoužije. Případně jen `?dpr=` přepínač později; nic teď neděl.
+
 ## 📱 26. 10. 10:30 — iPad test po H8/H1-B (Lukáš + `qxrdji`, `anacq3`, `yo6b3c`)
 **Lukáš:** ✅ **Sculpt už NEPADÁ** (qxrdji: 378 s, tex 65 MB, buf 14 MB). ✅ Magic Keyboard OK. ❌ Wireframe pořád černý + gizmo se duplikuje (fotky pošle).
 ❌ Material Preview pořád padá (yo6b3c: lost po 32 s, `tex_mb` **610**, `buf_new 531` ale **`buf_destroyed` jen 5** → v MP se buffery NEUVOLŇUJÍ
