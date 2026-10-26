@@ -1190,24 +1190,41 @@ window.Module = {
 
 /* iOS gives no 1 GB wasm memory right after a GPU crash: instantiation throws "RangeError: Out of memory"
  * and the splash would stay on "Loading Blender…" forever. Tell the user what to do instead. */
+const showFatalPanel = (title, text) => {
+  if (document.getElementById("oom-overlay")) return;
+  const o = document.createElement("div");
+  o.id = "oom-overlay";
+  o.style.cssText = "position:fixed;inset:0;z-index:99999;background:#b00020;color:#fff;display:flex;" +
+    "flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;" +
+    "font:600 28px/1.4 -apple-system,sans-serif";
+  o.innerHTML = "<div style='font-size:64px'>⚠️</div><div>" + title + "</div>" +
+    "<div style='font-weight:400;font-size:22px;margin-top:16px;max-width:640px'>" + text + "</div>";
+  document.body.appendChild(o);
+};
+const OOM_RE = /out of memory|Cannot allocate Wasm memory/i;
+const onOom = () => {
+  status("Nedostatek paměti. Zavři tento tab (a ostatní těžké taby), otevři stránku znovu.");
+  showFatalPanel("Safari nedalo Blenderu paměť",
+    "Zavři ostatní taby s Blenderem (i cizí), pak tento tab úplně zavři (přejeď a zavři) " +
+    "a otevři stránku znovu. Po pádu GPU může paměť uvolnit až chvíli po zavření. " +
+    "V soukromém tabu je limit paměti nižší — otevři Blender v normálním tabu.");
+};
 addEventListener("unhandledrejection", (e) => {
-  const m = String(e.reason && (e.reason.message || e.reason));
-  if (/out of memory|Cannot allocate Wasm memory/i.test(m)) {
-    status("Nedostatek paměti. Zavři tento tab (a ostatní těžké taby), otevři stránku znovu.");
-    if (!document.getElementById("oom-overlay")) {
-      const o = document.createElement("div");
-      o.id = "oom-overlay";
-      o.style.cssText = "position:fixed;inset:0;z-index:99999;background:#b00020;color:#fff;display:flex;" +
-        "flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;" +
-        "font:600 28px/1.4 -apple-system,sans-serif";
-      o.innerHTML = "<div style='font-size:64px'>⚠️</div><div>Safari nedalo Blenderu paměť</div>" +
-        "<div style='font-weight:400;font-size:22px;margin-top:16px;max-width:640px'>" +
-        "Zavři ostatní taby s Blenderem (i cizí), pak tento tab úplně zavři (přejeď a zavři) " +
-        "a otevři stránku znovu. Po pádu GPU může paměť uvolnit až chvíli po zavření.</div>";
-      document.body.appendChild(o);
-    }
-  }
+  if (OOM_RE.test(String(e.reason && (e.reason.message || e.reason)))) onOom();
 });
+/* H16: pthread workers report `UnknownError ... out of memory` as window `error` events, not rejections. */
+addEventListener("error", (e) => {
+  if (OOM_RE.test(String(e.message || (e.error && e.error.message) || ""))) onOom();
+});
+/* H16: Safari private tabs: IndexedDB is unusable there (and memory is lower) — say so clearly. */
+try {
+  const prq = indexedDB.open("blender-probe");
+  prq.onerror = () => showFatalPanel("Soukromý tab není podporován",
+    "Otevři Blender v normálním tabu Safari (ne v soukromém).");
+  prq.onsuccess = () => { try { prq.result.close(); } catch (e) {} };
+} catch (e) {
+  showFatalPanel("Soukromý tab není podporován", "Otevři Blender v normálním tabu Safari (ne v soukromém).");
+}
 
   /* H14: Safari fails pipelines with "Failed to evaluate override value". Never send it an
    * `override`: at pipeline creation, rewrite the module's WGSL so every override becomes a

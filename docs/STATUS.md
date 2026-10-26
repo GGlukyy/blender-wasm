@@ -1,3 +1,8 @@
+# Víkend — 26. 10. 20:50 — H16: soukromý tab a OOM z workeru (JS)
+Výsledek: ✅ na PC (`oom_test.mjs` PASS pro `unhandledrejection` i `error` událost), 🟡 iPad neotestován (stačí reload).
+**Co:** červený panel „Zavři ostatní taby“ se teď ukáže i pro `UnknownError … out of memory` z pthread workeru (window `error`). Navíc test IndexedDB při startu: když selže, panel „Soukromý tab není podporován“. Odhad: v Safari soukromém tabu IndexedDB funguje jen někdy, skutečné chování jsem na PC neověřil.
+**Co otestovat na iPadu:** otevři stránku v soukromém tabu → má naskočit červený panel s vysvětlením (místo tichého selhání).
+
 # Víkend — 26. 10. 20:35 — H15: příčina prázdného Material Preview nalezena (čeká na iPad)
 Výsledek: ✅ na PC (`shading_win` ERRORS 0, MP se kreslí, `out/win/shading_material.png`), 🟡 iPad neotestován.
 **Příčina (jistá z kódu + telemetrie):** Safari má `texture-formats-tier1`, ale ne tier2. EEVEE film shader používá `value_accum_img` jako `r16float` s `read_write` — to tier1 nepovoluje (jen write) → „Storage texture layout not valid“ → zahodí se celý command buffer. Ostatní storage formáty v seedu (r16float write, rgb10a2, rg16unorm write) jsou pro tier1 v pořádku.
