@@ -517,6 +517,9 @@ const scan = (t) => {
 };
 window.__scan = scan;
 const canvas = document.getElementById("canvas");
+/* H12: optional sharper UI. `?dpr=2` renders at CSS px * 2 (GHOST scales window size/mouse/UI by window.__DPR__);
+ * default 1 = unchanged (4x GPU memory at 2, iPad may not survive it). */
+window.__DPR__ = Math.min(3, Math.max(1, parseFloat(new URLSearchParams(location.search).get("dpr")) || 1));
 const fitCanvas = () => {
   if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
     /* After transferControlToOffscreen() the main thread may not resize the

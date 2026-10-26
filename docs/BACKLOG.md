@@ -98,7 +98,7 @@ Na OBOU fotkách je dole banner **„⏳ Kompiluji shadery… (jen poprvé, mů�
   funguje); (b) **Apple Pencil táhnutí hned zruší** operaci a velikost se skokově zvětší (pen pointer v modálním F/G/S nehandluje `touch.js`
   jako touchpad — zkontroluj `pointerType==='pen'`). Reprodukuj (a) na PC: Sculpt → F → screenshot kurzoru; černý čtverec = textura kurzoru
   štětce (256²/146² z H8-2 cache?) bez alfa/šedé → mohl to způsobit H8-2 (cache `immDrawPixels` textur) — ověř `WGPU_` přepínačem vrácení cache.
-- [ ] **H12 UI na iPadu je rozpixelované** (Retina DPR 2, plátno se kreslí v CSS px → zvětšené 2×; M3 to dřív „refutovalo“ jen pro paměť).
+- [!] BLOCKED (26. 10. 14:05, fork 2fde6d5d; default `dpr=1` beze změny: parity 0 ❌, tex 64 MB): přepínač `?dpr=N` existuje (JS `window.__DPR__` + GHOST: velikost okna, myš, `native_pixel_size_`), ale NENÍ pro iPad: (1) paměť textur `dpr 1`=64 MB, `1.5`=298 MB, `2`=917 MB (víc než 4×, iPad neunese), (2) UI se při dpr 2 nezvětší (Blender hlásí dpi 144/pixel_size 2, ale kreslí malé; pravé panely prázdné) — nejspíš `U.dpi` se přepíše po prvním snímku; ladění `scripts/dpr_win.sh N`. Nezkoušet na iPadu, dokud nevyřešeno) **H12 UI na iPadu je rozpixelované** (Retina DPR 2, plátno se kreslí v CSS px → zvětšené 2×; M3 to dřív „refutovalo“ jen pro paměť).
   Přidej přepínač `?dpr=1.5|2` (canvas backing store = CSS px × dpr, Blender `resolution_scale`/UI scale přizpůsobit, ať UI nezmizí).
   Změř na PC `tex_mb`/FPS při dpr 2 (4× pixelů viewportu: Solid 65 → odhad ~250 MB) a nech jako **volitelné** (default beze změny), dokud nebude jisté,
   že iPad nepadne. Lukáš otestuje `?dpr=2` ve Sculptu.

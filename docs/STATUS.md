@@ -1,3 +1,8 @@
+# Víkend — 26. 10. 14:05 — H12 (ostřejší UI) BLOCKED, na iPad NEZKOUŠET
+Výsledek: 🔴 `?dpr=2` je rozbité a moc paměťově náročné; výchozí `dpr=1` je beze změny (parity 0 ❌).
+**Co jsem udělal:** přepínač `?dpr=N` (GHOST: velikost okna, myš, nativní pixel). Myš sedí (klik vybere objekt), ale UI se nezvětší a pravé panely jsou prázdné. **Paměť textur: dpr 1 = 64 MB, 1.5 = 298 MB, 2 = 917 MB** — iPad by spadl. Test `scripts/dpr_win.sh N`.
+**Závěr:** ostřejší UI přes dpr je na iPadu asi nereálné; zvážit jen ostřejší UI bez ostřejšího viewportu (jiná práce, ne tento víkend).
+
 # Víkend — 26. 10. 13:50 — H11b: Apple Pencil v modálním F/G/R/S/E
 Výsledek: ✅ na PC, 🟡 iPad neotestován (JS, stačí reload; `demo/src/touch.js`).
 **Co:** když běží modální operátor (klávesa nebo lišta), Pencil dotyk už nemačká levé tlačítko (to potvrdilo/zrušilo operaci na „přeskočené“ pozici). Teď jen posouvá kurzor, zvednutí potvrdí.
