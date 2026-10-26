@@ -1139,7 +1139,30 @@ window.Module = {
         const rsp = await fetch("wgsl-cache.json");
         if (rsp.ok) seed = await rsp.json();
       } catch (e) {}
-      globalThis.__WGSL_CACHE__ = new Map([...seed, ...rows.map((r) => [r.key, r.wgsl])]);
+      /* Safari/WebKit bug 275010: module-scope `override NAME : T = EXPR;` WITHOUT
+       * @id (value computed from another override, Tint emits it for `if (spec_const)`
+       * ) may make the pipeline invalid. Inline EXPR into the uses instead (same
+       * meaning, overrides are allowed in function bodies). ?noovfix=1 turns it off. */
+      const inlineComputedOverrides = (src) => {
+        if (typeof src !== "string") return src;
+        const re = /^override\s+(\w+)\s*:\s*\w+\s*=\s*([^;]+);[ \t]*\n?/gm;
+        let out = src, m, found = [];
+        while ((m = re.exec(src)) !== null) {
+          const before = src.slice(src.lastIndexOf("\n", m.index - 1) + 1, m.index);
+          const prevLine = src.slice(0, Math.max(m.index - 1, 0)).split("\n").pop();
+          if (/@id\(\d+\)/.test(before) || /^\s*@id\(\d+\)\s*$/.test(prevLine)) continue;
+          found.push([m[0], m[1], m[2].trim()]);
+        }
+        for (const [line, name, expr] of found) {
+          out = out.replace(line, "");
+          out = out.replace(new RegExp("(?<![\\w.])" + name + "(?!\\w)", "g"), "(" + expr + ")");
+        }
+        return out;
+      };
+      const noOvFix = new URLSearchParams(location.search).has("noovfix");
+      const fixw = (w) => (noOvFix ? w : inlineComputedOverrides(w));
+      globalThis.__WGSL_CACHE__ = new Map([...seed.map(([k, w]) => [k, fixw(w)]),
+                                           ...rows.map((r) => [r.key, fixw(r.wgsl)])]);
       globalThis.__WGSL_CACHE_PUT__ = (k, v) => {
         try { db.transaction("wgsl", "readwrite").objectStore("wgsl").put({ key: k, wgsl: v }); }
         catch (e) {}

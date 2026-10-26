@@ -1,3 +1,9 @@
+# Víkend — 26. 10. 14:00 — H9-4: nový podezřelý na černý Wireframe (JS, čeká na iPad)
+Výsledek: ✅ na PC, 🟡 iPad neotestován (stačí reload, bez rebuildu).
+**Co:** architekt našel, že wireframe shadery (a edit-mode hrany, EEVEE) mají v WGSL `override` bez `@id` s hodnotou počítanou z jiného override. WebKit s tím měl bug 275010; kdyby ho iPadOS 26.5 měl, pipeline je nevalidní a zahodí se celý command buffer overlaye = přesně zamrzlý wireframe. Odhad, ne jistota. `main.js` teď tyto řádky při načtení shaderů přepíše na vložený výraz (stejný význam).
+**Důkaz:** seed: 7 shaderů změněno, 0 zbylých; `wire_win.sh` ERRORS 0, screenshot `out/win/wire_4.png` správně; `parity_win.sh` 0 ❌.
+**Co otestovat na iPadu:** smaž data webu → Solid → Overlays ▸ Wireframe: kreslí se? Pak totéž s `?noovfix=1` na konci adresy (původní chování). Pokud je první OK a druhé černé = příčina nalezena. Navíc: Edit Mode — jsou vybrané hrany oranžové? A zkus Material Preview (možná i H4).
+
 # Víkend — 26. 10. 13:40 — kontrola, beze změny
 Výsledek: 🟡 nic nového k opravě bez iPadu.
 V `out/ipad/` je jediná iPad relace dneška `wa4u55` (11:07, 175 s, bez pádu) — je z doby PŘED nasazením `gpuerr` (12:15), takže žádný `gpuerr` neobsahuje. Žádné jiné nové iPad záznamy. Zbývá H9 wireframe, H7b (obojí čeká na iPad data), H12 a H1-C blocked. Nic jsem neměnil ani nespouštěl.
