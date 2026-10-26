@@ -1,3 +1,6 @@
+# Víkend — 26. 10. 07:15 — kontrola, beze změny
+Výsledek: 🟡 `out/ipad/` bez nové iPad telemetrie (poslední zápis 06:12 = PC testy). Backlog: zbývá jen H9, H7b (potřebují iPad data) a H1-C (blocked). Nic jsem neměnil ani nespouštěl. Seznam „Co otestovat na iPadu“ je v bloku „26. 10. 06:20“ níž.
+
 # Víkend — 26. 10. 06:45 — kontrola, beze změny
 Výsledek: 🟡 `out/ipad/` bez nové iPad telemetrie (poslední zápis 06:12 = PC testy). Nic jsem neměnil ani nespouštěl; seznam „Co otestovat na iPadu“ je v bloku níž.
 
