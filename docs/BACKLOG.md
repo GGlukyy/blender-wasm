@@ -15,6 +15,7 @@
   (3) bez X-ray: `GPU_texture_copy(tmp_depth_tx_, depth_tx)` = kopie depth-stencil (v Safari může být přísnější).
   (4) 2 fragment výstupy (`frag_color` + `line_output`) do overlay fb + `DEPTH_WRITE(ANY)` (frag_depth).
 - **Ověřeno 26. 10. 13:50 (telemetrie `wa4u55`):** kandidát (1) je VYVRÁCEN — iPad adapter `indirect-first-instance` MÁ a `blender.js` ho zařízení vyžádá (`wanted` → `requiredFeatures`); limity (storage buffery 44, vertex buffery 12) jsou v pořádku. Zbývají (2)–(4), rozhodne až `gpuerr` z iPadu.
+- **Audit (2) 26. 10. 13:55 (čtení kódu, bez změny):** depth textura se vzorkuje přes view `aspect=DepthOnly`, formát Depth32Float (`webgpu_texture.cc:~452`), bind-group layout `UnfilterableFloat` + párový sampler vynucen `NonFiltering` (`webgpu_context.cc:~1990-2015`). Podle specifikace v pořádku → (2) nejspíš není příčina. Zbývají (3) kopie depth-stencil (H9-1 už ošetřeno) a (4) 2 výstupy + frag_depth.
 - Rychlé iPad testy, které to rozliší: `?nocompute=1&tel=1` + Wireframe (když se pozadí/obrys přestane „zamrzat“ (hrany chybět budou) → (1)).
 - **H9-0 (gpuerr telemetrie) dělej jako PRVNÍ** — Safari validační hláška řekne přesně který z (1)–(4).
 
