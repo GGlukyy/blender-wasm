@@ -1,3 +1,7 @@
+# Víkend — 26. 10. 14:20 — H6b: „neuvolňují se buffery v MP“ není únik
+Výsledek: 🟡 měření, žádná změna kódu.
+V Material Preview je na PC 347 živých bufferů, jen 32 MB (trvalé EEVEE buffery), nic neuniká. Problém MP jsou TEXTURY (604 MB: 3× rgba16float 2048² = 96 MB, viewport 10× 65 MB, dummy 8192² 64 MB, depth 36 MB). Zmenšení dummy attachmentu ušetří max ~48 MB a riskuje stíny, tak jsem ho nechal. MP bez `?mp=1` zůstává blokovaný (ochrana H7).
+
 # Víkend — 26. 10. 14:05 — H12 (ostřejší UI) BLOCKED, na iPad NEZKOUŠET
 Výsledek: 🔴 `?dpr=2` je rozbité a moc paměťově náročné; výchozí `dpr=1` je beze změny (parity 0 ❌).
 **Co jsem udělal:** přepínač `?dpr=N` (GHOST: velikost okna, myš, nativní pixel). Myš sedí (klik vybere objekt), ale UI se nezvětší a pravé panely jsou prázdné. **Paměť textur: dpr 1 = 64 MB, 1.5 = 298 MB, 2 = 917 MB** — iPad by spadl. Test `scripts/dpr_win.sh N`.

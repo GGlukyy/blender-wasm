@@ -102,7 +102,7 @@ Na OBOU fotkách je dole banner **„⏳ Kompiluji shadery… (jen poprvé, mů�
   Přidej přepínač `?dpr=1.5|2` (canvas backing store = CSS px × dpr, Blender `resolution_scale`/UI scale přizpůsobit, ať UI nezmizí).
   Změř na PC `tex_mb`/FPS při dpr 2 (4× pixelů viewportu: Solid 65 → odhad ~250 MB) a nech jako **volitelné** (default beze změny), dokud nebude jisté,
   že iPad nepadne. Lukáš otestuje `?dpr=2` ve Sculptu.
-- [ ] **H6b Material Preview 610 MB:** zbývá `fb_dummy_attachment 8192² (64 MB, náš backend — udělej menší)`, 3× `rgba16float 2048²` (~100 MB),
+- [~] (26. 10. 14:20 měření PC `heapused_mp_win.sh`: část „proč se neflushuje destroy“ je VYŘEŠENA = není to únik: v MP je 347 ŽIVÝCH bufferů, jen 32 MB (205× ~130 KB štítek `/1ac` = trvalé EEVEE buffery), `buf_new` 387 za celé sezení, ne za sekundu; `buf_destroyed` nízké je normální. Zbývá jen TEXTURY 604 MB: rgba16float 2048² 3× 96, viewport rgba16float 10× 65, `fb_dummy_attachment` 8192² 64, depth 9× 36, r32uint 2048² 32; nízko visící ovoce není — dummy zmenšit = max +48 MB a riziko stínů, NEDĚLAT bez iPad dat) **H6b Material Preview 610 MB:** zbývá `fb_dummy_attachment 8192² (64 MB, náš backend — udělej menší)`, 3× `rgba16float 2048²` (~100 MB),
   4× `r32uint 2048²` (64 MB), 15× `rgba16float 1125x715` (~96 MB) + depth 14×. A **zjisti, proč se v MP neflushuje destroy** (`buf_destroyed` 5 z 531).
 
 ## 📱 25. 10. 21:45 — iPad test po H1–H7 (Lukáš + telemetrie `c5l0sb`, `8ekvti`, + 1 další)
