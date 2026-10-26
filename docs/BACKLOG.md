@@ -1,5 +1,11 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 🎉 26. 10. 20:15 — iPad výsledek H14 (od Lukáše)
+- ✅ **Wireframe (shading i Overlay▸Wireframe) na iPadu funguje plně** po H14 (override→const). Příčina potvrzena: WGSL `override` v Safari. NEMĚNIT, jen zdokumentovat do LESSONS.md.
+- 🟡 **Material Preview už NEPADÁ, ale nic nevykreslí** (viewport prázdný/nezměněný). Nová úloha **H15**: z iPad telemetrie (`?tel=1&mp=1`) zjistit proč. Podezření: (a) `guard` v kódu MP stále posílá na Solid / EEVEE pass se přeskočí, (b) chyba v compute/render pipeline mimo `gpuerr` (hledej `pipeline`, `validation`, `WGPU_DISPATCH`), (c) paměť (textury ~600 MB) → pass vypuštěn. Nejdřív přidej do telemetrie jednořádkový výpis, kolik EEVEE passů bylo opravdu submitnuto a s kolika draw callů. Test na PC: screenshot Material Preview musí mít nenulové pixely mimo pozadí (`shading_win`).
+- 🔴 **Soukromý tab Safari: Blender se nespustí** (`UnknownError ... out of memory` v pthreadu blender.js), v normálním tabu ano. Odhad: soukromý tab má nižší limit paměti / neumí IndexedDB+OPFS. Úloha **H16**: (1) panel „Zavři ostatní taby" musí zachytit i `UnknownError` s „out of memory" z pthread workeru, nejen `RangeError`; (2) v soukromém tabu detekovat (IndexedDB selže) a vypsat jasnou hlášku „Soukromý tab nepodporován, otevři normální". Nestavět nic dalšího.
+
+
 ## 🎯🎯 26. 10. 14:20 — SAFARI ŘEKL PŘÍČINU: `gpuerr: "Failed to evaluate override value"` (H9-0 telemetrie zafungovala)
 - Architektova hypotéza (WGSL `override`) je SPRÁVNÁ, ale oprava H9-4 (inline jen `override X: T = EXPR;` bez `@id`) **nestačí** — Lukáš po ní
   (14:07) má pořád zamrzlý overlay ve Wireframe, Material Preview padá (`8tgihv` lost 88 s, předtím 2× gpuerr). Buď existují další tvary
