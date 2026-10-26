@@ -1,3 +1,10 @@
+# Víkend — 26. 10. 13:25 — H11a: černý čtverec kolem kurzoru štětce opraven (na PC)
+Výsledek: ✅ na PC (reprodukováno i opraveno), 🟡 iPad neotestován (nasazeno v `demo/public/`).
+**Příčina:** WebGPU neumí swizzle textur, náš backend `GPU_texture_swizzle_set` ignoruje. Radial control (klávesa F) kreslí R8 masku se swizzlem `111r` → četla se jako neprůhledná → čtverec. Opraveno: na webu se textura vyrobí jako RGBA8 už s vypečeným swizzlem (stejně i `cursor overlay`). Fork `5a67d7d2`.
+**Důkaz:** nový `scripts/brush_win.sh` (Sculpt → F → screenshot): před = čtverec 200×200, po = jen kruh (`out/win/brush_1.png`), ERRORS 0.
+**Co otestovat na iPadu:** Sculpt → F → táhni myší/touchpadem: kolem kruhu nesmí být černý čtverec.
+**Zbývá H11b:** Apple Pencil v modálním F zruší operaci (touch.js). Stejná vada swizzlu je i jinde (`imbuf/util_gpu.cc`, volume, EEVEE light probe volume) — zapsáno v BACKLOGU.
+
 # Víkend — 26. 10. 13:05 — H9-2: PC nehlásí žádnou validační chybu
 Výsledek: 🟡 H9 se na PC nedá reprodukovat. `wire_win.sh` teď testuje i Solid + Overlay Wireframe a chytá `WGPU_UNCAPTURED`: ERRORS 0, vykreslí se správně. Příčina je tedy Safari-specifická a víc bez `gpuerr` z iPadu nezjistím (test na iPadu viz blok 12:15).
 
