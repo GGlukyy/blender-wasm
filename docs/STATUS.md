@@ -1,3 +1,8 @@
+# Víkend — 26. 10. 20:40 — kontrola, beze změny
+Výsledek: 🟡 nic nového k opravě bez iPadu.
+`out/ipad/` bez nového zápisu od 20:19 (to už je zpracované: H15, H16). Backlog: H15 čeká na iPad, H9/H7b potřebují iPad data, H1-C a H12 blocked. Nic jsem neměnil ani nespouštěl.
+**Co otestovat na iPadu (nejdůležitější):** smaž data webu → `?tel=1&mp=1` → Material Preview: kreslí se objekt? Pošli ID relace (nesmí tam být `Storage texture layout not valid`). Pak soukromý tab → má naskočit červený panel.
+
 # Víkend — 26. 10. 20:50 — H16: soukromý tab a OOM z workeru (JS)
 Výsledek: ✅ na PC (`oom_test.mjs` PASS pro `unhandledrejection` i `error` událost), 🟡 iPad neotestován (stačí reload).
 **Co:** červený panel „Zavři ostatní taby“ se teď ukáže i pro `UnknownError … out of memory` z pthread workeru (window `error`). Navíc test IndexedDB při startu: když selže, panel „Soukromý tab není podporován“. Odhad: v Safari soukromém tabu IndexedDB funguje jen někdy, skutečné chování jsem na PC neověřil.
