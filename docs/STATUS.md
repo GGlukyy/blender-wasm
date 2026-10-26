@@ -2,6 +2,8 @@
 Výsledek: 🟡 nic nového k opravě bez iPadu.
 `out/ipad/` bez nové iPad telemetrie (poslední zápis 14:14). Backlog: H14 (override → const) a OOM panel jsou hotové na PC a čekají na iPad; H9, H7b potřebují iPad data; H1-C a H12 jsou blocked. Nic jsem neměnil ani nespouštěl (nové testy jsou zakázané).
 **Co otestovat na iPadu (nejdůležitější):** smaž data webu → `?tel=1` → Solid → Overlays ▸ Wireframe → otoč pohled → Material Preview (`?mp=1`). Pošli ID relace; `gpuerr` tam už nesmí být. Při problému porovnej s `&overrides=1`.
+**Doplněk 19:25:** `shading_win.sh` (Material Preview) znovu ERRORS 0 s H14. Počet specializovaných modulů v MP jsem nezměřil: test nevypisuje `OVR_SPEC`, na to by bylo potřeba upravit test.
+
 
 # Víkend — 26. 10. 19:30 — hláška při `Out of memory` je teď přes celou obrazovku
 Výsledek: ✅ na PC (`scripts/oom_test.mjs` PASS, `out/win/oom_1.png`), 🟡 iPad neotestován (JS, stačí reload).
