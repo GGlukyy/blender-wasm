@@ -1,3 +1,10 @@
+# Víkend — 27. 10. 01:45 — H15b: Material Preview bez „Storage texture layout not valid“ (čeká na iPad)
+Výsledek: ✅ na PC (`shading_win` ERRORS 0, 0× `WGPU_RW_STORAGE_BAD`; parity_win 0 ❌), 🟡 iPad neotestován.
+**Co:** iPad telemetrie (relace `vrbw4v`, `a2wf2h`, `1lzytn` po 00:47) ukázala, že H15 nestačil. Safari smí `read_write` storage jen pro r32*; EEVEE film měl 4 další obrazy (`color_accum`, `out_combined`, `cryptomatte`, `radiance_feedback`). Opraveno (fork `17f5d86e`, nasazeno v `demo/public/`, záloha `out/bak_h15b/`). Na PC je teď test, který selže, když se do Chrome dostane takový shader (`shading_test.mjs`).
+**Nezměřeno:** cryptomatte a F12 render passy (nový test zakázán); viewport compositor ukáže u cryptomatte jen kanál R (odhad).
+**Co otestovat na iPadu (nejdůležitější):** smaž data webu → `?tel=1&mp=1` → Material Preview: kreslí se opice? Pošli ID relace; `Storage texture layout not valid` tam už nesmí být. První start MP je delší (shadery film se překládají).
+**Co dál:** H15c (stejná vada v dalších shaderech mimo výchozí MP) až po tvém testu.
+
 # Víkend — 26. 10. 21:40 — kontrola, beze změny
 Výsledek: 🟡 nic nového k opravě bez iPadu.
 `out/ipad/` bez nového zápisu od 20:19. H15 a H16 hotové na PC, čekají na iPad; H9/H7b potřebují iPad data; H1-C a H12 blocked. Nic jsem neměnil ani nespouštěl.
