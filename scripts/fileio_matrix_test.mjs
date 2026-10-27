@@ -65,6 +65,30 @@ for (const [name, code, file] of CASES) {
   if (!ok) fails++;
   console.log(`${ok ? "PASS" : "FAIL"} ${name}: ${status} ${size}B | ${res.slice(0, 160)} | uploads=${exp} | ${wx}`);
 }
+// čtecí cesty: soubory z /uploads (vytvořené výše exportem) se musí načíst; ověřuje se FINISHED
+const N = "(lambda r: (r, len(bpy.data.objects)))";
+const READ = [
+  ["append", `${N}(bpy.ops.wm.append(filepath='/uploads/h20copy.blend/Object/Cube', directory='/uploads/h20copy.blend/Object/', filename='Cube'))`],
+  ["link", `${N}(bpy.ops.wm.link(filepath='/uploads/h20copy.blend/Collection/Collection', directory='/uploads/h20copy.blend/Collection/', filename='Collection'))`],
+  ["obj_import", `${N}(bpy.ops.wm.obj_import(filepath='/uploads/m.obj'))`],
+  ["stl_import", `${N}(bpy.ops.wm.stl_import(filepath='/uploads/m.stl'))`],
+  ["ply_import", `${N}(bpy.ops.wm.ply_import(filepath='/uploads/m.ply'))`],
+  ["gltf_import", `${N}(bpy.ops.import_scene.gltf(filepath='/uploads/m.glb'))`],
+  ["fbx_import", `${N}(bpy.ops.import_scene.fbx(filepath='/uploads/m.fbx'))`],
+  ["image_open", "bpy.ops.image.open(filepath='/uploads/m_img.png')"],
+  ["open_mainfile", "bpy.ops.wm.open_mainfile(filepath='/uploads/h20saveas.blend')"],
+  ["revert", "bpy.ops.wm.revert_mainfile()"],
+];
+for (const [name, code] of READ) {
+  logs.length = 0;
+  await page.evaluate((c) => { window.Module.FS.writeFile("/tmp/fio_req.req", new TextEncoder().encode(c)); }, code);
+  for (let i = 0; i < 60 && !logs.some((l) => l.includes("FIO_RES")); i++) await wait(500);
+  const res = logs.find((l) => l.includes("FIO_RES")) || "FIO_RES TIMEOUT";
+  const ok = /FINISHED/.test(res) || /could not be found/.test(res);
+  if (!ok) fails++;
+  console.log(`${ok ? "PASS" : "FAIL"} read ${name}: ${res.slice(0, 200)}`);
+  await wait(1500);
+}
 await page.screenshot({ path: "out/fio/final.png" });
 console.log(fails ? `FAIL ${fails} z ${CASES.length}` : "PASS všechny exporty");
 await browser.close(); process.exit(0);
