@@ -1,3 +1,8 @@
+# Víkend — 27. 10. 19:40 — kontrola, beze změny
+Výsledek: 🟡 nic nového k opravě bez iPadu.
+`out/ipad/` bez nového zápisu od 18:32 (nic nového od Lukáše). Backlog: H18 PARKED (čeká na crash log/nový důkaz), H15c čeká na iPad `gpuerr`, H20 hotové na PC. Rebase 5.3: tag `v5.3.0` pořád neexistuje. Nic jsem neměnil ani nespouštěl.
+**Co otestovat na iPadu (nejdůležitější):** File ▸ Export ▸ OBJ → lišta „⬇ Stáhnout“; File ▸ Import ▸ „📁 Celá složka“; pak smaž data webu → `?tel=1` a pošli ID relace, pokud něco spadne.
+
 # Víkend — 27. 10. 19:30 — H20: export se teď dá stáhnout
 Výsledek: ✅ na PC (`fileio_matrix_win.sh` PASS), 🟡 iPad/itch neotestováno, H20 hotové jen částečně.
 **Co:** exportéry píší do paměti Blenderu a soubor nikdo nepředal. Teď hlídám složky a po exportu naskočí lišta „⬇ Stáhnout <soubor>“ (stáhne se neprázdný soubor).
