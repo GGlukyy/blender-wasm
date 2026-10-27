@@ -713,6 +713,22 @@ async function enumerateTree(dirHandle) {
 const mountedNames = new Set();
 let pickerBusy = false;
 
+/* H17: File System Access pickers (showDirectoryPicker & co.) throw SecurityError in a cross-origin iframe
+ * (itch.io runs the game from html-classic.itch.zone). When framed, behave like Safari/Firefox: file
+ * <input> for Open (drop modal), blob download for Save. A button offers the full page in a new tab. */
+const IS_FRAMED = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+const HAS_FSACCESS = !!window.showDirectoryPicker && !IS_FRAMED;
+if (IS_FRAMED) {
+  const b = document.createElement("a");
+  b.id = "open-new-window";
+  b.href = location.href; b.target = "_blank"; b.rel = "noopener";
+  b.textContent = "↗ Otevřít v novém okně";
+  b.style.cssText = "position:fixed;right:8px;bottom:8px;z-index:900;padding:6px 10px;border-radius:6px;" +
+    "background:#222c;color:#ddd;font:13px system-ui,sans-serif;text-decoration:none;";
+  document.addEventListener("DOMContentLoaded", () => document.body.appendChild(b));
+  if (document.readyState !== "loading") document.body.appendChild(b);
+}
+
 /* Primary path (Chromium): File System Access lazy mount. Returns the mount
  * point (e.g. "/mnt/proj") or null if the user cancelled. */
 async function mountViaFileSystemAccess() {
@@ -926,7 +942,7 @@ window.__blenderFileOpenHook = async () => {
   try {
     /* Relies on transient user activation of the File ▸ Open click (FS-Access
      * path). Cancel (AbortError / null) → do nothing, no file browser. */
-    const mountPoint = window.showDirectoryPicker
+    const mountPoint = HAS_FSACCESS
       ? await mountViaFileSystemAccess()
       : await dropModalPick();
     if (mountPoint) {
@@ -1178,7 +1194,7 @@ window.Module = {
      * (Firefox/Safari). */
     try {
       window.Module.ccall("blender_web_set_has_fsaccess", null, ["number"],
-                          [window.showDirectoryPicker ? 1 : 0]);
+                          [HAS_FSACCESS ? 1 : 0]);
     } catch (e) { log("set_has_fsaccess: " + e); }
   },
   onAbort: (w) => {

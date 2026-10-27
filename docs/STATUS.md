@@ -1,3 +1,9 @@
+# Víkend — 27. 10. 03:40 — H17: Open/Save v iframu na itch.io (čeká na itch test)
+Výsledek: ✅ na PC (`iframe_files_win.sh` PASS), 🟡 na itch neotestováno.
+**Co:** v iframu je File System Access zakázán, proto se Průzkumník neukázal. Teď se v iframu chováme jako Safari: Open ukáže okno s výběrem souboru (`<input type=file>`), Save stáhne soubor. V rohu je tlačítko „↗ Otevřít v novém okně“ (plná verze). Jen JS, stačí nový zip na itch.
+**Odhad:** jestli itch iframe povoluje stahování (`allow-downloads`); když ne, použij tlačítko v novém okně.
+**Co otestovat na itch:** File ▸ Open → výběr souboru; File ▸ Save As → stáhne se .blend.
+
 # Víkend — 27. 10. 03:15 — M1: chybějící faces opraveno (čeká na iPad)
 Výsledek: ✅ na PC (`bigmesh_win.sh` 3× PASS, testovací model je celý, parity_win 0 ❌), 🟡 iPad neotestován.
 **Příčina:** mesh s víc materiály se kreslí jako několik sub-rozsahů indexů přes indirect draw; začátek rozsahu se aplikoval 2× (v příkazu i v offsetu index bufferu), takže všechny materiály kromě prvního kreslily špatné trojúhelníky. Velikost meshe s tím nesouvisela. Postihuje to i iPad (stejný backend).
