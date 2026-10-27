@@ -1,3 +1,8 @@
+# Víkend — 27. 10. 16:50 — H18 blokováno (potřebuju iPad data)
+Výsledek: 🟡 H19 hotové (viz níže), H18 jsem nezačal měnit.
+**Proč:** PC měření MP = 604 MB textur, iPad 657 MB, tedy stejné. Velké textury jsou nutné (sondy, viewport, stíny). Že iPad zabíjí právě paměť, je jen odhad: v telemetrii není `pagehide` ani `error`. Naslepo bych jen riskoval vzhled MP.
+**Co by pomohlo (Lukáš):** `?tel=1&mp=1`, nová prázdná scéna (jen Cube), Material Preview — spadne i tak? Pošli ID relace. Kdyby ano, jde o paměť/počet textur; kdyby ne, o velikost scény.
+
 # Víkend — 27. 10. 16:20 — H19: File ▸ Import nabízí soubor z počítače
 Výsledek: ✅ na PC (`import_win.sh` PASS, `iframe_files_win.sh` PASS), 🟡 iPad/itch neotestováno.
 **Co:** když se otevře file browser importu (File ▸ Import, Append/Link, Image ▸ Open…), nahoře se ukáže lišta „📂 Vybrat soubory z počítače…“. Vybrané soubory se nahrají do `/uploads` a file browser se tam přepne. Jen JS/Python, bez rebuildu.
