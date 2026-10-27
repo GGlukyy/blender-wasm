@@ -1,3 +1,8 @@
+# Víkend — 27. 10. 16:30 — kontrola, beze změny
+Výsledek: 🟡 nic nového k opravě bez iPadu.
+`out/ipad/` bez nového iPad zápisu (poslední 15:53 je z PC Chrome). Backlog: H18 blokováno (chybí iPad data), H15c čeká na iPad `gpuerr`. Nic jsem neměnil ani nespouštěl.
+**Co otestovat na iPadu (nejdůležitější):** `?tel=1&mp=1`, nová scéna jen s Cube, Material Preview: spadne i tak? Pošli ID relace. Pak File ▸ Import ▸ „📁 Celá složka“.
+
 # Víkend — 27. 10. 15:58 — kontrola, beze změny
 Výsledek: 🟡 nic nového k opravě bez iPadu.
 Nejnovější zápis v `out/ipad/tel_2026-10-27.jsonl` (15:53) je z Windows Chrome (PC test), ne z iPadu. Poslední iPad data jsou z 15:35 (H18, blokováno). Nic jsem neměnil ani nespouštěl.
