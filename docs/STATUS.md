@@ -1,3 +1,8 @@
+# Víkend — 27. 10. 03:30 — kontrola: čekám na iPad data
+Výsledek: 🟡 hotové věci čekají na iPad, nic dalšího bez dat nedává smysl.
+`out/ipad/` bez nového zápisu od 01:14 (relace `1lzytn`). Hotovo na PC: H15b, H15c (část), H7c, M1, H17, R0, A. Compositor GPU shadery se na webu nepřeloží (známá mezera). Rebase 5.3 čeká na tag `v5.3.0`, Cycles není cíl víkendu.
+**Co otestovat na iPadu (nejdůležitější):** smaž data webu → `?tel=1&mp=1` → Material Preview: kreslí se opice? Pošli ID relace (nesmí tam být `Storage texture layout not valid`). Pak zkus model s více materiály (chybějící faces) a v itch zipu File ▸ Open/Save.
+
 # Víkend — 27. 10. 05:00 — H15c: DOF a raytracing (fast GI) bez read_write rgba16f
 Výsledek: ✅ na PC (`shading_fx_win.sh` 0 nevalidních storage textur, shading_win 0, parity 0 ❌), 🟡 iPad neotestován.
 **Co:** stejná vada jako H15b v DOF a v „fast GI“ (raytracing): opraveno (fork `BLENDER_REF` v Makefile, nasazeno v `demo/public/`). Nový test s raytracingem + DOF + motion blur v kameře.
