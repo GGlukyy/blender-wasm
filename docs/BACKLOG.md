@@ -1,5 +1,9 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 🎛️ 27. 10. 22:15 — H21: export s nastavením přímo v Blenderu (Lukáš)
+- [ ] **H21 — export musí jít nastavit v rozhraní Blenderu (jen vybrané objekty, modifikátory, formát…).** Lukáš: stažení lišty funguje, ale chce volby „jen označené" apod. přímo v Blenderu. Ověř (screenshot test na PC): File ▸ Export ▸ glTF/OBJ/FBX otevře file browser **s panelem nastavení operátoru vpravo** (Include ▸ Selected Objects / Limit to Selected Only, Apply Modifiers, Transform…). Pokud panel na webu chybí/je sbalený/mimo obrazovku (malé okno, iPad), oprav (region sidebar otevřít, `T`/šipka vpravo, zvětšit na mobilu) a **test**: v scéně 3 objekty, 1 vybraný → export s „Selected" → výstupní soubor obsahuje JEN ten 1 (počet objektů ve výstupu; ověř desktop Blenderem `tests/validate_blend.py`/import zpět). Pokud panel funguje, jen to Lukášovi napsat do STATUS (kde se zapíná, krok po kroku), ať neprosí o něco, co už existuje. Lišta „⬇ Stáhnout" zůstane až po zápisu.
+
+
 ## 🆕 27. 10. 20:10 — upstream
 - [x] (27. 10. 20:15, jen čtení diffu `e73ddff`, nic nepřevzato) **U1 — upstream `e73ddff`:** (a) GL backend na wink/epoxy/Mesa (~3000 řádků patchů) je jiná architektura než náš WebGPU backend → pro iPad irelevantní, nepřebírat. (b) numpy 2.3.4 + `process_time` oprava: to my už máme (STATUS „Export FBX a GLB teď funguje“, LESSONS 17. 10.), upstream jen jiná cesta. (c) `BLENDER_REF` v upstreamu míří na jiný fork → nesloučit bez rebase. Případně později nabídnout našim PR jen naše H-opravy. Tag `v5.3.0` pořád neexistuje.
 
