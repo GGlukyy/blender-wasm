@@ -19,7 +19,7 @@ into STATUS.md and END the run — do not fill time with tests.
 3. Commit + push after every green step (blender fork branch `ipad` + update `BLENDER_REF`,
    then this repo `master`). Mark the item `[x]` with the proof line.
 4. Same error 2× → ask the `architect` subagent. 3× → mark `[!] BLOCKED: <why>` and move on.
-5. Backlog empty → write STATUS.md and END the run (no bug hunting, no performance work this weekend).
+5. Backlog empty / only waiting for iPad data or a Blender release → write STATUS.md, then `echo "<proč, 1 řádek>" > out/.idle_stop` (smyčka se tím ukončí, nepálit tokeny kontrolami) and END the run (no bug hunting, no performance work this weekend).
 6. Never break the build. If a change cannot be made green, revert it and write why in STATUS.md.
 7. Before ending a session: update `docs/STATUS.md` top section ("Víkend — co je nového",
    "Co otestovat na iPadu" sorted by importance, "Blocked"). Keep it short, Czech.
