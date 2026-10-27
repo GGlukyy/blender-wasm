@@ -552,6 +552,7 @@ const scan = (t) => {
   if (sv) showSaved(sv[1] || sv[2]);
   if (/^Blender quit\b/.test(t.trim())) showQuit();
   if (t.includes("WEB_MP_BLOCKED")) showMpBlocked();
+  if (t.startsWith("WEB_EXPORT /")) noteExport(t.slice(11).trim());
   if (t.includes("WEB_FILE_IMPORT_END")) hideImportBar();
   else if (t.includes("WEB_FILE_IMPORT")) showImportBar();
   if (t.startsWith("WEB_OPEN_URL ")) {
@@ -988,6 +989,52 @@ window.__blenderSaveDownload = (path) => {
   }
 };
 
+/* H20: exporters (File ▸ Export, Image ▸ Save As, render save …) write into the wasm FS and nobody hands the file over.
+ * WASMFS bypasses the JS FS, so Python (_export_watch) polls /uploads, /tmp, /opfs/home and prints WEB_EXPORT <path> for every new/changed
+ * file; after a short quiet period we offer "⬇ Stáhnout" for each. */
+const exportPending = new Map();
+const noteExport = (path) => {
+  exportPending.set(path, Date.now());
+  clearTimeout(exportPending._t); exportPending._t = setTimeout(showExportBar, 800);
+};
+const downloadFSFile = (path) => {
+  const data = window.Module.FS.readFile(path);
+  const a = document.createElement("a");
+  const url = URL.createObjectURL(new Blob([data], { type: "application/octet-stream" }));
+  a.href = url; a.download = path.split("/").pop() || "export";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 15000);
+  log("downloaded " + a.download + " (" + data.length + " bytes)");
+};
+const showExportBar = () => {
+  let n = document.getElementById("export-bar");
+  if (!n) {
+    n = document.createElement("div");
+    n.id = "export-bar";
+    n.style.cssText = "position:fixed;left:50%;top:52px;transform:translateX(-50%);z-index:99997;background:rgba(20,60,20,.95);" +
+      "color:#fff;font:15px system-ui,sans-serif;padding:8px 14px;border-radius:8px;max-width:92vw";
+    document.body.appendChild(n);
+  }
+  n.innerHTML = "";
+  const FS = window.Module.FS;
+  const files = [...exportPending.keys()].filter((p) => { try { return FS.stat(p).size > 0; } catch (e) { return false; } });
+  if (!files.length) { n.style.display = "none"; return; }
+  n.append("💾 Export hotový: ");
+  for (const p of files.slice(0, 6)) {
+    const b = document.createElement("button");
+    b.className = "export-dl"; b.dataset.path = p; b.textContent = "⬇ Stáhnout " + p.split("/").pop();
+    b.style.cssText = "margin:0 4px;font-size:15px";
+    b.onclick = () => { try { downloadFSFile(p); } catch (e) { b.textContent = "Chyba: " + (e && e.message || e); } };
+    n.append(b);
+  }
+  if (files.length > 6) n.append("+" + (files.length - 6) + " dalších ");
+  const x = document.createElement("button");
+  x.textContent = "✕"; x.style.cssText = "margin-left:8px;font-size:15px";
+  x.onclick = () => { exportPending.clear(); n.style.display = "none"; };
+  n.append(x);
+  n.style.display = "block";
+  exportPending.clear(); // další dávka začne novou lištou
+};
 window.__blenderFileOpenHook = async () => {
   if (pickerBusy) return;
   if (!window.Module || !window.Module.ccall) return;
@@ -1137,6 +1184,40 @@ def _import_assist():
     except Exception as e: print('IMPORT_ASSIST ERR', e)
     return 0.4
 bpy.app.timers.register(_import_assist, first_interval=2.0, persistent=True)
+# H20: export watcher — WASMFS obchází JS FS, proto Python hlídá adresáře a hlásí nové/změněné soubory (WEB_EXPORT <cesta>).
+_ew = {'snap': None, 'pend': {}}
+_EW_EXT = ('.obj', '.mtl', '.fbx', '.glb', '.gltf', '.bin', '.stl', '.ply', '.usd', '.usda', '.usdc', '.usdz', '.abc', '.dae', '.svg', '.x3d', '.wrl', '.png', '.jpg', '.jpeg', '.exr', '.tif', '.tiff', '.bmp', '.tga', '.hdr', '.webp', '.dds', '.mp4', '.avi', '.mkv', '.mov', '.wav', '.mp3', '.flac', '.ogg', '.pdf', '.json', '.csv', '.zip', '.vdb', '.bvh', '.blend')
+def _ew_scan():
+    out = {}
+    for root, depth in (('/uploads', 3), ('/tmp', 1), ('/opfs/home', 2), ('/home', 2), (_os.getcwd(), 1)):
+        stack = [(root, 0)]
+        while stack:
+            d, k = stack.pop()
+            try: it = list(_os.scandir(d))
+            except Exception: continue
+            for e in it:
+                try:
+                    if e.is_dir(follow_symlinks=False):
+                        if k + 1 < depth and e.name not in ('.config', '__pycache__', '.cache'): stack.append((e.path, k + 1))
+                    elif e.name.lower().endswith(_EW_EXT) and 'autosave' not in e.name and not e.name.endswith(('.blend1', '.blend@')) and e.name != 'quit.blend':
+                        st = e.stat(); out[e.path] = (st.st_mtime_ns, st.st_size)
+                except Exception: pass
+    return out
+def _export_watch():
+    try:
+        cur = _ew_scan()
+        if _ew['snap'] is None: _ew['snap'] = cur; return 0.5
+        for p, v in cur.items():
+            if _ew['snap'].get(p) == v: continue
+            if _ew['pend'].get(p) == v:
+                _ew['snap'][p] = v; del _ew['pend'][p]
+                if v[1] > 0: print('WEB_EXPORT ' + p, flush=True)
+            else: _ew['pend'][p] = v
+        for p in list(_ew['snap']):
+            if p not in cur: del _ew['snap'][p]
+    except Exception as e: print('EXPORT_WATCH ERR', e)
+    return 0.5
+bpy.app.timers.register(_export_watch, first_interval=3.0, persistent=True)
 def _save_prefs():
     try:
         if bpy.context.preferences.is_dirty: bpy.ops.wm.save_userpref(); print('USERPREF saved')
