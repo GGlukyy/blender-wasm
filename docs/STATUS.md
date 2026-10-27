@@ -1,3 +1,14 @@
+# Víkend — 27. 10. 23:10 — N1: rebase na 5.3 je proveditelný (28 konfliktních souborů)
+Výsledek: ✅ N1 změřeno (jen zjištění, nic nenasazeno), 🟡 C0 neudělán.
+**Co:** větev `blender-v5.3-release` už existuje (9eaa3f28968, 3195 commitů po našem základu z 26. 6.). Do `./blender-5.3/` (blobless klon forku + remote `upstream`) jsem spustil `git merge-tree` naše `ipad` × `blender-v5.3-release` — bez checkoutu, bez buildu, `./blender/` a `BLENDER_REF` nedotčené.
+**Důkaz:** náš port mění 113 existujících souborů + 32 nových (27 v `gpu/webgpu/` = bez konfliktu). **28 souborů v konfliktu:**
+- EEVEE shadery/C++ (14): `eevee_defines.hh`, `eevee_film.cc`, `eevee_shadow.cc`, `eevee_film|gbuffer_write|geom_curves|geom_mesh|geom_pointcloud|light_culling|light_eval|volume .bsl.hh`, `infos/eevee_geom_infos.hh`
+- draw/gpu shadery (6): `workbench_effect_outline_frag.glsl`, `draw_command_generate_comp.glsl`, `gpu_shader_utildefines.bsl.hh`, `gpu_shader_update_mipmaps.bsl.hh`, `gpu_shader_material_mix_color.bsl.hh`, `gpu/shader_tool/CMakeLists.txt`
+- editory/wm (8): `editmesh_select.cc`, `view3d_select.cc`, `uvedit_select.cc`, `render_internal.cc`, `paint_cursor.cc`, `wm_draw.cc`, `wm_jobs.cc`; + `writefile.cc`, `dna_genfile.cc`, `creator.cc`
+**Odhad práce:** konflikty jsou většinou v shaderech `.bsl.hh` (upstream je přepsal, naše H15 úpravy read_write → sampler se budou přenášet ručně) — odhad 1–2 dny, ne týdny. Plus `gpu/` má v 5.3 ~400 změněných souborů, takže backend půjde hlídat při buildu.
+**C0 (Cycles měření):** neudělán — vyžaduje samostatný dlouhý build (`cmake/cycles-wasm-cache.cmake` už existuje, Embree/OSL vypnuté); pro iPad nepodstatné, nechávám `[ ]` na později.
+**Co otestovat na iPadu (nejdůležitější):** beze změny — File ▸ Export ▸ OBJ → lišta „⬇ Stáhnout“; File ▸ Import ▸ „📁 Celá složka“; pak smaž data webu → `?tel=1` a pošli ID relace, pokud něco spadne.
+
 # Víkend — 27. 10. 22:15 — nová iPad relace `fjiwdv`, bez chyby
 Výsledek: 🟡 nic k opravě.
 V `out/ipad/` je nová iPad relace (Safari 26.5, 22:07, 165 s): start OK, 35 snímků, pak klid (Blender nic nekreslí, fps 0), tex 73 MB, **žádný `gpuerr`, `error` ani pád**; v 150 s tab přešel do pozadí (`visibility hidden`). Žádný Material Preview. Nic jsem neměnil ani nespouštěl.
