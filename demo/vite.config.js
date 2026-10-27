@@ -39,8 +39,34 @@ const isolationHeaders = {
   "Cross-Origin-Resource-Policy": "cross-origin",
 };
 
+/* R0: RELEASE=1 (scripts/package_itch.sh) builds the itch.io page: no Puter analytics/branding (replaced by an
+ * "unofficial port" credit with source links, GPL), telemetry code disabled (__RELEASE__). */
+const RELEASE = !!process.env.RELEASE;
+const credit = '<div class="credit-badge"><span>Neoficiální port, založeno na</span> ' +
+  '<a href="https://github.com/heyputer/blender-wasm" target="_blank" rel="noreferrer">HeyPuter/blender-wasm</a>' +
+  '<span class="credit-sep" aria-hidden="true">|</span><span>zdrojáky (GPL):</span> ' +
+  '<a href="https://github.com/GGlukyy/blender-wasm" target="_blank" rel="noreferrer">blender-wasm</a>' +
+  '<span class="credit-sep" aria-hidden="true">|</span>' +
+  '<a href="https://github.com/GGlukyy/blender" target="_blank" rel="noreferrer">blender</a></div>';
+const releasePlugin = () => ({
+  name: "blender-release-html",
+  transformIndexHtml(html) {
+    if (!RELEASE) return html;
+    let out = html
+      .replace(/<script async src="https:\/\/plausible\.io[^>]*><\/script>\s*<script>[\s\S]*?<\/script>/, "")
+      .replace(/<meta property="og:site_name"[^>]*>/, '<meta property="og:site_name" content="Blender in the Browser (unofficial)" />')
+      .replace(/<meta (?:property="og:image"|name="twitter:image")[^>]*>\s*/g, "")
+      .replace(/<meta (?:property="og:image:(?:width|height|alt)"|name="twitter:image:alt")[^>]*>\s*/g, "")
+      .replace(/<div class="nav-left">[\s\S]*?<\/div>\s*<div class="nav-links">/, '<div class="nav-left"></div>\n        <div class="nav-links">')
+      .replace(/https:\/\/github\.com\/heyputer\/blender-wasm" target="_blank" rel="noreferrer">\s*<svg/, 'https://github.com/GGlukyy/blender-wasm" target="_blank" rel="noreferrer">\n            <svg')
+      .replace(/<div class="credit-badge">[\s\S]*?<\/div>/, credit);
+    return out;
+  },
+});
+
 export default defineConfig({
-  plugins: [telemetryPlugin()],
+  define: { __RELEASE__: JSON.stringify(RELEASE) },
+  plugins: [telemetryPlugin(), releasePlugin()],
   /* Emit relative asset URLs (./assets/...) so the built site works when served
    * from any subpath, not just the domain root. The runtime fetches
    * (blender.wasm.zst, assets.tar.zst, manifest.json, blender.js) are already

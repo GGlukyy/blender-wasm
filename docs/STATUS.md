@@ -1,3 +1,9 @@
+# Víkend — 27. 10. 03:00 — R0: release zip pro itch.io je hotový
+Výsledek: ✅ (`scripts/package_itch.sh`), nic jsem nenahrával.
+**Co:** `out/itch_2026-10-27_0248.zip` (69,7 MB, žádný soubor > 45 MB). Bez Plausible, bez Puter brandingu a bez telemetrie; dole je „Neoficiální port, založeno na HeyPuter/blender-wasm“ + odkazy na zdrojáky (GPL). Obsahuje opravy H15b (Material Preview), M1 (chybějící faces), H17 (Open/Save v iframu).
+**Pozor:** zip jsem neotestoval na itch.io ani na iPadu; Google Fonts se pořád načítají z internetu (jen písmo).
+**Co dál (Lukáš):** nahraj zip na itch ručně → zkus na iPadu Material Preview (`?mp=1` v iframu nejde zadat, guard vrací Solid) a File ▸ Open/Save.
+
 # Víkend — 27. 10. 03:40 — H17: Open/Save v iframu na itch.io (čeká na itch test)
 Výsledek: ✅ na PC (`iframe_files_win.sh` PASS), 🟡 na itch neotestováno.
 **Co:** v iframu je File System Access zakázán, proto se Průzkumník neukázal. Teď se v iframu chováme jako Safari: Open ukáže okno s výběrem souboru (`<input type=file>`), Save stáhne soubor. V rohu je tlačítko „↗ Otevřít v novém okně“ (plná verze). Jen JS, stačí nový zip na itch.

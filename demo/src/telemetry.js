@@ -1,7 +1,7 @@
 /* M0 telemetry: iPad -> dev server (/__telemetry -> out/ipad/tel_<date>.jsonl).
  * On with ?tel=1, or on the Vite dev server in a real browser (?tel=0 turns it off; automated tests keep it off, it perturbs timing). */
 const q = new URLSearchParams(location.search).get("tel");
-export const telEnabled = q === "1" || (import.meta.env.DEV && q !== "0" && !navigator.webdriver);
+export const telEnabled = !(typeof __RELEASE__ !== "undefined" && __RELEASE__) && (q === "1" || (import.meta.env.DEV && q !== "0" && !navigator.webdriver));
 
 const sid = Math.random().toString(36).slice(2, 8);
 const t0 = performance.now();
