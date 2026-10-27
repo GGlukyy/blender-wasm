@@ -1,3 +1,9 @@
+# Víkend — 27. 10. 03:15 — M1: chybějící faces opraveno (čeká na iPad)
+Výsledek: ✅ na PC (`bigmesh_win.sh` 3× PASS, testovací model je celý, parity_win 0 ❌), 🟡 iPad neotestován.
+**Příčina:** mesh s víc materiály se kreslí jako několik sub-rozsahů indexů přes indirect draw; začátek rozsahu se aplikoval 2× (v příkazu i v offsetu index bufferu), takže všechny materiály kromě prvního kreslily špatné trojúhelníky. Velikost meshe s tím nesouvisela. Postihuje to i iPad (stejný backend).
+**Co:** `webgpu_batch.cc` (fork `BLENDER_REF` v Makefile), nasazeno v `demo/public/`. Nové testy: `scripts/bigmesh_win.sh` (koule s materiály, 0 děr), `scripts/model_run.sh` (načte testovací model z `out/models`).
+**Co otestovat na iPadu:** načti model s více materiály (nebo koule s 5 materiály) → Solid → žádné chybějící obdélníky.
+
 # Víkend — 27. 10. 02:10 — H7c: ochrana MP funguje i v iframu (itch.io) + oprava pádu při startu v iframu
 Výsledek: ✅ na PC (`mpguard_win.sh` 4× PASS, `touch_win` ALL PASS), 🟡 iPad/itch neotestován.
 **Co:** guard Material Preview se opírá o `navigator` (Mac UA + dotyk), takže v iframu na itch.io funguje bez query. `?mp=1` se v iframu zadat nedá (odhad: itch query rodiče nepředává). Při testu jsem našel skutečnou chybu: událost `focus` při startu v iframu zavolala `Module._blender_web_text_editing` před inicializací wasm → `Aborted(Assertion failed…)` a Blender se nespustil. Opraveno v `demo/src/touch.js` (čeká na `Module.calledRun`).
