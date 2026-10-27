@@ -12,7 +12,7 @@
 
 ## 🌐 26. 10. 21:45 — itch.io test (Lukáš): FUNGUJE na PC i iPadu
 - Build `pnpm build` → zip `demo/dist` (72 MB, max soubor 42 MB) → itch.io HTML projekt (Draft, SharedArrayBuffer support ON, Mobile friendly, Click to launch in fullscreen). Chrome PC: vše vč. Material Preview. **iPad Safari: Solid + Wireframe OK, Material Preview „hned spadne"** (bez `?mp=1`!).
-- [ ] **H7c**: ověř, že H7 guard (MP na iPadu → zpět na Solid bez `?mp=1`) funguje i v iframe na itch.io (detekce iPadu / query parametrů z `location` v iframu; itch spouští z `html-classic.itch.zone`). Pokud ne, oprav (JS). Nízká cena, udělat hned po H15/H16.
+- [x] (27. 10. 02:10, `scripts/mpguard_win.sh` 4× PASS vč. cross-origin iframe s Mac UA + dotykem bez query → Solid + pruh; guard stojí na `navigator`, ne na URL, takže v iframu funguje; `?mp=1` v iframu na itch nejde zadat (query rodiče se nepředá). NAŠLA se i skutečná chyba: `touch.js` sahal na `Module._blender_web_text_editing` před startem wasm → `Aborted(Assertion failed…)` při `focus` v iframu; opraveno `Module.calledRun`; touch_win ALL PASS) **H7c**
 - [ ] **R0 (až po H15)**: release balíček pro itch.io: `scripts/package_itch.sh` (pnpm build → zip do `out/itch_<datum>.zip`); z `demo/index.html` pro release ODSTRANIT Plausible analytiku Puteru a Puter branding (nahradit: „Neoficiální port, založeno na HeyPuter/blender-wasm" + odkaz na zdrojáky GGlukyy/blender-wasm a GGlukyy/blender, GPL); telemetrie v releasu vypnutá. Nic nenahrávat, zip předá Lukáš ručně.
 
 

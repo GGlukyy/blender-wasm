@@ -1,3 +1,8 @@
+# Víkend — 27. 10. 02:10 — H7c: ochrana MP funguje i v iframu (itch.io) + oprava pádu při startu v iframu
+Výsledek: ✅ na PC (`mpguard_win.sh` 4× PASS, `touch_win` ALL PASS), 🟡 iPad/itch neotestován.
+**Co:** guard Material Preview se opírá o `navigator` (Mac UA + dotyk), takže v iframu na itch.io funguje bez query. `?mp=1` se v iframu zadat nedá (odhad: itch query rodiče nepředává). Při testu jsem našel skutečnou chybu: událost `focus` při startu v iframu zavolala `Module._blender_web_text_editing` před inicializací wasm → `Aborted(Assertion failed…)` a Blender se nespustil. Opraveno v `demo/src/touch.js` (čeká na `Module.calledRun`).
+**Co otestovat na iPadu / itch:** nový build (`pnpm build`, zip) nahraj na itch a spusť — Blender se musí nastartovat a v Material Preview se vrátí Solid s pruhem.
+
 # Víkend — 27. 10. 01:45 — H15b: Material Preview bez „Storage texture layout not valid“ (čeká na iPad)
 Výsledek: ✅ na PC (`shading_win` ERRORS 0, 0× `WGPU_RW_STORAGE_BAD`; parity_win 0 ❌), 🟡 iPad neotestován.
 **Co:** iPad telemetrie (relace `vrbw4v`, `a2wf2h`, `1lzytn` po 00:47) ukázala, že H15 nestačil. Safari smí `read_write` storage jen pro r32*; EEVEE film měl 4 další obrazy (`color_accum`, `out_combined`, `cryptomatte`, `radiance_feedback`). Opraveno (fork `17f5d86e`, nasazeno v `demo/public/`, záloha `out/bak_h15b/`). Na PC je teď test, který selže, když se do Chrome dostane takový shader (`shading_test.mjs`).

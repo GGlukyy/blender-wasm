@@ -1,3 +1,4 @@
+// H7c: s MPIFRAME=1 běží demo v cross-origin iframe (jako itch.io) s Mac UA + dotykem BEZ query parametrů.
 // H7: ochrana Material Preview. MPQ='?ipad=1' → po přepnutí na MATERIAL se vrátí SOLID + pruh #mp-note; MPQ='?ipad=1&mp=1' nebo '' → zůstane MATERIAL.
 const { chromium } = await import(process.env.PW || "playwright");
 const expr = `import bpy, sys
@@ -23,16 +24,31 @@ let now = "";
 page.on("console", (m) => { const t = m.text(); const mm = /SHADING_NOW (\S+)/.exec(t); if (mm) now = mm[1]; if (/RuntimeError|abort\(|unreachable|memory access|tint-ICE|shaderc FAIL/i.test(t)) { errors++; console.log("CONSOLE-ERR " + t.slice(0, 200)); } });
 page.on("pageerror", (e) => { errors++; console.log("PAGEERROR " + e.message.slice(0, 200)); });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
-await page.goto("http://localhost:5173/" + ((process.argv[2] || "").replace(/"/g, "")), { waitUntil: "load" });
-await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
-await page.getByRole("button", { name: /Launch Blender/ }).click();
-for (let i = 0; i < 300; i++) { if ((await page.evaluate(() => window.__BGUI__ || {})).window) break; await new Promise(r => setTimeout(r, 1000)); }
+const IFR = process.env.MPIFRAME === "1";
+if (IFR) {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "maxTouchPoints", { get: () => 5 });
+    Object.defineProperty(navigator, "userAgent", { get: () => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Safari/605.1.15" });
+  });
+  const http = await import("node:http");
+  const srv = http.createServer((q, r) => { r.writeHead(200, { "content-type": "text/html", "Cross-Origin-Opener-Policy": "same-origin", "Cross-Origin-Embedder-Policy": "require-corp" });
+    r.end('<iframe src="http://localhost:5173/" style="width:1400px;height:840px;border:0" allow="cross-origin-isolated; fullscreen" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-downloads"></iframe>'); }).listen(5199, "127.0.0.1");
+  await page.goto("http://127.0.0.1:5199/", { waitUntil: "domcontentloaded" });
+} else {
+  await page.goto("http://localhost:5173/" + ((process.argv[2] || "").replace(/"/g, "")), { waitUntil: "load" });
+}
+const F = () => (IFR ? page.frames().find((f) => f !== page.mainFrame()) : page);
+if (IFR) await wait0(3000);
+function wait0(ms) { return new Promise(r => setTimeout(r, ms)); }
+await F().locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
+await F().getByRole("button", { name: /Launch Blender/ }).click().catch(async (e) => { await page.screenshot({ path: "out/mpguard_fail.png" }); throw e; });
+for (let i = 0; i < 300; i++) { if ((await F().evaluate(() => window.__BGUI__ || {})).window) break; await new Promise(r => setTimeout(r, 1000)); }
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
 await wait(8000); await page.keyboard.press("Escape");
-const box = await page.locator("#canvas").boundingBox();
+const box = await F().locator("#canvas").boundingBox();
 await page.mouse.move(box.x + 570, box.y + 395); await page.keyboard.press("Home"); await wait(1500);
 await wait(16000);
-const note = await page.evaluate(() => { const n = document.getElementById("mp-note"); return !!n; });
+const note = await F().evaluate(() => { const n = document.getElementById("mp-note"); return !!n; });
 await page.screenshot({ path: "out/mpguard_" + (process.env.MPTAG || "x") + ".png" });
 console.log("MPGUARD shading=" + now + " note=" + note + " expect_blocked=" + process.env.MPEXPECT);
 const ok = process.env.MPEXPECT === "1" ? (now === "SOLID" && note) : (now === "MATERIAL" && !note);
