@@ -69,7 +69,7 @@ export function installTelemetry() {
     if (performance.memory) { o.js_used_mb = Math.round(performance.memory.usedJSHeapSize / 1048576); o.js_total_mb = Math.round(performance.memory.totalJSHeapSize / 1048576); }
     send(o);
   };
-  setInterval(() => { try { sample(); } catch (e) { send({ kind: 'sample_err', msg: String(e && e.stack || e).slice(0, 300) }); } flush(); }, 2000);
+  setInterval(() => { try { sample(); } catch (e) { send({ kind: 'sample_err', msg: String(e && e.stack || e).slice(0, 300) }); } flush(); }, /[?&]mp=1/.test(location.search) ? 1000 : 2000); // H22e: v MP po 1 s, ať je před případným pádem co nejnovější vzorek
   const bye = (why) => () => { sample(); send({ kind: why }, false); flush(); if (navigator.sendBeacon && queue.length === 0) navigator.sendBeacon("/__telemetry", JSON.stringify({ sid, kind: why + "_beacon", t: Math.round(performance.now() - t0) }) + "\n"); };
   addEventListener("pagehide", bye("pagehide"));
   document.addEventListener("visibilitychange", bye("visibility"));
