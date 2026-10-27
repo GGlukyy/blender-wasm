@@ -1,3 +1,9 @@
+# Víkend — 27. 10. 16:20 — H19: File ▸ Import nabízí soubor z počítače
+Výsledek: ✅ na PC (`import_win.sh` PASS, `iframe_files_win.sh` PASS), 🟡 iPad/itch neotestováno.
+**Co:** když se otevře file browser importu (File ▸ Import, Append/Link, Image ▸ Open…), nahoře se ukáže lišta „📂 Vybrat soubory z počítače…“. Vybrané soubory se nahrají do `/uploads` a file browser se tam přepne. Jen JS/Python, bez rebuildu.
+**Neověřeno (odhad):** Image ▸ Open a textury (stejné pravidlo, netestováno), více souborů najednou, složky s texturami k modelu.
+**Co otestovat na iPadu / itch:** File ▸ Import ▸ Wavefront (.obj) → klepni na lištu → vyber .obj (nebo .glb/.fbx) → v okně potvrď Import. Pak Image ▸ Open s PNG.
+
 # Víkend — 27. 10. 07:47 — kontrola, beze změny
 Výsledek: 🟡 nic nového k opravě bez iPadu.
 `out/ipad/` bez nového zápisu od 01:14. Backlog: H15c čeká na iPad `gpuerr`, ostatní hotové na PC. Nic jsem neměnil ani nespouštěl.

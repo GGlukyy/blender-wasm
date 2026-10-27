@@ -495,12 +495,51 @@ const showMpBlocked = () => {
   n.style.display = "block";
   clearTimeout(n._t); n._t = setTimeout(() => { n.style.display = "none"; }, 9000);
 };
+/* H19: import operators (File ▸ Import, Image ▸ Open, Append…) open Blender's own file browser, which sees only the wasm FS.
+ * Python (_import_assist) prints WEB_FILE_IMPORT when such a browser opens; we offer the real file picker, copy the files to
+ * /uploads and hand the directory back to Python via /tmp/web_pick.txt (the browser then lists them). */
+const hideImportBar = () => { const n = document.getElementById("import-bar"); if (n) n.style.display = "none"; };
+const showImportBar = () => {
+  let n = document.getElementById("import-bar");
+  if (!n) {
+    n = document.createElement("div");
+    n.id = "import-bar";
+    n.style.cssText = "position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:99997;background:rgba(20,50,90,.95);" +
+      "color:#fff;font:15px system-ui,sans-serif;padding:8px 14px;border-radius:8px;max-width:92vw";
+    const inp = document.createElement("input");
+    inp.type = "file"; inp.multiple = true; inp.id = "import-input"; inp.style.display = "none";
+    const b = document.createElement("button");
+    b.id = "import-btn"; b.textContent = "📂 Vybrat soubory z počítače…"; b.style.cssText = "margin-left:8px;font-size:15px";
+    b.onclick = () => inp.click();
+    inp.onchange = async () => {
+      try {
+        const FS = window.Module.FS;
+        try { FS.mkdir("/uploads"); } catch (e) { /* exists */ }
+        const names = [];
+        for (const f of inp.files) {
+          b.textContent = "Nahrávám „" + f.name + "“…";
+          FS.writeFile("/uploads/" + f.name, new Uint8Array(await f.arrayBuffer()));
+          names.push(f.name);
+        }
+        if (names.length) FS.writeFile("/tmp/web_pick.txt", new TextEncoder().encode("/uploads/\n" + names.join("\n")));
+        b.textContent = "📂 Vybrat soubory z počítače…";
+        inp.value = "";
+        if (names.length) n.style.display = "none";
+      } catch (err) { b.textContent = "Chyba: " + (err && err.message || err); }
+    };
+    n.append("Soubor z počítače: ", b, inp);
+    document.body.appendChild(n);
+  }
+  n.style.display = "block";
+};
 const scan = (t) => {
   telLog(t);
   const sv = /Writing to (\/\S+)|^Saved "([^"]+)"/.exec(t.trim());
   if (sv) showSaved(sv[1] || sv[2]);
   if (/^Blender quit\b/.test(t.trim())) showQuit();
   if (t.includes("WEB_MP_BLOCKED")) showMpBlocked();
+  if (t.includes("WEB_FILE_IMPORT_END")) hideImportBar();
+  else if (t.includes("WEB_FILE_IMPORT")) showImportBar();
   if (t.startsWith("WEB_OPEN_URL ")) {
     const u = t.slice(13).trim();
     if (/^https?:\/\//.test(u)) { window.__LAST_OPEN_URL__ = u; window.open(u, "_blank", "noopener"); }
@@ -1046,6 +1085,35 @@ def _mp_guard():
     except Exception as e: print('MPGUARD ERR', e)
     return 0.5
 if '${MP_GUARD}' == '1': bpy.app.timers.register(_mp_guard, first_interval=1.0, persistent=True)
+# H19: import operátory (File ▸ Import, Image ▸ Open, Append…) otevřou vnitřní file browser, který vidí jen wasm FS.
+# Pokud takový browser vznikne, řekni stránce (WEB_FILE_IMPORT → tlačítko „Vybrat soubory z počítače“); stránka nahraje
+# soubory do /uploads a zapíše /tmp/web_pick.txt (adresář + jména) → tady je nastavíme do file browseru.
+_imp = {'seen': set()}
+def _is_import_op(idn):
+    return ('import' in idn or idn in {'image.open', 'sound.open', 'clip.open', 'text.open', 'wm.append', 'wm.link'}) and 'export' not in idn
+def _import_assist():
+    try:
+        cur = set()
+        pick = None
+        if _os.path.exists('/tmp/web_pick.txt'):
+            pick = open('/tmp/web_pick.txt').read().split('\\n'); _os.remove('/tmp/web_pick.txt')
+        for win in bpy.context.window_manager.windows:
+            for a in win.screen.areas:
+                if a.type != 'FILE_BROWSER': continue
+                for sp in a.spaces:
+                    if sp.type != 'FILE_BROWSER' or sp.active_operator is None or not _is_import_op(sp.active_operator.bl_idname): continue
+                    key = sp.as_pointer(); cur.add(key)
+                    if key not in _imp['seen']:
+                        _imp['seen'].add(key); print('WEB_FILE_IMPORT ' + sp.active_operator.bl_idname, flush=True)
+                    if pick and len(pick) > 1:
+                        sp.params.directory = pick[0].encode(); sp.params.filename = pick[1]
+                        print('WEB_FILE_IMPORT_PICKED ' + pick[0] + ' ' + str(len(pick) - 1), flush=True)
+        if _imp['seen'] - cur:
+            _imp['seen'] &= cur
+            if not cur: print('WEB_FILE_IMPORT_END', flush=True)
+    except Exception as e: print('IMPORT_ASSIST ERR', e)
+    return 0.4
+bpy.app.timers.register(_import_assist, first_interval=2.0, persistent=True)
 def _save_prefs():
     try:
         if bpy.context.preferences.is_dirty: bpy.ops.wm.save_userpref(); print('USERPREF saved')
