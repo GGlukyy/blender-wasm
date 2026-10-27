@@ -1068,9 +1068,18 @@ def _cap_pool():
     try:
         for sc in bpy.data.scenes: sc.eevee.shadow_pool_size = '${SHADOW_POOL}'
     except Exception as e: print('shadowpool', e)
+def _cap_pool_opened():
+    # iPad: soubor otevřený z disku nese 512 MB shadow pool (+384 MB) → zastropovat jen když je větší než cíl
+    try:
+        cap = int('${SHADOW_POOL}')
+        for sc in bpy.data.scenes:
+            if int(sc.eevee.shadow_pool_size) > cap:
+                sc.eevee.shadow_pool_size = '${SHADOW_POOL}'; print('SHADOWPOOL capped')
+    except Exception as e: print('shadowpool', e)
 @persistent
 def _on_new(*a):
     if not bpy.data.filepath: _cap_pool()
+    elif '${MP_GUARD}' == '1' and '${_qp.get("shadowpool") || ""}' == '': _cap_pool_opened()
 # Preferences: --factory-startup nečte userpref a na webu není „quit“, který by je uložil → UI scale, navigace,
 # klávesové zkratky apod. se po každém načtení stránky ztrácely. Načíst při startu, ukládat při změně.
 import os as _os

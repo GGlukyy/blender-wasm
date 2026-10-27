@@ -12,7 +12,9 @@ def shade(t):
         if a.type == 'VIEW_3D': a.spaces[0].shading.type = t
     print('SHADE ' + t); sys.stdout.flush(); return None
 bpy.app.timers.register(lambda: shade('MATERIAL'), first_interval=10.0)
-bpy.app.timers.register(lambda: shade('RENDERED'), first_interval=40.0)`;
+bpy.app.timers.register(lambda: shade('RENDERED'), first_interval=40.0)
+for _i, _t in enumerate(['SOLID', 'MATERIAL', 'SOLID', 'MATERIAL', 'SOLID', 'MATERIAL']):
+    bpy.app.timers.register(lambda t=_t: shade(t), first_interval=50.0 + 8.0 * _i)`;
 const browser = await chromium.launch({ headless: false, executablePath: process.env.CHROME,
   args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
 const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
@@ -30,6 +32,8 @@ const box = await page.locator("#canvas").boundingBox();
 await page.mouse.move(box.x + 570, box.y + 395); await page.keyboard.press("Home"); await wait(1500);
 await wait(14000); { const q = await page.evaluate(() => [window.__PERF__ || {}, window.__GPUMEM__ || {}]); console.log("GPUMEM_MP " + JSON.stringify(q[1])); console.log(`HEAPUSED material used=${Math.round(q[0].heap_used_mb)} tex_mb=${q[1].tex_mb} buf_mb=${q[1].buf_mb}`); } { const th = await page.evaluate(() => (window.__GPUMEM__ || {}).thist || {}); const bpp = f => /rgba32float/.test(f) ? 16 : /rgba16float/.test(f) ? 8 : /32float-stencil8/.test(f) ? 5 : /r32|depth32|rg16|rgba8|rg11|rgb10/.test(f) ? 4 : /rg8|r16|depth16/.test(f) ? 2 : 1; const arr = Object.entries(th).map(([k, n]) => { const m = k.split("/"); const [w, h] = m[m.length - 1].split("x").map(Number); return [Math.round(n * w * h * bpp(m[m.length - 2]) / 1048576), n, k]; }).sort((a, b) => b[0] - a[0]).slice(0, 14); for (const a of arr) console.log("TBIG " + a.join(" ")); } await page.screenshot({ path: "out/shading_material.png" });
 await wait(35000); await page.screenshot({ path: "out/shading_rendered.png" });
+await wait(60000);
+{ const g = await page.evaluate(() => window.__GPUMEM__ || {}); const th = g.thist || {}; const d = Object.entries(th).filter(([k]) => /fb_dummy_attachment/.test(k)).map(([k, n]) => k + "=" + n).join(" "); console.log("DUMMY " + (d || "none") + " tex_mb=" + g.tex_mb + " cpp_tex_mb=" + await page.evaluate(() => (window.__PERF__ || {}).tex_mb)); }
 const pp = await page.evaluate(() => [window.__PERF__ || {}, window.__GPUMEM__ || {}]); console.log(`HEAPUSED used=${Math.round(pp[0].heap_used_mb)} res=${Math.round(pp[0].heap_mb)} tex_mb=${pp[1].tex_mb} buf_mb=${pp[1].buf_mb}`);
 console.log("ERRORS " + errors);
 await browser.close();

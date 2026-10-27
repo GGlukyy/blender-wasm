@@ -1,3 +1,9 @@
+# Víkend — 27. 10. 17:05 — H18: únik dummy textury (64 MB na framebuffer) opraven
+Výsledek: ✅ na PC (`heapused_mp_win.sh` dummy 8192² 1×, `shading_win` ERRORS 0, `parity_win` 0 ❌), 🟡 iPad neotestován.
+**Co:** architekt našel, že `fb_dummy_attachment` 8192² (64 MB) se při smazání framebufferu nikdy neuvolnila. Teď je jedna sdílená (fork 6184ae79, nasazeno v `demo/public`). Navíc na iPadu se shadow pool 128 MB použije i u otevřeného .blend (dřív 512 MB, +384 MB).
+**Odhad:** že tohle zabíjí iPad, není potvrzeno; telemetrie ukazovala jen, že dummy vznikla 2×.
+**Co otestovat na iPadu:** smaž data webu → `?tel=1&mp=1`, jen Cube, Material Preview zap/vyp 3×, pošli ID relace. Pak otevři větší .blend a zkus MP.
+
 # Víkend — 27. 10. 16:30 — kontrola, beze změny
 Výsledek: 🟡 nic nového k opravě bez iPadu.
 `out/ipad/` bez nového iPad zápisu (poslední 15:53 je z PC Chrome). Backlog: H18 blokováno (chybí iPad data), H15c čeká na iPad `gpuerr`. Nic jsem neměnil ani nespouštěl.
