@@ -1317,6 +1317,7 @@ window.Module = {
       ENV.BLENDER_SYSTEM_RESOURCES = "/assets/5.3";
       ENV.BLENDER_SYSTEM_PYTHON = "/assets";
       ENV.PYTHONHOME = "/assets";
+      ENV.WGSL_SEED_URL = new URL("wgsl-cache.json", location.href).href; /* H22f: worker si relativní URL neumí složit */
       if (window.__CAPENV) for (const k in window.__CAPENV) ENV[k] = window.__CAPENV[k];
       ENV.WGPU_PERF = "1"; /* cheap; also feeds the memory guard */
       if (new URLSearchParams(location.search).get("perf") === "1" && new URLSearchParams(location.search).get("reglog") === "1") ENV.WGPU_REGIONLOG = "1";

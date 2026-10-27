@@ -1,3 +1,10 @@
+# Víkend — 28. 10. 00:35 — H22f: seed shaderů se na webu NIKDY nenačítal (opraveno)
+Výsledek: ✅ PC, 🟡 čeká na iPad.
+**Co:** worker neuměl složit URL k `wgsl-cache.json` (`Invalid URL`) → všech ~193 shaderů se překládalo za běhu (200–600 ms, špičky paměti ve wasm). Teď se předává absolutní URL; seed doplněn o 57 shaderů z MP (celkem 250).
+**Důkaz:** `scripts/wgsl_seed_win.sh verify`: překladů 193 → 2; parity 0 ❌; shading ERRORS 0. Telemetrie `heap_mb` opravena (čte skutečný wasm), na PC v MP zůstává 1024 MB → „heap roste k 4 GB“ na PC nepotvrzeno.
+**Co otestovat na iPadu:** `…/?mp=1&tel=1` (smaž data webu nebo soukromý tab) → Material Preview na Cube; mělo by být rychlejší start MP a méně pádů. Pošli ID relace.
+**Nezkoušeno:** H22f(c) 1 vlákno překladu, (d) MAXIMUM_MEMORY; H22c/d.
+
 # Víkend — 27. 10. 23:45 — H22a „MP Lite“ hotovo na PC
 Výsledek: ✅ PC, 🟡 čeká na iPad.
 **Co:** na iPadu (guard bez `?mp=1`) se při pokusu o Material Preview teď přepne na Solid s barvami/texturami materiálů, Studio světlem, Specular a Cavity (dřív šedý Solid). Jen JS/Python v `demo/src/main.js`, bez rebuildu.
