@@ -4,7 +4,9 @@ Výsledek: ✅ PC, 🟡 čeká na iPad.
 **Důkaz:** `scripts/mp_lite_win.sh` (`?ipad=1`) PASS, screenshot `out/win/mp_lite.png`.
 **Nález:** Workbench „Shadow“ na webu schová celý model (jen obrys) — i v Chrome na PC → v MP Lite vypnuto, neřešeno.
 **Co otestovat na iPadu:** otevři normální adresu (bez `?mp=1`), přidej materiál s barvou/texturou, klikni na Material Preview → má být barevný model, ne šedý + hláška nahoře.
-**Co dál:** H22b (EEVEE lite profil, `?mp=1`), H22e telemetrie.
+**H22b (taky hotovo na PC):** `?mp=1` na iPadu teď zapne EEVEE „lite“ (pixel size 2, 1 TAA sample, bez stínů/raytracingu/volumetrik). PC: textury 604→213 MB (JS odhad), 412→266 MB (C++), MP se kreslí, parity 0 ❌.
+**Další iPad test:** `…/?mp=1&tel=1` → Material Preview na jednoduché scéně; pak `&mppx=4` (ještě menší). Pošli ID relace.
+**Co dál:** H22c (serializace pipeline), H22e telemetrie.
 
 # Víkend — 27. 10. 23:10 — N1: rebase na 5.3 je proveditelný (28 konfliktních souborů)
 Výsledek: ✅ N1 změřeno (jen zjištění, nic nenasazeno), 🟡 C0 neudělán.

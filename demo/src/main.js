@@ -1109,6 +1109,10 @@ const UI_SCALE = (new URLSearchParams(location.search).get("uiscale") || "").rep
 const _qp = new URLSearchParams(location.search);
 const MP_GUARD = _qp.get("mp") === "1" ? "0" :
   (_qp.get("ipad") === "1" || (navigator.maxTouchPoints > 1 && /Macintosh|iPad/.test(navigator.userAgent))) ? "1" : "0";
+/* H22b: EEVEE „lite“ profil pro plný MP na iPadu (?mp=1) nebo na PC (?mplite=1): menší obrazovkové buffery, bez AA akumulace/GI/volumetrik/stínů. */
+const MP_LITE = (_qp.get("mplite") === "1" || (_qp.get("mp") === "1" && _qp.get("ipad") !== "0" && (_qp.get("ipad") === "1" ||
+  (navigator.maxTouchPoints > 1 && /Macintosh|iPad/.test(navigator.userAgent))))) ? "1" : "0";
+const MP_LITE_PX = (_qp.get("mppx") || "2").replace(/[^0-9]/g, "") || "2"; // ?mppx=1|2|4|8 = preview_pixel_size
 const SHADOW_POOL_PY = `import bpy
 from bpy.app.handlers import persistent
 def _cap_pool():
@@ -1236,6 +1240,18 @@ class _WebBrowser(_wb.BaseBrowser):
 _wb.register('blender-web', None, _WebBrowser('blender-web'), preferred=True)
 _cap_pool()
 bpy.app.handlers.load_post.append(_on_new)
+def _mp_lite_eevee(*a):
+    if '${MP_LITE}' != '1': return
+    ok = []
+    for sc in bpy.data.scenes:
+        for obj, name, val in ((sc.render, 'preview_pixel_size', '${MP_LITE_PX}'), (sc.eevee, 'taa_samples', 1), (sc.eevee, 'use_shadows', False),
+                               (sc.eevee, 'use_raytracing', False), (sc.eevee, 'use_volumetric_shadows', False), (sc.eevee, 'use_gtao', False)):
+            try:
+                if hasattr(obj, name): setattr(obj, name, val); ok.append(name)
+            except Exception as e: print('MPLITE_EEVEE', name, e)
+    print('MPLITE_EEVEE applied ' + ','.join(sorted(set(ok))), flush=True)
+_mp_lite_eevee()
+bpy.app.handlers.load_post.append(_mp_lite_eevee)
 # Autosave: Blenderův vlastní autosave timer na webu nezapíše nic (ověřeno 3 min, 1 min interval) a /tmp je v paměti.
 # iPad Safari zabíjí tab na pozadí → vlastní kopie do /opfs/home/_autosave.blend (viditelná v 📁), jen když je scéna změněná.
 import os, time
