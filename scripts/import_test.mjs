@@ -47,4 +47,18 @@ const imp = logs.find((l) => l.includes("H19_IMPORTED")) || "";
 console.log(params, imp, "bar=" + bar);
 const ok = bar && /H19_PARAMS \/uploads\/ True/.test(params) && /FINISHED/.test(imp) && /H19Tri/.test(imp);
 console.log((ok ? "PASS" : "FAIL") + " import");
+// složka s modelem + texturou: model v podsložce, textura vedle
+fs.mkdirSync("out/h19_dir/tex", { recursive: true });
+fs.writeFileSync("out/h19_dir/tex/h19b.obj", "o H19Dir\nv 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3\n");
+fs.writeFileSync("out/h19_dir/tex/skin.png", Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64"));
+logs.length = 0;
+await page.evaluate(() => { window.Module.ccall("blender_web_run_python", null, ["string"], ["0"]); }).catch(() => {});
+await page.evaluate(() => { const n = document.getElementById("import-bar"); if (n) n.style.display = "block"; });
+await page.setInputFiles("#import-dir-input", "out/h19_dir");
+await wait(1500);
+const ex = await page.evaluate(() => { const F = window.Module.FS; try { return F.readdir("/uploads/h19_dir/tex").join(","); } catch (e) { return "ERR " + e; } });
+const pk = await page.evaluate(() => { try { return new TextDecoder().decode(window.Module.FS.readFile("/tmp/web_pick.txt")); } catch (e) { return "consumed"; } });
+console.log("DIR", ex, JSON.stringify(pk));
+const ok2 = /h19b\.obj/.test(ex) && /skin\.png/.test(ex);
+console.log((ok2 ? "PASS" : "FAIL") + " import_dir");
 await browser.close(); process.exit(0);

@@ -511,23 +511,37 @@ const showImportBar = () => {
     const b = document.createElement("button");
     b.id = "import-btn"; b.textContent = "📂 Vybrat soubory z počítače…"; b.style.cssText = "margin-left:8px;font-size:15px";
     b.onclick = () => inp.click();
-    inp.onchange = async () => {
+    const upload = async (files, btn, label) => {
       try {
         const FS = window.Module.FS;
-        try { FS.mkdir("/uploads"); } catch (e) { /* exists */ }
-        const names = [];
-        for (const f of inp.files) {
-          b.textContent = "Nahrávám „" + f.name + "“…";
-          FS.writeFile("/uploads/" + f.name, new Uint8Array(await f.arrayBuffer()));
-          names.push(f.name);
+        const mk = (dir) => { let cur = ""; for (const part of dir.split("/").filter(Boolean)) { cur += "/" + part; try { FS.mkdir(cur); } catch (e) { /* exists */ } } };
+        mk("/uploads");
+        let first = null;
+        const MODEL = /\.(blend|obj|fbx|glb|gltf|stl|ply|usd[acz]?|abc|dae|svg|x3d|wrl)$/i;
+        for (const f of files) {
+          btn.textContent = "Nahrávám „" + f.name + "“…";
+          const rel = f.webkitRelativePath || f.name;
+          const path = "/uploads/" + rel;
+          mk(path.slice(0, path.lastIndexOf("/")));
+          FS.writeFile(path, new Uint8Array(await f.arrayBuffer()));
+          if (!first || (!MODEL.test(first) && MODEL.test(path))) first = path;
         }
-        if (names.length) FS.writeFile("/tmp/web_pick.txt", new TextEncoder().encode("/uploads/\n" + names.join("\n")));
-        b.textContent = "📂 Vybrat soubory z počítače…";
-        inp.value = "";
-        if (names.length) n.style.display = "none";
-      } catch (err) { b.textContent = "Chyba: " + (err && err.message || err); }
+        if (first) {
+          const i = first.lastIndexOf("/");
+          FS.writeFile("/tmp/web_pick.txt", new TextEncoder().encode(first.slice(0, i + 1) + "\n" + first.slice(i + 1)));
+          n.style.display = "none";
+        }
+      } catch (err) { btn.textContent = "Chyba: " + (err && err.message || err); return; }
+      btn.textContent = label;
     };
-    n.append("Soubor z počítače: ", b, inp);
+    inp.onchange = async () => { await upload(inp.files, b, "📂 Vybrat soubory z počítače…"); inp.value = ""; };
+    const dinp = document.createElement("input");
+    dinp.type = "file"; dinp.id = "import-dir-input"; dinp.style.display = "none"; dinp.setAttribute("webkitdirectory", "");
+    const db = document.createElement("button");
+    db.id = "import-dir-btn"; db.textContent = "📁 Celá složka (model + textury)…"; db.style.cssText = "margin-left:8px;font-size:15px";
+    db.onclick = () => dinp.click();
+    dinp.onchange = async () => { await upload(dinp.files, db, "📁 Celá složka (model + textury)…"); dinp.value = ""; };
+    n.append("Soubor z počítače: ", b, inp, db, dinp);
     document.body.appendChild(n);
   }
   n.style.display = "block";

@@ -1,3 +1,9 @@
+# Víkend — 27. 10. 17:10 — H19 doplněk: celá složka
+Výsledek: ✅ na PC (`import_win.sh` PASS import + import_dir), 🟡 iPad neotestován.
+**Co:** v liště importu přibylo „📁 Celá složka (model + textury)…“. Nahraje celou složku do `/uploads/<složka>/` se zachovanými podsložkami a file browser se přepne ke modelu.
+**Odhad:** textury se najdou jen když má model relativní cesty. Safari na iPadu `webkitdirectory` podporuje, ale nezkoušeno.
+**Co otestovat na iPadu:** File ▸ Import ▸ OBJ → „Celá složka“ → vyber složku s .obj + texturou.
+
 # Víkend — 27. 10. 16:50 — H18 blokováno (potřebuju iPad data)
 Výsledek: 🟡 H19 hotové (viz níže), H18 jsem nezačal měnit.
 **Proč:** PC měření MP = 604 MB textur, iPad 657 MB, tedy stejné. Velké textury jsou nutné (sondy, viewport, stíny). Že iPad zabíjí právě paměť, je jen odhad: v telemetrii není `pagehide` ani `error`. Naslepo bych jen riskoval vzhled MP.
