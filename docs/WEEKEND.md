@@ -23,3 +23,9 @@ into STATUS.md and END the run — do not fill time with tests.
 6. Never break the build. If a change cannot be made green, revert it and write why in STATUS.md.
 7. Before ending a session: update `docs/STATUS.md` top section ("Víkend — co je nového",
    "Co otestovat na iPadu" sorted by importance, "Blocked"). Keep it short, Czech.
+
+## Pravidlo „nejdřív důkaz" (27. 10., po 3 neúspěšných opravách MP)
+- Před každou opravou napiš do STATUS **predikci**: „Pokud je příčina X, pak měření M ukáže Y." Oprava se dělá až když M opravdu ukázalo Y. Bez měření žádná oprava.
+- Neplatí-li predikce → hypotéza padá, nezkoušej další variantu téže opravy.
+- Podezřívej vlastní telemetrii: hodnota, která se nikdy nemění (např. `max_heap` vždy 1024), je spíš chyba měření než fakt. Kde to jde, ověř nezávislým zdrojem (Jetsam log, desktop Blender, Chrome DevTools).
+- Po 2 neúspěšných opravách téhož příznaku: STOP, sepiš všechna fakta + rozpory (jen data, bez příběhu) a dej je `architect` subagentovi bez svých hypotéz.
