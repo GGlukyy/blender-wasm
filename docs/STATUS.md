@@ -1,3 +1,8 @@
+# Víkend — 27. 10. 22:15 — nová iPad relace `fjiwdv`, bez chyby
+Výsledek: 🟡 nic k opravě.
+V `out/ipad/` je nová iPad relace (Safari 26.5, 22:07, 165 s): start OK, 35 snímků, pak klid (Blender nic nekreslí, fps 0), tex 73 MB, **žádný `gpuerr`, `error` ani pád**; v 150 s tab přešel do pozadí (`visibility hidden`). Žádný Material Preview. Nic jsem neměnil ani nespouštěl.
+**Co otestovat na iPadu (nejdůležitější):** File ▸ Export ▸ OBJ → lišta „⬇ Stáhnout“; File ▸ Import ▸ „📁 Celá složka“; pak smaž data webu → `?tel=1` a pošli ID relace, pokud něco spadne.
+
 # Víkend — 27. 10. 21:40 — kontrola, beze změny
 Výsledek: 🟡 nic nového k opravě bez iPadu.
 `out/ipad/` bez nového zápisu od 18:32. Backlog: H18 PARKED, H15c čeká na iPad `gpuerr`, H20 hotové na PC, U1 posouzeno. Nic jsem neměnil ani nespouštěl.
