@@ -1241,6 +1241,14 @@ try {
       const m = origCSM.call(this, desc);
       stats.modules++;
       if (desc && typeof desc.code === "string" && /\boverride\b/.test(desc.code)) { srcOf.set(m, desc); stats.ovModules++; }
+      /* H15b: Safari (tier1, no tier2) only allows read_write storage textures for r32float/r32uint/r32sint;
+       * anything else voids the whole command buffer ("Storage texture layout not valid"). Flag it on every
+       * browser so the PC tests catch it too (shading_test fails on this line). */
+      if (desc && typeof desc.code === "string") {
+        for (const x of desc.code.matchAll(/(\w+)\s*:\s*texture_storage_\w+<(\w+),\s*read_write>/g)) {
+          if (!/^r32(float|uint|sint)$/.test(x[2])) console.log("WGPU_RW_STORAGE_BAD '" + (desc.label || "?") + "' var=" + x[1] + " fmt=" + x[2]);
+        }
+      }
       return m;
     };
     const lit = (t, v) => {
