@@ -3,7 +3,7 @@ Výsledek: ✅ na PC (`fileio_matrix_win.sh` PASS), 🟡 iPad/itch neotestováno
 **Co:** exportéry píší do paměti Blenderu a soubor nikdo nepředal. Teď hlídám složky a po exportu naskočí lišta „⬇ Stáhnout <soubor>“ (stáhne se neprázdný soubor).
 **Důkaz:** PASS obj (+mtl), stl, ply, glb, fbx, Image Save As, export do /opfs/home i do kořene. USD, Alembic, Collada, SVG export v tomto buildu **vůbec nejsou** (operátor chybí) → N/A.
 **Nasazení:** `swap_build.sh` kopíruje atomicky (chyba „expected a module of at least 8 bytes“).
-**Co nefunguje / nepokryto (odhad):** matice zatím Export, Image Save As, Save As/Save Copy (.blend se stáhne). Zbývá Open/Revert/Revert/Append/Link/addon install/bake a testy v iframu a se Safari emulací. Lišta se neukáže u exportu do `/mnt/<složka>` (to se zapisuje rovnou na disk).
+**Co nefunguje / nepokryto (odhad):** matice (PC Chrome) pokrývá Export, Image Save As, Image.save, Save As/Save Copy (.blend se stáhne), Append, Link, Import, Image Open, Open, Revert, Add-on install; export v iframu (itch simulace) taky PASS. Zbývá image.save_as a Bake přes UI (potřebuje Image Editor), Safari emulace a iPad. Lišta se neukáže u exportu do `/mnt/<složka>`.
 **Co otestovat na iPadu:** File ▸ Export ▸ OBJ → Export → objeví se lišta nahoře → ťukni „⬇ Stáhnout“ (na iPadu to otevře dialog stažení).
 
 # Víkend — 27. 10. 18:30 — kontrola, beze změny
