@@ -22,6 +22,7 @@ const CASES = [
   ["obj_cwd", "bpy.ops.wm.obj_export(filepath=os.path.join(os.getcwd(), 'h20cwd.obj'))", "h20cwd.obj"],
   ["save_copy", "bpy.ops.wm.save_as_mainfile(filepath='/uploads/h20copy.blend', copy=True)", "h20copy.blend"],
   ["save_as", "bpy.ops.wm.save_as_mainfile(filepath='/uploads/h20saveas.blend')", "h20saveas.blend"],
+  ["image_save_op", "(lambda im: (setattr(im, 'filepath_raw', '/uploads/h20bake.png'), setattr(im, 'file_format', 'PNG'), im.save()))(bpy.data.images.new('bk', 8, 8))", "h20bake.png"],
   ["image_save_as", "(lambda im: im.save_render('/uploads/m_img.png'))(bpy.data.images.new('t', 8, 8))", "m_img.png"],
 ];
 const PY = `import bpy, os, traceback
@@ -75,6 +76,7 @@ const READ = [
   ["ply_import", `${N}(bpy.ops.wm.ply_import(filepath='/uploads/m.ply'))`],
   ["gltf_import", `${N}(bpy.ops.import_scene.gltf(filepath='/uploads/m.glb'))`],
   ["fbx_import", `${N}(bpy.ops.import_scene.fbx(filepath='/uploads/m.fbx'))`],
+  ["addon_install", "(open('/uploads/h20addon.py','w').write('bl_info={\"name\":\"H20Addon\",\"blender\":(4,0,0),\"category\":\"Object\"}\\ndef register(): pass\\ndef unregister(): pass\\n'), bpy.ops.preferences.addon_install(filepath='/uploads/h20addon.py'))[1]"],
   ["image_open", "bpy.ops.image.open(filepath='/uploads/m_img.png')"],
   ["open_mainfile", "bpy.ops.wm.open_mainfile(filepath='/uploads/h20saveas.blend')"],
   ["revert", "bpy.ops.wm.revert_mainfile()"],
