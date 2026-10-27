@@ -1,3 +1,8 @@
+# Víkend — 27. 10. 15:58 — kontrola, beze změny
+Výsledek: 🟡 nic nového k opravě bez iPadu.
+Nejnovější zápis v `out/ipad/tel_2026-10-27.jsonl` (15:53) je z Windows Chrome (PC test), ne z iPadu. Poslední iPad data jsou z 15:35 (H18, blokováno). Nic jsem neměnil ani nespouštěl.
+**Co otestovat na iPadu (nejdůležitější):** `?tel=1&mp=1`, nová scéna jen s Cube, Material Preview: spadne i tak? Pošli ID relace. Pak import přes File ▸ Import ▸ „📁 Celá složka“.
+
 # Víkend — 27. 10. 17:10 — H19 doplněk: celá složka
 Výsledek: ✅ na PC (`import_win.sh` PASS import + import_dir), 🟡 iPad neotestován.
 **Co:** v liště importu přibylo „📁 Celá složka (model + textury)…“. Nahraje celou složku do `/uploads/<složka>/` se zachovanými podsložkami a file browser se přepne ke modelu.
