@@ -1,3 +1,9 @@
+# Víkend — 27. 10. 05:00 — H15c: DOF a raytracing (fast GI) bez read_write rgba16f
+Výsledek: ✅ na PC (`shading_fx_win.sh` 0 nevalidních storage textur, shading_win 0, parity 0 ❌), 🟡 iPad neotestován.
+**Co:** stejná vada jako H15b v DOF a v „fast GI“ (raytracing): opraveno (fork `BLENDER_REF` v Makefile, nasazeno v `demo/public/`). Nový test s raytracingem + DOF + motion blur v kameře.
+**Zbývá (nezachyceno testem):** ray_trace, motion blur, light probe bake, bxdf lut, gpencil, compositor — řešit podle iPad `gpuerr`.
+**Co otestovat na iPadu:** Rendered/MP s kamerou a zapnutým DOF (Camera ▸ Depth of Field) nebo Raytracing: nesmí padnout `Storage texture layout not valid`.
+
 # Víkend — 27. 10. 04:10 — A: vlastní add-ony fungují (PC), čeká na tvůj test v UI
 Výsledek: ✅ na PC přes Python (`addon_custom_win.sh`, `addon_persist_win.sh`), 🟡 UI cestu jsem neklikal.
 **Co:** instalace .py i .zip add-onu, zapnutí a spuštění operátoru funguje; soubor leží v `/opfs/home/.config/blender/5.3/scripts/addons` a přežije reload. Žádná změna kódu nebyla potřeba.
