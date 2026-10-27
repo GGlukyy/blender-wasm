@@ -1,5 +1,15 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 🌙 28. 10. 00:05 — NOČNÍ FRONTA do 08:00 (Lukáš pak 2 dny pryč, PC vypnuté). Pracuj v tomto pořadí, NEKONČI dřív, dokud je něco z toho otevřené. ŽÁDNÉ fuzz/sweep testy.
+1. [ ] **H22f** (níže) — měření SKUTEČNÉ wasm paměti v MP na PC (`wasmMemory.buffer.byteLength` čtené znovu + mallinfo). Predikce: roste-li > 2 GB, je viník na PC. Najdi ho a oprav; výsledek tabulkou do STATUS.
+2. [ ] **H22d** — pthread pool za běhu (`-sPTHREAD_POOL_SIZE=` JS výraz, `?pool=N`), na iPadu výchozí 8 (Mac UA + dotyk). Relink, regress + `prefs_sweep` s pool 8 musí projít.
+3. [ ] **Seed MP/EEVEE shaderů** (H22f b) — regenerovat `wgsl-cache.json` z PC běhu MP + shading_fx; `seed_verify` PASS.
+4. [ ] **H22c** — max 1–2 souběžné tvorby pipeline v MP; změř lag_max a heap špičku před/po.
+5. [ ] **C0** dokončit (jen `docs/CYCLES.md`, žádná změna master).
+6. [ ] **N1b** — v `./blender-5.3/` vyřeš 28 konfliktů na větvi `ipad-5.3-wip`; push JEN té větve do forku (`git push origin ipad-5.3-wip`), `BLENDER_REF` NEMĚNIT; pokud zbývá čas, build v `build-5.3/` a `regress` — výsledek do STATUS.
+7. [ ] **Na konci (nejpozději 07:30):** `bash scripts/package_itch.sh` → zip v `out/`, STATUS se shrnutím noci pro Lukáše (co otestovat na iPadu: MP Lite, EEVEE lite `?mp=1`, export/import, nový zip na itch). Teprve pak `out/.idle_stop`.
+
+
 ## 🧾 27. 10. 23:10 — DŮKAZ z iPadu: JetsamEvent-2026-10-27-153349 (pád MP v 15:33)
 - `largestProcess: com.apple.WebKit.WebContent`, **reason `per-process-limit`, 5106 MB** (lifetimeMax 5136 MB). `com.apple.WebKit.GPU` jen 354 MB. Zařízení iPad13,16, iPadOS 26.5.
 - ⇒ **Limit stránky na tomto iPadu ≈ 5 GB** (ne 1,5 GB, jak jsme předpokládali). Telemetrie ale viděla jen ~1 GB wasm heap + 0,4–0,66 GB textur ≈ 1,7 GB → **~3,4 GB neviditelné spotřeby**. WebKit připisuje Metal paměť z GPU procesu do WebContent, takže se tam počítá i GPU.
