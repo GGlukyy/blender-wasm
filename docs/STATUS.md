@@ -1,3 +1,8 @@
+# Víkend — 27. 10. 07:17 — kontrola, beze změny
+Výsledek: 🟡 nic nového k opravě bez iPadu.
+`out/ipad/` bez nového zápisu od 01:14. Backlog: H15c čeká na iPad `gpuerr`, ostatní hotové na PC. Nic jsem neměnil ani nespouštěl.
+**Co otestovat na iPadu (nejdůležitější):** smaž data webu → `?tel=1&mp=1` → Material Preview: kreslí se opice? Pošli ID relace (nesmí tam být `Storage texture layout not valid`). Pak model s více materiály a v itch zipu File ▸ Open/Save.
+
 # Víkend — 27. 10. 06:46 — kontrola, beze změny
 Výsledek: 🟡 nic nového k opravě bez iPadu.
 `out/ipad/` bez nového zápisu od 01:14. Backlog: H15c čeká na iPad `gpuerr`, ostatní hotové na PC. Nic jsem neměnil ani nespouštěl.
