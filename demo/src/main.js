@@ -489,7 +489,7 @@ const showMpBlocked = () => {
     n.id = "mp-note";
     n.style.cssText = "position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:99997;background:rgba(90,50,10,.95);" +
       "color:#fff;font:15px system-ui,sans-serif;padding:8px 14px;border-radius:8px;max-width:92vw";
-    n.textContent = "Material Preview na iPadu zatím nefunguje (v práci). Zkusit na vlastní riziko: přidej ?mp=1 do adresy.";
+    n.textContent = "Material Preview je na iPadu zatím vypnutý — dostal jsi „MP Lite“ (Solid s texturami a světlem). Plný MP na vlastní riziko: přidej ?mp=1 do adresy.";
     document.body.appendChild(n);
   }
   n.style.display = "block";
@@ -1143,7 +1143,7 @@ except Exception as e: print('UISCALE ERR', e)
 try:
     if float('${UNDO_MB}') > 0 and bpy.context.preferences.edit.undo_memory_limit == 0: bpy.context.preferences.edit.undo_memory_limit = int(float('${UNDO_MB}'))
 except Exception as e: print('UNDOMEM ERR', e)
-# H7: na iPadu zatím Material Preview/Rendered shazuje GPU → vrať Solid + hláška (JS ji zachytí z WEB_MP_BLOCKED).
+# H7: na iPadu zatím Material Preview/Rendered shazuje GPU → místo toho Solid „MP Lite“ (H22a) + hláška (JS ji zachytí z WEB_MP_BLOCKED).
 def _mp_guard():
     try:
         for win in bpy.context.window_manager.windows:
@@ -1151,7 +1151,11 @@ def _mp_guard():
                 if a.type == 'VIEW_3D':
                     for sp in a.spaces:
                         if sp.type == 'VIEW_3D' and sp.shading.type in {'MATERIAL', 'RENDERED'}:
-                            sp.shading.type = 'SOLID'; print('WEB_MP_BLOCKED', flush=True)
+                            sh = sp.shading; sh.type = 'SOLID'
+                            # H22a „MP Lite“: Workbench s texturami z materiálů, studiové světlo, bez EEVEE (show_shadows NE: na webu zmizí model, viz BACKLOG H22a)
+                            sh.light = 'STUDIO'; sh.color_type = 'TEXTURE'; sh.show_specular_highlight = True
+                            sh.show_shadows = False; sh.show_cavity = True; sh.use_dof = False
+                            print('WEB_MP_BLOCKED', flush=True)
     except Exception as e: print('MPGUARD ERR', e)
     return 0.5
 if '${MP_GUARD}' == '1': bpy.app.timers.register(_mp_guard, first_interval=1.0, persistent=True)

@@ -1,3 +1,11 @@
+# Víkend — 27. 10. 23:45 — H22a „MP Lite“ hotovo na PC
+Výsledek: ✅ PC, 🟡 čeká na iPad.
+**Co:** na iPadu (guard bez `?mp=1`) se při pokusu o Material Preview teď přepne na Solid s barvami/texturami materiálů, Studio světlem, Specular a Cavity (dřív šedý Solid). Jen JS/Python v `demo/src/main.js`, bez rebuildu.
+**Důkaz:** `scripts/mp_lite_win.sh` (`?ipad=1`) PASS, screenshot `out/win/mp_lite.png`.
+**Nález:** Workbench „Shadow“ na webu schová celý model (jen obrys) — i v Chrome na PC → v MP Lite vypnuto, neřešeno.
+**Co otestovat na iPadu:** otevři normální adresu (bez `?mp=1`), přidej materiál s barvou/texturou, klikni na Material Preview → má být barevný model, ne šedý + hláška nahoře.
+**Co dál:** H22b (EEVEE lite profil, `?mp=1`), H22e telemetrie.
+
 # Víkend — 27. 10. 23:10 — N1: rebase na 5.3 je proveditelný (28 konfliktních souborů)
 Výsledek: ✅ N1 změřeno (jen zjištění, nic nenasazeno), 🟡 C0 neudělán.
 **Co:** větev `blender-v5.3-release` už existuje (9eaa3f28968, 3195 commitů po našem základu z 26. 6.). Do `./blender-5.3/` (blobless klon forku + remote `upstream`) jsem spustil `git merge-tree` naše `ipad` × `blender-v5.3-release` — bez checkoutu, bez buildu, `./blender/` a `BLENDER_REF` nedotčené.
