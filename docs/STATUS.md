@@ -1,3 +1,8 @@
+# Víkend — 27. 10. 20:05 — kontrola, beze změny
+Výsledek: 🟡 nic nového k opravě bez iPadu.
+`out/ipad/` bez nového zápisu od 18:32. Backlog: H18 PARKED, H15c čeká na iPad `gpuerr`, H20 hotové na PC. Nic jsem neměnil ani nespouštěl.
+**Co otestovat na iPadu (nejdůležitější):** File ▸ Export ▸ OBJ → lišta „⬇ Stáhnout“; File ▸ Import ▸ „📁 Celá složka“; pak smaž data webu → `?tel=1` a pošli ID relace, pokud něco spadne.
+
 # Víkend — 27. 10. 19:40 — kontrola, beze změny
 Výsledek: 🟡 nic nového k opravě bez iPadu.
 `out/ipad/` bez nového zápisu od 18:32 (nic nového od Lukáše). Backlog: H18 PARKED (čeká na crash log/nový důkaz), H15c čeká na iPad `gpuerr`, H20 hotové na PC. Rebase 5.3: tag `v5.3.0` pořád neexistuje. Nic jsem neměnil ani nespouštěl.
