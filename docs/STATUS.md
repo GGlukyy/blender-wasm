@@ -1,3 +1,8 @@
+# Víkend — 27. 10. 17:30 — kontrola, beze změny
+Výsledek: 🟡 nic nového k opravě bez iPadu.
+`out/ipad/` bez nového iPad zápisu (Safari UA ve 16:42 je PC emulace Mac UA, poslední záznam 16:44 je Windows Chrome). Backlog: H18 čeká na iPad data, H15c na iPad `gpuerr`. Nic jsem neměnil ani nespouštěl.
+**Co otestovat na iPadu (nejdůležitější):** smaž data webu → `?tel=1&mp=1`, jen Cube, Material Preview zap/vyp 3×, pošli ID relace. Pak větší .blend a File ▸ Import ▸ „📁 Celá složka“.
+
 # Víkend — 27. 10. 16:58 — kontrola, beze změny
 Výsledek: 🟡 nic nového k opravě bez iPadu.
 Poslední zápis v `out/ipad/` (16:44) je z Windows Chrome (PC test H18), ne z iPadu. H18 čeká na iPad data. Nic jsem neměnil ani nespouštěl.
