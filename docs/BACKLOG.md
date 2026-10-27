@@ -2,8 +2,8 @@
 
 ## 🌙 28. 10. 00:05 — NOČNÍ FRONTA do 08:00 (Lukáš pak 2 dny pryč, PC vypnuté). Pracuj v tomto pořadí, NEKONČI dřív, dokud je něco z toho otevřené. ŽÁDNÉ fuzz/sweep testy.
 1. [ ] **H22f** (níže) — měření SKUTEČNÉ wasm paměti v MP na PC (`wasmMemory.buffer.byteLength` čtené znovu + mallinfo). Predikce: roste-li > 2 GB, je viník na PC. Najdi ho a oprav; výsledek tabulkou do STATUS.
-2. [ ] **H22d** — pthread pool za běhu (`-sPTHREAD_POOL_SIZE=` JS výraz, `?pool=N`), na iPadu výchozí 8 (Mac UA + dotyk). Relink, regress + `prefs_sweep` s pool 8 musí projít.
-3. [ ] **Seed MP/EEVEE shaderů** (H22f b) — regenerovat `wgsl-cache.json` z PC běhu MP + shading_fx; `seed_verify` PASS.
+2. [x] (28. 10. 00:50: link `PTHREAD_POOL_SIZE=Module.poolSize??32`, main.js `?pool=N`, iPad (Mac UA+dotyk) výchozí 8; PC: `?pool=8` MP lite ERRORS 0 + prefs_sweep PASS, výchozí 32 shading ERRORS 0; čeká na iPad) **H22d** — pthread pool za běhu (`-sPTHREAD_POOL_SIZE=` JS výraz, `?pool=N`), na iPadu výchozí 8 (Mac UA + dotyk). Relink, regress + `prefs_sweep` s pool 8 musí projít.
+3. [x] (28. 10. 00:30, 250 shaderů, překladů 193→2 — viz H22f) **Seed MP/EEVEE shaderů** (H22f b) — regenerovat `wgsl-cache.json` z PC běhu MP + shading_fx; `seed_verify` PASS.
 4. [ ] **H22c** — max 1–2 souběžné tvorby pipeline v MP; změř lag_max a heap špičku před/po.
 5. [ ] **C0** dokončit (jen `docs/CYCLES.md`, žádná změna master).
 6. [ ] **N1b** — v `./blender-5.3/` vyřeš 28 konfliktů na větvi `ipad-5.3-wip`; push JEN té větve do forku (`git push origin ipad-5.3-wip`), `BLENDER_REF` NEMĚNIT; pokud zbývá čas, build v `build-5.3/` a `regress` — výsledek do STATUS.

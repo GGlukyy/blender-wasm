@@ -3,7 +3,8 @@ Výsledek: ✅ PC, 🟡 čeká na iPad.
 **Co:** worker neuměl složit URL k `wgsl-cache.json` (`Invalid URL`) → všech ~193 shaderů se překládalo za běhu (200–600 ms, špičky paměti ve wasm). Teď se předává absolutní URL; seed doplněn o 57 shaderů z MP (celkem 250).
 **Důkaz:** `scripts/wgsl_seed_win.sh verify`: překladů 193 → 2; parity 0 ❌; shading ERRORS 0. Telemetrie `heap_mb` opravena (čte skutečný wasm), na PC v MP zůstává 1024 MB → „heap roste k 4 GB“ na PC nepotvrzeno.
 **Co otestovat na iPadu:** `…/?mp=1&tel=1` (smaž data webu nebo soukromý tab) → Material Preview na Cube; mělo by být rychlejší start MP a méně pádů. Pošli ID relace.
-**Nezkoušeno:** H22f(c) 1 vlákno překladu, (d) MAXIMUM_MEMORY; H22c/d.
+**H22d hotovo:** na iPadu se spouští jen 8 pthread workerů místo 32 (`?pool=N` přepíše). PC: prefs_sweep PASS s pool 8. iPad test: stejný odkaz, sleduj jestli MP vydrží déle.
+**Nezkoušeno:** H22f(c) 1 vlákno překladu, (d) MAXIMUM_MEMORY; H22c.
 
 # Víkend — 27. 10. 23:45 — H22a „MP Lite“ hotovo na PC
 Výsledek: ✅ PC, 🟡 čeká na iPad.

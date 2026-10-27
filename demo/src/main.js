@@ -1297,7 +1297,12 @@ def _autosave():
     except Exception as e: print('AUTOSAVE ERR', e)
     return _as['wait']
 bpy.app.timers.register(_autosave, first_interval=_AS_EVERY, persistent=True)`;
+/* H22d: počet pthread workerů se čte při startu (link: PTHREAD_POOL_SIZE=Module.poolSize||32). Každý worker v Safari = vlastní JS VM
+ * → iPad 8, jinde 32. Přepsat ?pool=N. */
+const _isIpadUA = navigator.maxTouchPoints > 1 && /Macintosh|iPad/.test(navigator.userAgent);
+const POOL_N = parseInt(_qp.get("pool") || (_isIpadUA ? "8" : "32"), 10) || 32;
 window.Module = {
+  poolSize: POOL_N,
   arguments: ["--factory-startup", "--python-expr", SHADOW_POOL_PY, ...(window.__BARGS || [])],
   canvas,
   print: (t) => { log(t); scan(t); },
