@@ -632,7 +632,7 @@ Subsurf 2 na Monkey plynulý, glTF export + import zpět (triangulováno).
   stejné verze — chybí tam taky? Pokud ne → náš bug. Hypotézy (odhad): limit velikosti bufferu/indexů při velkém meshi
   (`maxBufferSize`, 32bit indexy, rozdělení VBO), oříznutí clip start/end, nebo nedokreslené po načtení (paměť).
   Test: vygenerovat mesh ~1–2 M trojúhelníků, porovnat počet vykreslených ploch / screenshot web vs desktop.
-- [ ] **Materiály s texturami ve vedlejší složce se nenačtou.** Očekávané chování (odhad): do prohlížeče se nahraje jen
+- [~] (27. 10. 16:00: částečně vyřešeno H19 „📁 Celá složka“ — zachová podsložky, `import_win.sh` PASS import_dir; napojení textury v materiálu netestováno, čeká na iPad) **Materiály s texturami ve vedlejší složce se nenačtou.** Očekávané chování (odhad): do prohlížeče se nahraje jen
   `.blend`, relativní cesty `//textures/…` v MEMFS/OPFS neexistují → růžové/prázdné textury. Oprava: při Open umožnit
   nahrát celou složku nebo .zip (`webkitdirectory` / více souborů) se zachováním relativních cest vedle .blend; na iPadu
   ověřit, co Files app dovolí. Mezitím obejití pro Lukáše: v desktop Blenderu File ▸ External Data ▸ Pack Resources
