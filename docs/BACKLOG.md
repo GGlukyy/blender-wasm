@@ -7,6 +7,7 @@
 4. [ ] **H22c** — max 1–2 souběžné tvorby pipeline v MP; změř lag_max a heap špičku před/po.
 5. [ ] **C0** dokončit (jen `docs/CYCLES.md`, žádná změna master).
 6. [ ] **N1b** — v `./blender-5.3/` vyřeš 28 konfliktů na větvi `ipad-5.3-wip`; push JEN té větve do forku (`git push origin ipad-5.3-wip`), `BLENDER_REF` NEMĚNIT; pokud zbývá čas, build v `build-5.3/` a `regress` — výsledek do STATUS.
+6b. [ ] **H22g — MP Lite: základní barvy z uzlů.** `color_type='TEXTURE'` ukáže jen Image Texture; materiál BEZ textury se kreslí barvou *Viewport Display* (`mat.diffuse_color`, výchozí šedá), NE barvou Principled BSDF ▸ Base Color. Při zapnutí MP Lite (a při load_post) pro každý materiál bez obrázku, jehož `diffuse_color` je výchozí (0.8,0.8,0.8,1), nastav `diffuse_color` = Base Color z Principled BSDF (+ metallic/roughness do `metallic`/`roughness`). Neměnit materiály, kde uživatel Viewport Display barvu už nastavil. Test: kostka s červeným Principled bez textury → v MP Lite červená (pixel test).
 7. [ ] **Na konci (nejpozději 07:30):** `bash scripts/package_itch.sh` → zip v `out/`, STATUS se shrnutím noci pro Lukáše (co otestovat na iPadu: MP Lite, EEVEE lite `?mp=1`, export/import, nový zip na itch). Teprve pak `out/.idle_stop`.
 
 
