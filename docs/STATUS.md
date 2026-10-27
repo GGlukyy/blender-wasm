@@ -1,3 +1,9 @@
+# Víkend — 27. 10. 04:10 — A: vlastní add-ony fungují (PC), čeká na tvůj test v UI
+Výsledek: ✅ na PC přes Python (`addon_custom_win.sh`, `addon_persist_win.sh`), 🟡 UI cestu jsem neklikal.
+**Co:** instalace .py i .zip add-onu, zapnutí a spuštění operátoru funguje; soubor leží v `/opfs/home/.config/blender/5.3/scripts/addons` a přežije reload. Žádná změna kódu nebyla potřeba.
+**Co otestovat na iPadu:** 📁 → nahraj zip (DropBake / Preflight) → Edit ▸ Preferences ▸ Add-ons ▸ ▾ ▸ Install from Disk → vyber `/uploads/<soubor>.zip` → zaškrtni. Po reloadu má zůstat. Add-ony s binárkami (.so/.pyd) nepůjdou.
+**Rebase 5.3:** tag `v5.3.0` zatím neexistuje (`git ls-remote`), čekám.
+
 # Víkend — 27. 10. 03:00 — R0: release zip pro itch.io je hotový
 Výsledek: ✅ (`scripts/package_itch.sh`), nic jsem nenahrával.
 **Co:** `out/itch_2026-10-27_0248.zip` (69,7 MB, žádný soubor > 45 MB). Bez Plausible, bez Puter brandingu a bez telemetrie; dole je „Neoficiální port, založeno na HeyPuter/blender-wasm“ + odkazy na zdrojáky (GPL). Obsahuje opravy H15b (Material Preview), M1 (chybějící faces), H17 (Open/Save v iframu).
