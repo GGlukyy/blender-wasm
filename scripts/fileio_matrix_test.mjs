@@ -20,6 +20,8 @@ const CASES = [
   ["svg", "bpy.ops.wm.gpencil_export_svg(filepath='/uploads/m.svg')", "m.svg"],
   ["obj_opfs_home", "bpy.ops.wm.obj_export(filepath='/opfs/home/h20.obj')", "h20.obj"],
   ["obj_cwd", "bpy.ops.wm.obj_export(filepath=os.path.join(os.getcwd(), 'h20cwd.obj'))", "h20cwd.obj"],
+  ["save_copy", "bpy.ops.wm.save_as_mainfile(filepath='/uploads/h20copy.blend', copy=True)", "h20copy.blend"],
+  ["save_as", "bpy.ops.wm.save_as_mainfile(filepath='/uploads/h20saveas.blend')", "h20saveas.blend"],
   ["image_save_as", "(lambda im: im.save_render('/uploads/m_img.png'))(bpy.data.images.new('t', 8, 8))", "m_img.png"],
 ];
 const PY = `import bpy, os, traceback
