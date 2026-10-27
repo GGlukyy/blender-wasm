@@ -1,3 +1,8 @@
+# Víkend — 27. 10. 06:15 — kontrola, beze změny
+Výsledek: 🟡 nic nového k opravě bez iPadu.
+`out/ipad/` bez nového zápisu od 01:14 (`tel_2026-10-27.jsonl`). Backlog: H15c čeká na iPad `gpuerr`, ostatní hotové na PC. Nic jsem neměnil ani nespouštěl. Rebase 5.3 čeká na tag `v5.3.0`.
+**Co otestovat na iPadu (nejdůležitější):** smaž data webu → `?tel=1&mp=1` → Material Preview: kreslí se opice? Pošli ID relace (nesmí tam být `Storage texture layout not valid`). Pak model s více materiály (chybějící faces) a v itch zipu File ▸ Open/Save.
+
 # Víkend — 27. 10. 03:30 — kontrola: čekám na iPad data
 Výsledek: 🟡 hotové věci čekají na iPad, nic dalšího bez dat nedává smysl.
 `out/ipad/` bez nového zápisu od 01:14 (relace `1lzytn`). Hotovo na PC: H15b, H15c (část), H7c, M1, H17, R0, A. Compositor GPU shadery se na webu nepřeloží (známá mezera). Rebase 5.3 čeká na tag `v5.3.0`, Cycles není cíl víkendu.
