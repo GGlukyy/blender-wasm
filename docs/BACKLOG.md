@@ -1,5 +1,8 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## 🆕 27. 10. 20:10 — upstream
+- [ ] **U1 — posoudit upstream `e73ddff` „GL backend on wink + numpy for Python add-ons“** (HeyPuter). Jen přečíst diff a zapsat, jestli se týká add-onů (numpy) nebo iPadu; nic nepřebírat bez Lukáše. Nízká priorita, nesouvisí s H1–H20. Tag `v5.3.0` Blenderu pořád neexistuje.
+
 ## 🔎 27. 10. 18:50 — iPad MP výsledek po H18 + export nefunguje (Lukáš)
 - **MP iPad (relace `m3tlmy`, `?tel=1&mp=1`, 3× zapnuto):** tex 657→**401 MB** (H18 zabrala), fps 9, `gpuerr` žádný, a **přesto** 66 s bez `pagehide` a bez `error` (proces ukončen/restart). Lukáš: „vždy to hodilo na Solid, po třetím se Blender restartoval". Závěr: textury nejsou (jen) příčina; bez Safari crash logu (potřebuje Mac + Web Inspector) další zásah naslepo. **H18 = PARKED (přestat, nic dalšího na MP iPad).** MP na iPadu zůstane vypnuté (guard H7 + jasný pruh „Material Preview je zatím jen na PC (Chrome)"). V README napsat. Znovu otevřít jen když Lukáš dodá nový důkaz.
 - Dvě relace `nklwbz`, `eq9lyu` s `CompileError: WebAssembly.Module doesn't parse at byte 0: expected a module of at least 8 bytes` = dev server servíroval `blender.wasm.zst` uprostřed přepisu při nasazení (prázdný/nedokončený soubor). **Oprava nasazení:** vždy kopírovat do dočasného jména a pak atomicky `mv` (v `scripts/` deploy kroku; stejné pro `blender.js`, `assets.tar.zst`), nikdy přímo přes cílový soubor.
