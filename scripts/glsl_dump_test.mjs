@@ -18,9 +18,9 @@ const browser = await chromium.launch({ headless: false, executablePath: process
   args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
 const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
 let errors = 0;
-const dump = []; page.on("console", (m) => { const t = m.text(); if (t.includes("GLSL_DUMP") || dump.length) { dump.push(t); if (t.includes("GLSL_DUMP_END")) { require("fs").writeFileSync("out/glsl_dump.txt", dump.join("\n")); } } if (/RuntimeError|abort\(|unreachable|memory access|tint-ICE|shaderc FAIL|WGPU_RW_STORAGE_BAD/i.test(t)) { errors++; console.log("CONSOLE-ERR " + t.slice(0, 200)); } });
+const dump = []; page.on("console", (m) => { const t = m.text(); if (t.includes("WGSL_DUMP") || dump.length) { dump.push(t); if (t.includes("WGSL_DUMP_END")) { require("fs").writeFileSync("out/glsl_dump.txt", dump.join("\n")); } } if (/RuntimeError|abort\(|unreachable|memory access|tint-ICE|shaderc FAIL|WGPU_RW_STORAGE_BAD/i.test(t)) { errors++; console.log("CONSOLE-ERR " + t.slice(0, 200)); } });
 page.on("pageerror", (e) => { errors++; console.log("PAGEERROR " + e.message.slice(0, 200)); });
-await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; window.__CAPENV = { WGPU_DUMP_GLSL_STDERR: "eevee_deferred_light_single" }; }, expr);
+await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; window.__CAPENV = { WGPU_DUMP_WGSL_STDERR: "eevee_deferred_combine" }; }, expr);
 await page.goto("http://localhost:5173/", { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
 await page.getByRole("button", { name: /Launch Blender/ }).click();
