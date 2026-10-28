@@ -1,7 +1,7 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
 ## 🌙 28. 10. 00:05 — NOČNÍ FRONTA do 08:00 (Lukáš pak 2 dny pryč, PC vypnuté). Pracuj v tomto pořadí, NEKONČI dřív, dokud je něco z toho otevřené. ŽÁDNÉ fuzz/sweep testy.
-1. [ ] **H22f** (níže) — měření SKUTEČNÉ wasm paměti v MP na PC (`wasmMemory.buffer.byteLength` čtené znovu + mallinfo). Predikce: roste-li > 2 GB, je viník na PC. Najdi ho a oprav; výsledek tabulkou do STATUS.
+1. [!] BLOCKED: čeká na iPad telemetrii (na PC heap neroste, bez měření žádná oprava) **H22f** (níže) — měření SKUTEČNÉ wasm paměti v MP na PC (`wasmMemory.buffer.byteLength` čtené znovu + mallinfo). Predikce: roste-li > 2 GB, je viník na PC. Najdi ho a oprav; výsledek tabulkou do STATUS.
 2. [x] (28. 10. 00:50: link `PTHREAD_POOL_SIZE=Module.poolSize??32`, main.js `?pool=N`, iPad (Mac UA+dotyk) výchozí 8; PC: `?pool=8` MP lite ERRORS 0 + prefs_sweep PASS, výchozí 32 shading ERRORS 0; čeká na iPad) **H22d** — pthread pool za běhu (`-sPTHREAD_POOL_SIZE=` JS výraz, `?pool=N`), na iPadu výchozí 8 (Mac UA + dotyk). Relink, regress + `prefs_sweep` s pool 8 musí projít.
 3. [x] (28. 10. 00:30, 250 shaderů, překladů 193→2 — viz H22f) **Seed MP/EEVEE shaderů** (H22f b) — regenerovat `wgsl-cache.json` z PC běhu MP + shading_fx; `seed_verify` PASS.
 4. [x] (28. 10. 01:00, NEPOTŘEBA: `wgpuDeviceCreateRenderPipeline` se volá synchronně na jednom render vlákně (webgpu_batch.cc:966/1655), žádná async/paralelní tvorba → už je „max 1 naráz“; překlad shaderů je po opravě seedu skoro 0 (H22f). Špičku paměti při tvorbě pipeline by mohl řešit jen warm-up/Solid-first, až bude iPad telemetrie) **H22c** — max 1–2 souběžné tvorby pipeline v MP; změř lag_max a heap špičku před/po.
