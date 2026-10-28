@@ -2,6 +2,7 @@
 Výsledek: ✅ (PC, jen test boot), 🟡 Material Preview na 5.3 ještě ne.
 **Co:** 29 konfliktů při merge `blender-v5.3-release` vyřešeno, opraveno ~25 API změn (GPU backend, shadery, SDNA). Větev `ipad-5.3-wip` v `GGlukyy/blender`. `master` i `BLENDER_REF` beze změny (web zůstává na 5.2).
 **Důkaz:** `scripts/boot53_win.sh` → `out/win/boot53.png` (Blender 5.3.0 Beta v Chrome, UI se kreslí). `shading_win` na 5.3: ERRORS 31 (EEVEE read_write r16float/rgba16float — stejný typ chyby jako H15 u 5.2).
+**Update 02:50:** po úpravách shaderů/backendu `shading_win` na 5.3 = ERRORS 0, ale Material Preview je ČERNÝ (`out/win/shading53_material.png`). Solid/UI OK. Nutné dál ladit (nic pro iPad).
 **Dál (na 5.3):** znovu H15 pro EEVEE MP, seed shaderů, parity, regress; pak rozhodnout o přechodu. Nic z toho nejde na iPad, dokud to nebude zelené na PC.
 
 # Víkend — 28. 10. 00:35 — H22f: seed shaderů se na webu NIKDY nenačítal (opraveno)
