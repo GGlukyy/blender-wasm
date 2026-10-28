@@ -2,6 +2,7 @@
 Výsledek: ✅ PC, 🟡 iPad neověřen.
 **H23 (Image ▸ Open nenabízel soubory z iPadu):** příčina = Blender vrací jméno operátoru jako `IMAGE_OT_open`, my hledali `image.open` → lišta „Vybrat soubory…“ se u Image/Sound/Font/Append nikdy neukázala (u `*_import` fungovala jen shodou náhod). Opraveno normalizací jména. Důkaz: `scripts/image_open_win.sh` PASS (lišta se ukáže, nahraný PNG skončí v `/uploads/`).
 **H22g (MP Lite barvy):** materiál bez textury se teď kreslí barvou Base Color z Principled BSDF (jen když je Viewport Display výchozí šedá). Důkaz: `scripts/mp_lite_color_win.sh` PASS (červená kostka, 75 972 červených px).
+**Nový zip pro itch:** `out/itch_2026-10-28_0645.zip` (nahraješ ty).
 **Co otestovat na iPadu:** (1) Image Editor / Texture Paint ▸ Image ▸ Open → nahoře se ukáže modrá lišta „Soubor z počítače“ → vyber obrázek → ukáže se v seznamu. (2) Materiál s červenou Base Color bez textury → Material Preview (MP Lite) je červený.
 
 # 28. 10. ráno — opraven Workbench Shadow na webu (model už nemizí)
