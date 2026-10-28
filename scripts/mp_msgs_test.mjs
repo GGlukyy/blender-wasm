@@ -17,7 +17,7 @@ const browser = await chromium.launch({ headless: false, executablePath: process
   args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
 const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
 let errors = 0;
-const seen = new Map(); page.on("console", (m) => { const t = m.text(); if (/alidation|nvalid|rror|FAIL|mismatch|not bound|missing/i.test(t) && !/WGPU_RP /.test(t)) { const k = t.replace(/[0-9]+/g, "#").slice(0, 160); seen.set(k, (seen.get(k) || 0) + 1); if (seen.get(k) === 1) console.log("MSG " + t.slice(0, 400)); } if (/RuntimeError|abort\(|unreachable|memory access|tint-ICE|shaderc FAIL|WGPU_RW_STORAGE_BAD/i.test(t)) { errors++; console.log("CONSOLE-ERR " + t.slice(0, 200)); } });
+let ucn = 0; const seen = new Map(); page.on("console", (m) => { const t = m.text(); if (t.includes("UNCAPTURED") && ucn++ < 12) console.log("UNC " + t.slice(0, 1500)); if (/alidation|nvalid|rror|FAIL|mismatch|not bound|missing/i.test(t) && !/WGPU_RP /.test(t)) { const k = t.replace(/[0-9]+/g, "#").slice(0, 160); seen.set(k, (seen.get(k) || 0) + 1); if (seen.get(k) === 1) console.log("MSG " + t.slice(0, 400)); } if (/RuntimeError|abort\(|unreachable|memory access|tint-ICE|shaderc FAIL|WGPU_RW_STORAGE_BAD/i.test(t)) { errors++; console.log("CONSOLE-ERR " + t.slice(0, 200)); } });
 page.on("pageerror", (e) => { errors++; console.log("PAGEERROR " + e.message.slice(0, 200)); });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
 await page.goto("http://localhost:5173/", { waitUntil: "load" });

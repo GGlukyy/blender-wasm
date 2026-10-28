@@ -7,7 +7,7 @@ Výsledek: ✅ H22a/b/d/e + seed + oprava override hotové na PC; 🟡 nic z toh
 3. Obecně: jestli stránka vydrží déle než dřív (pád po ~30–40 s).
 **Víme:** na PC wasm heap v MP neroste (1024 MB), jetsam 5,1 GB je pořád záhada → telemetrie po 1 s v MP to doplní.
 **Nezkoušeno / neuděláno:** H22f(c) 1 vlákno překladu, (d) MAXIMUM_MEMORY 2,5 GB; Workbench Shadow na webu schová model (nález); Cycles čas renderu (OOM v nodu).
-**5.3:** větev `ipad-5.3-wip` v forku se přeloží, slinkuje, naběhne (UI OK), MP prázdný — viz BACKLOG N1b. `BLENDER_REF` zůstává na 5.2.
+**5.3:** větev `ipad-5.3-wip` se přeloží, slinkuje, naběhne a **Material Preview se už kreslí** (`out/win/shading53c_material.png`, opice je ale tmavá) — viz BACKLOG N1b. `BLENDER_REF` zůstává na 5.2.
 
 # Víkend — 28. 10. 02:35 — oprava řetězených `override` v shaderech (WGSL) i na 5.2
 Výsledek: ✅ PC, 🟡 iPad neověřen.
