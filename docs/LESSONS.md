@@ -38,3 +38,5 @@
 - 26. 10.: Sculpt pád: příčina byla v PC měření, ne v hádání — `sculpt_mem_win.sh` (buf_mb po 10 s) ukázal lineární růst živých bufferů; `GHIST` (hist/hbytes podle labelu) hned označil `uniform_arena`. Pak 1 fprintf v `wgpu_flush_buffer_frees` (limit/pending) vyloučil blokované uvolňování → viník = kontexty, které nikdy nevolají `uniform_arena_reset`. Při ladění ve vedlejším namespace pozor na `extern` (špatný namespace = chyba až při linku). `ninja bf_gpu` + `link_blender_release.sh` ≈ 3 min.
 
 - WebGPU `tier1` (Safari) = storage textury jen `write`; `read_write`/`read` pro r16float atd. chce tier2. Hledej `texture_storage_*<fmt, read_write>` v seed WGSL. Wireframe: `override` v Safari nefunguje → vše přepsat na `const` (H14, potvrzeno iPadem).
+
+- 28. 10.: ~2 h ztraceno honěním „nedeterministického“ renderu na 5.3 — build byl rozbitý (duplicitní metoda), ale `ninja … | grep error | head` chybu zahodil a link použil starou knihovnu. Po každém buildu zkontrolovat `ninja` výstup (`FAILED`) a že nový řetězec je ve wasm (`zstd -dc … | grep -a`). Také: `WebGPUTexture::mip_min_` stínilo `Texture::mip_min_` (mip views = mip 0).

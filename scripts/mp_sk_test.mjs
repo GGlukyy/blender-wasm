@@ -17,7 +17,7 @@ const browser = await chromium.launch({ headless: false, executablePath: process
   args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
 const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
 let errors = 0;
-const sk = new Set(); page.on("console", (m) => { const t = m.text(); if (/skip|drop|SKIP|DROP|unsupported|not supported|BAD|mismatch|WGPU_DISPATCH/.test(t) && sk.size < 40 && !sk.has(t.slice(0,120))) { sk.add(t.slice(0,120)); console.log("SK " + t.slice(0, 260)); } if (/RuntimeError|abort\(|unreachable|memory access|tint-ICE|shaderc FAIL|WGPU_RW_STORAGE_BAD/i.test(t)) { errors++; console.log("CONSOLE-ERR " + t.slice(0, 200)); } });
+const sk = new Set(); page.on("console", (m) => { const t = m.text(); if (/WGPU_VIEW/.test(t) && sk.size < 200 && true) { sk.add(t.slice(0,120)); console.log("SK " + t.slice(0, 260)); } if (/RuntimeError|abort\(|unreachable|memory access|tint-ICE|shaderc FAIL|WGPU_RW_STORAGE_BAD/i.test(t)) { errors++; console.log("CONSOLE-ERR " + t.slice(0, 200)); } });
 page.on("pageerror", (e) => { errors++; console.log("PAGEERROR " + e.message.slice(0, 200)); });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
 await page.goto("http://localhost:5173/", { waitUntil: "load" });
