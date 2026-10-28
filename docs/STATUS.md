@@ -1,3 +1,9 @@
+# Víkend — 28. 10. 02:35 — oprava řetězených `override` v shaderech (WGSL) i na 5.2
+Výsledek: ✅ PC, 🟡 iPad neověřen.
+**Co:** při portu 5.3 se ukázalo, že `wgsl_inline_computed_overrides` (obejití chyby Safari 275010) nechává v shaderu nedeklarovanou proměnnou, když jeden spočítaný `override` odkazuje na druhý (`v_2 = v_1 & x`). Opraveno (fork ipad, BLENDER_REF → nový commit). Na 5.2 jsem takovou chybu ještě neviděl (shading_win ERRORS 0 už předtím), ale na iPadu by to byl „Invalid pipeline“ u složitějších EEVEE shaderů.
+**Důkaz:** PC: shading_win ERRORS 0, mp_lite PASS, parity 0 ❌ s novým buildem. 5.3: chyba `unresolved value 'v_1'` u `eevee_deferred_combine` zmizela.
+**iPad:** stejný test jako dřív (`?mp=1&tel=1`), nové je jen to, že se víc shaderů dá přeložit.
+
 # Víkend — 28. 10. 01:35 — N1b: Blender 5.3 se na webu přeložil, slinkoval a naběhl
 Výsledek: ✅ (PC, jen test boot), 🟡 Material Preview na 5.3 ještě ne.
 **Co:** 29 konfliktů při merge `blender-v5.3-release` vyřešeno, opraveno ~25 API změn (GPU backend, shadery, SDNA). Větev `ipad-5.3-wip` v `GGlukyy/blender`. `master` i `BLENDER_REF` beze změny (web zůstává na 5.2).
