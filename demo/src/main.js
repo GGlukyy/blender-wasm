@@ -1181,7 +1181,9 @@ if '${MP_GUARD}' == '1': bpy.app.timers.register(_mp_guard, first_interval=1.0, 
 # soubory do /uploads a zapíše /tmp/web_pick.txt (adresář + jména) → tady je nastavíme do file browseru.
 _imp = {'seen': set()}
 def _is_import_op(idn):
-    return ('import' in idn or idn in {'image.open', 'sound.open', 'clip.open', 'text.open', 'wm.append', 'wm.link'}) and 'export' not in idn
+    # H23: SpaceFileBrowser.active_operator.bl_idname je ve tvaru 'IMAGE_OT_open' (ne 'image.open') → normalizuj.
+    idn = idn.lower().replace('_ot_', '.')
+    return ('import' in idn or idn in {'image.open', 'image.replace', 'sound.open', 'clip.open', 'text.open', 'font.open', 'volume.open', 'cachefile.open', 'wm.append', 'wm.link'}) and 'export' not in idn
 def _import_assist():
     try:
         cur = set()
@@ -1195,7 +1197,7 @@ def _import_assist():
                     if sp.type != 'FILE_BROWSER' or sp.active_operator is None or not _is_import_op(sp.active_operator.bl_idname): continue
                     key = sp.as_pointer(); cur.add(key)
                     if key not in _imp['seen']:
-                        _imp['seen'].add(key); print('WEB_FILE_IMPORT ' + sp.active_operator.bl_idname, flush=True)
+                        _imp['seen'].add(key); print('WEB_FILE_IMPORT ' + sp.active_operator.bl_idname.lower().replace('_ot_', '.'), flush=True)
                     if pick and len(pick) > 1:
                         sp.params.directory = pick[0].encode(); sp.params.filename = pick[1]
                         print('WEB_FILE_IMPORT_PICKED ' + pick[0] + ' ' + str(len(pick) - 1), flush=True)
