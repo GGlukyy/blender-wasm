@@ -1,5 +1,9 @@
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
+## ⚡ 28. 10. 09:45 — RYCHLÝ ÚKOL (jediný v tomto běhu)
+- [ ] **H24 — Add-ons ▸ Install from Disk nenabízí soubor z počítače/iPadu.** Oprava (už v `demo/src/main.js`, `_is_import_op`): operátory s `install` v názvu (`extensions.package_install_files`, `preferences.addon_install`, `theme/studiolight/app_template_install`) dostanou stejnou lištu jako import (H19/H23). **Úkol smyčky:** jen ověřit klikací cestou v UI testem `scripts/addon_install_ui_win.sh` (Preferences ▸ Add-ons ▸ ▾ ▸ Install from Disk → lišta se ukáže → nahraný .zip/.py v `/uploads` → Install → add-on zapnutý), v iframu i mimo, Safari emulace (`?ipad=1`). Pak `bash scripts/package_itch.sh`, STATUS, `out/.idle_stop`. Nic jiného nedělat.
+
+
 ## 🌙 28. 10. 00:05 — NOČNÍ FRONTA do 08:00 (Lukáš pak 2 dny pryč, PC vypnuté). Pracuj v tomto pořadí, NEKONČI dřív, dokud je něco z toho otevřené. ŽÁDNÉ fuzz/sweep testy.
 1. [!] BLOCKED: čeká na iPad telemetrii (na PC heap neroste, bez měření žádná oprava) **H22f** (níže) — měření SKUTEČNÉ wasm paměti v MP na PC (`wasmMemory.buffer.byteLength` čtené znovu + mallinfo). Predikce: roste-li > 2 GB, je viník na PC. Najdi ho a oprav; výsledek tabulkou do STATUS.
 2. [x] (28. 10. 00:50: link `PTHREAD_POOL_SIZE=Module.poolSize??32`, main.js `?pool=N`, iPad (Mac UA+dotyk) výchozí 8; PC: `?pool=8` MP lite ERRORS 0 + prefs_sweep PASS, výchozí 32 shading ERRORS 0; čeká na iPad) **H22d** — pthread pool za běhu (`-sPTHREAD_POOL_SIZE=` JS výraz, `?pool=N`), na iPadu výchozí 8 (Mac UA + dotyk). Relink, regress + `prefs_sweep` s pool 8 musí projít.

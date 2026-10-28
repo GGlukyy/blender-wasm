@@ -1183,7 +1183,9 @@ _imp = {'seen': set()}
 def _is_import_op(idn):
     # H23: SpaceFileBrowser.active_operator.bl_idname je ve tvaru 'IMAGE_OT_open' (ne 'image.open') → normalizuj.
     idn = idn.lower().replace('_ot_', '.')
-    return ('import' in idn or idn in {'image.open', 'image.replace', 'sound.open', 'clip.open', 'text.open', 'font.open', 'volume.open', 'cachefile.open', 'wm.append', 'wm.link'}) and 'export' not in idn
+    # H24: Preferences ▸ Add-ons/Extensions ▸ Install from Disk (extensions.package_install_files, preferences.addon_install,
+    # theme/studiolight/app_template_install) je taky čtecí file browser → stejná lišta „Vybrat soubory z počítače“.
+    return ('import' in idn or 'install' in idn or idn in {'image.open', 'image.replace', 'sound.open', 'clip.open', 'text.open', 'font.open', 'volume.open', 'cachefile.open', 'wm.append', 'wm.link'}) and 'export' not in idn
 def _import_assist():
     try:
         cur = set()
