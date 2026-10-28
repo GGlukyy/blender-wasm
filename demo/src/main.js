@@ -1148,6 +1148,18 @@ try:
     if float('${UNDO_MB}') > 0 and bpy.context.preferences.edit.undo_memory_limit == 0: bpy.context.preferences.edit.undo_memory_limit = int(float('${UNDO_MB}'))
 except Exception as e: print('UNDOMEM ERR', e)
 # H7: na iPadu zatím Material Preview/Rendered shazuje GPU → místo toho Solid „MP Lite“ (H22a) + hláška (JS ji zachytí z WEB_MP_BLOCKED).
+def _mp_lite_colors(*a):
+    # H22g: Workbench kreslí barvu Viewport Display (diffuse_color), ne Base Color z uzlů → u výchozí šedé ji vezmi z Principled BSDF.
+    try:
+        for m in bpy.data.materials:
+            if not m.use_nodes or not m.node_tree or tuple(round(c, 3) for c in m.diffuse_color) != (0.8, 0.8, 0.8, 1.0): continue
+            bsdf = next((n for n in m.node_tree.nodes if n.type == 'BSDF_PRINCIPLED'), None)
+            if not bsdf: continue
+            bc = bsdf.inputs['Base Color']
+            if bc.is_linked: continue
+            m.diffuse_color = tuple(bc.default_value)
+            m.metallic = bsdf.inputs['Metallic'].default_value; m.roughness = bsdf.inputs['Roughness'].default_value
+    except Exception as e: print('MPLITE_COLORS ERR', e)
 def _mp_guard():
     try:
         for win in bpy.context.window_manager.windows:
@@ -1155,6 +1167,7 @@ def _mp_guard():
                 if a.type == 'VIEW_3D':
                     for sp in a.spaces:
                         if sp.type == 'VIEW_3D' and sp.shading.type in {'MATERIAL', 'RENDERED'}:
+                            _mp_lite_colors()
                             sh = sp.shading; sh.type = 'SOLID'
                             # H22a „MP Lite“: Workbench s texturami z materiálů, studiové světlo, bez EEVEE
                             sh.light = 'STUDIO'; sh.color_type = 'TEXTURE'; sh.show_specular_highlight = True
