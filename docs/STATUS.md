@@ -1,3 +1,14 @@
+# NOC 27.→28. 10. — shrnutí pro Lukáše (konec 02:40)
+Výsledek: ✅ H22a/b/d/e + seed + oprava override hotové na PC; 🟡 nic z toho nevyzkoušeno na iPadu; 🟡 5.3 běží, ale MP je tam prázdný.
+**Nový zip pro itch:** `out/itch_2026-10-28_0236.zip` (70 MB; nenahrávám, nahraješ ty).
+**Co otestovat na iPadu (důležitost shora):**
+1. Odkaz `…/?mp=1&tel=1` (smaž data webu / soukromý tab): jednoduchá scéna, Material Preview. Změny: seed shaderů se konečně načítá (méně překladů), jen 8 workerů, EEVEE „lite“ (půl rozlišení, bez stínů), opravené řetězené override. Pošli ID relace; zkus i `&mppx=4`.
+2. Odkaz bez `?mp=1`: Material Preview → místo šedého Solidu „MP Lite“ (barvy/textury, Studio světlo) + hláška.
+3. Obecně: jestli stránka vydrží déle než dřív (pád po ~30–40 s).
+**Víme:** na PC wasm heap v MP neroste (1024 MB), jetsam 5,1 GB je pořád záhada → telemetrie po 1 s v MP to doplní.
+**Nezkoušeno / neuděláno:** H22f(c) 1 vlákno překladu, (d) MAXIMUM_MEMORY 2,5 GB; Workbench Shadow na webu schová model (nález); Cycles čas renderu (OOM v nodu).
+**5.3:** větev `ipad-5.3-wip` v forku se přeloží, slinkuje, naběhne (UI OK), MP prázdný — viz BACKLOG N1b. `BLENDER_REF` zůstává na 5.2.
+
 # Víkend — 28. 10. 02:35 — oprava řetězených `override` v shaderech (WGSL) i na 5.2
 Výsledek: ✅ PC, 🟡 iPad neověřen.
 **Co:** při portu 5.3 se ukázalo, že `wgsl_inline_computed_overrides` (obejití chyby Safari 275010) nechává v shaderu nedeklarovanou proměnnou, když jeden spočítaný `override` odkazuje na druhý (`v_2 = v_1 & x`). Opraveno (fork ipad, BLENDER_REF → nový commit). Na 5.2 jsem takovou chybu ještě neviděl (shading_win ERRORS 0 už předtím), ale na iPadu by to byl „Invalid pipeline“ u složitějších EEVEE shaderů.
