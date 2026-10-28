@@ -489,7 +489,7 @@ const showMpBlocked = () => {
     n.id = "mp-note";
     n.style.cssText = "position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:99997;background:rgba(90,50,10,.95);" +
       "color:#fff;font:15px system-ui,sans-serif;padding:8px 14px;border-radius:8px;max-width:92vw";
-    n.textContent = "Material Preview je na iPadu zatím vypnutý — dostal jsi „MP Lite“ (Solid s texturami a světlem). Plný MP na vlastní riziko: přidej ?mp=1 do adresy.";
+    n.textContent = "Material Preview je na iPadu zatím vypnutý — dostal jsi „MP Lite“ (Solid s texturami, světlem a stíny). Plný MP na vlastní riziko: přidej ?mp=1 do adresy.";
     document.body.appendChild(n);
   }
   n.style.display = "block";
@@ -1156,9 +1156,9 @@ def _mp_guard():
                     for sp in a.spaces:
                         if sp.type == 'VIEW_3D' and sp.shading.type in {'MATERIAL', 'RENDERED'}:
                             sh = sp.shading; sh.type = 'SOLID'
-                            # H22a „MP Lite“: Workbench s texturami z materiálů, studiové světlo, bez EEVEE (show_shadows NE: na webu zmizí model, viz BACKLOG H22a)
+                            # H22a „MP Lite“: Workbench s texturami z materiálů, studiové světlo, bez EEVEE
                             sh.light = 'STUDIO'; sh.color_type = 'TEXTURE'; sh.show_specular_highlight = True
-                            sh.show_shadows = False; sh.show_cavity = True; sh.use_dof = False
+                            sh.show_shadows = True; sh.show_cavity = True; sh.use_dof = False
                             print('WEB_MP_BLOCKED', flush=True)
     except Exception as e: print('MPGUARD ERR', e)
     return 0.5

@@ -1,3 +1,8 @@
+# 28. 10. ráno — opraven Workbench Shadow na webu (model už nemizí)
+Výsledek: ✅ PC (shading ERRORS 0, mp_lite PASS, parity 0 ❌), 🟡 iPad neověřen.
+**Co:** shader stínů ve Workbenchi vzorkoval stencil jako uint z textury Depth32FloatStencil8 → neplatná bind group → celý snímek zahozen. Teď dostane StencilOnly view. MP Lite má stíny zpět. Stejná chyba mohla shazovat i jiné Workbench stíny.
+**iPad:** Solid + Shadow (Viewport Shading ▸ Shadow) má ukazovat stíny; model se nesmí ztratit.
+
 # NOC 27.→28. 10. — shrnutí pro Lukáše (konec 02:40)
 Výsledek: ✅ H22a/b/d/e + seed + oprava override hotové na PC; 🟡 nic z toho nevyzkoušeno na iPadu; 🟡 5.3 běží, ale MP je tam prázdný.
 **Nový zip pro itch:** `out/itch_2026-10-28_0236.zip` (70 MB; nenahrávám, nahraješ ty).

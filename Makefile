@@ -12,7 +12,7 @@
 
 ROOT          := $(CURDIR)
 BLENDER_URL   := https://github.com/GGlukyy/blender
-BLENDER_REF := fc730916
+BLENDER_REF := bf714cb3
 # NOTE: ':=' (not '?=') so a stale exported EMSDK in the environment cannot
 # point us at the wrong tree. Command-line `make EMSDK=...` still overrides.
 EMSDK         := $(ROOT)/emsdk
