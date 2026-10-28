@@ -2,6 +2,7 @@
 Výsledek: ✅ PC (shading ERRORS 0, mp_lite PASS, parity 0 ❌), 🟡 iPad neověřen.
 **Co:** shader stínů ve Workbenchi vzorkoval stencil jako uint z textury Depth32FloatStencil8 → neplatná bind group → celý snímek zahozen. Teď dostane StencilOnly view. MP Lite má stíny zpět. Stejná chyba mohla shazovat i jiné Workbench stíny.
 **Hledání dalších chyb:** přepínání voleb Solidu (cavity, x-ray, outline, matcap, DOF, backface…) a průchod všemi workspace/mody → 0 WebGPU validačních chyb (`scripts/opts_msgs_win.sh`, `ws_sweep_win.sh`). Zůstává 1× `WGPU_MAP sync map failed` při startu (nevadí).
+**Start:** PC Chrome 11 s od kliknutí na Launch do okna Blenderu (`scripts/boot_time_win.sh`, baseline pro porovnání s iPadem).
 **iPad:** Solid + Shadow (Viewport Shading ▸ Shadow) má ukazovat stíny; model se nesmí ztratit.
 
 # NOC 27.→28. 10. — shrnutí pro Lukáše (konec 02:40)
