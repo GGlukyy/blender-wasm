@@ -53,3 +53,5 @@
 # local outputs (logs, captures)
 /out/
 /blender-5.3/
+build-5.3/
+demo/.stage53/
