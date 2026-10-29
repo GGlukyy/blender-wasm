@@ -60,5 +60,18 @@ def tick():
         bpy.context.view_layer.objects.active = c
         bpy.ops.object.mode_set(mode='WEIGHT_PAINT'); bpy.ops.object.mode_set(mode='OBJECT')
     step('weight paint toggle', wp)
+    def final():
+        target = rig or bpy.data.objects['metarig']
+        bpy.context.view_layer.objects.active = target
+        bpy.ops.object.mode_set(mode='POSE')
+        pb = target.pose.bones.get('upper_arm_fk.L') or target.pose.bones.get('upper_arm.L')
+        pb.rotation_mode = 'XYZ'; pb.rotation_euler = (0, 0, 1.2)
+        for a in bpy.context.window_manager.windows[0].screen.areas:
+            if a.type == 'VIEW_3D':
+                with bpy.context.temp_override(area=a, region=[r for r in a.regions if r.type == 'WINDOW'][0]):
+                    bpy.ops.view3d.view_all()
+        bpy.context.view_layer.update()
+        return pb.name
+    step('final pose + frame', final)
     out('OPS_DONE')
 bpy.app.timers.register(lambda: (tick(), None)[1], first_interval=8.0)
