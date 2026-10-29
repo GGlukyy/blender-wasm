@@ -1,3 +1,18 @@
+# Víkend — 30. 10. 00:55 — noční fronta T1–T5 (5 GB v MP)
+Výsledek: ✅ PC, 🟡 iPad neověřen (nic z toho jsem na iPadu nemohl vyzkoušet).
+**Co jsem udělal**
+- **T1 měření PC** (`scripts/t1_procmem_win.sh solid|mp|mpslow|mpslowbp`): paměť renderer procesu Chrome je v Solid, MP i MP se zpomaleným GPU (`dpr=3`, `mppx=1`) **plochá ~2,7–3,0 GB**, GPU proces roste jen při přepnutí do MP. Na PC se tedy 5 GB **nereprodukuje** (statická scéna, rychlé GPU).
+- **T2 telemetrie** (fork 2ef91965): ve vzorku `gpu` přibyly `q_depth`, `q_depth_max`, `submits`, `completed`, `write_mb`, `write_mb_s`, `map_n`, `map_mb`, `pipelines_created`, `wgpu_live`, `pending_free`. Na PC dávají smysl (při přepnutí do MP `q_depth_max` 94, pak 0).
+- **T3 backpressure** (fork, `BLENDER_REF` aktualizován): když je ve frontě GPU ≥ 2 snímky, přeskočí se `wm_draw_update` (události se zpracovávají dál; max 120 přeskočení v řadě kvůli pojistce). **Na iPadu zapnuto, `?bp=0` vypne, `?bp=1` zapne na PC.** Důkaz PC: `q_depth_max` 94 → 1 při MP se zpomaleným GPU, parity_win s `?bp=1` 0 ❌. Nespouštěl jsem celý regress_all ani fps test Solidu (omezený rozsah).
+- **T4 / H24** (jen JS/Python, `demo/src/main.js`): Install from Disk už nespouští podproces, `blender_ext.py` běží v procesu; navíc fallback pro `os.rename` adresáře na OPFS („Resource busy“). Důkaz: `scripts/ext_install_win.sh` PASS (extension .zip s manifestem se nainstaluje a operátor se zaregistruje). Nezkoušeno: přežití reloadu, stahování z internetu (Sync repozitářů), legacy .zip přes toto tlačítko (ten už šel přes `addon_install`).
+- **T5 / H25** (`scripts/rig_win.sh`): na PC projde Rigify enable → Human metarig → Generate → Ctrl+P Automatic Weights (160 skupin) → Pose → Weight Paint. Operátory fungují; **vizuál a dotyk jsem neviděl**. Pravidlo 3b (porovnání s desktopem) nesplněno — to musíš ty.
+**Nový zip pro itch:** `out/itch_2026-10-30_0051.zip` (nahraješ ty).
+**Co otestovat na iPadu (podle důležitosti)**
+1. `?mp=1&tel=1` na 2 min v Material Preview → pošli ID relace. Pak totéž s `&bp=0`. V telemetrii hledám `q_depth`, `wgpu_live`, `write_mb_s` (predikce A: bez bp `q_depth` roste; s bp ≤ 2 a tab přežije). Pokud padá i s bp → hypotéza A neplatí, pak B (`wgpu_live` roste) nebo T6.
+2. Preferences ▸ Add-ons ▸ Install from Disk ▸ vyber extension .zip → nainstaluje se a zapne.
+3. Rigify: napiš mi konkrétní kroky, kde je „zabugované“, a screenshot.
+**Co dál:** T6 (malý MP náhled) jen pokud bp nestačí. Čekám na iPad data.
+
 # Víkend — 28. 10. 07:25 — H23 + H22g (JS, bez rebuildu)
 Výsledek: ✅ PC, 🟡 iPad neověřen.
 **H23 (Image ▸ Open nenabízel soubory z iPadu):** příčina = Blender vrací jméno operátoru jako `IMAGE_OT_open`, my hledali `image.open` → lišta „Vybrat soubory…“ se u Image/Sound/Font/Append nikdy neukázala (u `*_import` fungovala jen shodou náhod). Opraveno normalizací jména. Důkaz: `scripts/image_open_win.sh` PASS (lišta se ukáže, nahraný PNG skončí v `/uploads/`).
