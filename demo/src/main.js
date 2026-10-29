@@ -1176,6 +1176,54 @@ def _mp_guard():
     except Exception as e: print('MPGUARD ERR', e)
     return 0.5
 if '${MP_GUARD}' == '1': bpy.app.timers.register(_mp_guard, first_interval=1.0, persistent=True)
+# H24: bl_pkg (Extensions ▸ Install from Disk / Install) spouští blender_ext.py jako podproces → na webu OSError 138
+# (emscripten nepodporuje procesy). Nahraď command_output_from_json_0 verzí, která CLI spustí V PROCESU a vrátí stejné zprávy.
+def _bl_pkg_inproc(args, use_idle, *, python_args):
+    import io, json, contextlib
+    import bl_pkg.bl_extension_utils as U
+    E = U._web_ext
+    buf = io.StringIO(); code = 1
+    import shutil
+    _o_rename, _o_replace = _os.rename, _os.replace
+    def _mv(src, dst, *a, _orig=_o_rename, **k):
+        # OPFS (wasmfs) neumí přejmenovat adresář („Resource busy“) → zkopíruj a smaž.
+        try: return _orig(src, dst, *a, **k)
+        except OSError:
+            if _os.path.isdir(src):
+                shutil.copytree(src, dst); shutil.rmtree(src)
+            else:
+                shutil.copy2(src, dst); _os.remove(src)
+    _os.rename = _os.replace = _mv
+    try:
+        with contextlib.redirect_stdout(buf):
+            code = E.main([*args, '--output-type=JSON_0'])
+    except SystemExit as e: code = e.code
+    except BaseException as e:
+        buf.write(json.dumps(['ERROR', 'blender_ext in-process: ' + repr(e)]) + chr(0))
+    finally:
+        _os.rename, _os.replace = _o_rename, _o_replace
+    msgs = []
+    for part in buf.getvalue().split(chr(0)):
+        if part.strip():
+            j = json.loads(part); msgs.append((j[0], j[1]))
+    print('BL_PKG inproc', args[0] if args else '', 'exit', code, 'msgs', len(msgs), flush=True)
+    for m in msgs: print('BL_PKG msg', str(m)[:130], flush=True)
+    yield msgs
+def _patch_bl_pkg():
+    try:
+        import importlib.util, sys as _sys
+        import bl_pkg.bl_extension_utils as U
+        if getattr(U, '_web_ext', None) is not None: return None
+        path = _os.path.join(U.BASE_DIR, 'cli', 'blender_ext.py')
+        spec = importlib.util.spec_from_file_location('blender_ext_inproc', path)
+        mod = importlib.util.module_from_spec(spec); _sys.modules['blender_ext_inproc'] = mod; spec.loader.exec_module(mod)
+        U._web_ext = mod; U.command_output_from_json_0 = _bl_pkg_inproc
+        print('BL_PKG patched (in-process blender_ext)', flush=True)
+        return None
+    except ImportError: return 2.0
+    except Exception as e:
+        print('BL_PKG patch ERR', e, flush=True); return None
+bpy.app.timers.register(_patch_bl_pkg, first_interval=1.0, persistent=True)
 # H19: import operátory (File ▸ Import, Image ▸ Open, Append…) otevřou vnitřní file browser, který vidí jen wasm FS.
 # Pokud takový browser vznikne, řekni stránce (WEB_FILE_IMPORT → tlačítko „Vybrat soubory z počítače“); stránka nahraje
 # soubory do /uploads a zapíše /tmp/web_pick.txt (adresář + jména) → tady je nastavíme do file browseru.
