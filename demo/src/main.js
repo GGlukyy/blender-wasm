@@ -1342,6 +1342,8 @@ window.Module = {
       ENV.WGSL_SEED_URL = new URL("wgsl-cache.json", location.href).href; /* H22f: worker si relativní URL neumí složit */
       if (window.__CAPENV) for (const k in window.__CAPENV) ENV[k] = window.__CAPENV[k];
       ENV.WGPU_PERF = "1"; /* cheap; also feeds the memory guard */
+      { const _q = new URLSearchParams(location.search); /* T3: max 2 snímky v GPU frontě; iPad default zapnuto, ?bp=0 vypne, ?bp=1 zapne na PC */
+        const _bp = _q.get("bp"); if (_bp === "1" || (_bp !== "0" && (_q.get("ipad") === "1" || _isIpadUA))) ENV.WGPU_BP = "1"; }
       if (new URLSearchParams(location.search).get("perf") === "1" && new URLSearchParams(location.search).get("reglog") === "1") ENV.WGPU_REGIONLOG = "1";
       if (new URLSearchParams(location.search).get("passlog") === "1") ENV.WGPU_PASSLOG = "1";
       if (new URLSearchParams(location.search).get("nocompute") === "1") ENV.WGPU_NO_COMPUTE = "1";

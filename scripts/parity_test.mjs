@@ -42,7 +42,7 @@ async function boot(tag, env) {
   if (process.env.PARITY_NDU) env = { ...(env || {}), WGPU_NO_DESTROY_USAGE: process.env.PARITY_NDU };
   if (process.env.PARITY_ND) env = { ...(env || {}), WGPU_NO_DESTROY: process.env.PARITY_ND };  // buf|tex|all: ladění M2
   if (env) await page.addInitScript((e) => { window.__CAPENV = e; }, env);
-  await page.goto("http://localhost:5173/", { waitUntil: "load" });
+  await page.goto("http://localhost:5173/" + (process.env.PARITY_BP === "1" ? "?bp=1" : ""), { waitUntil: "load" });
   await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
   await page.getByRole("button", { name: /Launch Blender/ }).click();
   for (let i = 0; i < 300; i++) { if ((await page.evaluate(() => window.__BGUI__ || {})).window) break; await wait(1000); }
