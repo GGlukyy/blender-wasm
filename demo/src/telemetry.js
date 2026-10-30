@@ -58,6 +58,23 @@ export function installTelemetry() {
   for (const ev of ["keydown", "pointerdown"]) {
     addEventListener(ev, (e) => inputs.push(Math.round(performance.now() - t0) + " " + ev + " " + (e.key || e.pointerType + ":" + e.button)), true);
   }
+  /* D1: render-thread heartbeat (shared wasm memory, see gpu/webgpu/webgpu_heartbeat.hh). Read on the
+   * main thread so it is still reported when the render pthread is frozen. */
+  const PHASES = ["", "draw", "shader_module", "pipeline", "map_read", "submit", "present"];
+  let hbPtr = 0, hbSeq = -1, hbSince = 0;
+  const heartbeat = (o) => {
+    const M = window.Module;
+    if (!M || !M.ccall) return;
+    if (!hbPtr) hbPtr = M.ccall("wgpu_hb_ptr", "number", [], []);
+    if (!hbPtr) return;
+    const buf = M.HEAPU8.buffer; /* HEAPU8 is exported; M.wasmMemory is not (touching it aborts) */
+    const hb = new Uint32Array(buf, hbPtr, 8);
+    const seq = Atomics.load(hb, 0), now = performance.now();
+    if (seq !== hbSeq) { hbSeq = seq; hbSince = now; }
+    o.rt_frame = Atomics.load(hb, 1); o.rt_phase = PHASES[Atomics.load(hb, 2)] || "?";
+    o.rt_phase_ms = Math.round(now - hbSince); o.rt_malloc_mb = Math.round(Atomics.load(hb, 4) / 1048576);
+    o.main_heap_mb = Math.round(buf.byteLength / 1048576);
+  };
   const sample = () => {
     const o = { kind: "sample", vis: document.visibilityState, logs: logs.all(), inputs: inputs.all() };
     if (perf) {
@@ -66,6 +83,7 @@ export function installTelemetry() {
       o.imm_bufs = perf.imm_bufs; o.imm_kb = perf.imm_kb; o.heap_mb = Math.round(perf.heap_mb); o.heap_used_mb = Math.round(perf.heap_used_mb);
     }
     if (gmem) o.gpu = gmem;
+    try { heartbeat(o); } catch (e) { o.rt_err = String(e).slice(0, 80); }
     if (performance.memory) { o.js_used_mb = Math.round(performance.memory.usedJSHeapSize / 1048576); o.js_total_mb = Math.round(performance.memory.totalJSHeapSize / 1048576); }
     send(o);
   };
