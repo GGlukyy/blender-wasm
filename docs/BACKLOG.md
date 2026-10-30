@@ -4,7 +4,7 @@ Cíl: AI místo "přetáhni světlo" dá odkaz, např. `https://…/?mp=1&tel=1&
 - [ ] A1b: scénáře: `light` (přepnout na MP/EEVEE, pohnout světlem v 10 krocích, pauza 1 s mezi nimi), `orbit` (otáčení pohledu), `mp` (jen přepnout na MP a čekat 60 s). Každý krok pošle `telEvent("auto_step", {name})`, na konci `auto_done`.
 - [ ] A1c: ipad_wait.py ať končí i na `auto_done`. WEEKEND.md: místo `ask.txt` s textem dát URL s `&auto=`.
 - Pozor: pokud se scénář nedá spolehlivě na PC reprodukovat, napsat do STATUS.md proč a nechat ASK pruh.
-Priorita: až po D3a (wasm stack), klidně souběžně s čekáním na build.
+PRIORITA (Lukáš 12:51): A1a ZAČNI HNED, jako první úkol. Důvod: zrychlí všechno další, D3 se pak dá testovat opakovaně bez jeho rukou. D3a (relink s názvy funkcí) pusť souběžně na pozadí, zatímco čekáš na buildy.
 
 ## D4 — EEVEE (Material Preview): Z-fighting na výchozí kostce (iPad, 30.10 12:35)
 Hlášení: Lukáš na iPadu v EEVEE vidí na cube Z-fighting (plochy blikají/prolínají se). Solid ne (tam je `invariant gl_Position` fix z dřívějška).
