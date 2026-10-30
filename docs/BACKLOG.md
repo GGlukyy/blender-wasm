@@ -54,7 +54,7 @@ Kontext: D1 heartbeat byl 12:09 prázdný (rt_phase None) -> opraveno 62c2a8a (�
 3. [x] (PC `?bp=1`: q_depth_max 94→1, parity 0 ❌; iPad default zapnuto, `?bp=0` vypne; čeká na iPad) **T3 Backpressure (oprava pro A, levná pojistka):** max 2 snímky v letu — pokud `q_depth ≥ 2`, nový snímek nekóduj (přeskoč redraw / počkej na `onSubmittedWorkDone`). Na iPadu ZAPNUTO, `?bp=0` vypne (A/B). Na PC: parity 0 ❌, regress zelený, fps v Solid beze změny.
 3b. [ ] **T6 — záložní „MP náhled" (Lukášův nápad 30. 10.), jen pokud T3 nestačí:** (a) **malé okno:** na iPadu povolit MP jen v 3D viewportu menším než ~25 % obrazovky (ostatní oblasti zůstanou Solid/MP Lite); tlačítko „Náhled materiálu" otevře malé okno vpravo dole (split area / nové okno oblasti) s MP; (b) **snímek na požádání:** v náhledu nekreslit průběžně — po N vzorcích (nebo po změně scény a 0,5 s klidu) přestat překreslovat (`taa_samples` malé + nepřekreslovat bez změny), tj. žádná fronta snímků; (c) případně `preview_pixel_size` 2–4 (rozpixelované jako Cycles). Měř `q_depth`, `tex_mb`, přežití > 5 min.
 4. [x] (viz H24 a H25 níže) **T4 H24** (Install from Disk → `blender_ext.py` v procesu), **T5 H25** (rigging na PC vs desktop).
-5. [x] (zip out/itch_2026-10-30_1350.zip) **Konec:** `package_itch.sh`, STATUS: tabulka predikcí (A/B/C) + co Lukáš otestuje: iPad `?mp=1&tel=1` 2 min, pak totéž s `&bp=0` → pošle telemetrii.
+5. [x] (zip out/itch_2026-10-30_1415.zip) **Konec:** `package_itch.sh`, STATUS: tabulka predikcí (A/B/C) + co Lukáš otestuje: iPad `?mp=1&tel=1` 2 min, pak totéž s `&bp=0` → pošle telemetrii.
 
 
 ## ⚡ 28. 10. 09:45 — RYCHLÝ ÚKOL (jediný v tomto běhu)
