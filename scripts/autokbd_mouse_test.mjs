@@ -19,7 +19,7 @@ const st = () => page.evaluate(() => ({ editing: window.__touchTextEditing && wi
 const s0 = await st(); check("export blender_web_text_editing je v buildu", s0.hasFn, JSON.stringify(s0));
 check("na začátku se neupravuje", s0.editing === false);
 // dvojklepnutí na název objektu ve vlastnostech (Object tab, pole „Cube“) = vstup do editace
-await page.mouse.move(box.x + 1300, box.y + 255); await wait(300); await page.mouse.dblclick(box.x + 1300, box.y + 255); await wait(900);
+await page.mouse.move(box.x + 1300, box.y + 255); await wait(300); for (let k = 0; k < 1; k++) { await page.mouse.down(); await wait(60); await page.mouse.up(); await wait(120); } await wait(900);
 await page.locator("#canvas").screenshot({ path: "out/autokbd_mouse.png" }); const s1 = await st(); check("pole je v editaci", s1.editing === true, JSON.stringify(s1));
 check("klávesnice (kbd-input) má focus", s1.focus === "kbd-input", JSON.stringify(s1));
 await page.locator("#touchbar button", { hasText: /^Esc$/ }).click(); await wait(1200);
