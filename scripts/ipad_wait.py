@@ -7,7 +7,7 @@ Konec čekání, když nová relace (od spuštění skriptu): (a) má abort/erro
 import argparse, glob, json, os, time
 ap = argparse.ArgumentParser()
 ap.add_argument("--max-sec", type=int, default=540); ap.add_argument("--quiet-sec", type=int, default=25)
-ap.add_argument("--freeze-ms", type=int, default=8000); ap.add_argument("--dir", default="out/ipad")
+ap.add_argument("--freeze-ms", type=int, default=30000); ap.add_argument("--dir", default="out/ipad")
 a = ap.parse_args()
 start = time.time(); sess = {}  # sid -> dict
 def files(): return sorted(glob.glob(os.path.join(a.dir, "tel_*.jsonl")))
