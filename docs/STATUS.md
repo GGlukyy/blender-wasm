@@ -7,7 +7,7 @@ Výsledek: ✅ PC, 🟡 iPad neověřen.
 **Důkaz:** před = abort v kroku 6, po = `auto_win.sh light` PASS 10/10 kroků, 0 chyb (relace 3cy2xo v `out/ipad`). Nespouštěl jsem regress_all / parity (jen 1 změna v počítadle).
 **Co nefunguje / neověřeno:** na iPadu nic (živý test: timeout 540 s, Lukáš u iPadu nebyl). Zip pro itch jsem neobnovil (`bash scripts/package_itch.sh`).
 **Co otestovat na iPadu (1 krok):** otevři `https://ins-developer-investigations-icq.trycloudflare.com/?mp=1&tel=1&auto=light` (URL tunelu platí, dokud neběží restart cloudflared), nic nedělej 3 min — stránka sama posune světlo 10×. Pak pošlu výsledek z telemetrie (hledám `auto_done` a žádný `abort`). Potom ručně přetáhni světlo v MP.
-**Update 14:55:** `mp` scénář PASS (A1b hotovo). D4a: na PC (Chrome) z-fighting na kostce **není** (`out/win/d4_*.png`), `invariant` už je všude → D4 čeká na iPad (možná WebKit ignoruje `@invariant`, odhad). **Co dál (původně):** D4 (EEVEE z-fighting na kostce, PC repro), A1b dokončit (`mp` scénář 60 s), po iPad testu T6 už asi není potřeba.
+**Zip pro itch (D3 oprava): `out/itch_2026-10-30_1350.zip`.** **Update 14:55:** `mp` scénář PASS (A1b hotovo). D4a: na PC (Chrome) z-fighting na kostce **není** (`out/win/d4_*.png`), `invariant` už je všude → D4 čeká na iPad (možná WebKit ignoruje `@invariant`, odhad). **Co dál (původně):** D4 (EEVEE z-fighting na kostce, PC repro), A1b dokončit (`mp` scénář 60 s), po iPad testu T6 už asi není potřeba.
 
 # Víkend — 30. 10. 01:50 — D1 heartbeat render vlákna + oprava mého omylu
 Výsledek: ✅ PC, 🟡 iPad neověřen.
