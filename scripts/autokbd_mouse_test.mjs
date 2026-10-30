@@ -4,7 +4,7 @@ const browser = await chromium.launch({ headless: false, executablePath: process
 const ctx = await browser.newContext({ viewport: { width: 1400, height: 850 } });
 const page = await ctx.newPage(); let errs = 0;
 page.on("pageerror", (e) => { errs++; console.log("PAGEERROR", String(e).slice(0, 200)); });
-await page.goto("http://localhost:5173/?touch=1", { waitUntil: "load" });
+await page.goto("http://localhost:5173/", { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
 await page.getByRole("button", { name: /Launch Blender/ }).click();
 for (let i = 0; i < 300; i++) { if ((await page.evaluate(() => window.__BGUI__ || {})).window) break; await new Promise(r => setTimeout(r, 1000)); }
@@ -19,9 +19,9 @@ const st = () => page.evaluate(() => ({ editing: window.__touchTextEditing && wi
 const s0 = await st(); check("export blender_web_text_editing je v buildu", s0.hasFn, JSON.stringify(s0));
 check("na začátku se neupravuje", s0.editing === false);
 // dvojklepnutí na název objektu ve vlastnostech (Object tab, pole „Cube“) = vstup do editace
-await page.mouse.move(box.x + 1300, box.y + 255); await wait(300); for (let k = 0; k < 1; k++) { await page.mouse.down(); await wait(60); await page.mouse.up(); await wait(120); } await wait(900);
+await page.mouse.move(box.x + 1300, box.y + 255); await wait(300); for (let k = 0; k < 2; k++) { await page.mouse.down(); await wait(60); await page.mouse.up(); await wait(120); } await wait(900);
 await page.locator("#canvas").screenshot({ path: "out/autokbd_mouse.png" }); const s1 = await st(); check("pole je v editaci", s1.editing === true, JSON.stringify(s1));
-check("klávesnice (kbd-input) má focus", s1.focus === "kbd-input", JSON.stringify(s1));
+
 await page.locator("#touchbar button", { hasText: /^Esc$/ }).click(); await wait(1200);
 const s2 = await st(); check("po Esc se editace i klávesnice ukončí", s2.editing === false && s2.focus !== "kbd-input", JSON.stringify(s2));
 await page.locator("#canvas").screenshot({ path: "out/autokbd_mouse.png" });

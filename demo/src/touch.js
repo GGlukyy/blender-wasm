@@ -391,7 +391,7 @@ export function installTouch(canvas) {
   let kbdUp = false;
   /* H7c: touching Module._fn before the runtime is up aborts Emscripten (assertions build), e.g. from a
    * `focus` event fired during startup (seen in a cross-origin iframe) — wait for calledRun. */
-  const textEditing = () => { const M = window.Module; const f = M && M.calledRun && M._blender_web_text_editing; return f ? f() === 1 : false; };
+  const textEditing = () => { const M = window.Module; const f = M && (M.calledRun || window.__rtInit) && M._blender_web_text_editing; return f ? f() === 1 : false; };
   const watchTextEdit = () => {
     const t0 = performance.now();
     const step = () => {
