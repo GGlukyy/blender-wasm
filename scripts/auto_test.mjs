@@ -26,10 +26,10 @@ page.on("console", (m) => { const t = m.text(); const p = /^PROBE (\w+) loc=(.*)
   if (/RuntimeError|abort\(|unreachable|memory access|tint-ICE|shaderc FAIL/i.test(t)) { errors++; console.log("CONSOLE-ERR " + t.slice(0, 200)); } });
 page.on("pageerror", (e) => { errors++; console.log("PAGEERROR " + e.message.slice(0, 200)); });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, probe);
-await page.goto(`http://localhost:5173/?auto=${scen}&tel=1${scen === "soak" ? "&soaksec=60" : ""}${process.env.MP === "0" ? "" : "&mp=1"}`, { waitUntil: "load" });
+await page.goto(`http://localhost:5173/?auto=${scen}&tel=1${scen === "soak" ? "&soaksec=" + (process.argv[3] || 60) : ""}${process.env.MP === "0" ? "" : "&mp=1"}`, { waitUntil: "load" });
 if (!process.env.NOAUTOCLICK) {} // Launch klikne stránka sama (A1: ?auto=)
 for (let i = 0; i < 300; i++) { if ((await page.evaluate(() => window.__BGUI__ || {})).window) break; await new Promise(r => setTimeout(r, 1000)); }
-for (let i = 0; i < 300 && !(await page.evaluate(() => window.__AUTO_DONE)); i++) await new Promise(r => setTimeout(r, 1000));
+for (let i = 0; i < 900 && !(await page.evaluate(() => window.__AUTO_DONE)); i++) await new Promise(r => setTimeout(r, 1000));
 done = !!(await page.evaluate(() => window.__AUTO_DONE));
 await page.evaluate(() => Module.FS.writeFile('/tmp/auto_probe', '1'));
 for (let i = 0; i < 90 && !probes.after; i++) await new Promise(r => setTimeout(r, 1000));   // sonda 'after'
