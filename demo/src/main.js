@@ -13,6 +13,7 @@
  */
 import { ZSTDDecoder } from "zstddec";
 import { installTouch } from "./touch.js";
+import { autoArgs, autoScan, autoStart } from "./autotest.js";
 import { installTelemetry, telEnabled, telLog, telEvent, telAdapterLimits } from "./telemetry.js";
 installTelemetry();
 
@@ -548,6 +549,7 @@ const showImportBar = () => {
 };
 const scan = (t) => {
   telLog(t);
+  autoScan(t);
   const sv = /Writing to (\/\S+)|^Saved "([^"]+)"/.exec(t.trim());
   if (sv) showSaved(sv[1] || sv[2]);
   if (/^Blender quit\b/.test(t.trim())) showQuit();
@@ -1368,7 +1370,7 @@ const _isIpadUA = navigator.maxTouchPoints > 1 && /Macintosh|iPad/.test(navigato
 const POOL_N = parseInt(_qp.get("pool") || (_isIpadUA ? "8" : "32"), 10) || 32;
 window.Module = {
   poolSize: POOL_N,
-  arguments: ["--factory-startup", "--python-expr", SHADOW_POOL_PY, ...(window.__BARGS || [])],
+  arguments: ["--factory-startup", "--python-expr", SHADOW_POOL_PY, ...autoArgs(), ...(window.__BARGS || [])],
   canvas,
   print: (t) => { log(t); scan(t); },
   printErr: (t) => { log("[err] " + t); scan(t); },
@@ -1452,6 +1454,7 @@ window.Module = {
     })().catch((e) => log("wgsl cache: " + e)).finally(() => removeRunDependency("wgsl-cache"));
   }],
   onRuntimeInitialized: () => {
+    autoStart();
     window.__rtInit = true; /* telemetry heartbeat waits for this (calledRun is set BEFORE initRuntime) */
     /* Parent of the local-folder mount points (wm_open_mainfile also creates
      * it wasm-side; this covers sessions where the dialog never opened). */
