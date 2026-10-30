@@ -64,7 +64,8 @@ export function installTelemetry() {
   let hbPtr = 0, hbSeq = -1, hbSince = 0;
   const heartbeat = (o) => {
     const M = window.Module;
-    if (!M || !M.ccall) return;
+    /* Abort-safe: ccall before runtime init does abort() on the whole Module (cannot be caught) -> only after calledRun. */
+    if (!M || !M.ccall || !M.calledRun || !M.HEAPU8) return;
     if (!hbPtr) hbPtr = M.ccall("wgpu_hb_ptr", "number", [], []);
     if (!hbPtr) return;
     const buf = M.HEAPU8.buffer; /* HEAPU8 is exported; M.wasmMemory is not (touching it aborts) */
