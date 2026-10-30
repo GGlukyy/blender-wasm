@@ -1469,7 +1469,8 @@ window.Module = {
   },
   onAbort: (w) => {
     let st = ""; try { st = String(new Error().stack).slice(0, 1500); } catch (e) {}
-    telEvent("abort", { what: String(w).slice(0, 200), stack: st });
+    const ws = String(w), i = ws.indexOf(" @@STACK@@ ");
+    telEvent("abort", { what: ws.slice(0, i < 0 ? 200 : Math.min(i, 200)), stack: i < 0 ? st : ws.slice(i + 11, i + 4011) });
     log("ABORT: " + w); status("Failed to start: " + w);
   },
 };

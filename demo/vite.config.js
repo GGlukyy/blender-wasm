@@ -31,6 +31,24 @@ const telemetryPlugin = () => ({
   },
 });
 
+/* D3a (jen dev server): blender.js se servíruje s upravenou abort(): do hlášení onAbort přidá JS+wasm stack VLÁKNA, které
+ * abortlo (jinak má telemetrie jen stack hlavního vlákna). Soubor na disku zůstává beze změny. */
+const abortStackPlugin = () => ({
+  name: "blender-abort-stack",
+  configureServer(server) {
+    server.middlewares.use((req, res, next) => {
+      if (!/^\/blender\.js(\?|$)/.test(req.url || "")) return next();
+      try {
+        const src = fs.readFileSync(path.resolve(__dirname, "public/blender.js"), "utf8")
+          .replace('Module["onAbort"]?.(what);', 'try { Module["onAbort"]?.(String(what) + " @@STACK@@ " + (ENVIRONMENT_IS_PTHREAD ? "[pthread " + (typeof _pthread_self === "function" ? _pthread_self() : "?") + "] " : "[main] ") + new Error().stack); } catch (e) { Module["onAbort"]?.(what); }');
+        res.setHeader("Content-Type", "text/javascript");
+        for (const [k, v] of Object.entries(isolationHeaders)) res.setHeader(k, v);
+        res.end(src);
+      } catch (e) { next(); }
+    });
+  },
+});
+
 /* Blender-wasm needs SharedArrayBuffer (pthreads): cross-origin isolation on
  * both the dev server and the preview server. */
 const isolationHeaders = {
@@ -66,7 +84,7 @@ const releasePlugin = () => ({
 
 export default defineConfig({
   define: { __RELEASE__: JSON.stringify(RELEASE) },
-  plugins: [telemetryPlugin(), releasePlugin()],
+  plugins: [telemetryPlugin(), abortStackPlugin(), releasePlugin()],
   /* Emit relative asset URLs (./assets/...) so the built site works when served
    * from any subpath, not just the domain root. The runtime fetches
    * (blender.wasm.zst, assets.tar.zst, manifest.json, blender.js) are already
