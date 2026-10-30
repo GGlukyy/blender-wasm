@@ -1,3 +1,11 @@
+## A1 — iPad test se udělá SÁM (`?auto=<scénář>`), Lukáš jen otevře URL (30.10 12:50)
+Cíl: AI místo "přetáhni světlo" dá odkaz, např. `https://…/?mp=1&tel=1&auto=light`; stránka po startu sama provede scénář a telemetrie pošle výsledek (ipad_wait.py ho zachytí).
+- [ ] A1a: v demo/src nový `autotest.js`, načtený jen při `&auto=`. Po `onRuntimeInitialized` + 5 s klidu spustí scénář. DŮKAZ NEJDŘÍV: zjistit na PC (Playwright), jestli syntetické `PointerEvent`/`MouseEvent` na canvasu Blender vezme (SDL/GHOST). Když ne, zkusit Python v Blenderu (bpy přes existující přístup, např. `Module.ccall` na python-run, pokud v buildu je) a pohnout světlem přes `bpy.data.objects[...].location`.
+- [ ] A1b: scénáře: `light` (přepnout na MP/EEVEE, pohnout světlem v 10 krocích, pauza 1 s mezi nimi), `orbit` (otáčení pohledu), `mp` (jen přepnout na MP a čekat 60 s). Každý krok pošle `telEvent("auto_step", {name})`, na konci `auto_done`.
+- [ ] A1c: ipad_wait.py ať končí i na `auto_done`. WEEKEND.md: místo `ask.txt` s textem dát URL s `&auto=`.
+- Pozor: pokud se scénář nedá spolehlivě na PC reprodukovat, napsat do STATUS.md proč a nechat ASK pruh.
+Priorita: až po D3a (wasm stack), klidně souběžně s čekáním na build.
+
 ## D4 — EEVEE (Material Preview): Z-fighting na výchozí kostce (iPad, 30.10 12:35)
 Hlášení: Lukáš na iPadu v EEVEE vidí na cube Z-fighting (plochy blikají/prolínají se). Solid ne (tam je `invariant gl_Position` fix z dřívějška).
 - [ ] D4a (PO D3, nejdřív důkaz): reprodukovat na PC (Chrome, `?mp=1`, výchozí kostka, zoom/orbit). Pokud je i tam -> screenshot před/po. Pak POROVNAT s desktop Blenderem stejné verze (pravidlo 3b): když má desktop stejný problém, není to naše.
