@@ -1,3 +1,12 @@
+# Víkend — 30. 10. 01:50 — D1 heartbeat render vlákna + oprava mého omylu
+Výsledek: ✅ PC, 🟡 iPad neověřen.
+**Oprava omylu:** relace `xebqm5` měla URL `?mp=1&tel=1&bp=0` → backpressure byla **vypnutá** (to byla A/B varianta), takže `q_depth_max 34` je v pořádku. `tex 604 MB` při dpr=2 (~4× pixelů proti PC) je s EEVEE lite věrohodné. Zamrznutí tedy zatím nemáme otestované S bp.
+**D1 (hotovo):** render vlákno zapisuje fázi (draw / shader_module / pipeline / map_read / submit / present) do sdílené paměti; hlavní vlákno ji čte a posílá `rt_frame`, `rt_phase`, `rt_phase_ms`, `rt_malloc_mb`, `main_heap_mb` + událost `flags` (bp, mp_lite, pool). Důkaz PC: `scripts/hb_win.sh` PASS (8 s umělé zaseknutí → `rt_phase_ms` roste, `rt_frame` stojí). Pozn.: `rt_frame` stojí i v klidu (Blender kreslí jen při události) — zamrznutí poznáš podle `rt_phase_ms` rostoucí při nenulové aktivitě, ne podle samotného `rt_frame`.
+**D2 (čeká na data):** predikce „freeze = `map_read` na Safari bez JSPI" se ověří z `rt_phase` v D1. Bez měření neopravuji.
+**Nový zip pro itch:** `out/itch_2026-10-30_0145.zip` (nahraješ ty).
+**Co otestovat na iPadu:** 1. `?mp=1&tel=1` (S bp, bez `&bp=0`) 2 min, pak pošli ID relace. Hledám `rt_phase` + `rt_phase_ms` v posledních vzorcích a `flags`. 2. Když zamrzne, nech stránku stát 30 s před zavřením.
+**Co dál:** čekám na iPad data (D2 podle nich).
+
 # Víkend — 30. 10. 00:55 — noční fronta T1–T5 (5 GB v MP)
 Výsledek: ✅ PC, 🟡 iPad neověřen (nic z toho jsem na iPadu nemohl vyzkoušet).
 **Co jsem udělal**
