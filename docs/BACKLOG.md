@@ -8,7 +8,7 @@ PRIORITA (Lukáš 12:51): A1a ZAČNI HNED, jako první úkol. Důvod: zrychlí v
 
 ## D4 — EEVEE (Material Preview): Z-fighting na výchozí kostce (iPad, 30.10 12:35)
 Hlášení: Lukáš na iPadu v EEVEE vidí na cube Z-fighting (plochy blikají/prolínají se). Solid ne (tam je `invariant gl_Position` fix z dřívějška).
-- [ ] D4a (PO D3, nejdřív důkaz): reprodukovat na PC (Chrome, `?mp=1`, výchozí kostka, zoom/orbit). Pokud je i tam -> screenshot před/po. Pak POROVNAT s desktop Blenderem stejné verze (pravidlo 3b): když má desktop stejný problém, není to naše.
+- [~] D4a (PO D3, nejdřív důkaz): reprodukovat na PC (Chrome, `?mp=1`, výchozí kostka, zoom/orbit). Pokud je i tam -> screenshot před/po. Pak POROVNAT s desktop Blenderem stejné verze (pravidlo 3b): když má desktop stejný problém, není to naše.
 - [ ] D4b: hypotézy (odhad): (1) EEVEE depth prepass vs. hlavní průchod počítají `gl_Position` jinak (chybí `invariant` v EEVEE shaderech po Tint překladu) -> zkusit stejný invariant fix jako u Solid; (2) depth formát/precision (depth32float-stencil8) nebo reverse-Z/clip start-end v naší WebGPU vrstvě; (3) `depthBias`/polygon offset neodpovídá GL/Vulkan.
 - Priorita: D3 (freeze) > D4. Nic neměnit v testech.
 
