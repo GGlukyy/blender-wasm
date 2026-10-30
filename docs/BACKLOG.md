@@ -1,6 +1,6 @@
 ## A1 — iPad test se udělá SÁM (`?auto=<scénář>`), Lukáš jen otevře URL (30.10 12:50)
 Cíl: AI místo "přetáhni světlo" dá odkaz, např. `https://…/?mp=1&tel=1&auto=light`; stránka po startu sama provede scénář a telemetrie pošle výsledek (ipad_wait.py ho zachytí).
-- [ ] A1a: v demo/src nový `autotest.js`, načtený jen při `&auto=`. Po `onRuntimeInitialized` + 5 s klidu spustí scénář. DŮKAZ NEJDŘÍV: zjistit na PC (Playwright), jestli syntetické `PointerEvent`/`MouseEvent` na canvasu Blender vezme (SDL/GHOST). Když ne, zkusit Python v Blenderu (bpy přes existující přístup, např. `Module.ccall` na python-run, pokud v buildu je) a pohnout světlem přes `bpy.data.objects[...].location`.
+- [~] A1a: v demo/src nový `autotest.js`, načtený jen při `&auto=`. Po `onRuntimeInitialized` + 5 s klidu spustí scénář. DŮKAZ NEJDŘÍV: zjistit na PC (Playwright), jestli syntetické `PointerEvent`/`MouseEvent` na canvasu Blender vezme (SDL/GHOST). Když ne, zkusit Python v Blenderu (bpy přes existující přístup, např. `Module.ccall` na python-run, pokud v buildu je) a pohnout světlem přes `bpy.data.objects[...].location`.
 - [ ] A1b: scénáře: `light` (přepnout na MP/EEVEE, pohnout světlem v 10 krocích, pauza 1 s mezi nimi), `orbit` (otáčení pohledu), `mp` (jen přepnout na MP a čekat 60 s). Každý krok pošle `telEvent("auto_step", {name})`, na konci `auto_done`.
 - [ ] A1c: ipad_wait.py ať končí i na `auto_done`. WEEKEND.md: místo `ask.txt` s textem dát URL s `&auto=`.
 - Pozor: pokud se scénář nedá spolehlivě na PC reprodukovat, napsat do STATUS.md proč a nechat ASK pruh.
