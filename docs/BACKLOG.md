@@ -1,6 +1,7 @@
 ## D8 — iPad: přepnutí Viewport Shading na "Rendered" (EEVEE plný) po soaku MP zamrzne (30.10 19:32)
+UPŘESNĚNÍ 19:38: stránka žije, jen Blender stojí. Po REFRESHI (čerstvá relace) Rendered funguje normálně i se světlem => Rendered samo není problém; zamrzlo to při PŘEPNUTÍ MP -> Rendered po 10 min soaku (dlouhá relace). Hypotézy: (a) přechod MP->Rendered (dva sady zdrojů naráz, špička paměti/pipeline); (b) stav po dlouhé relaci (wrappery, pool).
 Lukáš: MP (po soaku) funguje, ale po přepnutí na Rendered se to zase zaseklo. Data zatím nemáme (čekám na výpis z telemetrie: abort/lost/gpuerr, tex_mb, acct_mb, Jetsam).
-- [ ] D8a: nový scénář `?auto=rendered` (MP 20 s -> Rendered 60 s -> orbit), PC repro `auto_win.sh rendered`; sledovat tex_mb, acct_mb, wgpu_live, pipelines_created, gpuerr, abort. Pozn.: Rendered nejspíš nepoužívá EEVEE lite profil (odhad) -> plné rozlišení, stíny, bloom atd. = víc textur/shaderů; ověřit `WEB_EEVEE_LITE applied` pro Rendered.
+- [ ] D8a: nový scénář `?auto=rendered` (MP 20 s -> Rendered 60 s -> zpět MP -> Rendered, 5×, orbit; PLUS varianta po soaku) — hledat, jestli přepínání samo způsobí zamrznutí, PC repro `auto_win.sh rendered`; sledovat tex_mb, acct_mb, wgpu_live, pipelines_created, gpuerr, abort. Pozn.: Rendered nejspíš nepoužívá EEVEE lite profil (odhad) -> plné rozlišení, stíny, bloom atd. = víc textur/shaderů; ověřit `WEB_EEVEE_LITE applied` pro Rendered.
 - [ ] D8b: pokud tex_mb v Rendered >1 GB nebo vznikne device lost: použít lite profil i pro Rendered na iPadu (nebo varovat/odmítnout přepnutí s hláškou "Rendered není na iPadu podporován, použij Material Preview"). Rozhodnutí podle dat.
 - Zvážit: v UI na iPadu Rendered prostě skrýt/zablokovat, dokud nebude stabilní (levné, JS-first).
 
