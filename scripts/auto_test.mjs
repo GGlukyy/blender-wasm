@@ -26,7 +26,7 @@ page.on("console", (m) => { const t = m.text(); const p = /^PROBE (\w+) loc=(.*)
   if (/RuntimeError|abort\(|unreachable|memory access|tint-ICE|shaderc FAIL/i.test(t)) { errors++; console.log("CONSOLE-ERR " + t.slice(0, 200)); } });
 page.on("pageerror", (e) => { errors++; console.log("PAGEERROR " + e.message.slice(0, 200)); });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, probe);
-await page.goto(`http://localhost:5173/?auto=${scen}&tel=1${process.env.MP === "0" ? "" : "&mp=1"}`, { waitUntil: "load" });
+await page.goto(`http://localhost:5173/?auto=${scen}&tel=1${scen === "soak" ? "&soaksec=60" : ""}${process.env.MP === "0" ? "" : "&mp=1"}`, { waitUntil: "load" });
 if (!process.env.NOAUTOCLICK) {} // Launch klikne stránka sama (A1: ?auto=)
 for (let i = 0; i < 300; i++) { if ((await page.evaluate(() => window.__BGUI__ || {})).window) break; await new Promise(r => setTimeout(r, 1000)); }
 for (let i = 0; i < 300 && !(await page.evaluate(() => window.__AUTO_DONE)); i++) await new Promise(r => setTimeout(r, 1000));
@@ -36,6 +36,6 @@ for (let i = 0; i < 90 && !probes.after; i++) await new Promise(r => setTimeout(
 await page.screenshot({ path: `out/auto_${scen}.png` });
 console.log("STEPS", steps.join(" | ")); console.log("PROBES", JSON.stringify(probes));
 const changed = probes.before && probes.after && (probes.before.loc !== probes.after.loc || probes.before.view !== probes.after.view);
-const ok = done && (scen === "mp" || changed) && errors === 0;
+const ok = done && (scen === "mp" || scen === "soak" || changed) && errors === 0;
 console.log((ok ? "PASS" : "FAIL") + ` auto=${scen} done=${done} changed=${!!changed} errors=${errors}`);
 await browser.close(); process.exit(ok ? 0 : 1);

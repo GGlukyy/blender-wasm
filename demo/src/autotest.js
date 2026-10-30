@@ -48,6 +48,27 @@ def _sel():
 _gated(lambda: (_mp(), bpy.app.timers.register(_sel, first_interval=4.0)))`,
   orbit: PY_HEAD + `
 _gated(lambda: (_mp(), bpy.app.timers.register(lambda: (_say('AUTO_ORBIT_READY'), None)[1], first_interval=4.0)))`,
+  soak: PY_HEAD + `
+import math, time
+_t0 = [0.0]; _k = [0]
+def _soak():
+    if not _t0[0]: _t0[0] = time.time()
+    el = time.time() - _t0[0]
+    if el > float(SOAK_SEC):
+        _say('AUTO_DONE soak'); return None
+    _k[0] += 1; k = _k[0]
+    L = bpy.data.objects.get('Light')
+    if L: L.location.x = 4.0 * math.sin(k / 5.0); L.location.z = 4.0 + math.cos(k / 3.0)
+    ob = bpy.data.objects.get('Cube')
+    if ob:
+        if not ob.data.materials:
+            m = bpy.data.materials.new('SoakMat'); m.use_nodes = True; ob.data.materials.append(m)
+        ob.data.materials[0].node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = (abs(math.sin(k / 7.0)), abs(math.cos(k / 11.0)), 0.3, 1.0)
+    a = _v3d()
+    if a: a.spaces[0].region_3d.view_rotation.rotate(__import__('mathutils').Euler((0, 0, 0.05)))
+    if k % 30 == 0: _say('AUTO_STEP soak_%ds' % int(el))
+    return 1.0
+_gated(lambda: (_mp(), bpy.app.timers.register(_soak, first_interval=4.0)))`.replace('SOAK_SEC', String(+_q.get("soaksec") || 600)),
   mp: PY_HEAD + `
 _gated(lambda: (_mp(), bpy.app.timers.register(lambda: (_say('AUTO_DONE mp'), None)[1], first_interval=60.0)))`,
 };
