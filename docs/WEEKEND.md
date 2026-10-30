@@ -29,3 +29,12 @@ into STATUS.md and END the run — do not fill time with tests.
 - Neplatí-li predikce → hypotéza padá, nezkoušej další variantu téže opravy.
 - Podezřívej vlastní telemetrii: hodnota, která se nikdy nemění (např. `max_heap` vždy 1024), je spíš chyba měření než fakt. Kde to jde, ověř nezávislým zdrojem (Jetsam log, desktop Blender, Chrome DevTools).
 - Po 2 neúspěšných opravách téhož příznaku: STOP, sepiš všechna fakta + rozpory (jen data, bez příběhu) a dej je `architect` subagentovi bez svých hypotéz.
+
+## Živý test na iPadu (Lukáš je u iPadu, telemetrie teče na PC)
+Když Lukáš řekl, že je u iPadu (nebo je to den s ním), NEPIŠ jen "vyzkoušej a pošli". Udělej tohle:
+1. Ověř, že běží dev server + tunel (`pgrep -af "vite|cloudflared"`); URL tunelu je v logu tunelu. Když neběží, napiš to do `out/ipad/ASK.txt` a končíš.
+2. Nasaď build (atomicky), pak napiš Lukášovi do `out/ipad/ASK.txt` JEDNU konkrétní instrukci (odkaz s `?mp=1&tel=1`, co přesně udělat, např. "Material Preview, přetáhni světlo") a zazvoň: `printf '\a'; cat out/ipad/ASK.txt`.
+3. Spusť `python3 scripts/ipad_wait.py --max-sec 540` (blokuje; čte jen nové řádky telemetrie, nestojí tahy). Výstup = abort/lost/error, `rt_phase` + `rt_phase_ms` (visí vlákno?), fps, tex_mb.
+4. Z výsledku vyvoď další krok sám (oprava / další měření) a opakuj. Max 3 iPad testy za hodinu, ať Lukáše nezahltíš; mezi testy dělej práci na PC (build, testy).
+5. Timeout (exit 2) = Lukáš u iPadu není: neopakuj, pokračuj jinou prací z BACKLOGu.
+Do STATUS.md piš u každého testu: co jsi čekal, co přišlo (řádek z ipad_wait), co z toho plyne.
