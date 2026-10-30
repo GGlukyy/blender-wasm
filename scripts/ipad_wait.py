@@ -17,6 +17,7 @@ def summary():
         print(f"== {sid} url={d['url']} trvání={d['last_t']/1000:.0f}s řádků={d['n']}")
         for e in d["events"][-6:]: print("   !", e)
         print("   poslední stav:", d["last"])
+        if d.get("auto"): print("   auto:", " | ".join(d["auto"][-12:]), "=> HOTOVO" if d.get("auto_done") else "=> NEDOKONČENO")
 while time.time() - start < a.max_sec:
     for f in files():
         pos.setdefault(f, 0)
@@ -33,10 +34,14 @@ while time.time() - start < a.max_sec:
             if k == "start": d["url"] = r.get("url", "")
             if k in ("abort", "error", "rejection", "lost", "lost_detail", "pagehide"):
                 d["events"].append(f"t={r.get('t')} {k} {str(r.get('what') or r.get('msg') or r.get('reason'))[:160]} | {str(r.get('stack',''))[:300]}")
+            if k in ("auto_step", "auto_done"): d["auto"] = d.get("auto", []) + [f"{r.get('t')}ms {k} {r.get('name')}"]
+            if k == "auto_done": d["auto_done"] = True
             if k == "sample":
                 d["last"] = f"fps={r.get('fps')} rt_phase={r.get('rt_phase')} rt_phase_ms={r.get('rt_phase_ms')} rt_frame={r.get('rt_frame')} tex_mb={(r.get('gpu') or {}).get('tex_mb')} heap={r.get('heap_mb')}"
                 if (r.get("rt_phase_ms") or 0) > a.freeze_ms: d["hang"] = True
     done = [d for d in sess.values() if any(" abort " in e or " lost" in e or " error " in e for e in d["events"]) or d["hang"] or time.time() - d["seen"] > a.quiet_sec]
+    if any(d.get("auto_done") for d in sess.values()) and all(d["n"] > 3 for d in sess.values() if d.get("auto_done")) and not done:
+        time.sleep(4); print("VÝSLEDEK iPad testu (auto_done):"); summary(); raise SystemExit(0)
     if sess and done and all(d["n"] > 3 for d in done):
         print("VÝSLEDEK iPad testu:"); summary(); raise SystemExit(0)
     time.sleep(2)

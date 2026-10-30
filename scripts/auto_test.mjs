@@ -27,8 +27,7 @@ page.on("console", (m) => { const t = m.text(); const p = /^PROBE (\w+) loc=(.*)
 page.on("pageerror", (e) => { errors++; console.log("PAGEERROR " + e.message.slice(0, 200)); });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, probe);
 await page.goto(`http://localhost:5173/?auto=${scen}&tel=1${process.env.MP === "0" ? "" : "&mp=1"}`, { waitUntil: "load" });
-await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
-await page.getByRole("button", { name: /Launch Blender/ }).click();
+if (!process.env.NOAUTOCLICK) {} // Launch klikne stránka sama (A1: ?auto=)
 for (let i = 0; i < 300; i++) { if ((await page.evaluate(() => window.__BGUI__ || {})).window) break; await new Promise(r => setTimeout(r, 1000)); }
 for (let i = 0; i < 150 && !(await page.evaluate(() => window.__AUTO_DONE)); i++) await new Promise(r => setTimeout(r, 1000));
 done = !!(await page.evaluate(() => window.__AUTO_DONE));

@@ -114,3 +114,9 @@ export function autoScan(t) {
   else if (s.startsWith("AUTO_DONE")) telEvent("auto_done", { name: AUTO });
   else telEvent("auto_step", { name: s.slice(10) });
 }
+
+/* iPad: Lukáš jen otevře URL — Launch klikne stránka sama (po 2 s, ať se stihne vyhodnotit GPU/asset stav). */
+if (AUTO) setTimeout(() => {
+  const ack = document.getElementById("gpu-ack"); if (ack && !ack.checked) { ack.checked = true; ack.dispatchEvent(new Event("change", { bubbles: true })); }
+  const b = document.getElementById("start-btn"); if (b && !b.disabled) b.click();
+}, 2000);
