@@ -1,3 +1,9 @@
+## D8 — iPad: přepnutí Viewport Shading na "Rendered" (EEVEE plný) po soaku MP zamrzne (30.10 19:32)
+Lukáš: MP (po soaku) funguje, ale po přepnutí na Rendered se to zase zaseklo. Data zatím nemáme (čekám na výpis z telemetrie: abort/lost/gpuerr, tex_mb, acct_mb, Jetsam).
+- [ ] D8a: nový scénář `?auto=rendered` (MP 20 s -> Rendered 60 s -> orbit), PC repro `auto_win.sh rendered`; sledovat tex_mb, acct_mb, wgpu_live, pipelines_created, gpuerr, abort. Pozn.: Rendered nejspíš nepoužívá EEVEE lite profil (odhad) -> plné rozlišení, stíny, bloom atd. = víc textur/shaderů; ověřit `WEB_EEVEE_LITE applied` pro Rendered.
+- [ ] D8b: pokud tex_mb v Rendered >1 GB nebo vznikne device lost: použít lite profil i pro Rendered na iPadu (nebo varovat/odmítnout přepnutí s hláškou "Rendered není na iPadu podporován, použij Material Preview"). Rozhodnutí podle dat.
+- Zvážit: v UI na iPadu Rendered prostě skrýt/zablokovat, dokud nebude stabilní (levné, JS-first).
+
 ## D7 — (PŘEHODNOCENO 19:30: pravděpodobně POPLACH, ne 95 s freeze) relace 2rjggg
 Pozorování 25–145 s: `rt_phase=draw`, `rt_phase_ms` roste, `rt_frame`=11 stojí, pak se "odmrzne" s prvním auto-vstupem. STEJNÝ obraz je po `auto_done` (750–1020 s): `rt_phase_ms` roste až na 270 s a frame stojí, přitom Blender je jen v klidu (kreslí jen při události; hbSince se resetuje jen při změně seq). => `rt_phase_ms` rostoucí SÁM nedokazuje zamrznutí. Moje čtení z 19:16 ("95 s stall") bylo chybné; stejné platí pro slabší část důkazu "visí v draw od abortu" u D3 (D3 samo stojí: PC repro + stack + oprava).
 - [ ] D7a: D1 heartbeat: přidat fázi `idle` (render vlákno čeká na událost/vsync) a nastavovat ji, když draw skončí; teprve `draw` s rostoucím rt_phase_ms pak = opravdu visí. Přepsat poznámku v STATUS o rt_frame.
