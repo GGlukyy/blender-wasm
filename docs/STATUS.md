@@ -1,3 +1,14 @@
+# Víkend — 30. 10. 13:45 — D3 freeze NALEZEN a opraven (moje vlastní chyba v telemetrii) + A1 autotest
+Výsledek: ✅ PC, 🟡 iPad neověřen.
+**Co jsem udělal**
+- **A1a/b/c — `?auto=light|lightdrag|orbit|mp`** (`demo/src/autotest.js`): stránka sama klikne Launch, počká na zahřátí, přepne na MP a provede scénář; kroky jdou do telemetrie (`auto_step`, `auto_done`), `ipad_wait.py` na `auto_done` skončí. Syntetické události Blender bere (orbit PASS, `lightdrag` posune světlo). Test: `bash scripts/auto_win.sh light|lightdrag|orbit`.
+- **D3 — příčina:** `scripts/auto_win.sh light` zreprodukoval `pthread mutex deadlock` **na PC Chrome** (6. posun světla). Stack vlákna (nově v telemetrii abortu přes dev server): `_emwgpuBufferDestroy → gpost (JS telemetrie) → wgpu_pending_free_n → std::mutex::lock`. Tedy **moje T2 telemetrie** `pending_free` bere `g_buf_free_mutex`, který právě drží eviction poolu při `wgpuBufferDestroy` → vlákno zamkne zámek 2× → freeze. Predikce „zámek držený při destroy + volání z JS obalu" sedí na stack 1:1.
+- **Oprava:** `wgpu_pending_free_n` je bez zámku (atomic čítač). Fork `ipad` + `BLENDER_REF` aktualizován, wasm přelinkován (záloha starého v `out/bak_d3/`).
+**Důkaz:** před = abort v kroku 6, po = `auto_win.sh light` PASS 10/10 kroků, 0 chyb (relace 3cy2xo v `out/ipad`). Nespouštěl jsem regress_all / parity (jen 1 změna v počítadle).
+**Co nefunguje / neověřeno:** na iPadu nic (živý test: timeout 540 s, Lukáš u iPadu nebyl). Zip pro itch jsem neobnovil (`bash scripts/package_itch.sh`).
+**Co otestovat na iPadu (1 krok):** otevři `https://ins-developer-investigations-icq.trycloudflare.com/?mp=1&tel=1&auto=light` (URL tunelu platí, dokud neběží restart cloudflared), nic nedělej 3 min — stránka sama posune světlo 10×. Pak pošlu výsledek z telemetrie (hledám `auto_done` a žádný `abort`). Potom ručně přetáhni světlo v MP.
+**Co dál:** D4 (EEVEE z-fighting na kostce, PC repro), A1b dokončit (`mp` scénář 60 s), po iPad testu T6 už asi není potřeba.
+
 # Víkend — 30. 10. 01:50 — D1 heartbeat render vlákna + oprava mého omylu
 Výsledek: ✅ PC, 🟡 iPad neověřen.
 **Oprava omylu:** relace `xebqm5` měla URL `?mp=1&tel=1&bp=0` → backpressure byla **vypnutá** (to byla A/B varianta), takže `q_depth_max 34` je v pořádku. `tex 604 MB` při dpr=2 (~4× pixelů proti PC) je s EEVEE lite věrohodné. Zamrznutí tedy zatím nemáme otestované S bp.
