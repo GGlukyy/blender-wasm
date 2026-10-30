@@ -1,3 +1,13 @@
+## D3 — iPad freeze = `pthread mutex deadlock detected` (30.10 12:11, ZREPRODUKOVÁNO 2×)
+Důkaz: telemetrie relace 2wwlig (abort v 25 s) a 0gromf (abort v 35 s), obě `?mp=1&tel=1`, iPad Safari, EEVEE se tentokrát načetlo.
+`Assertion failed: at || own != __pthread_self()->tid && "pthread mutex deadlock detected"` (musl pthread_mutex_timedlock.c:95). Stack jen 2 řádky (onAbort, blender.js:1200 = worker).
+Význam: vlákno si bere zámek, který už samo drží -> zasekne se napořád = "freeze, co se neodfreezne". Na PC/Chrome se to neděje (odhad: Safari volá nějaký callback synchronně).
+- [ ] D3a: zjistit KTERÝ zámek a které vlákno: v blender.js worker onerror/onAbort vypsat jméno vlákna a `new Error().stack` z wasm (build s -g / names; nebo `-sASSERTIONS` už je). Zkusit `emscripten_pc_get_function` backtrace v abort handleru.
+- [ ] D3b: projít `source/blender/gpu/webgpu/` + `draw/` + `intern/guardedalloc` na zámky držené při volání wgpu* (zvlášť callbacky: popErrorScope, mapAsync, compilation info, device lost, uncaptured error). Hledat re-entranci: callback volaný SYNCHRONNĚ uvnitř wgpu volání, které drží zámek.
+- [ ] D3c: pokud jde o náš zámek, udělat ho recursive nebo uvolnit před voláním wgpu*; reprodukce na PC přes `?ipad=1` + vynucené synchronní callbacky, pokud jde.
+- Pozor: NEMĚNIT test, jen opravit příčinu. Nejdřív důkaz (který zámek), pak oprava.
+Kontext: D1 heartbeat byl 12:09 prázdný (rt_phase None) -> opraveno 62c2a8a (čeká na onRuntimeInitialized). Další test dá rt_phase.
+
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
 
 ## 🧊 30. 10. 01:25 — iPad test po T3 (Lukáš): Blender „zamrzl" ještě před změnou materiálu
