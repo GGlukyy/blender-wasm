@@ -6,5 +6,5 @@ cp "$ROOT/scripts/auto_test.mjs" "$W/"; mkdir -p "$W/out"
 # CAPENV='{"WGPU_LOG_DRAW":""}' → env proměnné pro Blender (window.__CAPENV)
 if [ -n "$CAPENV" ]; then echo "$CAPENV" > "$W/capenv.json"; else rm -f "$W/capenv.json"; fi
 cd "$W" && CHROME='C:\Program Files\Google\Chrome\Application\chrome.exe' PW=playwright-core \
-  cmd.exe /c "set CHROME=C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe&& set PW=playwright-core&& node auto_test.mjs $*" 2>&1 | tail -8
+  cmd.exe /c "set CHROME=C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe&& set PW=playwright-core&& node auto_test.mjs $*" 2>&1 | tail -20
 mkdir -p "$ROOT/out/win"; cp "$W"/out/auto_* "$ROOT/out/win/" 2>/dev/null
