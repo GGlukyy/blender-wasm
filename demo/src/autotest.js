@@ -137,7 +137,16 @@ export function autoScan(t) {
 }
 
 /* iPad: Lukáš jen otevře URL — Launch klikne stránka sama (po 2 s, ať se stihne vyhodnotit GPU/asset stav). */
-if (AUTO) setTimeout(() => {
-  const ack = document.getElementById("gpu-ack"); if (ack && !ack.checked) { ack.checked = true; ack.dispatchEvent(new Event("change", { bubbles: true })); }
-  const b = document.getElementById("start-btn"); if (b && !b.disabled) b.click();
-}, 2000);
+/* Opakuje každou 1 s (max 10 min), dokud tlačítko není povolené: na iPadu přes tunel se assety stahují
+ * déle než 2 s, tlačítko je pak ještě disabled a jednorázový klik se ztratil (relace i2hhlk: 15 min na "loading"). */
+if (AUTO) {
+  let tries = 0;
+  const iv = setInterval(() => {
+    tries++;
+    const ack = document.getElementById("gpu-ack"); if (ack && !ack.checked) { ack.checked = true; ack.dispatchEvent(new Event("change", { bubbles: true })); }
+    const b = document.getElementById("start-btn");
+    if (b && !b.disabled) { b.click(); clearInterval(iv); telEvent("auto_launch", { after_s: tries + 1 }); }
+    else if (tries >= 600) { clearInterval(iv); telEvent("auto_launch_fail", { btn: !!b, disabled: !!(b && b.disabled) }); }
+    else if (tries % 30 === 0) telEvent("auto_launch_wait", { s: tries, btn: !!b, disabled: !!(b && b.disabled) });
+  }, 1000);
+}
