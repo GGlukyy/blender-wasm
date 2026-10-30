@@ -33,8 +33,8 @@ into STATUS.md and END the run — do not fill time with tests.
 ## Živý test na iPadu (Lukáš je u iPadu, telemetrie teče na PC)
 Když Lukáš řekl, že je u iPadu (nebo je to den s ním), NEPIŠ jen "vyzkoušej a pošli". Udělej tohle:
 1. Ověř, že běží dev server + tunel (`pgrep -af "vite|cloudflared"`); URL tunelu je v logu tunelu. Když neběží, napiš to do `out/ipad/ASK.txt` a končíš.
-2. Nasaď build (atomicky), pak napiš Lukášovi do `out/ipad/ASK.txt` JEDNU konkrétní instrukci (odkaz s `?mp=1&tel=1`, co přesně udělat, např. "Material Preview, přetáhni světlo") a zazvoň: `printf '\a'; cat out/ipad/ASK.txt`.
-3. Spusť `python3 scripts/ipad_wait.py --max-sec 540` (blokuje; čte jen nové řádky telemetrie, nestojí tahy). Výstup = abort/lost/error, `rt_phase` + `rt_phase_ms` (visí vlákno?), fps, tex_mb.
-4. Z výsledku vyvoď další krok sám (oprava / další měření) a opakuj. Max 3 iPad testy za hodinu, ať Lukáše nezahltíš; mezi testy dělej práci na PC (build, testy).
+2. Nasaď build (atomicky), pak napiš JEDNU konkrétní instrukci do `demo/public/ask.txt` ve tvaru `ASK: Material Preview, přetáhni světlo` (iPad ji sám ukáže žlutým pruhem nahoře, jen s `?tel=1`; Lukáš nemusí sledovat PC). Kopii dej i do `out/ipad/ASK.txt`. Bell/echo nepomůže (výstup smyčky jde do logu).
+3. Spusť `python3 scripts/ipad_wait.py --max-sec 540` s Bash `timeout: 590000` (jinak se zabije po 2 min!) (blokuje; čte jen nové řádky telemetrie, nestojí tahy). Výstup = abort/lost/error, `rt_phase` + `rt_phase_ms` (visí vlákno?), fps, tex_mb.
+4. Po testu vyprázdni pruh: `echo 'ASK:' > demo/public/ask.txt` a na konci práce `rm -f demo/public/ask.txt` (ať nejde do itch zipu). Z výsledku vyvoď další krok sám (oprava / další měření) a opakuj. Max 3 iPad testy za hodinu, ať Lukáše nezahltíš; mezi testy dělej práci na PC (build, testy).
 5. Timeout (exit 2) = Lukáš u iPadu není: neopakuj, pokračuj jinou prací z BACKLOGu.
 Do STATUS.md piš u každého testu: co jsi čekal, co přišlo (řádek z ipad_wait), co z toho plyne.

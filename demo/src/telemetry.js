@@ -53,6 +53,21 @@ export function installTelemetry() {
       if (gmem.lost_reason) send({ kind: "lost_detail", reason: gmem.lost_reason, msg: gmem.lost_message, gpu: gmem }, true);
     };
   } catch (e) {}
+  /* Živý test: smyčka (AI na PC) píše instrukci do demo/public/ask.txt ("ASK: ..."), iPad ji ukáže v bance nahoře. Jen s ?tel=1. */
+  try {
+    const bar = document.createElement("div");
+    bar.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:99999;background:#d4a017;color:#000;font:600 15px system-ui;padding:6px 10px;display:none;pointer-events:none;text-align:center";
+    document.body.appendChild(bar);
+    let lastAsk = "";
+    setInterval(async () => {
+      try {
+        const r = await fetch("/ask.txt?" + Date.now(), { cache: "no-store" });
+        const t = r.ok ? (await r.text()).trim() : "";
+        const msg = t.startsWith("ASK:") ? t.slice(4).trim() : "";
+        if (msg !== lastAsk) { lastAsk = msg; bar.textContent = msg ? "🤖 " + msg : ""; bar.style.display = msg ? "block" : "none"; send({ kind: "ask_shown", msg: msg.slice(0, 200) }); }
+      } catch (e) {}
+    }, 3000);
+  } catch (e) {}
   addEventListener("error", (e) => send({ kind: "error", msg: String(e.message).slice(0, 300), src: e.filename, line: e.lineno }));
   addEventListener("unhandledrejection", (e) => send({ kind: "rejection", msg: String(e.reason && (e.reason.stack || e.reason)).slice(0, 400) }));
   for (const ev of ["keydown", "pointerdown"]) {
