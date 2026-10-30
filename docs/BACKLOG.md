@@ -6,6 +6,9 @@ Význam: vlákno si bere zámek, který už samo drží -> zasekne se napořád 
 - [ ] D3b: projít `source/blender/gpu/webgpu/` + `draw/` + `intern/guardedalloc` na zámky držené při volání wgpu* (zvlášť callbacky: popErrorScope, mapAsync, compilation info, device lost, uncaptured error). Hledat re-entranci: callback volaný SYNCHRONNĚ uvnitř wgpu volání, které drží zámek.
 - [ ] D3c: pokud jde o náš zámek, udělat ho recursive nebo uvolnit před voláním wgpu*; reprodukce na PC přes `?ipad=1` + vynucené synchronní callbacky, pokud jde.
 - Pozor: NEMĚNIT test, jen opravit příčinu. Nejdřív důkaz (který zámek), pak oprava.
+D1 DŮKAZ (12:32): relace qjr3sc: abort v 28,6 s; rt_phase=draw, rt_phase_ms=222093 (!), rt_frame zamrzlé na 115 od ~29 s. Relace 3210qw: abort v 62,7 s; rt_phase=draw, rt_phase_ms=92373, rt_frame zamrzlé na 1005 od ~63 s.
+=> render thread visí v `draw` přesně od okamžiku abortu = freeze JE ten self-deadlock, uvnitř draw (ne shader_module/pipeline/map_read/submit). Lukáš: před tím vše OK (EEVEE MP kreslí), spadlo to, až když v EEVEE přetáhl SVĚTLO (-> update světel/shadow tilemap/shader batch). Hledat tedy v tom, co se při změně světla děje v EEVEE draw: DRW shader compile/batch (mutex), shadow tilemap update, GPU_shader_batch, `DRW_*lock`.
+- [ ] D3a PRIORITA: wasm backtrace z abortu. Relink s `--profiling-funcs` (jen scripts/link_blender_web.sh, bez rebuildu objektů) a v onAbort/worker vypsat `e.stack` z workeru (teď se do telemetrie dostanou jen 2 JS řádky).
 Kontext: D1 heartbeat byl 12:09 prázdný (rt_phase None) -> opraveno 62c2a8a (čeká na onRuntimeInitialized). Další test dá rt_phase.
 
 # BACKLOG — pořadí = priorita. [ ] čeká · [~] dělám · [x] hotovo · [!] blocked
