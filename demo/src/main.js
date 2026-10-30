@@ -1452,6 +1452,7 @@ window.Module = {
     })().catch((e) => log("wgsl cache: " + e)).finally(() => removeRunDependency("wgsl-cache"));
   }],
   onRuntimeInitialized: () => {
+    window.__rtInit = true; /* telemetry heartbeat waits for this (calledRun is set BEFORE initRuntime) */
     /* Parent of the local-folder mount points (wm_open_mainfile also creates
      * it wasm-side; this covers sessions where the dialog never opened). */
     try { window.Module.FS.mkdir(MOUNT_ROOT); } catch (e) { /* exists */ }
