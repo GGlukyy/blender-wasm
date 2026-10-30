@@ -101,6 +101,10 @@ export function installTelemetry() {
     if (gmem) o.gpu = gmem;
     try { heartbeat(o); } catch (e) { o.rt_err = String(e).slice(0, 80); }
     if (performance.memory) { o.js_used_mb = Math.round(performance.memory.usedJSHeapSize / 1048576); o.js_total_mb = Math.round(performance.memory.totalJSHeapSize / 1048576); }
+    /* D5b (JS část): „účetní“ součet toho, co alokujeme my. Jetsam − acct_mb = paměť Safari, kterou neovládáme. */
+    const g = o.gpu || {};
+    o.acct_mb = (o.main_heap_mb || o.heap_mb || 0) + (g.buf_mb || 0) + (g.tex_mb || o.tex_mb || 0) + (o.js_used_mb || 0);
+    o.workers = +(new URLSearchParams(location.search).get("pool") || 0) || undefined;
     send(o);
   };
   setInterval(() => { try { sample(); } catch (e) { send({ kind: 'sample_err', msg: String(e && e.stack || e).slice(0, 300) }); } flush(); }, /[?&]mp=1/.test(location.search) ? 1000 : 2000); // H22e: v MP po 1 s, ať je před případným pádem co nejnovější vzorek
