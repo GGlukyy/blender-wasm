@@ -24,11 +24,12 @@ const probes = {}; let errors = 0, done = false; const steps = [];
 page.on("console", (m) => { const t = m.text(); const p = /^PROBE (\w+) loc=(.*) view=(.*)$/.exec(t); if (p) probes[p[1]] = { loc: p[2], view: p[3] };
   if (t.startsWith("AUTO_")) { steps.push(t); if (t.startsWith("AUTO_DONE")) done = true; }
   if (/RuntimeError|abort\(|unreachable|memory access|tint-ICE|shaderc FAIL/i.test(t)) { errors++; console.log("CONSOLE-ERR " + t.slice(0, 200)); } });
+page.on("console", (m) => { const t = m.text(); if (/WGPU_PIPE_THROW|WGPU_UNCAPTURED/.test(t)) console.log("LOG " + t.slice(0, 200)); });
 page.on("pageerror", (e) => { errors++; console.log("PAGEERROR " + e.message.slice(0, 200)); });
 if (scen === "soak") await page.addInitScript(() => { window.__CAPENV = { WGPU_LOG_COMPILE: "1" }; });
 const pipeNames = {}; const pipeLines = []; page.on("console", (m) => { if (/COMPILELOG pipeline 'gpu_shader_2D_widget_base'/.test(m.text()) && pipeLines.length < 12) pipeLines.push(m.text()); const x = /COMPILELOG pipeline '([^']*)'/.exec(m.text()); if (x) pipeNames[x[1]] = (pipeNames[x[1]] || 0) + 1; });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, probe);
-await page.goto(`http://localhost:5173/?auto=${scen}&tel=1${scen === "soak" ? "&soaksec=" + (process.argv[3] || 60) + "&soakmode=" + (process.argv[4] || "lmo") : ""}${process.env.MP === "0" ? "" : "&mp=1"}`, { waitUntil: "load" });
+await page.goto(`http://localhost:5173/?auto=${scen}&tel=1${scen === "soak" ? "&soaksec=" + (process.argv[3] || 60) + "&soakmode=" + (process.argv[4] || "lmo") : ""}${process.env.MP === "0" ? "" : "&mp=1"}${process.env.EXTRAQ || ""}`, { waitUntil: "load" });
 if (!process.env.NOAUTOCLICK) {} // Launch klikne stránka sama (A1: ?auto=)
 for (let i = 0; i < 300; i++) { if ((await page.evaluate(() => window.__BGUI__ || {})).window) break; await new Promise(r => setTimeout(r, 1000)); }
 for (let i = 0; i < 900 && !(await page.evaluate(() => window.__AUTO_DONE)); i++) await new Promise(r => setTimeout(r, 1000));

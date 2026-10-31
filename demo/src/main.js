@@ -641,6 +641,13 @@ const NAV_KEYS = new Set([
 /* I1: iPad/Mac keyboards send Cmd as `metaKey`; Blender (GHOST/SDL) wants Ctrl for undo/save/copy/….
  * Swallow the Meta key and re-send Cmd+<key> as Ctrl+<key>. Safari also eats the keyup of keys pressed
  * with Cmd, so the chord's keyup is synthesized here. Browser-owned combos are left alone. */
+/* I4: Blender (via SDL/Emscripten) takes the PHYSICAL key (`code`); desktop Blender uses the character. On QWERTZ/AZERTY/
+ * Dvorak keyboards Ctrl+Z / G Z would hit the wrong key. Map the code to the letter in `key`. */
+const heldRemap = new Map(); /* original code -> remapped code, so the keyup matches */
+const fixCode = (e) => {
+  if (e.altKey || !/^Key[A-Z]$/.test(e.code) || !/^[a-zA-Z]$/.test(e.key)) return e.code;
+  return "Key" + e.key.toUpperCase();
+};
 const CMD_KEEP = new Set(["KeyR", "KeyT", "KeyW", "KeyN", "KeyQ", "KeyL", "KeyH", "KeyM", "Tab"]);
 let cmdCtrlDown = false;
 const cmdKey = (type, code, key, shiftKey, altKey, repeat) =>
@@ -662,8 +669,9 @@ window.addEventListener(
       cmdCtrlDown = true;
       window.dispatchEvent(new KeyboardEvent("keydown", { code: "ControlLeft", key: "Control", ctrlKey: true, bubbles: true, cancelable: true }));
     }
-    cmdKey("keydown", e.code, e.key, e.shiftKey, e.altKey, e.repeat);
-    setTimeout(() => cmdKey("keyup", e.code, e.key, e.shiftKey, e.altKey), 40);
+    const fc = fixCode(e);
+    cmdKey("keydown", fc, e.key, e.shiftKey, e.altKey, e.repeat);
+    setTimeout(() => cmdKey("keyup", fc, e.key, e.shiftKey, e.altKey), 40);
   },
   { capture: true },
 );
@@ -673,6 +681,30 @@ window.addEventListener(
     if (!e.isTrusted) return;
     if (e.code === "MetaLeft" || e.code === "MetaRight") { e.stopImmediatePropagation(); setTimeout(cmdRelease, 60); return; }
     if (e.metaKey && cmdCtrlDown) e.stopImmediatePropagation(); /* real keyup of a translated chord */
+  },
+  { capture: true },
+);
+window.addEventListener(
+  "keydown",
+  (e) => {
+    if (!window.Module || !e.isTrusted || isEditableTarget(document.activeElement)) return;
+    const fc = fixCode(e);
+    if (fc === e.code) return;
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    heldRemap.set(e.code, fc);
+    window.dispatchEvent(new KeyboardEvent("keydown", { code: fc, key: e.key, bubbles: true, cancelable: true, ctrlKey: e.ctrlKey, shiftKey: e.shiftKey, altKey: e.altKey, metaKey: e.metaKey, repeat: e.repeat }));
+  },
+  { capture: true },
+);
+window.addEventListener(
+  "keyup",
+  (e) => {
+    if (!e.isTrusted || !heldRemap.has(e.code)) return;
+    const fc = heldRemap.get(e.code);
+    heldRemap.delete(e.code);
+    e.stopImmediatePropagation();
+    window.dispatchEvent(new KeyboardEvent("keyup", { code: fc, key: e.key, bubbles: true, cancelable: true, ctrlKey: e.ctrlKey, shiftKey: e.shiftKey, altKey: e.altKey, metaKey: e.metaKey }));
   },
   { capture: true },
 );
@@ -1623,10 +1655,36 @@ try {
       delete stage.constants;
     };
     const origRP = P.createRenderPipeline, origCP = P.createComputePipeline;
+    /* H26: sparse colour slots arrive as `undefined` in fragment.targets; Safari throws "TypeError: Type error"
+     * for that (Chrome accepts it) and the throw kills the render pthread inside the proxied call -> frozen
+     * Blender. Spec says null. A throw must never escape: log it and return an invalid pipeline instead. */
+    const failTest = /[?&]pipethrow=(\w+)/.exec(globalThis.__PT_SEARCH || location.search); /* test hook: "sparse" = act like Safari, "all" = always throw */
+    let badMod = null;
+    let noteCh = null; /* -> telemetry "gpuerr" record (visible in out/ipad even if the thread dies) */
+    const note = (m) => { try { (noteCh || (noteCh = new BroadcastChannel("blender-gpuerr"))).postMessage(m); } catch (_) {} };
     P.createRenderPipeline = function (d) {
       stats.pipes++;
-      specialize(this, d.vertex); specialize(this, d.fragment);
-      return origRP.call(this, d);
+      try {
+        specialize(this, d.vertex); specialize(this, d.fragment);
+        const t = d.fragment && d.fragment.targets;
+        if (t) {
+          for (let i = 0; i < t.length; i++) {
+            if (t[i] === undefined) {
+              if (failTest && failTest[1] === "sparse") throw new TypeError("Type error (simulated sparse target)");
+              t[i] = null; stats.sparse = (stats.sparse || 0) + 1;
+              if (stats.sparse <= 10) note("PIPE_SPARSE '" + d.label + "' slot=" + i + " of " + t.length + " fmts=" + t.map((x) => x ? x.format : "null"));
+            }
+          }
+        }
+        if (failTest && failTest[1] === "all") throw new TypeError("Type error (simulated)");
+        return origRP.call(this, d);
+      } catch (e) {
+        stats.pipeThrown = (stats.pipeThrown || 0) + 1;
+        console.log("WGPU_PIPE_THROW '" + (d && d.label) + "' " + e);
+        if (stats.pipeThrown <= 10) note("PIPE_THROW '" + (d && d.label) + "' " + e);
+        if (!badMod) badMod = origCSM.call(this, { code: "@vertex fn main() -> @builtin(position) vec4f { return vec4f(0); }" });
+        return origRP.call(this, { label: "invalid_after_throw", layout: "auto", vertex: { module: badMod, entryPoint: "nope" } });
+      }
     };
     P.createComputePipeline = function (d) {
       specialize(this, d.compute);
@@ -1640,7 +1698,7 @@ try {
       constructor(url, opts) {
         if (opts && String(opts.name).startsWith("em-pthread") && !opts.type) {
           const abs = new URL(String(url), location.href).href;
-          url = URL.createObjectURL(new Blob(["(" + ovrPatch + ")();importScripts(" + JSON.stringify(abs) + ");"],
+          url = URL.createObjectURL(new Blob(["globalThis.__PT_SEARCH=" + JSON.stringify(location.search) + ";(" + ovrPatch + ")();importScripts(" + JSON.stringify(abs) + ");"],
                                               { type: "text/javascript" }));
         }
         super(url, opts);

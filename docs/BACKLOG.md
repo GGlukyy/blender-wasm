@@ -6,8 +6,8 @@
 
 ## I4 — České (QWERTZ) a jiné klávesnice: zkratky podle POLOHY klávesy, ne znaku (31.10 23:47, odhad)
 Lukáš (iPad, česká klávesnice): Cmd+Z "možná šlo, ale mám to na Y". Hypotéza: SDL2 pod Emscriptenem posílá Blenderu fyzický kód klávesy (US layout), takže na QWERTZ je undo na klávese s popisem Y a osa Z (G Z) na klávese Y. Desktop Blender u QWERTZ používá znak klávesy (Ctrl+Z = klávesa se Z).
-- [ ] I4a (nejdřív důkaz): Playwright s `locale cs`/`KeyboardEvent{key:'z', code:'KeyY'}` -> co Blender dostane (undo?). Test: stisk `{key:'z',code:'KeyY',ctrlKey:true}` provede undo? a `{key:'y',code:'KeyZ'}`?
-- [ ] I4b: pokud ano, v capture handleru přepsat `code` podle `e.key` pro písmena a-z (a číslice/interpunkci dle potřeby), jen když `e.key` je jednoznačné latinské písmeno a `e.code` se neshoduje (QWERTZ, AZERTY, Dvorak, Colemak). Zachovat text input (SDL_TEXTINPUT jde přes `e.key`, ověřit psaní do polí). Test s kódem KeyY/key z.
+- [x] (1.11. 00:55 `scripts/qwertz_win.sh`: Ctrl+{code KeyY,key z} BEZ opravy = žádný undo (Blender bere `code`), S opravou PASS) I4a (nejdřív důkaz): Playwright s `locale cs`/`KeyboardEvent{key:'z', code:'KeyY'}` -> co Blender dostane (undo?). Test: stisk `{key:'z',code:'KeyY',ctrlKey:true}` provede undo? a `{key:'y',code:'KeyZ'}`?
+- [x] (1.11. 00:55 `fixCode` v main.js, jen písmena a–z, ne s Alt; US rozložení beze změny; na iPadu ověřit s CZ klávesnicí) I4b: pokud ano, v capture handleru přepsat `code` podle `e.key` pro písmena a-z (a číslice/interpunkci dle potřeby), jen když `e.key` je jednoznačné latinské písmeno a `e.code` se neshoduje (QWERTZ, AZERTY, Dvorak, Colemak). Zachovat text input (SDL_TEXTINPUT jde přes `e.key`, ověřit psaní do polí). Test s kódem KeyY/key z.
 - Pozn.: klávesnicová lišta na obrazovce má pravé Z/Y, tou to funguje.
 
 ## NOVÁ FRONTA z iPadu (31.10 16:47, itch verze 0144) — pořadí = priorita
