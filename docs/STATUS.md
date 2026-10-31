@@ -1,5 +1,5 @@
 # Víkend — 31. 10. 18:55 — fronta z iPadu I1–I3 hotové (PC), H26/V1/U1 čekají
-Výsledek: 🟡 PC ✅, iPad neověřen (ASK 18:15 i 18:45 nikdo neotevřel, `ipad_wait` 2× timeout; telemetrie ze staré relace tekla dál).
+Výsledek: 🟡 PC ✅, iPad neověřen (ASK 18:15, 18:45 a 19:40 nikdo neotevřel, `ipad_wait` 3× timeout; telemetrie ze staré relace tekla dál).
 **Co jsem udělal**
 - **I1 Cmd+Z (JS):** `metaKey` + klávesa se překládá na Ctrl (Cmd+Z undo, Cmd+Shift+Z redo, Cmd+S/C/A…); Cmd+R/T/W/N/Q/L/H/M/Tab zůstávají prohlížeči; keyup chordu se syntetizuje (Safari ho polyká). Důkaz: `scripts/cmd_win.sh` — BEZ opravy FAIL (undo nic), S opravou PASS undo+redo.
 - **I2 MP na iPadu zapnuté:** výchozí = EEVEE lite; `?mp=0` = „MP Lite“ (Solid). README má varování o Rendered po dlouhé relaci. `mpguard_win.sh` upraven na nové chování (ne zeslabení: ipad&mp=0→SOLID+pruh, ipad→MATERIAL, PC, iframe Mac UA→MATERIAL: 4× PASS). Opakované mačkání → device lost: nezkoumáno, cesta zůstala jen u `?mp=0` (odhad).
