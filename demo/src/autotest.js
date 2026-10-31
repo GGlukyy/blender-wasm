@@ -1,6 +1,6 @@
 /* A1: `?auto=<scénář>` — stránka po startu sama provede scénář (iPad test bez Lukášových rukou).
  * Scénáře: light (MP + pohyb světla přes bpy), lightdrag (MP + G-tažení světla syntetickými myšími událostmi),
- * orbit (otáčení pohledu syntetickou myší), mp (jen MP a čekání 60 s).
+ * orbit (otáčení pohledu syntetickou myší), ws (projde všechny workspace, 6 s pauza, krok ws_<jméno> PŘED přepnutím), mp (jen MP a čekání 60 s).
  * Python (timery) hlásí řádky "AUTO_*" do konzole; scan() v main.js je přepošle jako telEvent. */
 import { telEvent as _telEvent } from "./telemetry.js";
 const telEvent = (k, d) => { if (k === "auto_done") window.__AUTO_DONE = d.name; _telEvent(k, d); };
@@ -69,6 +69,25 @@ def _soak():
     if k % 30 == 0: _say('AUTO_STEP soak_%ds' % int(el))
     return 1.0
 _gated(lambda: (_mp(), bpy.app.timers.register(_soak, first_interval=4.0)))`.replace('SOAK_SEC', String(+_q.get("soaksec") || 600)).replace('SOAK_MODE', _q.get("soakmode") || "lmo"),
+  ws: PY_HEAD + `
+_ws = [None, 0]
+def _next():
+    names = [w.name for w in bpy.data.workspaces]
+    if _ws[1] >= len(names):
+        _say('AUTO_DONE ws'); return None
+    n = names[_ws[1]]; _ws[1] += 1
+    _say('AUTO_STEP ws_' + n.replace(' ', '_'))        # před přepnutím: když to zamrzne, poslední krok = viník
+    bpy.context.window.workspace = bpy.data.workspaces[n]
+    return 6.0
+_gated(lambda: bpy.app.timers.register(_next, first_interval=2.0))`,
+  tmpl: PY_HEAD + `
+def _load():
+    _say('AUTO_STEP tmpl_load_' + 'TMPL_NAME')
+    bpy.ops.wm.read_homefile(app_template='TMPL_NAME')
+    _say('AUTO_STEP tmpl_loaded')
+    bpy.app.timers.register(lambda: (_say('AUTO_DONE tmpl'), None)[1], first_interval=30.0, persistent=True)
+    return None
+_gated(lambda: bpy.app.timers.register(_load, first_interval=2.0))`.replace('TMPL_NAME', _q.get("tmpl") || "2D_Animation").replace('TMPL_NAME', _q.get("tmpl") || "2D_Animation"),
   mp: PY_HEAD + `
 _gated(lambda: (_mp(), bpy.app.timers.register(lambda: (_say('AUTO_DONE mp'), None)[1], first_interval=60.0)))`,
 };
