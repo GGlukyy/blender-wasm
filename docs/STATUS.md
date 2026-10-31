@@ -1,3 +1,21 @@
+# Víkend — 31. 10. 18:55 — fronta z iPadu I1–I3 hotové (PC), H26/V1/U1 čekají
+Výsledek: 🟡 PC ✅, iPad neověřen (Lukáš ASK 18:15 neotevřel, `ipad_wait` timeout).
+**Co jsem udělal**
+- **I1 Cmd+Z (JS):** `metaKey` + klávesa se překládá na Ctrl (Cmd+Z undo, Cmd+Shift+Z redo, Cmd+S/C/A…); Cmd+R/T/W/N/Q/L/H/M/Tab zůstávají prohlížeči; keyup chordu se syntetizuje (Safari ho polyká). Důkaz: `scripts/cmd_win.sh` — BEZ opravy FAIL (undo nic), S opravou PASS undo+redo.
+- **I2 MP na iPadu zapnuté:** výchozí = EEVEE lite; `?mp=0` = „MP Lite“ (Solid). README má varování o Rendered po dlouhé relaci. `mpguard_win.sh` upraven na nové chování (ne zeslabení: ipad&mp=0→SOLID+pruh, ipad→MATERIAL, PC, iframe Mac UA→MATERIAL: 4× PASS). Opakované mačkání → device lost: nezkoumáno, cesta zůstala jen u `?mp=0` (odhad).
+- **I3 OOM po reloadu:** hláška EN+CS „zavři záložku úplně“ + tlačítko „Zkusit s menší pamětí“ (`?pool=4`). Automatický reload v kódu není. Důkaz: `oom_win.sh` PASS. Pozn.: `?pool=4` zmenší jen GPU pool, wasm heap 1 GB je pevný (odhad: pomůže málo).
+- **H26 (2D Animation):** to NENÍ workspace, ale **app template** (File ▸ New ▸ 2D Animation). Nový scénář `?auto=tmpl` (a `?auto=ws` pro všech 11 workspace). Na PC oba PASS, šablona se načte a vykreslí (out/win/auto_tmpl.png) → web/iPad-only, potřebuju iPad.
+- **V1 (node editor světlý):** změřeno i na PC: pozadí #5a5a5a, tělo nodu #787878 (`v1_win.sh`). Téma 5.3 má `space_node.back = 0x1a1a1a00` (alfa 0) → podezření: alfa 0 se u nás nepotlačí. Web-only chyba, ne iPad. Odhad, desktop jsem neviděl.
+- **U1:** (a) „ze zařízení“ na iPadu hotovo; (d) build má `WITH_INTERNATIONAL=OFF` → žádné překlady Blenderu, jen EN. (b)+(c) čekají na schválení návrhu níže.
+**Co otestovat na iPadu (podle důležitosti)**
+1. `…/?tel=1&auto=tmpl` (načte 2D Animation, nic nedělej 2 min) → zamrzne? Pak já z telemetrie.
+2. Klávesnice: Cmd+Z po posunu objektu (G X 2 Enter) → vrátí zpět?
+3. Itch/iframe bez parametrů: jde přidat objekt v Material Preview?
+4. Přes „Rendered“ po dlouhé relaci (varování v README).
+**Návrh U1 (b)(c) ke schválení:** tmavé lišty #303030/#3d3d3d, rámeček 1 px #1a1a1a, písmo Inter→system-ui, tlačítka bez gradientu; texty přes malý `i18n.js` (EN výchozí, CS při `navigator.language` cs). Screenshot návrhu neudělán (čeká na tvé „ano“).
+**Co dál:** V1 oprava v C++ (rebuild) — řekni, jestli ji chceš; H26 po iPad testu.
+**Blocked:** nic.
+
 # Víkend — 30. 10. 13:45 — D3 freeze NALEZEN a opraven (moje vlastní chyba v telemetrii) + A1 autotest
 Výsledek: ✅ PC, 🟡 iPad neověřen.
 **Co jsem udělal**

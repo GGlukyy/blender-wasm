@@ -483,6 +483,8 @@ const showSaved = (path) => {
   n.style.display = "block";
   clearTimeout(n._t); n._t = setTimeout(() => { n.style.display = "none"; }, 9000);
 };
+/* U1a: „z počítače“ na iPadu nesedí. */
+const FROM_DEV = navigator.maxTouchPoints > 1 && /Macintosh|iPad/.test(navigator.userAgent) ? "ze zařízení" : "z počítače";
 const showMpBlocked = () => {
   let n = document.getElementById("mp-note");
   if (!n) {
@@ -510,7 +512,7 @@ const showImportBar = () => {
     const inp = document.createElement("input");
     inp.type = "file"; inp.multiple = true; inp.id = "import-input"; inp.style.display = "none";
     const b = document.createElement("button");
-    b.id = "import-btn"; b.textContent = "📂 Vybrat soubory z počítače…"; b.style.cssText = "margin-left:8px;font-size:15px";
+    b.id = "import-btn"; b.textContent = "📂 Vybrat soubory " + FROM_DEV + "…"; b.style.cssText = "margin-left:8px;font-size:15px";
     b.onclick = () => inp.click();
     const upload = async (files, btn, label) => {
       try {
@@ -535,14 +537,14 @@ const showImportBar = () => {
       } catch (err) { btn.textContent = "Chyba: " + (err && err.message || err); return; }
       btn.textContent = label;
     };
-    inp.onchange = async () => { await upload(inp.files, b, "📂 Vybrat soubory z počítače…"); inp.value = ""; };
+    inp.onchange = async () => { await upload(inp.files, b, "📂 Vybrat soubory " + FROM_DEV + "…"); inp.value = ""; };
     const dinp = document.createElement("input");
     dinp.type = "file"; dinp.id = "import-dir-input"; dinp.style.display = "none"; dinp.setAttribute("webkitdirectory", "");
     const db = document.createElement("button");
     db.id = "import-dir-btn"; db.textContent = "📁 Celá složka (model + textury)…"; db.style.cssText = "margin-left:8px;font-size:15px";
     db.onclick = () => dinp.click();
     dinp.onchange = async () => { await upload(dinp.files, db, "📁 Celá složka (model + textury)…"); dinp.value = ""; };
-    n.append("Soubor z počítače: ", b, inp, db, dinp);
+    n.append("Soubor " + FROM_DEV + ": ", b, inp, db, dinp);
     document.body.appendChild(n);
   }
   n.style.display = "block";
