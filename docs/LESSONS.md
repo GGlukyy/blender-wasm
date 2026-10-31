@@ -41,3 +41,5 @@
 
 - 28. 10.: ~2 h ztraceno honěním „nedeterministického“ renderu na 5.3 — build byl rozbitý (duplicitní metoda), ale `ninja … | grep error | head` chybu zahodil a link použil starou knihovnu. Po každém buildu zkontrolovat `ninja` výstup (`FAILED`) a že nový řetězec je ve wasm (`zstd -dc … | grep -a`). Také: `WebGPUTexture::mip_min_` stínilo `Texture::mip_min_` (mip views = mip 0).
 - 30. 10.: freeze „pthread mutex deadlock" (~3 h iPad hádání) = vlastní telemetrie volající C++ pod zámkem uvnitř JS obalu `destroy()`. Pomohlo: scénář `?auto=light` (syntetické události, repro na PC za 2 min) + dev-server patch `abort()` s `new Error().stack` vlákna (vite.config.js `abortStackPlugin`). Telemetrie nesmí brát zámky ani volat do C++ z obalů alokací.
+
+- **Ztráta času 31.10:** `oom_test` — handlery OOM jsou uvnitř `start()` (po Launch), test musel nejdřív kliknout Launch (~25 min hledání). Jas node editoru: barvy z overlay sRGB textury počítat `srgb_encode(theme)` — přesná shoda hodnot (0x1a→0x5a) odhalila příčinu za 10 min.
