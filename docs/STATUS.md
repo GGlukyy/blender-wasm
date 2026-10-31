@@ -13,7 +13,7 @@ Výsledek: 🟡 PC ✅, iPad neověřen (ASK 18:15 i 18:45 nikdo neotevřel, `ip
 3. Itch/iframe bez parametrů: jde přidat objekt v Material Preview?
 4. Shading + Geometry Nodes workspace: pozadí node editoru má být tmavé (#1a1a1a), ne šedé (V1). Nahraj `out/itch_2026-10-31_1835.zip`.
 5. Přes „Rendered“ po dlouhé relaci (varování v README).
-**Návrh U1 (b)(c) ke schválení:** tmavé lišty #303030/#3d3d3d, rámeček 1 px #1a1a1a, písmo Inter→system-ui, tlačítka bez gradientu; texty přes malý `i18n.js` (EN výchozí, CS při `navigator.language` cs). Screenshot návrhu neudělán (čeká na tvé „ano“).
+**Návrh U1 (b)(c) ke schválení:** tmavé lišty #303030/#3d3d3d, rámeček 1 px #1a1a1a, písmo Inter→system-ui, tlačítka bez gradientu; texty přes malý `i18n.js` (EN výchozí, CS při `navigator.language` cs). Screenshot návrhu: `out/win/u1_mock.png` (zdroj `scripts/u1_mock.html`) — čeká na tvé „ano“.
 **Co dál:** H26 po iPad testu; U1 (b)(c) po schválení.
 **Blocked:** nic.
 
