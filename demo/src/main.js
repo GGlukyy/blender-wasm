@@ -490,7 +490,7 @@ const showMpBlocked = () => {
     n.id = "mp-note";
     n.style.cssText = "position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:99997;background:rgba(90,50,10,.95);" +
       "color:#fff;font:15px system-ui,sans-serif;padding:8px 14px;border-radius:8px;max-width:92vw";
-    n.textContent = "Material Preview je na iPadu zatím vypnutý — dostal jsi „MP Lite“ (Solid s texturami, světlem a stíny). Plný MP na vlastní riziko: přidej ?mp=1 do adresy.";
+    n.textContent = "Material Preview je vypnutý (?mp=0) — dostal jsi „MP Lite“ (Solid s texturami, světlem a stíny). Plný MP zapneš odebráním ?mp=0 z adresy.";
     document.body.appendChild(n);
   }
   n.style.display = "block";
@@ -1147,11 +1147,11 @@ const UI_SCALE = (new URLSearchParams(location.search).get("uiscale") || "").rep
 /* H7: Material Preview/Rendered crashes the iPad GPU process (790 MB textures, H6). iPad = touch + Macintosh/iPad UA
  * (iPadOS Safari sends a Mac UA). ?mp=1 opts out, ?ipad=1 forces the guard on (PC test). */
 const _qp = new URLSearchParams(location.search);
-const MP_GUARD = _qp.get("mp") === "1" ? "0" :
-  (_qp.get("ipad") === "1" || (navigator.maxTouchPoints > 1 && /Macintosh|iPad/.test(navigator.userAgent))) ? "1" : "0";
-/* H22b: EEVEE „lite“ profil pro plný MP na iPadu (?mp=1) nebo na PC (?mplite=1): menší obrazovkové buffery, bez AA akumulace/GI/volumetrik/stínů. */
-const MP_LITE = (_qp.get("mplite") === "1" || (_qp.get("mp") === "1" && _qp.get("ipad") !== "0" && (_qp.get("ipad") === "1" ||
-  (navigator.maxTouchPoints > 1 && /Macintosh|iPad/.test(navigator.userAgent))))) ? "1" : "0";
+/* I2: na iPadu je MP/EEVEE (lite profil) ZAPNUTÝ jako výchozí (soak 10 min PASS 30.10); ?mp=0 vrátí „MP Lite“ (Solid), ?ipad=1 vynutí iPad profil na PC. */
+const _isIpadQ = _qp.get("ipad") === "1" || (_qp.get("ipad") !== "0" && navigator.maxTouchPoints > 1 && /Macintosh|iPad/.test(navigator.userAgent));
+const MP_GUARD = (_isIpadQ && _qp.get("mp") === "0") ? "1" : "0";
+/* H22b: EEVEE „lite“ profil pro MP na iPadu (výchozí) nebo na PC (?mplite=1): menší obrazovkové buffery, bez AA akumulace/GI/volumetrik/stínů. */
+const MP_LITE = (_qp.get("mplite") === "1" || (_isIpadQ && _qp.get("mp") !== "0")) ? "1" : "0";
 const MP_LITE_PX = (_qp.get("mppx") || "2").replace(/[^0-9]/g, "") || "2"; // ?mppx=1|2|4|8 = preview_pixel_size
 const SHADOW_POOL_PY = `import bpy
 from bpy.app.handlers import persistent
