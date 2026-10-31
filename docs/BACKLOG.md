@@ -1,3 +1,9 @@
+## NOC 1.11. 00:05–04:00 — Lukáš u iPadu NENÍ (spí). Jen PC práce.
+- NEPIŠ `ask.txt`, NESPOUŠTĚJ `ipad_wait.py` (zbytečně 9 min čekání). Testy pro iPad jen sepiš do STATUS (přesné odkazy `&auto=…`).
+- Pořadí: (1) H26-A robustnost: výjimka v JS při create pipeline/shader nesmí zablokovat vlákno (umělý test na PC); (2) H26-B příčina: reprodukce na PC (`auto=tmpl&ipad=1`, případně simulace Safari formátů), jméno shaderu + formát, oprava; (3) I4 klávesnice QWERTZ (Playwright test key/code); (4) D7a fáze `idle` v heartbeatu; (5) D8a `auto=rendered` přepínání MP<->Rendered 5×.
+- Na konci: regress (nebo aspoň dotčené sekce), `package_itch.sh`, STATUS pro Lukáše (co otestovat ráno na iPadu, v pořadí).
+- Limit: Lukáš má ~20 % týdenního limitu, reset ve 4:00. Pokud skript narazí na limit, počká; nevadí.
+
 ## I4 — České (QWERTZ) a jiné klávesnice: zkratky podle POLOHY klávesy, ne znaku (31.10 23:47, odhad)
 Lukáš (iPad, česká klávesnice): Cmd+Z "možná šlo, ale mám to na Y". Hypotéza: SDL2 pod Emscriptenem posílá Blenderu fyzický kód klávesy (US layout), takže na QWERTZ je undo na klávese s popisem Y a osa Z (G Z) na klávese Y. Desktop Blender u QWERTZ používá znak klávesy (Ctrl+Z = klávesa se Z).
 - [ ] I4a (nejdřív důkaz): Playwright s `locale cs`/`KeyboardEvent{key:'z', code:'KeyY'}` -> co Blender dostane (undo?). Test: stisk `{key:'z',code:'KeyY',ctrlKey:true}` provede undo? a `{key:'y',code:'KeyZ'}`?
