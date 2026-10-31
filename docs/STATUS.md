@@ -15,6 +15,7 @@ Výsledek: 🟡 PC ✅, iPad neověřen (ASK 18:15 i 18:45 nikdo neotevřel, `ip
 5. Přes „Rendered“ po dlouhé relaci (varování v README).
 **Návrh U1 (b)(c) ke schválení:** tmavé lišty #303030/#3d3d3d, rámeček 1 px #1a1a1a, písmo Inter→system-ui, tlačítka bez gradientu; texty přes malý `i18n.js` (EN výchozí, CS při `navigator.language` cs). Screenshot návrhu: `out/win/u1_mock.png` (zdroj `scripts/u1_mock.html`) — čeká na tvé „ano“.
 **Co dál:** H26 po iPad testu; U1 (b)(c) po schválení.
+**Regress po V1 (C++):** `out/regress_v1.log` — 51 sekcí až po `ops_sweeps_extra` bez FAIL/❌ (poslední, dlouhá sekce `ops_sweeps_extra` jsem nedočkal, jako dřív).
 **Blocked:** nic.
 
 # Víkend — 30. 10. 13:45 — D3 freeze NALEZEN a opraven (moje vlastní chyba v telemetrii) + A1 autotest
