@@ -1515,7 +1515,7 @@ window.Module = {
 
 /* iOS gives no 1 GB wasm memory right after a GPU crash: instantiation throws "RangeError: Out of memory"
  * and the splash would stay on "Loading Blender…" forever. Tell the user what to do instead. */
-const showFatalPanel = (title, text) => {
+const showFatalPanel = (title, text, retry) => {
   if (document.getElementById("oom-overlay")) return;
   const o = document.createElement("div");
   o.id = "oom-overlay";
@@ -1524,15 +1524,27 @@ const showFatalPanel = (title, text) => {
     "font:600 28px/1.4 -apple-system,sans-serif";
   o.innerHTML = "<div style='font-size:64px'>⚠️</div><div>" + title + "</div>" +
     "<div style='font-weight:400;font-size:22px;margin-top:16px;max-width:640px'>" + text + "</div>";
+  if (retry) {
+    const b = document.createElement("button");
+    b.textContent = retry.label;
+    b.style.cssText = "margin-top:24px;font-size:22px;padding:10px 22px";
+    b.onclick = retry.onclick;
+    o.appendChild(b);
+  }
   document.body.appendChild(o);
 };
 const OOM_RE = /out of memory|Cannot allocate Wasm memory/i;
+/* I3: after a crash/reload WebKit frees the old tab's memory lazily -> reloading the SAME tab keeps failing, a new tab works.
+ * Say that (EN+CS), offer a retry with a smaller GPU pool, and never reload automatically. */
 const onOom = () => {
-  status("Nedostatek paměti. Zavři tento tab (a ostatní těžké taby), otevři stránku znovu.");
-  showFatalPanel("Safari nedalo Blenderu paměť",
-    "Zavři ostatní taby s Blenderem (i cizí), pak tento tab úplně zavři (přejeď a zavři) " +
-    "a otevři stránku znovu. Po pádu GPU může paměť uvolnit až chvíli po zavření. " +
-    "V soukromém tabu je limit paměti nižší — otevři Blender v normálním tabu.");
+  status("Out of memory — close this tab completely and reopen the page. / Nedostatek paměti — zavři tento tab a otevři stránku znovu.");
+  showFatalPanel("Safari didn't give Blender memory / Safari nedalo Blenderu paměť",
+    "<b>Close this tab completely</b> (swipe it away in the tab overview) and open the page again — Safari frees the memory of a crashed tab late. " +
+    "Close other heavy tabs too. Private tabs have a lower limit.<br><br>" +
+    "<b>Zavři tuhle záložku úplně</b> (v přehledu záložek ji odsuň pryč) a otevři stránku znovu — Safari uvolňuje paměť spadlé záložky se zpožděním. " +
+    "Zavři i ostatní těžké záložky. V soukromém tabu je limit nižší.",
+    { label: "Try with less memory / Zkusit s menší pamětí", onclick: () => {
+        const u = new URL(location.href); u.searchParams.set("pool", "4"); location.href = u.toString(); } });
 };
 addEventListener("unhandledrejection", (e) => {
   if (OOM_RE.test(String(e.reason && (e.reason.message || e.reason)))) onOom();
