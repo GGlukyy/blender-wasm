@@ -40,6 +40,6 @@ if (scen === "soak") console.log("PIPES " + JSON.stringify(Object.entries(pipeNa
 if (scen === "soak") console.log("PIPELINES " + pipeLines.join("\n"));
 console.log("STEPS", steps.join(" | ")); console.log("PROBES", JSON.stringify(probes));
 const changed = probes.before && probes.after && (probes.before.loc !== probes.after.loc || probes.before.view !== probes.after.view);
-const ok = done && (scen === "mp" || scen === "soak" || (scen === "tmpl" && steps.some((x) => /tmpl_loaded/.test(x))) || (scen === "ws" && steps.filter((x) => /AUTO_STEP ws_/.test(x)).length >= 10) || changed) && errors === 0;
+const ok = done && (scen === "mp" || scen === "soak" || (scen === "rendered" && steps.length >= 10) || (scen === "tmpl" && steps.some((x) => /tmpl_loaded/.test(x))) || (scen === "ws" && steps.filter((x) => /AUTO_STEP ws_/.test(x)).length >= 10) || changed) && errors === 0;
 console.log((ok ? "PASS" : "FAIL") + ` auto=${scen} done=${done} changed=${!!changed} errors=${errors}`);
 await browser.close(); process.exit(ok ? 0 : 1);

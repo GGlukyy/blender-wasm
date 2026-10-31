@@ -88,6 +88,19 @@ def _load():
     bpy.app.timers.register(lambda: (_say('AUTO_DONE tmpl'), None)[1], first_interval=30.0, persistent=True)
     return None
 _gated(lambda: bpy.app.timers.register(_load, first_interval=2.0))`.replace('TMPL_NAME', _q.get("tmpl") || "2D_Animation").replace('TMPL_NAME', _q.get("tmpl") || "2D_Animation"),
+  rendered: PY_HEAD + `
+_r = [0]
+def _sw():
+    a = _v3d()
+    if not a: return 2.0
+    if _r[0] >= 10:
+        _say('AUTO_DONE rendered'); return None
+    t = 'RENDERED' if _r[0] % 2 == 0 else 'MATERIAL'
+    _r[0] += 1
+    _say('AUTO_STEP shade_%s_%d' % (t, _r[0]))
+    a.spaces[0].shading.type = t
+    return 15.0
+_gated(lambda: bpy.app.timers.register(_sw, first_interval=3.0))`,
   mp: PY_HEAD + `
 _gated(lambda: (_mp(), bpy.app.timers.register(lambda: (_say('AUTO_DONE mp'), None)[1], first_interval=60.0)))`,
 };
