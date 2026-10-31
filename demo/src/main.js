@@ -636,6 +636,44 @@ const NAV_KEYS = new Set([
   "Tab", " ", "Spacebar", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight",
   "PageUp", "PageDown", "Home", "End", "Backspace", "/",
 ]);
+/* I1: iPad/Mac keyboards send Cmd as `metaKey`; Blender (GHOST/SDL) wants Ctrl for undo/save/copy/….
+ * Swallow the Meta key and re-send Cmd+<key> as Ctrl+<key>. Safari also eats the keyup of keys pressed
+ * with Cmd, so the chord's keyup is synthesized here. Browser-owned combos are left alone. */
+const CMD_KEEP = new Set(["KeyR", "KeyT", "KeyW", "KeyN", "KeyQ", "KeyL", "KeyH", "KeyM", "Tab"]);
+let cmdCtrlDown = false;
+const cmdKey = (type, code, key, shiftKey, altKey, repeat) =>
+  window.dispatchEvent(new KeyboardEvent(type, { code, key, bubbles: true, cancelable: true, ctrlKey: true, shiftKey, altKey, repeat: !!repeat }));
+const cmdRelease = () => {
+  if (!cmdCtrlDown) return;
+  cmdCtrlDown = false;
+  window.dispatchEvent(new KeyboardEvent("keyup", { code: "ControlLeft", key: "Control", bubbles: true, cancelable: true }));
+};
+window.addEventListener(
+  "keydown",
+  (e) => {
+    if (!window.Module || !e.isTrusted || isEditableTarget(document.activeElement)) return;
+    if (e.code === "MetaLeft" || e.code === "MetaRight") { e.stopImmediatePropagation(); return; }
+    if (!e.metaKey || e.ctrlKey || !e.code || CMD_KEEP.has(e.code)) return;
+    e.stopImmediatePropagation();
+    if (e.code !== "KeyV") e.preventDefault(); /* keep the native paste event for the clipboard bridge */
+    if (!cmdCtrlDown) {
+      cmdCtrlDown = true;
+      window.dispatchEvent(new KeyboardEvent("keydown", { code: "ControlLeft", key: "Control", ctrlKey: true, bubbles: true, cancelable: true }));
+    }
+    cmdKey("keydown", e.code, e.key, e.shiftKey, e.altKey, e.repeat);
+    setTimeout(() => cmdKey("keyup", e.code, e.key, e.shiftKey, e.altKey), 40);
+  },
+  { capture: true },
+);
+window.addEventListener(
+  "keyup",
+  (e) => {
+    if (!e.isTrusted) return;
+    if (e.code === "MetaLeft" || e.code === "MetaRight") { e.stopImmediatePropagation(); setTimeout(cmdRelease, 60); return; }
+    if (e.metaKey && cmdCtrlDown) e.stopImmediatePropagation(); /* real keyup of a translated chord */
+  },
+  { capture: true },
+);
 window.addEventListener(
   "keydown",
   (e) => {
