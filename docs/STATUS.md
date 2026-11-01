@@ -1,3 +1,19 @@
+# Noc 1. 11. 01:30 — H26 robustnost + QWERTZ + idle fáze (PC)
+Výsledek: 🟡 PC ✅, příčina H26 (formát 0) z PC nenalezena, iPad neověřen (Lukáš spí, ASK/ipad_wait jsem nepoužil).
+**Co jsem udělal**
+- **H26-A robustnost (JS, `main.js`):** `createRenderPipeline` obalený try/catch — výjimka (Safari „TypeError: Type error“) už nezabije render vlákno; vrátí se neplatný pipeline a kreslení pokračuje. Řídké color targety se posílají jako `null` místo `undefined`. Důkaz: `EXTRAQ='&pipethrow=all' bash scripts/auto_win.sh tmpl` (každý pipeline hodí TypeError) → vlákno žije, PASS, `auto_done`.
+- **H26-B příčina:** predikce „v tmpl vzniká řídký/Undefined color target“ na PC **neplatí** (`pipethrow=sparse`, i s `ipad=1`: nic nezachyceno). Hypotéza padá, nic dalšího jsem nehádal. Přidal jsem diagnostiku: C++ `WGPU_COLOR_HOLE shader=… fb=… slot=… out_mask=… fmts=…` (fork 3c1b5866) a JS záznamy `PIPE_SPARSE` / `PIPE_THROW` jako `gpuerr` v telemetrii (jméno shaderu + formáty).
+- **I4 QWERTZ:** důkaz `scripts/qwertz_win.sh`: Ctrl + {code KeyY, key z} bez opravy nic nedělá (Blender bere `code` = fyzickou klávesu). Oprava `fixCode` v `main.js`: písmena a–z se mapují podle `key` (ne s Alt; US rozložení beze změny). Po opravě PASS undo.
+- **D7a:** heartbeat má fázi `idle` (po `end_frame`/present), `draw` s rostoucím `rt_phase_ms` teď znamená opravdu visí. `hb_win.sh` PASS (ukazuje `idle`). Dřívější poznámka, že „draw 60+ s“ = zamrznutí, tedy platí jen pro nové buildy.
+- Parity po C++ změně: `parity_win.sh` 0 ❌ / 14 ✅. Celý regress jsem nepouštěl (jen heartbeat + diagnostika).
+**Co nefunguje:** skutečná příčina iPad freeze 2D Animation (color target format 0) není známá — čeká na data z iPadu.
+**Co otestovat na iPadu (podle důležitosti)**
+1. Nahraj `out/itch_2026-11-01_0125.zip` NEBO tunel: `…/?tel=1&auto=tmpl&mp=1` — nic nedělej 2 min. Doufám, že už nezamrzne (A). Pošli ID relace: hledám `gpuerr` s `PIPE_SPARSE`/`PIPE_THROW` (jméno shaderu) a `rt_phase`.
+2. Česká klávesnice: Cmd+Z po posunu objektu, a G pak Z (osa Z je na klávese se Z/Y popiskem Z).
+3. Ostatní z předchozího STATUS (node editor tmavý, Cmd+Z, MP v itch) platí dál.
+**Co dál:** H26-B po datech z iPadu; U1 (b)(c) čeká na tvé „ano“; D8a už hotové dřív (`auto=rendered` 10×, PC).
+**Blocked:** nic.
+
 # Víkend — 31. 10. 18:55 — fronta z iPadu I1–I3 hotové (PC), H26/V1/U1 čekají
 Výsledek: 🟡 PC ✅, iPad neověřen (ASK 18:15, 18:45 a 19:40 nikdo neotevřel, `ipad_wait` 3× timeout; telemetrie ze staré relace tekla dál).
 **Co jsem udělal**

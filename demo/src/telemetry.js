@@ -75,7 +75,7 @@ export function installTelemetry() {
   }
   /* D1: render-thread heartbeat (shared wasm memory, see gpu/webgpu/webgpu_heartbeat.hh). Read on the
    * main thread so it is still reported when the render pthread is frozen. */
-  const PHASES = ["", "draw", "shader_module", "pipeline", "map_read", "submit", "present"];
+  const PHASES = ["", "draw", "shader_module", "pipeline", "map_read", "submit", "present", "idle"];
   let hbPtr = 0, hbSeq = -1, hbSince = 0;
   const heartbeat = (o) => {
     const M = window.Module;

@@ -24,7 +24,7 @@ const probes = {}; let errors = 0, done = false; const steps = [];
 page.on("console", (m) => { const t = m.text(); const p = /^PROBE (\w+) loc=(.*) view=(.*)$/.exec(t); if (p) probes[p[1]] = { loc: p[2], view: p[3] };
   if (t.startsWith("AUTO_")) { steps.push(t); if (t.startsWith("AUTO_DONE")) done = true; }
   if (/RuntimeError|abort\(|unreachable|memory access|tint-ICE|shaderc FAIL/i.test(t)) { errors++; console.log("CONSOLE-ERR " + t.slice(0, 200)); } });
-page.on("console", (m) => { const t = m.text(); if (/WGPU_PIPE_THROW|WGPU_UNCAPTURED/.test(t)) console.log("LOG " + t.slice(0, 200)); });
+page.on("console", (m) => { const t = m.text(); if (/WGPU_PIPE_THROW|WGPU_UNCAPTURED|WGPU_COLOR_HOLE/.test(t)) console.log("LOG " + t.slice(0, 200)); });
 page.on("pageerror", (e) => { errors++; console.log("PAGEERROR " + e.message.slice(0, 200)); });
 if (scen === "soak") await page.addInitScript(() => { window.__CAPENV = { WGPU_LOG_COMPILE: "1" }; });
 const pipeNames = {}; const pipeLines = []; page.on("console", (m) => { if (/COMPILELOG pipeline 'gpu_shader_2D_widget_base'/.test(m.text()) && pipeLines.length < 12) pipeLines.push(m.text()); const x = /COMPILELOG pipeline '([^']*)'/.exec(m.text()); if (x) pipeNames[x[1]] = (pipeNames[x[1]] || 0) + 1; });
