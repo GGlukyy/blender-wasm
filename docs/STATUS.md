@@ -1,7 +1,7 @@
 # Noc 1. 11. 03:45 — N1b: 5.3 parity bez ❌
 Výsledek: ✅ PC (5.3 jen na PC, iPad neověřen, master/`BLENDER_REF` beze změny)
 - Opraveno #9 (body v edit módu) na 5.3 podle návrhu `architect`: na webu se gather/scatter do corner VBO dělá na CPU (`extract_mesh_corner_gpu.cc`, `#ifdef __EMSCRIPTEN__`), takže vzniká CPU stín. Pozn.: `GPU_backend_get_type()` WebGPU nezná (vrací 0) — proto `__EMSCRIPTEN__`. Fork `ipad-5.3-wip`.
-- Důkaz: `parity_win.sh 9` ✅ „8 bodů jako quady“; celý `parity_win.sh` na 5.3: 12 ✅, 0 ❌ (`out/parity_53_report.md`). Na 5.3 navíc PASS `undo_win.sh` a `interactive_win.sh` (ALL PASS, 0 chyb); celý regress ne. Nezkoušeno: GPU subdivision v edit módu (architect: tam stín nebude).
+- Důkaz: `parity_win.sh 9` ✅ „8 bodů jako quady“; celý `parity_win.sh` na 5.3: 12 ✅, 0 ❌ (`out/parity_53_report.md`). Na 5.3 navíc PASS `undo_win.sh` a `interactive_win.sh` (ALL PASS, 0 chyb); celý regress ne. **`ops_win.sh` na 5.3: 6/96 FAIL** (`png_save_roundtrip` „Could not write image“, `image_formats_save`, `image_ops_new_scale_invert_pack`, `io_gltf_fbx_export`, `io_gltf_fbx_roundtrip`, `gltf_textured_material_roundtrip`) — všechno zápis obrázků / glTF-FBX exporty, nic z mesh extraktorů; na 5.2 je ops 96/96 → port-mezera 5.3 (příčina nezkoumána, odhad: obrazový/OIIO zápis a Python addon). `sculpt_win` a `templates_win` na 5.3 přesáhly 250 s timeout (nevyhodnoceno). Nezkoušeno: GPU subdivision v edit módu (architect: tam stín nebude).
 - Cíl „parity na 5.3 bez ❌“ splněn → po schválení jde 5.3 rebase dál (PLAN krok R).
 
 # Noc 1. 11. 02:57 — celý regress na aktuálním buildu (BLENDER_REF 3c1b5866)
