@@ -3,7 +3,9 @@ Výsledek: ✅ PC (iPad neověřen, nic nového pro iPad)
 - `scripts/regress_all.sh` doběhl do `=== hotovo`: 59 sekcí, 0 FAIL / 0 ❌ (parity 14 ✅, ops 96/96, undo, touch*, sweepy, fuzz, ui_fuzz, seed_verify). Log: `out/regress.log`. Trvalo ~60 min.
 - Očekávané hlášky v logu (ne chyby): `blend64_collide` (záměrná ochrana 32bit), `vert_connect_path Invalid selection order` (operátor v sweepu odmítl vstup).
 - Master se nezměnil → `package_itch.sh` nepouštím.
-- Zbývá z noční fronty: (2) N1b 5.3 MP tmavý, (3) C0 měření Cycles.
+- **N1b (5.3 MP tmavý) — nezačato.** Jen pozorování ze starého screenshotu `out/win/shading53c_material.png`: rovina je světlá, Suzanne černá s oranžovými spekulárními odlesky → odhad: chybí difuzní/ambientní příspěvek (světelné sondy / world SH), ne celý pass. Predikce k ověření: „Pokud je příčina v sondách/world, pak MP s vypnutým světlem a světlým world dá černou Suzanne, ale plane zůstane světlá“. Potřebuje relink 5.3 (`build-5.3`, `scripts/.link53.sh`).
+- **C0 (Cycles čas/paměť) — neděláno.** Chybí harness (`web/scenes`, render.html), standalone `cycles.wasm` jen 14,7 MB bez integrace; viz `docs/CYCLES.md`. Chtělo by tvůj pokyn.
+- Smyčku jsem zastavil (`out/.idle_stop`).
 
 # Noc 1. 11. 01:30 — H26 robustnost + QWERTZ + idle fáze (PC)
 Výsledek: 🟡 PC ✅, příčina H26 (formát 0) z PC nenalezena, iPad neověřen (Lukáš spí, ASK/ipad_wait jsem nepoužil).
