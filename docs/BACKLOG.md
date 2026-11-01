@@ -1,3 +1,10 @@
+## NOC 1.11. — POKRAČOVÁNÍ do 04:00 (Lukáš spí; jen PC; když je fronta výše hotová)
+H26-A, I4, D7a, D8a hotové (STATUS 01:30). Zbývající limit využij na PC úlohy bez iPadu, v tomto pořadí:
+- [ ] (1) **Celý `scripts/regress_all.sh`** na aktuálním buildu (po H26-A/I4/D7a se pouštěl jen parity+hb). Výsledek do STATUS. Při FAIL: oprav jen, pokud je jasné, že je to z dnešních změn; jinak zapiš.
+- [ ] (2) **N1b (5.3 příprava)**: větev `ipad-5.3-wip` — MP tmavý. Najdi příčinu (porovnej s master build: světlo/world/tonemap/sRGB view; po V1 opravě `bind_no_srgb` možná souvisí). Cíl: `parity` na 5.3 build bez ❌ v Solid + MP lite. Do master nic nemerguj.
+- [ ] (3) **C0 Cycles na PC — jen měření**: render výchozí kostky 64 samples 960×540 v Chrome (čas, paměť), zapsat do STATUS. Žádná změna master.
+- Na konci STATUS + `package_itch.sh` jen pokud se změnil master.
+
 ## NOC 1.11. 00:05–04:00 — Lukáš u iPadu NENÍ (spí). Jen PC práce.
 - NEPIŠ `ask.txt`, NESPOUŠTĚJ `ipad_wait.py` (zbytečně 9 min čekání). Testy pro iPad jen sepiš do STATUS (přesné odkazy `&auto=…`).
 - Pořadí: (1) H26-A robustnost: výjimka v JS při create pipeline/shader nesmí zablokovat vlákno (umělý test na PC); (2) H26-B příčina: reprodukce na PC (`auto=tmpl&ipad=1`, případně simulace Safari formátů), jméno shaderu + formát, oprava; (3) I4 klávesnice QWERTZ (Playwright test key/code); (4) D7a fáze `idle` v heartbeatu; (5) D8a `auto=rendered` přepínání MP<->Rendered 5×.
