@@ -1,3 +1,9 @@
+# Noc 1. 11. 03:45 — N1b: 5.3 parity bez ❌
+Výsledek: ✅ PC (5.3 jen na PC, iPad neověřen, master/`BLENDER_REF` beze změny)
+- Opraveno #9 (body v edit módu) na 5.3 podle návrhu `architect`: na webu se gather/scatter do corner VBO dělá na CPU (`extract_mesh_corner_gpu.cc`, `#ifdef __EMSCRIPTEN__`), takže vzniká CPU stín. Pozn.: `GPU_backend_get_type()` WebGPU nezná (vrací 0) — proto `__EMSCRIPTEN__`. Fork `ipad-5.3-wip`.
+- Důkaz: `parity_win.sh 9` ✅ „8 bodů jako quady“; celý `parity_win.sh` na 5.3: 12 ✅, 0 ❌ (`out/parity_53_report.md`). Regress na 5.3 jsem nepouštěl. Nezkoušeno: GPU subdivision v edit módu (architect: tam stín nebude).
+- Cíl „parity na 5.3 bez ❌“ splněn → po schválení jde 5.3 rebase dál (PLAN krok R).
+
 # Noc 1. 11. 02:57 — celý regress na aktuálním buildu (BLENDER_REF 3c1b5866)
 Výsledek: ✅ PC (iPad neověřen, nic nového pro iPad)
 - `scripts/regress_all.sh` doběhl do `=== hotovo`: 59 sekcí, 0 FAIL / 0 ❌ (parity 14 ✅, ops 96/96, undo, touch*, sweepy, fuzz, ui_fuzz, seed_verify). Log: `out/regress.log`. Trvalo ~60 min.
