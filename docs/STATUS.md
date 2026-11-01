@@ -1,3 +1,10 @@
+# Noc 1. 11. 02:57 — celý regress na aktuálním buildu (BLENDER_REF 3c1b5866)
+Výsledek: ✅ PC (iPad neověřen, nic nového pro iPad)
+- `scripts/regress_all.sh` doběhl do `=== hotovo`: 59 sekcí, 0 FAIL / 0 ❌ (parity 14 ✅, ops 96/96, undo, touch*, sweepy, fuzz, ui_fuzz, seed_verify). Log: `out/regress.log`. Trvalo ~60 min.
+- Očekávané hlášky v logu (ne chyby): `blend64_collide` (záměrná ochrana 32bit), `vert_connect_path Invalid selection order` (operátor v sweepu odmítl vstup).
+- Master se nezměnil → `package_itch.sh` nepouštím.
+- Zbývá z noční fronty: (2) N1b 5.3 MP tmavý, (3) C0 měření Cycles.
+
 # Noc 1. 11. 01:30 — H26 robustnost + QWERTZ + idle fáze (PC)
 Výsledek: 🟡 PC ✅, příčina H26 (formát 0) z PC nenalezena, iPad neověřen (Lukáš spí, ASK/ipad_wait jsem nepoužil).
 **Co jsem udělal**
