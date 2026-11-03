@@ -34,6 +34,24 @@ export function installTouch(canvas) {
   const pointers = new Map(); /* id -> {x, y, type, x0, y0, t0} */
 
   window.__touchDebug = () => ({ mode, pointers: [...pointers.keys()], modalArmed });
+  /* Continuous grab (GHOST asks for Pointer Lock on Wrap/Hide grabs) only makes sense for a real mouse:
+   * finger / Pencil drive Blender through synthetic mouse events with absolute coordinates, and a lock
+   * would freeze them (value drags, modal pad). */
+  let lastPointerType = "mouse";
+  for (const ev of ["pointerdown", "pointermove"]) {
+    addEventListener(ev, (e) => {
+      lastPointerType = e.pointerType;
+      /* the lock may have been taken earlier (G with the keyboard) - a finger/Pencil gets it released */
+      if (e.pointerType !== "mouse" && document.pointerLockElement) document.exitPointerLock();
+    }, true);
+  }
+  const origLock = Element.prototype.requestPointerLock;
+  if (origLock) {
+    Element.prototype.requestPointerLock = function (...args) {
+      if (lastPointerType !== "mouse") return undefined;
+      return origLock.apply(this, args);
+    };
+  }
   /* Modal operators started from the key bar (G/R/S/E…): a finger would orbit instead of moving the
    * cursor, so while "armed" one finger is a TRACKPAD (relative cursor move, tap = confirm click). */
   let modalArmed = false;
