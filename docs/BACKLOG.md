@@ -1,3 +1,12 @@
+## VEČER 3.11. 19:40–23:30 — cíl: opravy + FINÁLNÍ zip pro itch (verze 5.2)
+Stav: Lukáš na PC vše OK; iPad: Cmd+Z funguje (I1/I4 potvrzeno), MP i Rendered fungují, 2D Animation už NEZAMRZÁ (H26-A potvrzeno), ale tahy Grease Pencil se v Solid/MP NEVYKRESLÍ (ve Wireframe vidět). v5.3.0 tag ještě neexistuje (3.11.) -> rebase ne.
+Pořadí:
+- [ ] (1) **H26-B GP tahy neviditelné na iPadu** (odhad: pipeline GP shaderu na Safari selže -> po H26-A se jen přeskočí -> tah chybí). Pokud Lukáš na začátku pošle telemetrii s `PIPE_THROW`/`PIPE_SPARSE`/`WGPU_COLOR_HOLE` (jméno shaderu + formáty), oprav podle ní. Jinak: na PC vynutit stejnou situaci (`?ipad=1`, tier1 formáty, `pipethrow=sparse`) a hledat GP shadery (`gpencil_*`, `grease_pencil_*`) s více výstupy/formáty; porovnat výstupní locations s attachmenty. Lukáš může 1× test přes ASK (je doma), max 2 ASK za večer.
+- [ ] (2) **G1 nekonečné posouvání kurzoru (Continuous Grab)**: desktop při tažení hodnoty/G/R/S kurzor na kraji obrazovky "přeskočí" na druhou stranu; web to neumí (prohlížeč neumí warp kurzoru). Řešení: při GHOST grab (wrap/hide) zapnout Pointer Lock (`requestPointerLock` na canvasu, relativní pohyb `movementX/Y`; SDL2 Emscripten: `SDL_SetRelativeMouseMode`), při uvolnění `exitPointerLock`. Pozor: požadavek musí přijít krátce po uživatelském gestu (pointerdown) — vlákna PROXY_TO_PTHREAD; Esc ukončí lock (Blender Esc = cancel, OK); Chrome ukazuje hlášku o skrytém kurzoru. Kopírovat chování z desktopu (Preferences ▸ Input ▸ Continuous Grab: když OFF, nic neměnit). Test na PC: Playwright drag hodnoty přes kraj canvasu -> hodnota roste dál. iPad: dotyk/Pencil netýká; trackpad volitelně.
+- [ ] (3) Celý `regress_all.sh` po (1)+(2).
+- [ ] (4) **FINÁLNÍ zip**: `package_itch.sh` + STATUS "verze pro itch: co funguje / známé limity" (EN+CS, krátce: Rendered po dlouhé relaci, 4 fps MP na iPadu, bez Cycles, bez překladů UI).
+- [ ] (5) Jen pokud zbude čas: 5.3 větev — 6/96 ops FAIL (image save, glTF/FBX export). Do master nic.
+
 ## NOC 1.11. — POKRAČOVÁNÍ do 04:00 (Lukáš spí; jen PC; když je fronta výše hotová)
 H26-A, I4, D7a, D8a hotové (STATUS 01:30). Zbývající limit využij na PC úlohy bez iPadu, v tomto pořadí:
 - [x] (1) [PASS 02:56, 59 sekcí, 0 FAIL/❌, out/regress.log] **Celý `scripts/regress_all.sh`** na aktuálním buildu (po H26-A/I4/D7a se pouštěl jen parity+hb). Výsledek do STATUS. Při FAIL: oprav jen, pokud je jasné, že je to z dnešních změn; jinak zapiš.
