@@ -49,7 +49,12 @@ export function installTouch(canvas) {
   if (origLock) {
     Element.prototype.requestPointerLock = function (...args) {
       if (lastPointerType !== "mouse") return undefined;
-      return origLock.apply(this, args);
+      /* refused locks (window not focused, no user gesture…) reject: not an error for us */
+      try {
+        const r = origLock.apply(this, args);
+        if (r && r.catch) r.catch(() => {});
+        return r;
+      } catch (_) { return undefined; }
     };
   }
   /* Modal operators started from the key bar (G/R/S/E…): a finger would orbit instead of moving the
