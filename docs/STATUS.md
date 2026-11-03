@@ -1,3 +1,10 @@
+# Večer 3. 11. — H26-B: GP tahy neviditelné na iPadu
+Výsledek: 🟡 PC ✅, iPad čeká na test
+- Hypotéza „iPad nemá dual-source-blending“ **padla**: telemetrie z iPadu ukazuje `dual-source-blending` v `adapter.features` a my ji žádáme. Přesto Safari selže při `createRenderPipeline('gpencil_antialiasing_stage_2')` (TypeError + Metal „pixel format(0) for location(115)“) → Safari neumí ten dual-source výstup (příčina uvnitř WebKitu, odhad).
+- Oprava (fork `ipad`, 2f49dc67): na iPadu (`WGPU_NO_DUALSRC`, nebo `?nodualsrc=1`) se GP resolve dělá 2 průchody stejným výsledkem: `dst *= reveal`, pak `dst += color` (nový shader `gpencil_antialiasing_stage_2_nodual`). Jiné dual-source shadery (EEVEE) neměněny — MP/Rendered na iPadu fungují.
+- Důkaz (PC Chrome): `scripts/gp_nodual_test.mjs 0|1` — „PASS dual použit“ / „PASS nodual použit“, screenshoty `out/win/gp_nodual_0.png` = `_1.png` bajt po bajtu stejné (neprůhledný tah; poloprůhledný netestován).
+- Co otestovat na iPadu: čistá karta (vymazat data webu) → 2D Animation / Add ▸ Grease Pencil ▸ Stroke, Solid → tah má být vidět černý.
+
 # Noc 1. 11. 03:45 — N1b: 5.3 parity bez ❌
 Výsledek: ✅ PC (5.3 jen na PC, iPad neověřen, master/`BLENDER_REF` beze změny)
 - Opraveno #9 (body v edit módu) na 5.3 podle návrhu `architect`: na webu se gather/scatter do corner VBO dělá na CPU (`extract_mesh_corner_gpu.cc`, `#ifdef __EMSCRIPTEN__`), takže vzniká CPU stín. Pozn.: `GPU_backend_get_type()` WebGPU nezná (vrací 0) — proto `__EMSCRIPTEN__`. Fork `ipad-5.3-wip`.

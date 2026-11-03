@@ -1470,6 +1470,7 @@ window.Module = {
       if (new URLSearchParams(location.search).get("perf") === "1" && new URLSearchParams(location.search).get("reglog") === "1") ENV.WGPU_REGIONLOG = "1";
       if (new URLSearchParams(location.search).get("passlog") === "1") ENV.WGPU_PASSLOG = "1";
       if (new URLSearchParams(location.search).get("nocompute") === "1") ENV.WGPU_NO_COMPUTE = "1";
+      { const _nd = new URLSearchParams(location.search).get("nodualsrc"); if (_nd === "1" || (_nd !== "0" && _isIpadUA)) ENV.WGPU_NO_DUALSRC = "1"; } /* H26-B: Safari neumí pipeline s dual-source blendem (GP kompozice) */
       if (new URLSearchParams(location.search).get("compilelog") === "1") ENV.WGPU_LOG_COMPILE = "1";
       if (new URLSearchParams(location.search).get("drawlog") === "1") ENV.WGPU_LOG_DRAWS = "1";
       if (new URLSearchParams(location.search).get("iconprev") === "1") ENV.BLENDER_WEB_ICON_PREVIEWS = "1";
