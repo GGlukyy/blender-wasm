@@ -1,3 +1,11 @@
+# Konec večera 3. 11. 22:55 — souhrn
+Výsledek: 🟡 vše ✅ na PC, iPad čeká
+- Celý `regress_all.sh` na finálním buildu: 0 FAIL / 0 ❌ / 0 PAGEERROR (`out/regress.log`, 59 sekcí). První běh našel 2 vlastní chyby G1 (touch drag zamrzl kvůli Pointer Locku; neodchycený reject → ui_fuzz FAIL) — obě opraveny v `demo/src/touch.js` (zámek jen pro myš, prst/Pencil ho uvolní, reject se zahodí), ne zeslabením testů.
+- Zip pro itch: `out/itch_2026-11-03_2253.zip` (70 MB, bez Puter brandingu, bez ask.txt). Nahraje Lukáš ručně.
+- Co otestovat na iPadu (podle důležitosti): 1) H26-B — čistá karta, Add ▸ Grease Pencil ▸ Stroke v Solid → tah je vidět; 2) prst na číselném poli a G/R/S s prst. padem stále fungují (G1 se na dotyku nesmí projevit).
+- Co otestovat na PC s myší: tažení čísla / G přes okraj okna (G1), Esc při zámku (odhad: Chrome Esc spotřebuje).
+- Master nepushnut (rozhodni ty); fork `ipad` pushnutý, `BLENDER_REF` aktualizován. Položka (5) 5.3 větev: nezačato (čas).
+
 # Verze pro itch (3. 11. večer) — co funguje / známé limity
 CS:
 - Funguje: modelování, edit mode, sculpt, UV, Material Preview a Rendered (iPad), Cmd+Z, ukládání do prohlížeče, 2D Animation (Grease Pencil, tahy se vykreslují — oprava H26-B čeká na potvrzení z iPadu).
