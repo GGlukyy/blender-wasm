@@ -844,3 +844,8 @@ Subsurf 2 na Monkey plynulý, glTF export + import zpět (triangulováno).
 - [x] (25. 10., PASS `scripts/leak_win.sh`) Růst haldy při opakovaném těžkém modelování = undo kroky (ne únik). Výchozí Undo Memory Limit 300 MB. Zbývá ověřit na iPadu a případně doladit hodnotu (`?undomem=`).
 
 - [ ] (26. 10. 06:15, jen poznámka) `upstream` (HeyPuter) má nový commit `e73ddff` „GL backend on wink + numpy for Python add-ons" — neřeší iPad pády/WebGPU; numpy už máme. Neslučováno; Lukáš ať rozhodne po víkendu.
+
+## M1 — Blender Web MCP (BUDOUCNOST — NEDĚLAT, dokud Lukáš neřekne; až po release + 5.3 rebase)
+Nápad (4.11.): AI (Claude apod.) ovládá Blender v prohlížeči jako u Figma/Miro MCP, pro toho, kdo chce.
+Rozdíl proti Figma/Miro: jejich MCP běží v cloudu u dokumentu; náš Blender běží jen v záložce uživatele -> potřeba relay.
+Návrh: (1) add-on "Blender Web MCP" v našem buildu, VYPNUTÝ ve výchozím stavu, v Preferences: URL relay + token + Connect; (2) JS v stránce drží WebSocket ven (stránka nesmí poslouchat na portu), příkazy předá Pythonu (už umíme z testů), odpověď zpět; (3) relay = MCP server (stdio/HTTP pro AI klienta + WebSocket pro stránku) jako SAMOSTATNÉ repo (`npx blender-web-mcp`), běží u uživatele lokálně. Nástroje: scene info, screenshot viewportu, přidat/upravit objekt, run python (jen s tokenem). Bezpečnost: nikdy zapnuto bez akce uživatele, token, jen wss/localhost, na itch nic automaticky. Hostovaný relay (jako Figma) až případně později (Cloudflare Workers/Durable Objects, párovací kód) — náklady + zneužití.
