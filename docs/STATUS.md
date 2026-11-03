@@ -1,3 +1,10 @@
+# Večer 3. 11. — G1: Continuous Grab (Pointer Lock)
+Výsledek: 🟡 PC ✅ (jen základ), iPad netýká
+- Změna (fork `ipad`): `GHOST_WindowWeb::setWindowCursorGrab` při Wrap/Hide žádá Pointer Lock; při zámku se kurzor skládá z `movementX/Y` (neomezená pozice jako X11 backend). Když prohlížeč zámek odmítne (iPad), chování beze změny.
+- Důkaz: `scripts/cgrab_test.mjs` PASS (při tažení Location X `pointerLockElement=canvas`, po puštění `null`, hodnota 0 → 8.72); `parity_win.sh` bez ❌ (3 ❓ jako dřív).
+- Nezjištěno (odhad): že hodnota opravdu roste přes okraj obrazovky (Playwright pohyb ven z okna neukáže rozdíl) a Esc při zámku (Chrome Esc spotřebuje na ukončení zámku → G/R/S se nemusí zrušit). Zkus na PC ručně: tažení čísla a G přes okraj.
+- Master nepushnut, `BLENDER_REF` aktualizován.
+
 # Večer 3. 11. — H26-B: GP tahy neviditelné na iPadu
 Výsledek: 🟡 PC ✅, iPad čeká na test
 - Hypotéza „iPad nemá dual-source-blending“ **padla**: telemetrie z iPadu ukazuje `dual-source-blending` v `adapter.features` a my ji žádáme. Přesto Safari selže při `createRenderPipeline('gpencil_antialiasing_stage_2')` (TypeError + Metal „pixel format(0) for location(115)“) → Safari neumí ten dual-source výstup (příčina uvnitř WebKitu, odhad).
