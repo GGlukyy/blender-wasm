@@ -9,10 +9,10 @@ Výsledek: 🟡 vše ✅ na PC, iPad čeká
 # Verze pro itch (3. 11. večer) — co funguje / známé limity
 CS:
 - Funguje: modelování, edit mode, sculpt, UV, Material Preview a Rendered (iPad), Cmd+Z, ukládání do prohlížeče, 2D Animation (Grease Pencil, tahy se vykreslují — oprava H26-B čeká na potvrzení z iPadu).
-- Limity: Material Preview ~4 fps na iPadu; Rendered po dlouhé relaci může spadnout (stačí obnovit stránku); bez Cycles; UI jen anglicky; Safari vyžaduje HTTPS.
+- Limity: Material Preview u těžších scén na iPadu pomalejší (Lukáš: běžně plynulé, 30+ fps; 4 fps byla jen telemetrie v auto-testu); Rendered po dlouhé relaci může spadnout (stačí obnovit stránku); bez Cycles; UI jen anglicky; Safari vyžaduje HTTPS.
 EN:
 - Works: modeling, edit mode, sculpt, UV, Material Preview and Rendered (iPad), undo, browser file storage, 2D Animation (Grease Pencil strokes now render — fix awaiting iPad confirmation).
-- Limits: Material Preview ~4 fps on iPad; Rendered may crash after a long session (reload the page); no Cycles; UI is English only; Safari needs HTTPS.
+- Limits: heavy scenes in Material Preview can be slow on iPad; Rendered may crash after a long session (reload the page); no Cycles; UI is English only; Safari needs HTTPS.
 
 # Večer 3. 11. — G1: Continuous Grab (Pointer Lock)
 Výsledek: 🟡 PC ✅ (jen základ), iPad netýká

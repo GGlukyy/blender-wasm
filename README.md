@@ -13,10 +13,10 @@ Real Blender compiled to WebAssembly + WebGPU. No install, runs in the browser �
 <img width="1907" height="1076" alt="Blender running in the browser" src="https://github.com/user-attachments/assets/04296d56-da28-42b7-bf9d-f703ccf15684" />
 
 ## Works
-Modeling · Edit Mode · Sculpt · UV · Texture Paint · Grease Pencil · Solid / Material Preview / Rendered (EEVEE) · open, save, import, export · add-ons from disk
+Modeling · Edit Mode · Sculpt · Geometry Nodes · UV · Texture Paint · Grease Pencil · Solid / Material Preview / Rendered (EEVEE) · open, save, import, export · add-ons from disk
 
 ## Limits
-- Material Preview is slow on iPad (~4 fps)
+- Heavy scenes in Material Preview / Rendered can be slow on iPad
 - Long session → switching to Rendered can freeze. Save first.
 - "Out of memory" on iPad: close the tab completely and open it again
 - No Cycles · English UI only · needs WebGPU (Chrome/Edge, Safari on iPadOS 26+)
