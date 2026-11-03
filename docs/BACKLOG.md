@@ -8,7 +8,7 @@ Pořadí:
 - [x] (2) **G1 nekonečné posouvání kurzoru (Continuous Grab)**: desktop při tažení hodnoty/G/R/S kurzor na kraji obrazovky "přeskočí" na druhou stranu; web to neumí (prohlížeč neumí warp kurzoru). Řešení: při GHOST grab (wrap/hide) zapnout Pointer Lock (`requestPointerLock` na canvasu, relativní pohyb `movementX/Y`; SDL2 Emscripten: `SDL_SetRelativeMouseMode`), při uvolnění `exitPointerLock`. Pozor: požadavek musí přijít krátce po uživatelském gestu (pointerdown) — vlákna PROXY_TO_PTHREAD; Esc ukončí lock (Blender Esc = cancel, OK); Chrome ukazuje hlášku o skrytém kurzoru. Kopírovat chování z desktopu (Preferences ▸ Input ▸ Continuous Grab: když OFF, nic neměnit). Test na PC: Playwright drag hodnoty přes kraj canvasu -> hodnota roste dál. iPad: dotyk/Pencil netýká; trackpad volitelně.
 - [x] (3) Celý `regress_all.sh` po (1)+(2).
 - [x] (4) **FINÁLNÍ zip**: `package_itch.sh` + STATUS "verze pro itch: co funguje / známé limity" (EN+CS, krátce: Rendered po dlouhé relaci, 4 fps MP na iPadu, bez Cycles, bez překladů UI).
-- [ ] (5) Jen pokud zbude čas: 5.3 větev — 6/96 ops FAIL (image save, glTF/FBX export). Do master nic.
+- [ ] (5) [3.11. 23:00: nezačato; OIIO ustring patch je ve sdíleném sysrootu (`build_oiio.sh`), takže „PNG save“ na 5.3 asi není tohle; lokální větev `ipad-5.3-wip` v ./blender není, 5.3 build je potřeba znovu založit — >1 h] Jen pokud zbude čas: 5.3 větev — 6/96 ops FAIL (image save, glTF/FBX export). Do master nic.
 
 ## NOC 1.11. — POKRAČOVÁNÍ do 04:00 (Lukáš spí; jen PC; když je fronta výše hotová)
 H26-A, I4, D7a, D8a hotové (STATUS 01:30). Zbývající limit využij na PC úlohy bez iPadu, v tomto pořadí:
