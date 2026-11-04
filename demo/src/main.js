@@ -845,6 +845,7 @@ async function enumerateTree(dirHandle) {
 }
 
 const mountedNames = new Set();
+const mountBlends = new Map(); /* folder name -> top-level .blend names (H29b) */
 let pickerBusy = false;
 
 /* H17: File System Access pickers (showDirectoryPicker & co.) throw SecurityError in a cross-origin iframe
@@ -871,6 +872,7 @@ async function mountViaFileSystemAccess() {
   if (!mountedNames.has(dir.name)) {
     await mountIdbPut(mountPoint, dir);
     const lines = await enumerateTree(dir);
+    mountBlends.set(dir.name, lines.filter((l) => l.startsWith("F\t") && !l.includes("/") && /\.blend$/i.test(l)).map((l) => l.slice(2)));
     /* Spawns a detached helper pthread and returns immediately; the mount
      * itself must not block the main thread (it creates a proxy worker). */
     const rc = window.Module.ccall(
@@ -935,7 +937,9 @@ function dropModalPick() {
           statusEl.textContent = "Loading “" + f.name + "”…";
           FS.writeFile("/uploads/" + f.name, new Uint8Array(await f.arrayBuffer()));
         }
-        if (fileInput.files.length) finish("/uploads");
+        const fl = [...fileInput.files];
+        if (fl.length === 1 && /\.blend$/i.test(fl[0].name)) finish("file:/uploads/" + fl[0].name);
+        else if (fl.length) finish("/uploads");
       } catch (err) {
         statusEl.textContent = "Failed: " + (err && err.message || err);
       }
@@ -1115,17 +1119,79 @@ const showExportBar = () => {
   n.style.display = "block";
   exportPending.clear(); // další dávka začne novou lištou
 };
+/* H29: File ▸ Open on Chromium used to show only the Windows "select FOLDER" dialog; people expected a file picker. Ask first. */
+function openChooser() {
+  return new Promise((resolve) => {
+    const ov = document.createElement("div");
+    ov.id = "open-chooser";
+    ov.style.cssText = "position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;" +
+      "background:rgba(0,0,0,.6);font:14px system-ui,sans-serif;color:#ddd;";
+    ov.innerHTML = "<div style='width:460px;max-width:88vw;padding:24px;border-radius:10px;background:#1c1c1c;text-align:center'>" +
+      "<div style='font-size:17px;font-weight:600;margin-bottom:10px'>Otevřít .blend</div>" +
+      "<div style='color:#aaa;line-height:1.5'>Vyber <b>SLOŽKU</b>, ve které je tvůj .blend (Blender pak uvidí celou složku i s texturami).</div>" +
+      "<button id='oc-folder' style='margin-top:16px;padding:12px 22px;border:0;border-radius:8px;background:#e87d0d;color:#111;font:600 16px system-ui;cursor:pointer'>Vybrat složku…</button>" +
+      "<div style='margin-top:14px;color:#aaa'>nebo</div>" +
+      "<button id='oc-file' style='margin-top:10px;padding:10px 20px;border:0;border-radius:8px;background:#333;color:#ddd;font:15px system-ui;cursor:pointer'>Jen jeden soubor…</button>" +
+      "<div style='margin-top:6px;color:#888;font-size:12px'>(textury vedle souboru se nenačtou)</div>" +
+      "<div><button id='oc-cancel' style='margin-top:16px;padding:6px 16px;border:0;border-radius:5px;background:#2a2a2a;color:#ddd;cursor:pointer'>Zrušit</button></div></div>";
+    document.body.appendChild(ov);
+    const done = (v) => { ov.remove(); resolve(v); };
+    ov.querySelector("#oc-folder").onclick = () => done("folder");
+    ov.querySelector("#oc-file").onclick = () => done("file");
+    ov.querySelector("#oc-cancel").onclick = () => done(null);
+    ov.addEventListener("click", (e) => { if (e.target === ov) done(null); });
+  });
+}
+
+/* One .blend via <input type=file> -> /uploads. Returns "file:/uploads/<name>" or null (cancel). Must run under user activation. */
+function pickSingleBlend() {
+  return new Promise((resolve) => {
+    const inp = document.createElement("input");
+    inp.type = "file"; inp.accept = ".blend"; inp.id = "open-single-input"; inp.style.display = "none";
+    document.body.appendChild(inp);
+    inp.addEventListener("cancel", () => { inp.remove(); resolve(null); });
+    inp.onchange = async () => {
+      const f = inp.files[0]; inp.remove();
+      if (!f) return resolve(null);
+      const FS = window.Module.FS;
+      try { FS.mkdir("/uploads"); } catch (e) { /* exists */ }
+      FS.writeFile("/uploads/" + f.name, new Uint8Array(await f.arrayBuffer()));
+      resolve("file:/uploads/" + f.name);
+    };
+    inp.click();
+  });
+}
+
+/* Open a .blend right away (no Blender file browser). Asks first if the current scene has unsaved changes. */
+function openBlendDirect(path) {
+  const FS = window.Module.FS;
+  let dirty = "0"; try { dirty = new TextDecoder().decode(FS.readFile("/tmp/dirty.txt")); } catch (e) { /* none yet */ }
+  if (dirty === "1" && !window.confirm("Aktuální scéna má neuložené změny. Otevřít soubor a změny zahodit?")) return;
+  FS.writeFile("/tmp/open_req.txt", path);
+  log("open .blend directly: " + path);
+}
+
 window.__blenderFileOpenHook = async () => {
   if (pickerBusy) return;
   if (!window.Module || !window.Module.ccall) return;
   pickerBusy = true;
   try {
     /* Relies on transient user activation of the File ▸ Open click (FS-Access
-     * path). Cancel (AbortError / null) → do nothing, no file browser. */
-    const mountPoint = HAS_FSACCESS
-      ? await mountViaFileSystemAccess()
-      : await dropModalPick();
-    if (mountPoint) {
+     * path) / the chooser button click. Cancel (AbortError / null) → do nothing. */
+    let mountPoint = null;
+    if (HAS_FSACCESS) {
+      const choice = await openChooser();
+      if (choice === "folder") {
+        mountPoint = await mountViaFileSystemAccess();
+        const blends = mountBlends.get(mountPoint.slice(MOUNT_ROOT.length + 1)) || [];
+        if (blends.length === 1) mountPoint = "file:" + mountPoint + "/" + blends[0];
+      } else if (choice === "file") mountPoint = await pickSingleBlend();
+    } else {
+      mountPoint = await dropModalPick();
+    }
+    if (mountPoint && mountPoint.startsWith("file:")) {
+      openBlendDirect(mountPoint.slice(5));
+    } else if (mountPoint) {
       /* Only NOW open Blender's file browser, pointed at the folder. */
       window.Module.ccall("blender_web_file_open_at", null, ["string"], [mountPoint + "/"]);
     }
@@ -1446,10 +1512,29 @@ bpy.app.timers.register(_autosave, first_interval=_AS_EVERY, persistent=True)`;
  * → iPad 8, jinde 32. Přepsat ?pool=N. */
 const _isIpadUA = navigator.maxTouchPoints > 1 && /Macintosh|iPad/.test(navigator.userAgent);
 const POOL_N = parseInt(_qp.get("pool") || (_isIpadUA ? "8" : "32"), 10) || 32;
+/* H29b: File ▸ Open of a single .blend skips Blender's file browser: JS writes the path to /tmp/open_req.txt, this timer
+ * opens it; /tmp/dirty.txt tells JS whether the current scene has unsaved changes (JS asks before discarding). */
+const OPEN_REQ_PY = `import bpy, os
+_dirty = [None]
+def _open_tick():
+    try:
+        d = '1' if bpy.data.is_dirty else '0'
+        if d != _dirty[0]:
+            _dirty[0] = d
+            with open('/tmp/dirty.txt', 'w') as f: f.write(d)
+        p = '/tmp/open_req.txt'
+        if os.path.exists(p):
+            with open(p) as f: fp = f.read().strip()
+            os.remove(p)
+            print('OPEN_REQ', fp)
+            bpy.ops.wm.open_mainfile(filepath=fp)
+    except Exception as e: print('OPEN_REQ failed', e)
+    return 0.3
+bpy.app.timers.register(_open_tick, first_interval=1.0, persistent=True)`;
 const _mcp = mcpConfig(_qp);
 window.Module = {
   poolSize: POOL_N,
-  arguments: ["--factory-startup", "--python-expr", SHADOW_POOL_PY, ...autoArgs(), ...mcpPyArgs(_mcp), ...(window.__BARGS || [])],
+  arguments: ["--factory-startup", "--python-expr", SHADOW_POOL_PY, "--python-expr", OPEN_REQ_PY, ...autoArgs(), ...mcpPyArgs(_mcp), ...(window.__BARGS || [])],
   canvas,
   print: (t) => { log(t); scan(t); },
   printErr: (t) => { log("[err] " + t); scan(t); },

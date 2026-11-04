@@ -1,3 +1,11 @@
+# 4. 11. 19:15 — H29 + H29b: File ▸ Open
+Výsledek: 🟡 PC ✅, iPad netestován
+- Co: na Chromu File ▸ Open nejdřív ukáže dialog „Vyber SLOŽKU… / Jen jeden soubor…“. Složka s právě 1 `.blend` (jen nejvyšší úroveň) → otevře se rovnou; „Jen jeden soubor“ → kopie do `/uploads` + rovnou otevřít (textury vedle souboru se nenačtou — je to v dialogu); složka s víc `.blend` → Blenderův prohlížeč jako dřív. Safari/iPad (dialog „Choose file(s)…“): 1 vybraný `.blend` se otevře rovnou.
+- Když má scéna neuložené změny, před přímým otevřením se JS zeptá (`confirm`). Otevření dělá Python timer (`/tmp/open_req.txt`), jen JS, bez rebuildu.
+- Důkaz: `scripts/open_single_win.sh` PASS 3/3 (folder1, file, folder2; showDirectoryPicker v testu nahrazen OPFS složkou), `open_file_win.sh` PASS.
+- Nevím: skutečný Windows dialog složky (Playwright ho neumí), iPad `confirm` vzhled, chování při velkém .blend v `/uploads` (paměť).
+- Co otestovat na iPadu: čistá karta → File ▸ Open → Choose file(s) → vyber 1 .blend → otevře se rovnou?
+
 # 4. 11. 18:45 — M1b: MCP jako add-on v Preferences
 Výsledek: 🟡 PC ✅
 - Co: `demo/src/mcp.js` při startu zapíše do user add-ons `blender_web_mcp.py` (vypnutý). Panel v Preferences: Relay URL (výchozí `ws://127.0.0.1:8765`), Token (heslo), Connect/Disconnect, stav, návod. Connect → soubor `/tmp/mcp_ctl.json` → JS bridge (bez reloadu); povoleno jen `ws://localhost` nebo `wss://`. `?mcp=` dál funguje.
