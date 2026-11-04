@@ -2,6 +2,10 @@
 Výsledek: 🟡 čeká na iPad
 - Měření: WGSL dump (`out/wgsl_dump_gpencil_depth_merge.txt`, `scripts/auto_test.mjs` + env `CAPENV_JSON`/`WSLENV`): fragment je `fn main(...) -> @builtin(frag_depth) f32` (holý builtin, žádný `@location`), pipeline má přitom color target rgba16float s writeMask 0.
 - Predikce: Pokud je příčina holý frag_depth bez barevného výstupu, pak po přepisu na `struct { @location(0) c: vec4<f32>, @builtin(frag_depth) d: f32 }` (maska výstupů se spočítá PŘED přepisem, takže se barva nepřepíše) zmizí na iPadu `PIPE_INVALID 'gpencil_depth_merge'`. Na PC to nelze ověřit (Chrome shader bere i teď), PC test = jen že se nic nerozbilo.
+- Oprava (fork `ipad` afd9fb9e, `BLENDER_REF` aktualizován): `wrap_bare_frag_depth` v `webgpu_shader.cc` přidá holému `frag_depth` výstupu dummy `@location(0)`; maska výstupů se počítá před přepisem → writeMask 0 zůstává, barva se nepřepíše.
+- Důkaz PC: `gp_nodual_test 1` PASS, errs=0, tah vidět (`out/win/gp_nodual_1_orbit.png`). Nasazeno do `demo/public` (záloha starého v `out/bak_h26d`).
+- iPad: ASK + `ipad_wait.py` → TIMEOUT (Lukáš u iPadu nebyl), neopakováno, ask.txt smazán. Master nepushnut.
+- Co otestovat na iPadu: tunel `?tel=1`, čistá karta, 2D Animation, 3 tahy v Solid → tah je vidět? Já pak v gpuerr hledám `PIPE_INVALID 'gpencil_depth_merge'` (nemá být). Když pořád padá: hypotéza „holý frag_depth“ neplatí (odhad: příčina jinde, např. depth-only pass bez color targetu).
 
 # 4. 11. 16:00 — H25b: klik na kost vybírá špatnou kost
 Výsledek: 🟡 PC ✅, Lukáš potvrdí
