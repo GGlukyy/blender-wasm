@@ -36,6 +36,8 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
 await wait(18000);
 await page.keyboard.press("Escape"); await wait(2500);
 await page.locator("#canvas").screenshot({ path: `out/gp_nodual_${mode}.png` });
+await page.mouse.move(600, 400); for (const k of ["KP_4", "KP_4", "KP_8"]) { await page.keyboard.press("Numpad" + k.slice(3)); await wait(400); }
+await wait(1500); await page.locator("#canvas").screenshot({ path: `out/gp_nodual_${mode}_orbit.png` });
 console.log("SHADERS", [...used].join(","), mode === "1" ? (used.has("gpencil_antialiasing_stage_2_nodual") && !used.has("gpencil_antialiasing_stage_2") ? "PASS nodual použit" : "FAIL") : (used.has("gpencil_antialiasing_stage_2") && !used.has("gpencil_antialiasing_stage_2_nodual") ? "PASS dual použit" : "FAIL"));
 console.log(ready ? "READY" : "NOT READY", "errs=" + err);
 await browser.close();
