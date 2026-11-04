@@ -1,3 +1,10 @@
+# 4. 11. 20:15 — regress + D8 + měření výkonu MP (PC, `?ipad=1`)
+Výsledek: 🟡 PC ✅
+- `regress_all.sh` po H25c/M1b/H29b/O1a: **0 FAIL / 0 ❌ / 0 PAGEERROR** (`out/regress.log`, 59 sekcí).
+- D8 (Rendered po dlouhé relaci): nový přepínač `soakmode` s písmenem `R` (`auto_win.sh soak 300 lmoR`) = soak 300 s a pak 6× MP<->Rendered po 15 s. PASS, 0 chyb, v logu jen známé `WGPU_COLOR_HOLE` (nejsou chyby). PC to nereprodukuje → zbývá jen iPad.
+- Měření MP s `?ipad=1` (`auto_win.sh soak 60 lmo`, telemetrie, 185 vzorků): medián 52 passů a 16 submitů na snímek (max 150 / 78); bindgroups medián 82 (max 151); textury medián 53 ks, 69 MB (max 115 ks, 424 MB). FPS v tomto scénáři nic neříká (medián 1 — Blender kreslí jen při změně, soak mění scénu 1×/s).
+- Návrh (odhad, nic neměněno): (1) největší položka jsou passy (~50/snímek) — nejdřív změřit, které EEVEE passy MP lite opravdu potřebuje (shadow/probe/volume) a vypnout ty zbytečné; (2) sledovat `writes` (queue.writeBuffer, stovky KB–MBy/snímek) — kandidát na batch; (3) pro skutečné fps potřebujeme scénář s plynulým orbitem (`auto=orbit` + ruční drag) — dosud jen měření na iPadu (`?tel=1`).
+
 # 4. 11. 20:10 — O1a offline PWA (service worker)
 Výsledek: 🟡 PC ✅, hosting čeká na Lukáše
 - Co: `demo/public/sw.js` — ukládá do Cache Storage vše, co stránka stáhne (blender.js/wasm/assets/wgsl-cache), obsluhuje bez sítě a ke každé odpovědi přidává COOP/COEP (bez toho by nešla vlákna). `version.json` (build) → při nové verzi oranžový pruh „klepni pro aktualizaci“. Registrace v `main.js` jen v produkčním buildu (ne dev server, ne itch release; `?sw=1` vynutí, `?sw=0` vypne). `navigator.storage.persist()` se zkouší.
