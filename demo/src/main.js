@@ -1683,7 +1683,15 @@ try {
           }
         }
         if (failTest && failTest[1] === "all") throw new TypeError("Type error (simulated)");
-        return origRP.call(this, d);
+        /* H26-C: name the shader whose pipeline Safari rejects (the plain gpuerr has no label) */
+        const dev = this;
+        dev.pushErrorScope("validation");
+        const pl = origRP.call(this, d);
+        dev.popErrorScope().then((er) => {
+          if (er && (stats.pipeInvalid = (stats.pipeInvalid || 0) + 1) <= 10)
+            note("PIPE_INVALID '" + d.label + "' tgts=" + (d.fragment && d.fragment.targets ? d.fragment.targets.map((x) => x ? x.format + (x.blend ? "+blend" : "") : "null") : "-") + " " + er.message.slice(0, 160));
+        }, () => {});
+        return pl;
       } catch (e) {
         stats.pipeThrown = (stats.pipeThrown || 0) + 1;
         console.log("WGPU_PIPE_THROW '" + (d && d.label) + "' " + e);
