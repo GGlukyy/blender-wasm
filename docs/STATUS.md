@@ -1,3 +1,8 @@
+# 5. 11. 00:20 — box select kostí
+- `scripts/bone_box_win.sh` (Rigify, zoom na ruku, box kolem ruky): Edit mode — před 21 vybraných s 2 falešnými (f_middle.03, f_ring.03 mimo box), po 18 a 0 falešných (PASS). Oprava: v SELECT_ALL se kost bere jako úsečka (Liang-Barsky), ne AABB (fork `ipad`, `BLENDER_REF`).
+- Pose mode: box select vybere i vzdálenou kost `spine` (FAIL, `MODE=pose`) — stejně i před H25c; příčina: Blender v pose módu bere i objektový záznam (když ho vynechám, nevybere se nic). Neřešeno, nízká priorita (box kolem prstů obvykle nevadí).
+- `bone_click` 10/10, `obj_click` 8/8, `bone_rigify` pose i edit 9/9.
+
 # 4. 11. 23:40 — regress po P33/P34
 Výsledek: ✅ PC — `regress_all.sh`: 0 FAIL / 0 ❌ / 0 PAGEERROR (`out/regress.log`). Pushnuto: fork `ipad` f891591f (`BLENDER_REF`), `master` do P34 + test potvrzení při neuložených změnách (H29b, dialog se ukáže).
 - Nový zip pro itch není (nahraje Lukáš; `package_itch.sh` až po tvém potvrzení H25c/H29b na iPadu).
