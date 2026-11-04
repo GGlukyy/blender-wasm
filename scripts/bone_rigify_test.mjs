@@ -3,7 +3,9 @@
 // a po každém kliku stav (BPROBE active + vybrané). Test klikne na každou kost 2× v různém pořadí.
 const { chromium } = await import(process.env.PW || "playwright");
 const HAND = process.env.VIEW === 'hand';
+const EDIT = process.env.MODE === 'edit';
 const expr = `HAND = ${HAND ? 1 : 0}
+EDIT = ${EDIT ? 1 : 0}
 import bpy, sys, mathutils
 from bpy_extras import view3d_utils
 st = {'built': False}
@@ -17,8 +19,10 @@ def build():
     bpy.ops.object.armature_human_metarig_add()
     ob = bpy.context.object
     ob.show_in_front = True
-    bpy.ops.object.mode_set(mode='POSE')
-    bpy.ops.pose.select_all(action='DESELECT')
+    if EDIT:
+        bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.armature.select_all(action='DESELECT')
+    else:
+        bpy.ops.object.mode_set(mode='POSE'); bpy.ops.pose.select_all(action='DESELECT')
     for a in bpy.context.window_manager.windows[0].screen.areas:
         if a.type == 'VIEW_3D':
             r3 = a.spaces[0].region_3d; r3.view_perspective = 'ORTHO'
@@ -53,8 +57,12 @@ def probe():
                 if any(n != pb.name and dseg(mid, h, t) < 6 for n, h, t in segs): amb.append(pb.name)
             print('BAMB ' + ' '.join(amb)); sys.stdout.flush()
             print('BPOS ' + ' '.join(pts) + ' WIN %d %d' % (W.width, W.height)); sys.stdout.flush()
-    sel = [pb.name for pb in ob.pose.bones if (pb.select if hasattr(pb, 'select') else pb.bone.select)]
-    act = ob.data.bones.active.name if ob.data.bones.active else 'None'
+    if EDIT:
+        sel = [b.name for b in ob.data.edit_bones if b.select or b.select_head or b.select_tail]
+        act = ob.data.edit_bones.active.name if ob.data.edit_bones.active else 'None'
+    else:
+        sel = [pb.name for pb in ob.pose.bones if (pb.select if hasattr(pb, 'select') else pb.bone.select)]
+        act = ob.data.bones.active.name if ob.data.bones.active else 'None'
     print('BPROBE mode=%s active=%s sel=%s' % (ob.mode, act, ','.join(sel))); sys.stdout.flush()
     return 0.4
 bpy.app.timers.register(probe, first_interval=5.0)`;
@@ -68,6 +76,9 @@ page.on("console", (m) => { const t = m.text(); let i;
   else if (/Traceback|Error:|File "/.test(t)) console.log("PY " + t.slice(0, 200));
   else if (/RuntimeError|abort\(|unreachable|memory access/i.test(t)) { errors++; console.log("ERR " + t.slice(0, 160)); } });
 page.on("pageerror", (e) => { errors++; console.log("PAGEERROR " + e.message.slice(0, 160)); });
+if (process.env.SELDBG) await page.addInitScript(() => { window.__CAPENV = { SELDBG: "1" }; });
+page.on("console", (m) => { const t = m.text(); if (process.env.ALLLOG && !/WGPU|WGSL|OVR_|COMPILELOG|BPOS|timedWait/.test(t)) console.log("LOG " + t.slice(0, 160)); });
+page.on("console", (m) => { if (process.env.SELDBG && m.text().includes("SELDBG")) console.log(m.text().slice(0, 120)); });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
 await page.goto("http://localhost:5173/", { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
@@ -88,7 +99,8 @@ for (const n of order) {
   const [x, y] = pos[n]; if (x === undefined) continue;
   await page.mouse.click(box.x + x * sx, box.y + y * sy); await wait(1000);
   const a = /active=(\S+)/.exec(probe), s = /sel=(\S*)/.exec(probe);
-  const ok = a && a[1] === n && s && s[1] === n; total++; if (ok) hit++;
+  /* Edit mode: connected bones share joints, Blender selects neighbours' tip/root too -> the picked bone must be active and in sel. */
+  const ok = EDIT ? (a && a[1] === n && s && s[1].split(",").includes(n)) : (a && a[1] === n && s && s[1] === n); total++; if (ok) hit++;
   console.log(`${ok ? "PASS" : "FAIL"} click ${n} -> active=${a && a[1]} sel=${s && s[1]}`);
 }
 await page.screenshot({ path: "out/bone_rigify.png" });

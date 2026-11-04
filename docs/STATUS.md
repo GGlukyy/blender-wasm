@@ -1,3 +1,9 @@
+# 4. 11. 22:30 — H25c-b: klik na kost v EDIT módu (nalezená chyba v mé opravě H25c)
+Výsledek: 🟡 PC ✅
+- Nález: `bone_rigify_win.sh` s `MODE=edit` ukázal, že H25c v Edit módu nevybere NIC (starý build vybíral klouby). Měření (debug výpis hitů): výsledek obsahoval vedle kosti i hit celého objektu armatury (id bez BONESEL příznaků) s menší hloubkou → Blender pak žádnou kost nevybral.
+- Oprava (fork `ipad` → `BLENDER_REF`): objektový AABB záznam se v CPU pickingu vynechá, pokud má objekt vybíratelné kosti. Důkaz: Edit mode ruka 9/9, tělo 21/21 (aktivní kost = kliknutá; sousední kosti ve společném kloubu se vyberou taky — tak to dělá Blender), Pose 9/9, bone_click 10/10, obj_click 8/8.
+- Nutné: nový build je v demo/public (záloha předchozího v `out/cur_h25c`). iPad: Edit mode armatury, klik na kost.
+
 # 4. 11. 21:45 — H27/H28 a stav fronty
 Výsledek: 🟡 hotovo vše, co jde bez iPadu/Lukáše
 - H27 (add-ony 2×): na čisté instanci NEreprodukováno — 13 modulů, 0 duplicit, v Edit ▸ Preferences ▸ Add-ons jedna řada 9 položek (`out/win/prefs_addons.png`). Potřebuji screenshot od Lukáše a co před tím dělal (Install from Disk / Get Extensions?). `[!] BLOCKED`.
