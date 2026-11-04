@@ -1,3 +1,5 @@
+# 5. 11. 01:30 — Object mode + armatura: `scripts/arm_obj_win.sh` PASS (12/12 kliků na kosti vybere armaturu, klik do prázdna odznačí; `out/win/arm_obj.png`).
+
 # 5. 11. 01:10 — regress po P35: ✅ 0 FAIL / 0 ❌ / 0 PAGEERROR (`out/regress.log`). Fork `ipad` + `BLENDER_REF` = box select kostí; master pushnut.
 
 # 5. 11. 00:20 — box select kostí
