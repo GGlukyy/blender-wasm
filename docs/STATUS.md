@@ -1,3 +1,7 @@
+# 5. 11. 02:10 — pose box select: falešná kost `spine` vyřešena
+- Příčina: objektový záznam armatury (bez příznaků) se v Blenderu dekóduje jako kost č. 0 (`spine`) → vybral se při každém boxu přes AABB. Oprava: ten záznam se v SELECT_ALL vynechá, když mají kosti vlastní výběr (fork `ipad`, `BLENDER_REF`). Dřívější poznámka „vynechání nevybere nic“ byla špatné měření (neaktuální build).
+- Důkaz: `bone_box_win` pose i edit PASS (18 vybraných, 0 falešných), `bone_rigify` pose/edit 9/9, `bone_click` 10/10, `obj_click` 8/8, `arm_obj` 12/12, parity 0 ❌.
+
 # 5. 11. 01:30 — Object mode + armatura: `scripts/arm_obj_win.sh` PASS (12/12 kliků na kosti vybere armaturu, klik do prázdna odznačí; `out/win/arm_obj.png`).
 
 # 5. 11. 01:10 — regress po P35: ✅ 0 FAIL / 0 ❌ / 0 PAGEERROR (`out/regress.log`). Fork `ipad` + `BLENDER_REF` = box select kostí; master pushnut.
