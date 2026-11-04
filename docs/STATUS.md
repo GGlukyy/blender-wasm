@@ -1,3 +1,6 @@
+# 4. 11. 22:50 — M1b oprava: stav MCP se nečetl
+- Nález (test `scripts/mcp_badurl_test.py`): `/tmp/mcp_status.json` měl po kratším zápisu starý ocas (`writeFile` ve wasmfs nezkracuje) → Python `json.load` selhal a panel by ukazoval pořád „off“. Oprava v `mcp.js` (unlink před zápisem). Test: nepovolená URL / chybějící token → `state=error` s hláškou; `mcp_addon_win.sh` PASS.
+
 # 4. 11. 22:30 — H25c-b: klik na kost v EDIT módu (nalezená chyba v mé opravě H25c)
 Výsledek: 🟡 PC ✅
 - Nález: `bone_rigify_win.sh` s `MODE=edit` ukázal, že H25c v Edit módu nevybere NIC (starý build vybíral klouby). Měření (debug výpis hitů): výsledek obsahoval vedle kosti i hit celého objektu armatury (id bez BONESEL příznaků) s menší hloubkou → Blender pak žádnou kost nevybral.

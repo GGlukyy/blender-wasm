@@ -169,7 +169,8 @@ export function startMcp(cfg0, canvas, log) {
     } catch (e) { rej(e); }
   }));
   let cfg = null, ws = null, timer = null;
-  const setStatus = (state, msg = "") => { try { FS().writeFile(STATUS, JSON.stringify({ state, msg })); } catch {} };
+  /* unlink first: wasmfs writeFile does not truncate, a shorter status would keep the old tail and break json.load */
+  const setStatus = (state, msg = "") => { try { try { FS().unlink(STATUS); } catch {} FS().writeFile(STATUS, JSON.stringify({ state, msg })); } catch {} };
   const open = () => {
     if (!cfg) return;
     setStatus("connecting");
