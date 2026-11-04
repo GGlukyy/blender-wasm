@@ -1,3 +1,10 @@
+# 4. 11. 17:00 — M1 Blender Web MCP (základ)
+Výsledek: 🟡 PC ✅
+- Co: `mcp/relay.mjs` (MCP stdio ↔ WebSocket na 127.0.0.1 s tokenem), `demo/src/mcp.js` (zapíná se JEN s `?mcp=ws://127.0.0.1:8765&mcptoken=…`; stránka se připojuje ven, neposlouchá; Python timer čte `/tmp/mcp_in.json`). Nástroje: get_scene_info, get_object_info, get_viewport_screenshot, execute_blender_code.
+- Důkaz: `scripts/mcp_win.sh` PASS (scéna Cube/Camera/Light, přidání koule přes kód, chyba v kódu se vrátí, screenshot `out/mcp_shot.png`).
+- Nedělá se: add-on v Preferences (zatím URL parametry), hostovaný relay. Bez parametru se nic nezapne. Změna v `main.js` jde do dalšího zipu.
+- iPad: netýká se (odhad: k relay na PC by iPad přes https tunel chtěl wss://).
+
 # 4. 11. 16:00 — H26-D gpencil_depth_merge (rozpracováno)
 Výsledek: 🟡 čeká na iPad
 - Měření: WGSL dump (`out/wgsl_dump_gpencil_depth_merge.txt`, `scripts/auto_test.mjs` + env `CAPENV_JSON`/`WSLENV`): fragment je `fn main(...) -> @builtin(frag_depth) f32` (holý builtin, žádný `@location`), pipeline má přitom color target rgba16float s writeMask 0.

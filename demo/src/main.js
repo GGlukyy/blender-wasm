@@ -12,6 +12,7 @@
  * visit and fed to emscripten via Module.instantiateWasm.
  */
 import { ZSTDDecoder } from "zstddec";
+import { mcpConfig, mcpPyArgs, startMcp } from "./mcp.js";
 import { installTouch } from "./touch.js";
 import { autoArgs, autoScan, autoStart } from "./autotest.js";
 import { installTelemetry, telEnabled, telLog, telEvent, telAdapterLimits } from "./telemetry.js";
@@ -1445,9 +1446,10 @@ bpy.app.timers.register(_autosave, first_interval=_AS_EVERY, persistent=True)`;
  * → iPad 8, jinde 32. Přepsat ?pool=N. */
 const _isIpadUA = navigator.maxTouchPoints > 1 && /Macintosh|iPad/.test(navigator.userAgent);
 const POOL_N = parseInt(_qp.get("pool") || (_isIpadUA ? "8" : "32"), 10) || 32;
+const _mcp = mcpConfig(_qp);
 window.Module = {
   poolSize: POOL_N,
-  arguments: ["--factory-startup", "--python-expr", SHADOW_POOL_PY, ...autoArgs(), ...(window.__BARGS || [])],
+  arguments: ["--factory-startup", "--python-expr", SHADOW_POOL_PY, ...autoArgs(), ...mcpPyArgs(_mcp), ...(window.__BARGS || [])],
   canvas,
   print: (t) => { log(t); scan(t); },
   printErr: (t) => { log("[err] " + t); scan(t); },
@@ -1533,6 +1535,7 @@ window.Module = {
   }],
   onRuntimeInitialized: () => {
     autoStart();
+    if (_mcp) startMcp(_mcp, canvas, log);
     window.__rtInit = true; /* telemetry heartbeat waits for this (calledRun is set BEFORE initRuntime) */
     /* Parent of the local-folder mount points (wm_open_mainfile also creates
      * it wasm-side; this covers sessions where the dialog never opened). */
