@@ -50,11 +50,23 @@ _gated(lambda: (_mp(), bpy.app.timers.register(_sel, first_interval=4.0)))`,
 _gated(lambda: (_mp(), bpy.app.timers.register(lambda: (_say('AUTO_ORBIT_READY'), None)[1], first_interval=4.0)))`,
   soak: PY_HEAD + `
 import math, time
-_t0 = [0.0]; _k = [0]
+_t0 = [0.0]; _k = [0]; _p = [0]
+def _post():
+    a = _v3d()
+    if not a: return 2.0
+    if _p[0] >= 6:
+        _say('AUTO_DONE soak'); return None
+    t = 'RENDERED' if _p[0] % 2 == 0 else 'MATERIAL'
+    _p[0] += 1
+    _say('AUTO_STEP post_shade_%s_%d' % (t, _p[0]))
+    a.spaces[0].shading.type = t
+    return 15.0
 def _soak():
     if not _t0[0]: _t0[0] = time.time()
     el = time.time() - _t0[0]
     if el > float(SOAK_SEC):
+        if 'R' in 'SOAK_MODE':
+            _say('AUTO_STEP soak_done_switching'); bpy.app.timers.register(_post, first_interval=1.0); return None
         _say('AUTO_DONE soak'); return None
     _k[0] += 1; k = _k[0]
     L = bpy.data.objects.get('Light')
