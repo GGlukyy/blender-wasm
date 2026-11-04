@@ -1,3 +1,10 @@
+# 4. 11. 17:30 — souhrn večera
+Výsledek: 🟡 PC ✅, iPad čeká
+- `regress_all.sh` na finálním buildu (H26-D + M1): 0 FAIL / 0 ❌ / 0 PAGEERROR (`out/regress.log`).
+- Zip pro itch: `out/itch_2026-11-04_1727.zip` (70 MB, bez ask.txt). Nahraje Lukáš ručně.
+- Co otestovat na iPadu (podle důležitosti): 1) H26-D — čistá karta, 2D Animation, 3 tahy v Solid → tah vidět?; 2) H25b klik na kost; 3) MCP se na iPadu nezapíná (jen s `?mcp=`).
+- Master nepushnut (rozhodni ty); fork `ipad` pushnutý (afd9fb9e).
+
 # 4. 11. 17:00 — M1 Blender Web MCP (základ)
 Výsledek: 🟡 PC ✅
 - Co: `mcp/relay.mjs` (MCP stdio ↔ WebSocket na 127.0.0.1 s tokenem), `demo/src/mcp.js` (zapíná se JEN s `?mcp=ws://127.0.0.1:8765&mcptoken=…`; stránka se připojuje ven, neposlouchá; Python timer čte `/tmp/mcp_in.json`). Nástroje: get_scene_info, get_object_info, get_viewport_screenshot, execute_blender_code.
