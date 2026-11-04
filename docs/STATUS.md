@@ -1,3 +1,11 @@
+# 4. 11. 16:00 — H25b: klik na kost vybírá špatnou kost
+Výsledek: 🟡 PC ✅, Lukáš potvrdí
+- Příčina (čtením kódu + měřením): web nemá readback select bufferu, proto `SelectMap::cpu_pick_fallback` počítá zásah z AABB. Každá kost armatury dostala AABB celého objektu → všechny kosti = stejný zásah → vyhrála první (proto „po sobě“).
+- Oprava (fork `ipad` 8782a99c, `BLENDER_REF` aktualizován): v `draw_bone` (overlay_armature.cc) se pro každou kost nastaví vlastní AABB (podle `disp_mat`).
+- Důkaz: nový `scripts/bone_click_win.sh` — před 3/10 shod, po 10/10; `parity_win.sh` 0 ❌. Rebuild jen `bf_draw` + link.
+- Omezení (odhad): box je hrubý (kost šikmo = větší plocha); překrývající se kosti vybere ta blíž k pohledu.
+- Co otestovat: nový blender.js/wasm je v demo/public (zálohy starých v out/bak_h25b). Pose/Edit mode armatury, klik na různé kosti. Master nepushnut.
+
 # 4. 11. 15:20 — H26-C-a diagnostika
 Výsledek: 🟡 PC ✅, iPad čeká
 - Co jsem udělal: v `demo/src/main.js` kolem `createRenderPipeline` je `pushErrorScope/popErrorScope('validation')`; při chybě se do telemetrie (gpuerr) zapíše `PIPE_INVALID '<label shaderu>' tgts=<formáty+blend> <zpráva>` (max 10).
