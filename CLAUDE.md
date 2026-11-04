@@ -44,7 +44,7 @@ newer Blender/Emscripten versions.
    what changed (`ninja` in the existing build dir). Run long builds with
    `setsid nohup … > out/build.log 2>&1 &` and check the log, don't block.
 7. **Commit small**, one fix per commit, message `P<n>: <co> (<důkaz>)`.
-   Don't push to `master` without telling Lukáš; he decides.
+   Push to `master` after each green step is allowed (Lukáš, 4. 11.); always say in STATUS what you pushed.
 8. Upstream workflow `.github/workflows/build-release.yml` is HeyPuter's release
    build (hours). Leave it untouched; Actions on this fork stay off.
 
