@@ -1,3 +1,15 @@
+# 4. 11. 21:45 — H27/H28 a stav fronty
+Výsledek: 🟡 hotovo vše, co jde bez iPadu/Lukáše
+- H27 (add-ony 2×): na čisté instanci NEreprodukováno — 13 modulů, 0 duplicit, v Edit ▸ Preferences ▸ Add-ons jedna řada 9 položek (`out/win/prefs_addons.png`). Potřebuji screenshot od Lukáše a co před tím dělal (Install from Disk / Get Extensions?). `[!] BLOCKED`.
+- H28 (Airbrush): pravidlo 3b → nejdřív desktop. Lukáš: udělej stejné kroky v desktop Blenderu 5.3 a napiš, jestli se rozsah/síla Airbrushe mění stejně. `[!] BLOCKED`.
+- Pushnuto dnes na `master`: H25c (P28), M1b (P29), H29/H29b (P30), O1a (P31), 5.3 sondy (P32) + STATUS. Fork `ipad`: bbf3dc2f (H25c). Fork `ipad-5.3-wip`: 644b0f9a. `BLENDER_REF` = bbf3dc2f.
+- Nový zip pro itch jsem nesestavil (nahrává Lukáš) — `scripts/package_itch.sh` až bude třeba; O1a (service worker) se do itch release nezapíná.
+
+## Co otestovat na iPadu (podle důležitosti)
+1. H25c: čistá karta, Pose mode (Rigify metarig), klik na prsty/páteř — vybere se správná kost? (H25b: nejdřív hard reload)
+2. H29b: File ▸ Open → „Choose file(s)…“ → 1 .blend → otevře se rovnou?
+3. M1b/O1a se na iPadu nedají zkusit (potřebují relay `wss://` / hosting).
+
 # 4. 11. 21:15 — 5.3: ops 96/96 (dřív 6 FAIL)
 Výsledek: 🟡 PC ✅ jen větev `ipad-5.3-wip`; master/`BLENDER_REF` beze změny (5.2 zůstává)
 - Příčiny (změřeno): (1) PNG/image save — Blender 5.3 vkládá do PNG ICC profil; soubor `srgb_rec709_display.icc` je v upstreamu jen 128 B (jen hlavička) a libpng hlásí „ICC profile too short“ → zápis selže celý (ostatní formáty prošly). Oprava: na webu se profil <132 B ignoruje (`colormanagement.cc`). Odhad: desktop to přežije jinak sestaveným libpng (nezkoušeno) — pravidlo 3b: stojí za nahlášení Blenderu, pokud to na desktopu 5.3 taky padá. (2) glTF — nový `ktx.py` dělá `import ctypes` (web CPython nemá `_ctypes`); obaleno try/except jako `meshopt.py`.
