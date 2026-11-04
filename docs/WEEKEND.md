@@ -47,3 +47,7 @@ Když Lukáš řekl, že je u iPadu (nebo je to den s ním), NEPIŠ jen "vyzkou�
 4. Po testu vyprázdni pruh: `echo 'ASK:' > demo/public/ask.txt` a na konci práce `rm -f demo/public/ask.txt` (ať nejde do itch zipu). Z výsledku vyvoď další krok sám (oprava / další měření) a opakuj. Max 3 iPad testy za hodinu, ať Lukáše nezahltíš; mezi testy dělej práci na PC (build, testy).
 5. Timeout (exit 2) = Lukáš u iPadu není: neopakuj, pokračuj jinou prací z BACKLOGu.
 Do STATUS.md piš u každého testu: co jsi čekal, co přišlo (řádek z ipad_wait), co z toho plyne.
+
+## Úklid před koncem běhu (Lukáš 5. 11.: po konci smyčky dál vyskakovala okna Chrome z testů)
+Před `out/.idle_stop` i před koncem každého běhu: zastav VŠE, co jsi pustil na pozadí (`setsid nohup` testy, regress, fuzz, vite instance, které jsi spustil ty):
+`pkill -f regress_all.sh; pkill -f "_win.sh"; pkill -f fuzz` a Windows Node z testů (`cmd.exe /c "taskkill /IM node.exe /F"` jen když jde o tvé testy). Ověř `pgrep -af "regress|fuzz|_win.sh|_test"` = prázdné a napiš to do STATUS. Dev server a tunel, které spustil Lukáš, nech být.
