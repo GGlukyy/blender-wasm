@@ -1,3 +1,7 @@
+# 4. 11. 23:40 — regress po P33/P34
+Výsledek: ✅ PC — `regress_all.sh`: 0 FAIL / 0 ❌ / 0 PAGEERROR (`out/regress.log`). Pushnuto: fork `ipad` f891591f (`BLENDER_REF`), `master` do P34 + test potvrzení při neuložených změnách (H29b, dialog se ukáže).
+- Nový zip pro itch není (nahraje Lukáš; `package_itch.sh` až po tvém potvrzení H25c/H29b na iPadu).
+
 # 4. 11. 22:50 — M1b oprava: stav MCP se nečetl
 - Nález (test `scripts/mcp_badurl_test.py`): `/tmp/mcp_status.json` měl po kratším zápisu starý ocas (`writeFile` ve wasmfs nezkracuje) → Python `json.load` selhal a panel by ukazoval pořád „off“. Oprava v `mcp.js` (unlink před zápisem). Test: nepovolená URL / chybějící token → `state=error` s hláškou; `mcp_addon_win.sh` PASS.
 
