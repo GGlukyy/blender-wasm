@@ -1,3 +1,11 @@
+# 4. 11. 20:10 — O1a offline PWA (service worker)
+Výsledek: 🟡 PC ✅, hosting čeká na Lukáše
+- Co: `demo/public/sw.js` — ukládá do Cache Storage vše, co stránka stáhne (blender.js/wasm/assets/wgsl-cache), obsluhuje bez sítě a ke každé odpovědi přidává COOP/COEP (bez toho by nešla vlákna). `version.json` (build) → při nové verzi oranžový pruh „klepni pro aktualizaci“. Registrace v `main.js` jen v produkčním buildu (ne dev server, ne itch release; `?sw=1` vynutí, `?sw=0` vypne). `navigator.storage.persist()` se zkouší.
+- Důkaz: `scripts/pwa_offline_win.sh` PASS: build → preview :4173 → 1. návštěva + Launch → server vypnut (curl 000) → 2. start v Chrome ze service workeru: Blender naběhl, crossOriginIsolated, 0 chyb. Cache 71 MB, kvóta Chrome 10 GB.
+- Nevím: iPad (kvóta PWA na ploše, chování SW v iOS 26.5, zda `persist()` projde); aktualizační pruh jsem netestoval (jen kód).
+- Blokováno: O1b hosting (itch iframe SW nepodporuje) — potřebuje Lukášův účet (Cloudflare Pages / GitHub Pages). Bez hostingu s HTTPS to na iPadu nejde vyzkoušet (mimo tunel: ten by SW taky uměl — `?sw=1` přes cloudflared, odhad).
+- Co otestovat na iPadu (až bude URL): otevřít, počkat na start, „Přidat na plochu“, letadlo, spustit z plochy.
+
 # 4. 11. 19:15 — H29 + H29b: File ▸ Open
 Výsledek: 🟡 PC ✅, iPad netestován
 - Co: na Chromu File ▸ Open nejdřív ukáže dialog „Vyber SLOŽKU… / Jen jeden soubor…“. Složka s právě 1 `.blend` (jen nejvyšší úroveň) → otevře se rovnou; „Jen jeden soubor“ → kopie do `/uploads` + rovnou otevřít (textury vedle souboru se nenačtou — je to v dialogu); složka s víc `.blend` → Blenderův prohlížeč jako dřív. Safari/iPad (dialog „Choose file(s)…“): 1 vybraný `.blend` se otevře rovnou.

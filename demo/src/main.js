@@ -1253,6 +1253,26 @@ const UI_SCALE = (new URLSearchParams(location.search).get("uiscale") || "").rep
 /* H7: Material Preview/Rendered crashes the iPad GPU process (790 MB textures, H6). iPad = touch + Macintosh/iPad UA
  * (iPadOS Safari sends a Mac UA). ?mp=1 opts out, ?ipad=1 forces the guard on (PC test). */
 const _qp = new URLSearchParams(location.search);
+/* O1a: offline PWA. Not in the itch release (iframe on another origin), not in the vite dev server (?sw=1 forces, ?sw=0 disables). */
+const _swWanted = _qp.get("sw") ? _qp.get("sw") === "1" : (import.meta.env.PROD && !__RELEASE__);
+if (_swWanted && "serviceWorker" in navigator && window.self === window.top) {
+  navigator.serviceWorker.register("./sw.js").then(async () => {
+    const reg = await navigator.serviceWorker.ready;
+    const urls = [location.pathname, ...performance.getEntriesByType("resource").map((r) => r.name)];
+    reg.active && reg.active.postMessage({ type: "precache", urls });
+    navigator.storage && navigator.storage.persist && navigator.storage.persist().catch(() => {});
+  }).catch((e) => console.warn("sw register failed", e));
+  navigator.serviceWorker.addEventListener("message", (e) => {
+    if (e.data && e.data.type === "update-available" && !document.getElementById("sw-update")) {
+      const b = document.createElement("div");
+      b.id = "sw-update";
+      b.style.cssText = "position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:2000;padding:8px 14px;border-radius:8px;background:#e87d0d;color:#111;font:600 14px system-ui;cursor:pointer";
+      b.textContent = "Je nová verze Blenderu — klepni pro aktualizaci (neuložená práce se ztratí)";
+      b.onclick = () => navigator.serviceWorker.controller && navigator.serviceWorker.controller.postMessage({ type: "update" });
+      document.body.appendChild(b);
+    } else if (e.data && e.data.type === "updated") location.reload();
+  });
+}
 /* I2: na iPadu je MP/EEVEE (lite profil) ZAPNUTÝ jako výchozí (soak 10 min PASS 30.10); ?mp=0 vrátí „MP Lite“ (Solid), ?ipad=1 vynutí iPad profil na PC. */
 const _isIpadQ = _qp.get("ipad") === "1" || (_qp.get("ipad") !== "0" && navigator.maxTouchPoints > 1 && /Macintosh|iPad/.test(navigator.userAgent));
 const MP_GUARD = (_isIpadQ && _qp.get("mp") === "0") ? "1" : "0";

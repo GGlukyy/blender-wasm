@@ -83,9 +83,15 @@ const releasePlugin = () => ({
   },
 });
 
+/* O1a: version.json (build time) for the service worker's update check. */
+const versionPlugin = () => ({
+  name: "blender-version-json",
+  generateBundle() { this.emitFile({ type: "asset", fileName: "version.json", source: JSON.stringify({ v: Date.now() }) }); },
+});
+
 export default defineConfig({
   define: { __RELEASE__: JSON.stringify(RELEASE) },
-  plugins: [telemetryPlugin(), abortStackPlugin(), releasePlugin()],
+  plugins: [telemetryPlugin(), abortStackPlugin(), releasePlugin(), versionPlugin()],
   /* Emit relative asset URLs (./assets/...) so the built site works when served
    * from any subpath, not just the domain root. The runtime fetches
    * (blender.wasm.zst, assets.tar.zst, manifest.json, blender.js) are already
