@@ -5,14 +5,17 @@
 import { readFileSync } from "node:fs";
 const { chromium } = await import(process.env.PW || "playwright");
 const [mode, ...files] = process.argv.slice(2);
-const expr = `import bpy, sys
+const DIRTY = process.env.DIRTY ? 1 : 0;
+const expr = `DIRTY = ${DIRTY}\nimport bpy, sys
 def t():
+    if DIRTY and not bpy.data.is_dirty and not bpy.data.filepath: bpy.ops.mesh.primitive_cube_add(); bpy.ops.ed.undo_push(message='dirty')
     print('FILEPATH ' + bpy.data.filepath); sys.stdout.flush(); return 1.0
 bpy.app.timers.register(t, first_interval=3.0, persistent=True)`;
 const browser = await chromium.launch({ headless: false, executablePath: process.env.CHROME,
   args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
 const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
-let fp = "";
+let fp = "", dlg = "";
+page.on("dialog", async (d) => { dlg = d.message(); await d.accept(); });
 page.on("console", (m) => { const t = m.text(), i = t.indexOf("FILEPATH "); if (i >= 0) fp = t.slice(i + 9).trim(); });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
 await page.goto("http://localhost:5173/", { waitUntil: "load" });
@@ -30,6 +33,7 @@ if (mode !== "file") {
     window.showDirectoryPicker = async () => d;
   }, datas);
 }
+console.log("dirty.txt:", await page.evaluate(() => { try { return new TextDecoder().decode(Module.FS.readFile("/tmp/dirty.txt")); } catch (e) { return "ERR " + e; } }));
 await page.evaluate(() => { window.__blenderFileOpenHook(); });
 await page.waitForSelector("#open-chooser", { timeout: 5000 });
 await page.screenshot({ path: `out/open_chooser.png` });
@@ -41,7 +45,8 @@ if (mode === "file") {
 } else await page.click("#oc-folder");
 await wait(9000);
 await page.screenshot({ path: `out/open_${mode}.png` });
-console.log(`mode=${mode} filepath=${fp}`);
+console.log(`mode=${mode} filepath=${fp} dialog=${dlg ? "yes" : "no"}`);
+if (DIRTY && !dlg) { console.log("FAIL dirty: no confirm"); process.exit(1); }
 const ok = mode === "folder2" ? fp === "" : /\.blend$/.test(fp);
 console.log(ok ? `PASS ${mode}` : `FAIL ${mode}`);
 await browser.close(); process.exit(ok ? 0 : 1);
