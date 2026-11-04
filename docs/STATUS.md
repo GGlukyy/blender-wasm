@@ -1,3 +1,8 @@
+# 4. 11. 16:00 — H26-D gpencil_depth_merge (rozpracováno)
+Výsledek: 🟡 čeká na iPad
+- Měření: WGSL dump (`out/wgsl_dump_gpencil_depth_merge.txt`, `scripts/auto_test.mjs` + env `CAPENV_JSON`/`WSLENV`): fragment je `fn main(...) -> @builtin(frag_depth) f32` (holý builtin, žádný `@location`), pipeline má přitom color target rgba16float s writeMask 0.
+- Predikce: Pokud je příčina holý frag_depth bez barevného výstupu, pak po přepisu na `struct { @location(0) c: vec4<f32>, @builtin(frag_depth) d: f32 }` (maska výstupů se spočítá PŘED přepisem, takže se barva nepřepíše) zmizí na iPadu `PIPE_INVALID 'gpencil_depth_merge'`. Na PC to nelze ověřit (Chrome shader bere i teď), PC test = jen že se nic nerozbilo.
+
 # 4. 11. 16:00 — H25b: klik na kost vybírá špatnou kost
 Výsledek: 🟡 PC ✅, Lukáš potvrdí
 - Příčina (čtením kódu + měřením): web nemá readback select bufferu, proto `SelectMap::cpu_pick_fallback` počítá zásah z AABB. Každá kost armatury dostala AABB celého objektu → všechny kosti = stejný zásah → vyhrála první (proto „po sobě“).

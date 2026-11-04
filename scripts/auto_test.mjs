@@ -25,8 +25,10 @@ page.on("console", (m) => { const t = m.text(); const p = /^PROBE (\w+) loc=(.*)
   if (t.startsWith("AUTO_")) { steps.push(t); if (t.startsWith("AUTO_DONE")) done = true; }
   if (/RuntimeError|abort\(|unreachable|memory access|tint-ICE|shaderc FAIL/i.test(t)) { errors++; console.log("CONSOLE-ERR " + t.slice(0, 200)); } });
 page.on("console", (m) => { const t = m.text(); if (/WGPU_PIPE_THROW|WGPU_UNCAPTURED|WGPU_COLOR_HOLE/.test(t)) console.log("LOG " + t.slice(0, 200)); });
+{ let cur = null; page.on("console", (m) => { const t = m.text().replace(/^\[err\] /, ""); if (t.startsWith("WGSL_DUMP ")) cur = { n: t.slice(10), l: [] }; if (cur) cur.l.push(t); if (cur && t.startsWith("WGSL_DUMP_END")) { const d = cur; cur = null; import("node:fs").then((fs) => fs.writeFileSync("out/wgsl_dump_" + d.n.replace(/\W/g, "_") + ".txt", d.l.join("\n"))); } }); }
 page.on("pageerror", (e) => { errors++; console.log("PAGEERROR " + e.message.slice(0, 200)); });
 if (scen === "soak") await page.addInitScript(() => { window.__CAPENV = { WGPU_LOG_COMPILE: "1" }; });
+if (process.env.CAPENV_JSON) await page.addInitScript((e) => { window.__CAPENV = { ...(window.__CAPENV || {}), ...JSON.parse(e) }; }, process.env.CAPENV_JSON);
 const pipeNames = {}; const pipeLines = []; page.on("console", (m) => { if (/COMPILELOG pipeline 'gpu_shader_2D_widget_base'/.test(m.text()) && pipeLines.length < 12) pipeLines.push(m.text()); const x = /COMPILELOG pipeline '([^']*)'/.exec(m.text()); if (x) pipeNames[x[1]] = (pipeNames[x[1]] || 0) + 1; });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, probe);
 await page.goto(`http://localhost:5173/?auto=${scen}&tel=1${scen === "soak" ? "&soaksec=" + (process.argv[3] || 60) + "&soakmode=" + (process.argv[4] || "lmo") : ""}${process.env.MP === "0" ? "" : "&mp=1"}${process.env.EXTRAQ || ""}`, { waitUntil: "load" });
