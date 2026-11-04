@@ -5,13 +5,22 @@ session: read `CLAUDE.md`, `docs/STATUS.md`, `docs/PLAN.md` and `docs/BACKLOG.md
 Lukáš cannot test on the iPad until he is back — verify everything yourself in Windows
 Chrome on the real GPU (`scripts/p2_win.sh`, `scripts/parity_win.sh`).
 
-## Mission now (from 25. 10. 10:30) — ONLY THIS
-**Fix the iPad crash per `docs/IPAD_CRASH.md`** (read it fully first). Work the `[ ] H1…` items at the top of
-`docs/BACKLOG.md` in order. Measure before fixing. Start every run by reading new files in `out/ipad/`.
-**FORBIDDEN until H1-A is deployed and Lukáš has tested it:** new fuzz runs, new `*_win.sh` tests that are not
-in `docs/IPAD_CRASH.md`, model_ops*, touch_fuzz, regress_all more than once per code change. These do not help
-the iPad (Chrome on PC never crashes). If you are blocked, ask the `architect`; if still blocked, write it
-into STATUS.md and END the run — do not fill time with tests.
+## Mission now (od 4. 11.) — BACKLOG.md shora dolů
+Pracuj podle bloků nahoře v `docs/BACKLOG.md` (nejnovější blok = nejvyšší priorita). Starý cíl "iPad crash / IPAD_CRASH.md" (25. 10.) je HOTOVÝ, neplatí.
+Fuzz/`regress_all` jen JEDNOU po změně kódu, nikdy jako výplň času.
+
+## NEKONČIT PŘEDČASNĚ (Lukáš 4. 11.: smyčka se opakovaně ukončila, i když práce byla)
+Úkol, který čeká na iPad / Lukáše / vydání 5.3, NENÍ důvod končit. Nejdřív: ASK na iPad max 2× za večer (viz níže), pak ho přeskoč a pokračuj
+v této ZÁLOŽNÍ FRONTĚ (jen PC, v pořadí; každou položku buď dodělej, nebo označ `[!] BLOCKED: <proč>` v BACKLOGu):
+1. M1 — Blender Web MCP (add-on + relay ve `mcp/`), viz BACKLOG M1
+2. O1 — offline PWA: service worker + test v PC Chrome offline (hosting nezakládej, jen kód + test na localhost)
+3. 5.3 větev `ipad-5.3-wip`: 6/96 ops FAIL (image save, glTF/FBX export) — do master nic
+4. D8 — přepínání MP <-> Rendered po dlouhé relaci (PC repro přes `auto=soak` + `auto=rendered`)
+5. Výkon MP na iPadu: jen měření na PC s `?ipad=1` (fps, počet pipeline/draw callů), návrh do STATUS, bez velkých změn
+`out/.idle_stop` smíš zapsat JEN když jsou všechny položky výše `[x]` nebo `[!] BLOCKED` a do `.idle_stop` napiš, které to jsou.
+
+## Push
+Lukáš povolil (4. 11.): po každém zeleném kroku `git pull --rebase && git push` i do `master` tohoto repa (a fork `ipad` + `BLENDER_REF` jako dřív). Do STATUS napiš, co jsi pushnul. Zip pro itch dál nahrává jen Lukáš.
 
 ## How to work
 1. Take the first unchecked item in `docs/BACKLOG.md`. Mark it `[~]` (in progress) and commit.
@@ -19,7 +28,7 @@ into STATUS.md and END the run — do not fill time with tests.
 3. Commit + push after every green step (blender fork branch `ipad` + update `BLENDER_REF`,
    then this repo `master`). Mark the item `[x]` with the proof line.
 4. Same error 2× → ask the `architect` subagent. 3× → mark `[!] BLOCKED: <why>` and move on.
-5. Backlog empty / only waiting for iPad data or a Blender release → write STATUS.md, then `echo "<proč, 1 řádek>" > out/.idle_stop` (smyčka se tím ukončí, nepálit tokeny kontrolami) and END the run (no bug hunting, no performance work this weekend).
+5. Backlog AND záložní fronta (viz "NEKONČIT PŘEDČASNĚ") hotové nebo BLOCKED → write STATUS.md, then `echo "<proč, 1 řádek>" > out/.idle_stop` (smyčka se tím ukončí, nepálit tokeny kontrolami) and END the run (no bug hunting, no performance work this weekend).
 6. Never break the build. If a change cannot be made green, revert it and write why in STATUS.md.
 7. Before ending a session: update `docs/STATUS.md` top section ("Víkend — co je nového",
    "Co otestovat na iPadu" sorted by importance, "Blocked"). Keep it short, Czech.
