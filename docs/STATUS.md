@@ -1,3 +1,11 @@
+# 4. 11. 21:15 — 5.3: ops 96/96 (dřív 6 FAIL)
+Výsledek: 🟡 PC ✅ jen větev `ipad-5.3-wip`; master/`BLENDER_REF` beze změny (5.2 zůstává)
+- Příčiny (změřeno): (1) PNG/image save — Blender 5.3 vkládá do PNG ICC profil; soubor `srgb_rec709_display.icc` je v upstreamu jen 128 B (jen hlavička) a libpng hlásí „ICC profile too short“ → zápis selže celý (ostatní formáty prošly). Oprava: na webu se profil <132 B ignoruje (`colormanagement.cc`). Odhad: desktop to přežije jinak sestaveným libpng (nezkoušeno) — pravidlo 3b: stojí za nahlášení Blenderu, pokud to na desktopu 5.3 taky padá. (2) glTF — nový `ktx.py` dělá `import ctypes` (web CPython nemá `_ctypes`); obaleno try/except jako `meshopt.py`.
+- Důkaz: `ops_test` na 5.3 buildu: `OPS_DONE failed=0 total=96` (dřív 6 FAIL); sondy `img53_test.py` / `fbx53_test.py` (PNG, JPEG, EXR, TGA, BMP, HDR, FBX, GLB PASS).
+- Pushnuto: fork `GGlukyy/blender` větev `ipad-5.3-wip` (644b0f9a). Do `master` repa nic z 5.3 (jen `demo/vite.53.config.js` = testovací server na :5174 + sondy).
+- Jak 5.3 testovat bez zásahu do demo/public: viz komentář v `demo/vite.53.config.js`. Poznámka: první pokus přes :5174 hlásil `invoke_viiiiijii requires a callable` (nevyřešeno proč, na :5175 se stejnými soubory OK; odhad: zastaralá cache vite) — neopakovalo se.
+- Co dál (pro 5.3): sculpt/templates přes časový limit (neověřeno), regress_all na 5.3 neběžel, MP na iPadu s 5.3 neověřen.
+
 # 4. 11. 20:15 — regress + D8 + měření výkonu MP (PC, `?ipad=1`)
 Výsledek: 🟡 PC ✅
 - `regress_all.sh` po H25c/M1b/H29b/O1a: **0 FAIL / 0 ❌ / 0 PAGEERROR** (`out/regress.log`, 59 sekcí).
