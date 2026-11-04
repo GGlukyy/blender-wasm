@@ -1,3 +1,11 @@
+# 4. 11. 15:20 — H26-C-a diagnostika
+Výsledek: 🟡 PC ✅, iPad čeká
+- Co jsem udělal: v `demo/src/main.js` kolem `createRenderPipeline` je `pushErrorScope/popErrorScope('validation')`; při chybě se do telemetrie (gpuerr) zapíše `PIPE_INVALID '<label shaderu>' tgts=<formáty+blend> <zpráva>` (max 10).
+- Důkaz: `auto_win.sh tmpl` s `&ipad=1&nodualsrc=1` PASS, 0 chyb (nic se nerozbilo). Commit lokálně, master nepushnut.
+- Čekání na iPad: ASK + `ipad_wait.py` → timeout (Lukáš u iPadu nebyl), neopakováno. ask.txt smazán.
+- Co otestovat na iPadu: tunel `?tel=1&auto=tmpl` (čistá karta), nakreslit pár tahů v Solid; já pak z gpuerr přečtu jméno shaderu (H26-C-b/c).
+- Co dál: H25b (klik na kost, reprodukce na PC přes Playwright).
+
 # Konec večera 3. 11. 22:55 — souhrn
 Výsledek: 🟡 vše ✅ na PC, iPad čeká
 - Celý `regress_all.sh` na finálním buildu: 0 FAIL / 0 ❌ / 0 PAGEERROR (`out/regress.log`, 59 sekcí). První běh našel 2 vlastní chyby G1 (touch drag zamrzl kvůli Pointer Locku; neodchycený reject → ui_fuzz FAIL) — obě opraveny v `demo/src/touch.js` (zámek jen pro myš, prst/Pencil ho uvolní, reject se zahodí), ne zeslabením testů.
