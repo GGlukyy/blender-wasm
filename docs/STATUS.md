@@ -1,3 +1,5 @@
+# 5. 11. 01:10 — regress po P35: ✅ 0 FAIL / 0 ❌ / 0 PAGEERROR (`out/regress.log`). Fork `ipad` + `BLENDER_REF` = box select kostí; master pushnut.
+
 # 5. 11. 00:20 — box select kostí
 - `scripts/bone_box_win.sh` (Rigify, zoom na ruku, box kolem ruky): Edit mode — před 21 vybraných s 2 falešnými (f_middle.03, f_ring.03 mimo box), po 18 a 0 falešných (PASS). Oprava: v SELECT_ALL se kost bere jako úsečka (Liang-Barsky), ne AABB (fork `ipad`, `BLENDER_REF`).
 - Pose mode: box select vybere i vzdálenou kost `spine` (FAIL, `MODE=pose`) — stejně i před H25c; příčina: Blender v pose módu bere i objektový záznam (když ho vynechám, nevybere se nic). Neřešeno, nízká priorita (box kolem prstů obvykle nevadí).
