@@ -1535,7 +1535,7 @@ window.Module = {
   }],
   onRuntimeInitialized: () => {
     autoStart();
-    if (_mcp) startMcp(_mcp, canvas, log);
+    startMcp(_mcp, canvas, log);
     window.__rtInit = true; /* telemetry heartbeat waits for this (calledRun is set BEFORE initRuntime) */
     /* Parent of the local-folder mount points (wm_open_mainfile also creates
      * it wasm-side; this covers sessions where the dialog never opened). */

@@ -1,3 +1,10 @@
+# 4. 11. 18:45 — M1b: MCP jako add-on v Preferences
+Výsledek: 🟡 PC ✅
+- Co: `demo/src/mcp.js` při startu zapíše do user add-ons `blender_web_mcp.py` (vypnutý). Panel v Preferences: Relay URL (výchozí `ws://127.0.0.1:8765`), Token (heslo), Connect/Disconnect, stav, návod. Connect → soubor `/tmp/mcp_ctl.json` → JS bridge (bez reloadu); povoleno jen `ws://localhost` nebo `wss://`. `?mcp=` dál funguje.
+- Důkaz: `scripts/mcp_addon_win.sh` PASS (add-on zapnut z Pythonu, Connect, get_scene_info/execute/object_info/chyba/screenshot); `mcp_win.sh` PASS.
+- Nevím: vzhled panelu (screenshot Preferences jsem neudělal); iPad (relay by chtěl `wss://`).
+- Změna je v `demo/src` → půjde do dalšího zipu.
+
 # 4. 11. 18:20 — H25c: výběr kostí podle úsečky
 Výsledek: 🟡 PC ✅, Lukáš potvrdí
 - Důkaz PŘED: nový `scripts/bone_rigify_win.sh` (Rigify Human metarig, `VIEW=hand` = zoom na ruku) na buildu H25b: 7/123 shod (kliky mimo viewport se započítaly, ale i prsty padaly: f_middle→f_index, f_pinky→f_index).
