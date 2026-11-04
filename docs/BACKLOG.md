@@ -1,3 +1,9 @@
+## H25b — Rigging: klik na kost vybere NÁHODNOU jinou kost (i na PC!) (4.11. 09:01, Lukáš) — PRIORITA 1
+Hlášení: v Pose/Edit mode armatury nejde označit konkrétní kost klikem, vybere se nějaká náhodná. Na PC i iPadu. Dřívější `rig_win.sh` testoval jen operátory (Generate, weights), ne výběr klikem.
+- [ ] H25b-a DŮKAZ: Playwright: Rigify Human metarig (nebo jednoduchá armatura 3 kosti v řadě, známé pozice), Pose mode, klik na střed kosti B (promítnout head/tail přes `view3d_utils.location_3d_to_region_2d`) -> `context.active_pose_bone.name` musí být B. 10 kliků na různé kosti, počet shod. Porovnat: totéž desktop Blender (pravidlo 3b; čekám, že desktop 10/10).
+- [ ] H25b-b PŘÍČINA (hypotézy, odhad): výběr kostí jde přes GPU select (`GPU_select_begin` + occlusion queries / `GPU_select_pick` s depth readback nebo select-id buffer). Mesh výběr funguje, kosti ne -> podezření: (1) occlusion queries ve WebGPU backendu neimplementované/vrací vždy 1 -> první/poslední "hit" vyhraje; (2) `map_read_sync` na webu nefunguje (D6c: po 1. selhání vypnuto) -> výsledek readbacku je starý/nulový; (3) depth pick u čar (kosti Octahedral/Stick) bez šířky. Porovnat s Vulkan/Metal `*_query.cc`.
+- [ ] H25b-c oprava + test (10/10 shod) + parity; ověřit i výběr objektů klikem při překryvu (stejná cesta).
+
 ## VEČER 3.11. 19:40–23:30 — cíl: opravy + FINÁLNÍ zip pro itch (verze 5.2)
 Stav: Lukáš na PC vše OK; iPad: Cmd+Z funguje (I1/I4 potvrzeno), MP i Rendered fungují, 2D Animation už NEZAMRZÁ (H26-A potvrzeno), ale tahy Grease Pencil se v Solid/MP NEVYKRESLÍ (ve Wireframe vidět). v5.3.0 tag ještě neexistuje (3.11.) -> rebase ne.
 Pořadí:

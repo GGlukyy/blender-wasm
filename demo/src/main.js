@@ -442,8 +442,13 @@ const showQuit = () => {
  * and heavy ops (Subsurf 5+, big Remesh/Array) can jump there in seconds → warn while the autosave (30 s) still can run. */
 const MEM_WARN_MB = +(new URLSearchParams(location.search).get("memwarn") || 1500);
 let memWarnLevel = 0;
+/* Jen iPad/iPhone (Safari zabíjí tab); na PC je limit 4 GB a hláška jen straší (Lukáš 4.11.). ?memwarn=N vynutí i na PC. */
+const MEM_WARN_ON = new URLSearchParams(location.search).has("memwarn") ||
+  new URLSearchParams(location.search).get("ipad") === "1" ||
+  (navigator.maxTouchPoints > 1 && /Macintosh|iPad|iPhone/.test(navigator.userAgent));
 const checkMem = (mb) => {
   try {
+    if (!MEM_WARN_ON) { window.__HEAP_MB__ = Math.round(mb); return; }
     mb = Math.round(mb); window.__HEAP_MB__ = mb;
     const level = mb >= MEM_WARN_MB + 500 ? 2 : mb >= MEM_WARN_MB ? 1 : 0;
     if (level <= memWarnLevel) return;
