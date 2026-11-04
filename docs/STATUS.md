@@ -1,3 +1,11 @@
+# 4. 11. 18:20 — H25c: výběr kostí podle úsečky
+Výsledek: 🟡 PC ✅, Lukáš potvrdí
+- Důkaz PŘED: nový `scripts/bone_rigify_win.sh` (Rigify Human metarig, `VIEW=hand` = zoom na ruku) na buildu H25b: 7/123 shod (kliky mimo viewport se započítaly, ale i prsty padaly: f_middle→f_index, f_pinky→f_index).
+- Oprava (fork `ipad` bbf3dc2f, `BLENDER_REF` aktualizován): kost se vybírá podle promítnuté úsečky head→tail; vyhrává nejbližší ke kliknutí (tolerance = pick rect). Edit mode: kořen/špička = bod. AABB zůstává pro objekty.
+- Důkaz PO: ruka 9/9, celé tělo 21/21, `bone_click_win` 10/10, `obj_click_win` 8/8, `parity_win` 0 ❌. Test přeskakuje kliky, kde je jiná kost blíž než 6 px (nejednoznačné i na desktopu).
+- Nevím: Edit mode klik (head/tail body) netestován; bez desktop srovnání (odhad: sedí).
+- Co otestovat na iPadu/PC: čistá karta (hard reload), Pose mode Rigify, klik na prsty/páteř.
+
 # 4. 11. 17:30 — souhrn večera
 Výsledek: 🟡 PC ✅, iPad čeká
 - `regress_all.sh` na finálním buildu (H26-D + M1): 0 FAIL / 0 ❌ / 0 PAGEERROR (`out/regress.log`).
