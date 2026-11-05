@@ -1,3 +1,42 @@
+# 5. 11. 22:58 — výběr kostí podle tvaru + Mac Safari
+Výsledek: 🟡 PC ✅, regres jen částečně, iPad/Mac neověřeno
+
+**Co jsem udělal**
+- H25d: kost s custom shape se vybírá podle nakresleného tvaru (hrany, plné plochy, Empty), B-Bone podle křivky. Mimo tvar nevybere nic. Fork `ipad` 7c32fc48, `BLENDER_REF`.
+- S1b: Mac Safari dostane `nodualsrc` (WebKit nebo chybějící `dual-source-blending`). Lite profil, pool 8 a bp zůstávají jen na iPadu.
+- Pushnuto: fork `ipad` 7c32fc48, `master` P36, P37 + dokumenty. Zip pro itch není.
+
+**Predikce a měření (H25d)**
+- Predikce 1: neviditelná osa head-tail mimo tvar vybere kost. Padla: starý build tam nevybral nic.
+- Predikce 2: starý build testuje osu Y z `disp_mat`, ta se natahuje se scale tvaru a vede do prázdna. Platí: klik 116 px od všeho viditelného vybral `ctl_big`. Nový build nevybere nic. To je nejspíš ta „náhodná kost“ (odhad, na tvém rigu neověřeno).
+
+**Důkaz**
+- `bone_miss_win.sh` (Rigify 221 kostí): starý build 12 FAIL (`out/win/bone_miss_before.txt`), nový 0 FAIL, i s `MESH=1`.
+- `bone_bbone_win.sh` PASS (B-Bone, Stick). `s1b_win.sh` PASS. `cmd_win.sh` PASS.
+- `bone_click` 10/10, `obj_click` 8/8, `arm_obj` 12/12, `bone_rigify` pose i edit 21/21, `bone_box` VIEW=hand pose i edit PASS, parity 0 ❌.
+- `regress_all.sh`: NEDOBĚHL. Ukončil jsem ho kvůli deadlinu po 27 sekcích z ~59 (0 FAIL, 0 ❌, 0 PAGEERROR). Chybí zbytek včetně fuzzu. Celý regres je potřeba pustit znovu.
+
+**Co nefunguje / není hotové**
+- H25d-c (klik na tlusté tělo octahedral kosti): oprava je jen v `out/h25d_c.patch`, není commitnutá ani nasazená. S ní `TYPES=OCTAHEDRAL bone_bbone_win.sh` PASS. Starý build: `FAIL klik na tělo octa -> (nic)`. Před nasazením chybí parity a testy kostí.
+- Envelope a tvary z křivek/fontu se dál vybírají podle osy.
+- Vidět: `bone_box_win.sh` bez `VIEW=hand` hlásí FAIL (17 kostí chybí, např. `ear.L`). Nezkoumal jsem, jestli to dělal už starý build.
+- S1c Cmd+Shift+Z: v Chrome funguje, v Safari neověřeno.
+- Pozor: `demo/public` má nový build (H25d bez H25d-c). Dev server jsem spustil já a na konci vypnul: pro test ho spusť znovu.
+
+**Co otestovat na iPadu (podle důležitosti)**
+1. Hard reload, tvůj rig postavy, Pose mode: klik na kontrolku (kruh, kvádr, šestiúhelník) vybere ji?
+2. Klik trochu dál od všeho: nevybere nic?
+3. Klik na kost Stick a B-Bone.
+
+**Co otestovat na Macu (Safari)**
+1. 2D Animation: kreslí čáry? Material Preview a Rendered kreslí?
+2. V konzoli `addEventListener("keydown",e=>console.log(e.code,e.key,e.metaKey,e.shiftKey),true)`, stiskni Cmd+Shift+Z a pošli výpis.
+
+**Co dál**
+- Celý `regress_all.sh`. Potom H25d-c: aplikovat patch, build, parity, testy kostí, push.
+
+**Úklid:** testy i moje vite instance zastavené, `pgrep` regress/fuzz/_win.sh/_test prázdné.
+
 # 5. 11. 02:10 — pose box select: falešná kost `spine` vyřešena
 - Příčina: objektový záznam armatury (bez příznaků) se v Blenderu dekóduje jako kost č. 0 (`spine`) → vybral se při každém boxu přes AABB. Oprava: ten záznam se v SELECT_ALL vynechá, když mají kosti vlastní výběr (fork `ipad`, `BLENDER_REF`). Dřívější poznámka „vynechání nevybere nic“ byla špatné měření (neaktuální build).
 - Důkaz: `bone_box_win` pose i edit PASS (18 vybraných, 0 falešných), `bone_rigify` pose/edit 9/9, `bone_click` 10/10, `obj_click` 8/8, `arm_obj` 12/12, parity 0 ❌.
