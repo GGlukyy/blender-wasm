@@ -1,3 +1,9 @@
+## H25d — Výběr kostí: nepřesný klik a CUSTOM SHAPES (Lukáš 5.11., rig postavy s pomocnými kontrolkami) — PRIORITA 2 (po S1)
+Lukáš: klik přesně na kost už vybere správně (H25c OK), ale (a) když klikne NEpřesně vedle kosti, vybere se "něco jiného"; (b) "pomocné rigy" (kontrolky = kosti s **custom shape**, Rigify widgety: kruhy, šipky) a "tyčkové" kosti (Stick / B-Bone zobrazení) moc nefungují. Testy H25c byly na METARIGU (bez custom shapes).
+- [ ] H25d-a DŮKAZ: `bone_rigify_win.sh` rozšířit o VYGENEROVANÝ rig (Rigify ▸ Generate Rig -> kontrolky s custom shapes, např. `hand_ik.L`, `torso`, `foot_ik.L`, prsty `f_index.01.L` widgety), klik na viditelný tvar kontrolky (ne na osu kosti) + 10 kliků 15–30 px vedle kostí. Stejné kroky v desktop Blenderu (pravidlo 3b) -> co vybere desktop (nic / nejbližší).
+- [ ] H25d-b oprava CPU pickingu: (1) kost s `custom_shape` (a `show_bone_custom_shapes`): testovat proti promítnutým HRANÁM custom shape meshe (vrcholy × pose matrix × custom_shape_transform/scale/translation/rotation, příp. wire width), ne proti úsečce head->tail; (2) zobrazení Stick/B-Bone/Wire/Envelope: odpovídající tvar (B-Bone segmenty, envelope poloměr); (3) tolerance a "klik vedle": chovat se jako desktop (když desktop v té vzdálenosti nic nevybere, nevybírat; jinak nejbližší); objektový záznam (mesh postavy) nesmí vyhrát nad kostí, když je klik na kontrolce.
+- Zdroj pravdy: desktop Blender stejné verze na Lukášově PC. Parity + bone_click/bone_box/arm_obj nesmí spadnout.
+
 ## D9 — Paměť změřená v Safari Web Inspectoru (školní Mac, Apple GPU, 5.11. 15:45) — NOVÁ DATA k D5 (5 GB)
 Safari Časové osy ▸ Paměť, čerstvá karta, patch S1 (limity), zip 2307, výchozí pool (32 vláken, ne iPad):
 - Solid v klidu: celkem 3,95 GB = **JavaScript 2,78 GB** + **Stránka 1,17 GB**, ploché.
