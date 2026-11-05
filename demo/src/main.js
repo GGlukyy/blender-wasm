@@ -308,6 +308,7 @@ async function probeGpu() {
   try {
     const adapter = await navigator.gpu.requestAdapter();
     if (adapter) telAdapterLimits(adapter);
+    if (adapter) window.__noDualSrc = !adapter.features.has("dual-source-blending"); /* S1b: Mac Safari ji nehlásí */
     if (!adapter) {
       return { ok: false, software: false, fatal: true, desc: "",
         message: "No <b>WebGPU adapter</b> is available, so Blender cannot start. " +
@@ -1531,6 +1532,8 @@ bpy.app.timers.register(_autosave, first_interval=_AS_EVERY, persistent=True)`;
 /* H22d: počet pthread workerů se čte při startu (link: PTHREAD_POOL_SIZE=Module.poolSize||32). Každý worker v Safari = vlastní JS VM
  * → iPad 8, jinde 32. Přepsat ?pool=N. */
 const _isIpadUA = navigator.maxTouchPoints > 1 && /Macintosh|iPad/.test(navigator.userAgent);
+/* S1b: obchvaty chyb WebKitu platí pro Safari na Macu i iPadu; _isIpadUA dál řídí jen paměťová opatření (lite, pool, bp, memwarn). */
+const _isWebKit = /AppleWebKit/.test(navigator.userAgent) && !/Chrome|Chromium|CriOS|Edg|Firefox|FxiOS/.test(navigator.userAgent);
 const POOL_N = parseInt(_qp.get("pool") || (_isIpadUA ? "8" : "32"), 10) || 32;
 /* H29b: File ▸ Open of a single .blend skips Blender's file browser: JS writes the path to /tmp/open_req.txt, this timer
  * opens it; /tmp/dirty.txt tells JS whether the current scene has unsaved changes (JS asks before discarding). */
@@ -1582,7 +1585,8 @@ window.Module = {
       if (new URLSearchParams(location.search).get("perf") === "1" && new URLSearchParams(location.search).get("reglog") === "1") ENV.WGPU_REGIONLOG = "1";
       if (new URLSearchParams(location.search).get("passlog") === "1") ENV.WGPU_PASSLOG = "1";
       if (new URLSearchParams(location.search).get("nocompute") === "1") ENV.WGPU_NO_COMPUTE = "1";
-      { const _nd = new URLSearchParams(location.search).get("nodualsrc"); if (_nd === "1" || (_nd !== "0" && _isIpadUA)) ENV.WGPU_NO_DUALSRC = "1"; } /* H26-B: Safari neumí pipeline s dual-source blendem (GP kompozice) */
+      { const _nd = new URLSearchParams(location.search).get("nodualsrc"); if (_nd === "1" || (_nd !== "0" && (_isIpadUA || _isWebKit || window.__noDualSrc))) ENV.WGPU_NO_DUALSRC = "1"; } /* H26-B: Safari neumí pipeline s dual-source blendem (GP kompozice) */
+      console.log("WEB_FLAGS " + JSON.stringify({ nodualsrc: ENV.WGPU_NO_DUALSRC || "0", mp_lite: MP_LITE, pool: POOL_N, bp: ENV.WGPU_BP || "0", webkit: _isWebKit, ipad_ua: _isIpadUA }));
       if (new URLSearchParams(location.search).get("compilelog") === "1") ENV.WGPU_LOG_COMPILE = "1";
       if (new URLSearchParams(location.search).get("drawlog") === "1") ENV.WGPU_LOG_DRAWS = "1";
       if (new URLSearchParams(location.search).get("iconprev") === "1") ENV.BLENDER_WEB_ICON_PREVIEWS = "1";
