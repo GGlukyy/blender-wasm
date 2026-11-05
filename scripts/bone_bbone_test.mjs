@@ -41,7 +41,7 @@ bpy.app.timers.register(probe, first_interval=5.0)`;
 const browser = await chromium.launch({ headless: false, executablePath: process.env.CHROME, args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 let fail = 0; const check = (ok, l) => { if (!ok) fail++; console.log(`${ok ? "PASS" : "FAIL"} ${l}`); };
-for (const TYPE of ["BBONE", "STICK"]) {
+for (const TYPE of (process.env.TYPES || "BBONE,STICK").split(",")) {
   const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
   let probe = "", dump = null;
   page.on("console", (m) => { const t = m.text(); let i; if ((i = t.indexOf("BDUMP ")) >= 0) dump = t.slice(i + 6); else if ((i = t.indexOf("BPROBE ")) >= 0) probe = t.slice(i + 7); else if (/Traceback|Error:/.test(t) && !/_multiprocessing/.test(t)) console.log("PY " + t.slice(0, 200)); });
@@ -65,6 +65,12 @@ for (const TYPE of ["BBONE", "STICK"]) {
     const nearCurve = D.curve.reduce((b, p) => Math.min(b, Math.hypot(p[0] - D.head[0] - (D.tail[0] - D.head[0]) * 0.25, p[1] - D.mid[1])), 1e9);
     const air = [D.head[0] + (D.tail[0] - D.head[0]) * 0.25, D.mid[1]]; console.log("přímka od křivky px", Math.round(nearCurve));
     const s = await click(air); check(nearCurve > 16 && !s, `klik na přímku mimo křivku @${air.map(Math.round)} -> ${s || "(nic)"}`);
+  } else if (TYPE === "OCTAHEDRAL") {
+    /* Tělo: nejširší místo je v 1/10 délky, polovina šířky = 1/10 délky. Bod na 70 % a bod kousek za okrajem. */
+    const L = D.tail[0] - D.head[0], x = D.head[0] + L * 0.1, in7 = L * 0.07; console.log("octa delka px", Math.round(L), "bod od osy px", Math.round(in7));
+    check(in7 > 20, "bod na těle je mimo toleranci osy");
+    const a = await click([x, D.mid[1] - in7]); check(a === "bb", `klik na tělo octa -> ${a || "(nic)"}`); await click([300, 120]);
+    const o = await click([x, D.mid[1] - L * 0.1 - 22]); check(!o, `22 px nad okrajem -> ${o || "(nic)"}`);
   } else {
     check((await click(D.mid)) === "bb", "Stick: klik na úsečku"); await click([300, 120]);
     const s = await click([D.mid[0], D.mid[1] - 22]); check(!s, `Stick: 22 px vedle -> ${s || "(nic)"}`);
