@@ -16,7 +16,7 @@ while (( $(date +%s) < WEEKEND_DEADLINE - 600 )); do
   git pull -q --rebase || true
   start=$(date +%s)
   claude -p "Read docs/WEEKEND.md and follow it. Today is $(date '+%A %F %H:%M'). Deadline: $DEADLINE_STR." \
-    --model sonnet --dangerously-skip-permissions > "$log" 2>&1
+    --model "${MODEL:-sonnet}" --dangerously-skip-permissions > "$log" 2>&1
   rc=$?; dur=$(( $(date +%s) - start ))
   if [ -f out/.idle_stop ]; then echo "Claude hlásí: nic dalšího k práci bez tebe (out/.idle_stop). Konec smyčky."; cat out/.idle_stop; break; fi
   tail -3 "$log" | sed 's/^/    /'
