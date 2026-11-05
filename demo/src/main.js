@@ -1716,6 +1716,22 @@ try {
    * `const` with the value from `constants` (or its default), and drop `constants`.
    * ?overrides=1 keeps the original path. */
   const ovrPatch = function () {
+    /* S1 (Mac Safari 5.11.): Safari vynucuje i nové limity `max{Storage,}*In{Fragment,Vertex}Stage` (výchozí 8),
+     * které emdawnwebgpu (WGPULimits) neumí poslat -> EEVEE shader s 9 SSBO = neplatná pipeline, MP nic nekreslí.
+     * Doplň je do requiredLimits z adapteru. Ověřeno v konzoli na Macu: s tímhle MP kreslí. Běží i ve workerech. */
+    if (globalThis.GPUAdapter && !GPUAdapter.prototype.__s1) {
+      const A = GPUAdapter.prototype, orig = A.requestDevice;
+      A.__s1 = true;
+      A.requestDevice = function (d) {
+        d = Object.assign({}, d || {});
+        const r = Object.assign({}, d.requiredLimits || {});
+        for (const k of ["maxStorageBuffersInFragmentStage", "maxStorageBuffersInVertexStage",
+                         "maxStorageTexturesInFragmentStage", "maxStorageTexturesInVertexStage"])
+          if (k in this.limits && !(k in r)) r[k] = this.limits[k];
+        d.requiredLimits = r;
+        return orig.call(this, d);
+      };
+    }
     if (!globalThis.GPUDevice) return;
     const P = GPUDevice.prototype;
     const srcOf = new WeakMap(), specCache = new Map();
