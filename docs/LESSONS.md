@@ -44,3 +44,4 @@
 
 - **Ztráta času 31.10:** `oom_test` — handlery OOM jsou uvnitř `start()` (po Launch), test musel nejdřív kliknout Launch (~25 min hledání). Jas node editoru: barvy z overlay sRGB textury počítat `srgb_encode(theme)` — přesná shoda hodnot (0x1a→0x5a) odhalila příčinu za 10 min.
 - 4. 11.: `pkill -f "vite preview …"` nezabije proces (příkazová řádka node je `vite.js preview`) → server běžel dál a offline test by lhal. Po zabití vždy ověřit `curl` (000). Test offline = server skutečně mrtvý, ne `context.setOffline`.
+- 5. 11.: env proměnné z WSL se do `cmd.exe` v `*_win.sh` nedostanou samy: `MODE=edit` tiše běží jako pose. Použij `export WSLENV=MODE:VIEW` a kontroluj výstup; `bone_box_win.sh` má smysl jen s `VIEW=hand`.
