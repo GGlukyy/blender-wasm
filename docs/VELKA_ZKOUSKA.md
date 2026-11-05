@@ -23,3 +23,29 @@ a v tom, že na iPadu/Macu nikdo neprojde všechno najednou.
 
 ## Část C — opravy podle výsledků
 - Seřadit nalezené chyby podle dopadu (spadne/nekreslí > špatně kreslí > kosmetika), opravovat od nejhorších, každá s testem v A.
+
+## Část D — Lov chyb přes noc "jako cizí uživatel" (stálý režim smyčky, když není jiná práce)
+Cíl (Lukáš 5. 11.): smyčka sama najde chyby, na které narazí BĚŽNÝ uživatel Blenderu a které Lukáš zatím nenašel.
+Ne fuzz (náhodné klikání = výplň). Místo toho **reálné postupy přes UI + srovnání s desktop Blenderem** (stejná verze na Lukášově PC).
+
+Postup jedné "cesty" (journey):
+1. Napsat cestu jako Playwright scénář se SKUTEČNÝMI vstupy (myš, klávesy vč. Cmd/QWERTZ, dotyk kde dává smysl), ne jen bpy.
+2. Pustit ji: Chrome normálně, Chrome `webkit_sim=1` (část A), a stejné kroky v desktop Blenderu (bpy/operátory přes Blender MCP nebo `--python`).
+3. Porovnat výsledek: data scény (počty objektů/vrcholů/materiálů/kostí, vybrané/aktivní objekty, módy), screenshot viewportu (parity), konzole (gpuerr/abort/PAGEERROR = vždy chyba), čas kroku (> 5× desktop = výkonový problém).
+4. Rozdíl = chyba -> BACKLOG s důkazem (scénář + screenshot web vs desktop) a pravidlem 3b. Opravit, co je jasné; jinak zapsat.
+
+Knihovna cest (postupně doplňovat, každá 2–5 min):
+- donut tutoriál začátek (torus, subdiv, proportional edit, sculpt, materiál, MP)
+- židle/stůl z kostky (extrude, inset, bevel, loop cut, mirror modifier, apply)
+- UV unwrap + obrázková textura (Image ▸ Open, Texture Paint tah, uložit obrázek)
+- materiál přes Shading workspace (nody, Principled, připojit texturu)
+- sculpt (dyntopo/remesh, maska, symetrie, undo)
+- rig: armatura, parent with automatic weights, pose, klik/box na kosti, weight paint
+- animace: klíčové snímky, timeline, graph editor, přehrát
+- 2D Animation: kreslení, vrstvy, gumování, barvy
+- Geometry Nodes: scatter na plochu, instance, realize
+- soubory: Save/Open/Recent, Import/Export glTF/FBX/OBJ/STL, Append z jiného .blend
+- add-ony: zapnout vestavěné, Install from Disk, Get Extensions offline chování
+- UI: změna workspace, rozdělení oblastí, Preferences (téma, jednotky, klávesy), N-panel, vyhledávání F3, kontextová menu
+- vstup: Cmd vs Ctrl, QWERTZ/AZERTY, numpad emulace, pero/dotyk (touch_win)
+Výstup každé noci do STATUS: tabulka cesta × (Chrome / webkit_sim) = OK / chyba (odkaz na BACKLOG) / rozdíl proti desktopu.

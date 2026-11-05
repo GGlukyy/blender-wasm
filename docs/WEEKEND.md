@@ -19,6 +19,7 @@ v této ZÁLOŽNÍ FRONTĚ (jen PC, v pořadí; každou položku buď dodělej, 
 3. 5.3 větev `ipad-5.3-wip`: 6/96 ops FAIL (image save, glTF/FBX export) — do master nic
 4. D8 — přepínání MP <-> Rendered po dlouhé relaci (PC repro přes `auto=soak` + `auto=rendered`)
 5. Výkon MP na iPadu: jen měření na PC s `?ipad=1` (fps, počet pipeline/draw callů), návrh do STATUS, bez velkých změn
+6. Lov chyb jako cizí uživatel: `docs/VELKA_ZKOUSKA.md` část D (cesty přes UI + srovnání s desktopem). Vždy je další cesta k napsání, takže tahle položka nikdy není "hotová" — dělej ji do deadlinu.
 `out/.idle_stop` smíš zapsat JEN když jsou všechny položky výše `[x]` nebo `[!] BLOCKED` a do `.idle_stop` napiš, které to jsou.
 
 ## Push
