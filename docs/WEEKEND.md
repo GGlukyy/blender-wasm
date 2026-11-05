@@ -9,6 +9,8 @@ Chrome on the real GPU (`scripts/p2_win.sh`, `scripts/parity_win.sh`).
 Pracuj podle bloků nahoře v `docs/BACKLOG.md` (nejnovější blok = nejvyšší priorita). Starý cíl "iPad crash / IPAD_CRASH.md" (25. 10.) je HOTOVÝ, neplatí.
 Fuzz/`regress_all` jen JEDNOU po změně kódu, nikdy jako výplň času.
 
+## Víkend od so 7. 11.: hlavní úkol = `docs/VELKA_ZKOUSKA.md` (A1 -> A2 -> B1 -> B2), před tím dokonči S1 a H25d. Do pátku 6. 11. NEZAČÍNAT.
+
 ## NEKONČIT PŘEDČASNĚ (Lukáš 4. 11.: smyčka se opakovaně ukončila, i když práce byla)
 Úkol, který čeká na iPad / Lukáše / vydání 5.3, NENÍ důvod končit. Nejdřív: ASK na iPad max 2× za večer (viz níže), pak ho přeskoč a pokračuj
 v této ZÁLOŽNÍ FRONTĚ (jen PC, v pořadí; každou položku buď dodělej, nebo označ `[!] BLOCKED: <proč>` v BACKLOGu):
