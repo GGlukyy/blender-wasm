@@ -1,3 +1,13 @@
+## D9 — Paměť změřená v Safari Web Inspectoru (školní Mac, Apple GPU, 5.11. 15:45) — NOVÁ DATA k D5 (5 GB)
+Safari Časové osy ▸ Paměť, čerstvá karta, patch S1 (limity), zip 2307, výchozí pool (32 vláken, ne iPad):
+- Solid v klidu: celkem 3,95 GB = **JavaScript 2,78 GB** + **Stránka 1,17 GB**, ploché.
+- Záznam 5 (odhad: MP zapnutý ~0–12 s, pak zpět Solid — Lukáš potvrdí): **Stránka max 5,18 GB** -> po ~12,5 s klesla na 1,51 GB; JavaScript 2,82–2,84 GB beze změny; celkem max 8 GB.
+- Dřív (záznam 1): po reloadu stránky paměť staré instance NEklesla a nová se načetla navrch (7,31 GB max) + hláška Safari "stránka načtena znovu kvůli velkému množství paměti" -> stejný mechanismus jako iPad "po reloadu není paměť".
+Výklad (odhad): kategorie **Stránka** = WebCore vč. WebGPU zdrojů ve WebContent (unified memory) -> EEVEE/MP stojí ~+3,7 GB Stránky; **JavaScript** = wasm heap + JS haldy všech workerů (32 vláken!).
+- [ ] D9a: čekám na měření Lukáše: (B) Solid s `&pool=8` (klesne JS?) (C) MP s `&ipad=1` (lite profil: kolik ušetří Stránky?).
+- [ ] D9b: podle (B): pokud pool=8 ušetří >0,5 GB JS, dát pool 8 (nebo méně) pro VŠECHNY WebKit prohlížeče, ne jen iPad (S1b).
+- [ ] D9c: podle (C): co v MP drží ~3,7 GB "Stránky": vypsat seznam GPU textur/bufferů po přepnutí na MP (thist/hbytes z telemetrie gmem) a porovnat s 3,7 GB; kandidáti: EEVEE lightprobe/shadow atlas 2048² rgba16f ×3, fb_dummy 8192² (67 MB), staging/upload buffery, mapped kopie. Zmenšit to, co nejvíc přispívá, primárně pro WebKit.
+
 ## S1 — macOS Safari (školní Mac, 5.11. 14:47, zip itch_2026-11-03_2307 = BEZ H26-D) — PRIORITA 1
 Lukáš: UI funguje, ale Material Preview + Rendered (EEVEE) nic nevykreslí; 2D Animation nekreslí čáry ani ve Wireframe; Cmd+Shift+Z nefunguje.
 Hypotéza (odhad, silná): Safari obchvaty jsou zapnuté podle "je to iPad" (`_isIpadUA` = maxTouchPoints>1 && Mac UA), ne podle "je to WebKit/Safari". Mac Safari má maxTouchPoints 0 -> dostane cestu pro Chrome: bez `WGPU_NO_DUALSRC` (GP), bez EEVEE lite (MP_LITE), bez bp/pool 8. Stejný WebKit jako iPad -> stejné chyby.
