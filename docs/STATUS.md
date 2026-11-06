@@ -1,4 +1,15 @@
-# 6. 11. večer — H31 a H30 nereprodukované, sonda H30
+# 6. 11. večer — H31 a H30 nereprodukované, sonda H30, H25d-c hotovo
+Výsledek: 🟡 PC ✅ H25d-c; H31 a H30 se na PC nepodařilo vyvolat
+**Co jsem udělal**
+- H25d-c: klik na tlusté tělo octahedral kosti vybere kost. Fork `ipad` da18923f, `BLENDER_REF`, `master` P39. Build je v `demo/public`.
+- H30: sonda v telemetrii. S `?tel=1` se každá změna snap/proportional zapíše jako `H30_STATE` (`master` P38).
+- H31, H30: nové testy `h31_win.sh`, `h30_win.sh`. Část D: `journey_win.sh` + `journey_desktop.py` (desktop 5.2.3 ze Steamu).
+
+**Otázky na Lukáše**
+- H31: Kde se to stalo (PC, nebo iPad)? Jaká scéna? Jsou ty obrázky starší pohledy kamery? Pošli 2 screenshoty přes Win+Shift+S.
+- H30: Klikal jsi na „Obnovit poslední práci“? Scéna po startu byla kostka, nebo tvůj soubor? Napiš přibližný čas, sonda to pak dohledá.
+- Pozor: moje testy otevírají okna Chrome, když běží smyčka. Tvoje karta se pak hlásí jako skrytá (18:27).
+
 **Predikce H31:** Pokud se v MP střídají staré snímky, 20 pohybů myši bez změny scény dá po doběhnutí vzorků víc než 1 různý obrázek. **Měření: neplatí**, vždy 1 obrázek (`scripts/h31_win.sh`, 4 běhy, kontrola citlivosti PASS). `window_backbuffer_color` je 1 textura, hypotéza „kruh 4 backbufferů“ neplatí.
 **Predikce H30:** Pokud to dělají naše klávesy nebo startup, tak v čisté kartě po kliknutí na MP bude snap/prop zapnuté. **Měření: neplatí** (`scripts/h30_win.sh`). Přenese se jen při obnově `_autosave_prev.blend`.
 
