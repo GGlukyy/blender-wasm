@@ -266,6 +266,18 @@ const J = {
     await check(`dyntopo tah přidá vrcholy (${v0} -> ${dv})`, (s) => s.mode === "SCULPT" && dv > v0);
     await clickDyn(); const dt2 = await cmd(dyn); await check(`klik vypne dyntopo (${dt2})`, () => dt2 === false);
   },
+  /* Animace 2: klíče, skok mezi klíči (nahoru = předchozí, dolů = další, stejně v keymapě desktopu), Graph Editor (Shift+F6), T Linear, Alt+I smaže klíč, Ctrl+Z. */
+  anim2: async ({ hover, key, type, check, cmd, page, wait }) => {
+    const fc = "eval:(lambda c: [len(c), len(c[0].keyframe_points), c[0].keyframe_points[0].interpolation])(bpy.context.object.animation_data.action.layers[0].strips[0].channelbag(bpy.context.object.animation_data.action_slot).fcurves)";
+    await hover(); await key("i", 700); await cmd("bpy.context.scene.frame_set(20)"); await wait(400); await key("g"); await key("x"); await type("2"); await key("Enter", 500); await key("i", 700);
+    let f = await cmd(fc); await check(`2 klíče na křivku (${f})`, () => f && f[0] >= 3 && f[1] === 2);
+    await key("ArrowDown", 500); await check("šipka dolů (další klíč) z posledního: zůstane 20", (s) => s.frame === 20); await key("ArrowUp", 500); await check("šipka nahoru (předchozí klíč): snímek 1", (s) => s.frame === 1); await key("ArrowDown", 500); await check("šipka dolů (další klíč): snímek 20", (s) => s.frame === 20);
+    await page.keyboard.press("Shift+F6"); await wait(1200); const area = await cmd("eval:bpy.context.window_manager.windows[0].screen.areas[0].type + ':' + ','.join(a.type for a in bpy.context.window_manager.windows[0].screen.areas)"); await check(`Shift+F6: Graph Editor (${area})`, () => /GRAPH_EDITOR/.test(area)); await page.screenshot({ path: "out/jr_anim2_graph.png" });
+    await key("a", 500); await key("t", 700); await page.screenshot({ path: "out/jr_anim2_menu.png" }); await key("l", 900); f = await cmd(fc); await check(`T L: Linear (${f})`, () => f && f[2] === "LINEAR");
+    await cmd("bpy.context.scene.frame_set(10)"); await wait(400); const x = (await check("snímek 10", (s) => s.frame === 10)).loc[0]; await check(`Linear: X na snímku 10 je 0,947 (${x})`, () => Math.abs(x - 0.947) < 0.002);
+    await page.keyboard.press("Control+z"); await wait(800); await page.keyboard.press("Shift+F5"); await wait(1200); await check("Shift+F5: zpět 3D pohled", (s) => s.shade === "SOLID");
+    await cmd("bpy.context.scene.frame_set(20)"); await wait(400); await page.keyboard.press("Alt+i"); await wait(800); await page.screenshot({ path: "out/jr_anim2_alti.png" }); await key("Enter", 800); f = await cmd(fc); await check(`Alt+I smaže klíč (${f})`, () => f && f[1] === 1);
+  },
   /* UI: F3 hledání, Modifier přes Shift+A menu v nodech není; rozdělení oblasti přes menu View, Preferences okno. */
   ui: async ({ hover, key, check, page, wait, type, tab }) => {
     await hover(); await key("F3", 700); await type("subdivide"); await wait(500); await page.keyboard.press("Escape"); await wait(300); await page.keyboard.press("Escape"); await wait(400); await check("F3 a Esc nezmění mód", (s) => s.mode === "OBJECT");

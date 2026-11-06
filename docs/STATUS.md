@@ -1,19 +1,20 @@
-# 6. 11. 21:55 — dvě nové cesty (donut, sculpt2), žádná nová chyba
-Výsledek: 🟡 PC ✅ (jen `donut` a `sculpt2`), iPad neověřeno
+# 6. 11. 21:58 — tři nové cesty (donut, sculpt2, anim2), žádná nová chyba
+Výsledek: 🟡 PC ✅ (jen `donut`, `sculpt2`, `anim2`), iPad neověřeno
 
 **Co jsem udělal**
 - Cesta `donut`: Shift+A torus, Ctrl+1, Shade Smooth přes F3, proportional edit (O + kolečko), Ctrl+Z, materiál v Material Preview, sculpt tah.
 - Cesta `sculpt2`: symetrie X, maska (M, Alt+M), voxel remesh (Ctrl+R) + Ctrl+Z, Dyntopo (klik v hlavičce) a tah.
+- Cesta `anim2`: klíče, skok mezi klíči šipkami, Graph Editor (Shift+F6), T Linear, Alt+I, Ctrl+Z.
 - `journey_desktop.py`: přidán torus + proportional.
-- Pushnuto: `master` P42, P43 (jen testy, žádná změna Blenderu ani `demo/`, proto bez regresu).
+- Pushnuto: `master` P42, P43, P44 (jen testy, žádná změna Blenderu ani `demo/`, proto bez regresu).
 
 **Důkaz**
-- `journey_win.sh donut`: OK, fail=0 err=0 gpu=0 py=0. `journey_win.sh sculpt2`: OK, fail=0 err=0 gpu=0 py=0. Jen Chrome na PC, celé `all` jsem po přidání nepouštěl.
-- Desktop 5.2.3 (`blender.exe -b`): torus 576/1152/576, proportional pohne 174 vrcholy. Web to samé. Tah Dyntopo (2562 -> 3399) a remesh jsem s desktopem nesrovnal.
+- `journey_win.sh donut`: OK, fail=0 err=0 gpu=0 py=0. `journey_win.sh sculpt2`: OK, fail=0 err=0 gpu=0 py=0. `journey_win.sh anim2`: OK, fail=0 err=0 gpu=0 py=0. Jen Chrome na PC, celé `all` jsem po přidání nepouštěl.
+- Desktop 5.2.3 (`blender.exe -b`): torus 576/1152/576, proportional pohne 174 vrcholy. Web to samé. Tah Dyntopo (2562 -> 3399), remesh a `anim2` jsem s desktopem nesrovnal (u `anim2` jen keymapa šipek).
 - Screenshoty `out/win/jr_donut_mp.png`, `jr_donut_sculpt.png`, `jr_sculpt2_dyntopo.png`: donut i sculpt vypadají správně (kontrola okem).
 
 **Co nefunguje / není jisté**
-- Tři FAILy během psaní byly chyby testu, ne Blenderu: `proportional_size` se zapíše až po Enter; Ctrl+D v keymapě není (0 výskytů, web i desktop 5.2); X štětec nepřepnul, zůstala maska (proč X nepřepnul, jsem nezkoumal, ani jestli to tak má i desktop).
+- Pět FAILů během psaní byly chyby testu, ne Blenderu: `proportional_size` se zapíše až po Enter; Ctrl+D v keymapě není (0 výskytů, web i desktop 5.2); X štětec nepřepnul, zůstala maska (proč X nepřepnul, jsem nezkoumal, ani jestli to tak má i desktop); Alt+I chce potvrdit Enterem (popup na screenshotu nekontrolován, s Enter klíč zmizí); šipka nahoru = předchozí klíč, dolů = další (keymapa webu i desktopu 5.2).
 - Web ukazuje verzi `5.3.0 a`, desktop je 5.2.3. Srovnání podle 3b tedy není se stejnou verzí.
 - `web/` (blender.js, .wasm, .data) je v repu netrackované, není ode mě z tohoto běhu. Nechal jsem to být, necommitoval.
 
