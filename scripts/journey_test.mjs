@@ -217,6 +217,32 @@ const J = {
     await page.keyboard.press("Alt+z"); await wait(600); await page.keyboard.press("Alt+z"); await wait(600);
     await key("z", 600); await page.screenshot({ path: "out/jr_edit2_pie.png" }); await key("Escape", 500);
   },
+  /* Donut: Shift+A torus, Ctrl+1, proportional edit (O + kolečko), Shade Smooth přes F3, sculpt tah, materiál v Material Preview. */
+  donut: async ({ hover, key, type, check, cmd, page, wait, tab, mid }) => {
+    await hover(); await key("Delete", 700); await check("Delete smaže kostku", (s) => s.objs === 2);
+    await page.keyboard.press("Shift+a"); await wait(600); await type("torus"); await wait(400); await key("Enter", 900); await check("Shift+A torus: 576 v, 1152 e, 576 f", (s) => s.type === "MESH" && s.v === 576 && s.e === 1152 && s.f === 576);
+    await page.keyboard.press("Control+1"); await wait(800); await check("Ctrl+1: SUBSURF", (s) => s.mods.join() === "SUBSURF");
+    await page.keyboard.press("F3"); await wait(600); for (const c of "shade smooth") await page.keyboard.press(c === " " ? "Space" : c); await wait(600); await key("Enter", 900);
+    const smooth = await cmd("eval:sum(p.use_smooth for p in bpy.context.object.data.polygons)"); await check(`F3 Shade Smooth (${smooth}/576)`, () => smooth === 576);
+    await key("Tab", 800); await key("1"); await page.keyboard.press("Alt+a"); await wait(400);
+    await cmd("o=bpy.context.object; bpy.ops.object.mode_set(mode='OBJECT'); o.data.vertices[0].select=True; bpy.ops.object.mode_set(mode='EDIT')"); await wait(500);
+    await check("1 vybraný vrchol", (s) => s.mode === "EDIT_MESH" && s.vsel === 1);
+    const before = await cmd("eval:[v.co.z for v in bpy.context.object.data.vertices]");
+    await key("o", 500); const prop = await cmd("eval:bpy.context.tool_settings.use_proportional_edit"); await check("O zapne proportional", () => prop === true);
+    await cmd("bpy.context.tool_settings.proportional_size=1.0"); await hover(); await key("g"); await key("z"); await type("0.3"); await page.mouse.wheel(0, 100); await wait(500); await key("Enter", 900); const size = await cmd("eval:bpy.context.tool_settings.proportional_size");
+    await check(`kolečko během G změní dosah (${size})`, () => typeof size === "number" && size !== 1);
+    await cmd("bpy.context.object.update_from_editmode()"); const after = await cmd("eval:[v.co.z for v in bpy.context.object.data.vertices]");
+    const moved = after.filter((z, i) => Math.abs(z - before[i]) > 1e-4).length; await check(`G Z s proportional pohne víc vrcholy (${moved})`, () => moved > 1 && moved < 576);
+    await page.keyboard.press("Control+z"); await wait(1000); await cmd("bpy.context.object.update_from_editmode()"); const undone = await cmd("eval:[v.co.z for v in bpy.context.object.data.vertices]");
+    await check("Ctrl+Z vrátí tvar", () => undone.every((z, i) => Math.abs(z - before[i]) < 1e-4));
+    await key("o", 500); const off = await cmd("eval:bpy.context.tool_settings.use_proportional_edit"); await check("O vypne proportional", () => off === false); await key("Tab", 800);
+    await cmd("o=bpy.context.object; m=bpy.data.materials.new('Poleva'); m.use_nodes=True; m.node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value=(0.9,0.3,0.5,1); o.data.materials.append(m)"); await wait(500);
+    await check("materiál přiřazen", (s) => s.slots === 1);
+    await page.keyboard.press("z"); await wait(600); await page.keyboard.press("2"); await wait(6000); await check("Z 2: Material Preview", (s) => s.shade === "MATERIAL"); await page.screenshot({ path: "out/jr_donut_mp.png" });
+    await tab("Sculpting"); const s0 = await check("Sculpting: sculpt mode", (s) => s.mode === "SCULPT");
+    const m = mid(); await page.mouse.move(m[0] - 40, m[1] - 30); await wait(300); await page.mouse.down(); for (let i = 0; i < 12; i++) { await page.mouse.move(m[0] - 40 + i * 8, m[1] - 30 + i * 3); await wait(30); } await page.mouse.up(); await wait(1000);
+    await check("tah změní donut", (s) => s.zsum !== s0.zsum || s.zmax !== s0.zmax); await page.screenshot({ path: "out/jr_donut_sculpt.png" });
+  },
   /* UI: F3 hledání, Modifier přes Shift+A menu v nodech není; rozdělení oblasti přes menu View, Preferences okno. */
   ui: async ({ hover, key, check, page, wait, type, tab }) => {
     await hover(); await key("F3", 700); await type("subdivide"); await wait(500); await page.keyboard.press("Escape"); await wait(300); await page.keyboard.press("Escape"); await wait(400); await check("F3 a Esc nezmění mód", (s) => s.mode === "OBJECT");
