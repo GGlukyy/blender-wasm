@@ -1,3 +1,32 @@
+# 6. 11. 21:55 — dvě nové cesty (donut, sculpt2), žádná nová chyba
+Výsledek: 🟡 PC ✅ (jen `donut` a `sculpt2`), iPad neověřeno
+
+**Co jsem udělal**
+- Cesta `donut`: Shift+A torus, Ctrl+1, Shade Smooth přes F3, proportional edit (O + kolečko), Ctrl+Z, materiál v Material Preview, sculpt tah.
+- Cesta `sculpt2`: symetrie X, maska (M, Alt+M), voxel remesh (Ctrl+R) + Ctrl+Z, Dyntopo (klik v hlavičce) a tah.
+- `journey_desktop.py`: přidán torus + proportional.
+- Pushnuto: `master` P42, P43 (jen testy, žádná změna Blenderu ani `demo/`, proto bez regresu).
+
+**Důkaz**
+- `journey_win.sh donut`: OK, fail=0 err=0 gpu=0 py=0. `journey_win.sh sculpt2`: OK, fail=0 err=0 gpu=0 py=0. Jen Chrome na PC, celé `all` jsem po přidání nepouštěl.
+- Desktop 5.2.3 (`blender.exe -b`): torus 576/1152/576, proportional pohne 174 vrcholy. Web to samé. Tah Dyntopo (2562 -> 3399) a remesh jsem s desktopem nesrovnal.
+- Screenshoty `out/win/jr_donut_mp.png`, `jr_donut_sculpt.png`, `jr_sculpt2_dyntopo.png`: donut i sculpt vypadají správně (kontrola okem).
+
+**Co nefunguje / není jisté**
+- Tři FAILy během psaní byly chyby testu, ne Blenderu: `proportional_size` se zapíše až po Enter; Ctrl+D v keymapě není (0 výskytů, web i desktop 5.2); X štětec nepřepnul, zůstala maska (proč X nepřepnul, jsem nezkoumal, ani jestli to tak má i desktop).
+- Web ukazuje verzi `5.3.0 a`, desktop je 5.2.3. Srovnání podle 3b tedy není se stejnou verzí.
+- `web/` (blender.js, .wasm, .data) je v repu netrackované, není ode mě z tohoto běhu. Nechal jsem to být, necommitoval.
+
+**Záložní fronta:** M1, O1, D8 hotové nebo čekají na iPad / hosting. 5.3 větev (6/96 ops) a měření `?ipad=1` jsem dnes nezačal, do 22:00 by se nevešly. `out/.idle_stop` nezapisuji.
+
+**Úklid:** `pgrep -af "regress|fuzz|_win.sh|_test"` prázdné. Dev server a tunel nechávám běžet (spustil je Lukáš).
+
+**Co otestovat na iPadu**
+- Nic nového, kód aplikace se nezměnil. Platí seznam z bloku níže.
+
+**Co dál**
+- So 7. 11.: `VELKA_ZKOUSKA.md` A1, A2, B1, B2.
+
 # 6. 11. 21:45 — H25d-c hotovo, add-on Extensions opraven, H31 a H30 nereprodukované
 Výsledek: 🟡 PC ✅ (regres 0 FAIL), iPad neověřeno; H31 a H30 NEJSOU opravené
 

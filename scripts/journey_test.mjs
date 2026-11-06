@@ -243,6 +243,29 @@ const J = {
     const m = mid(); await page.mouse.move(m[0] - 40, m[1] - 30); await wait(300); await page.mouse.down(); for (let i = 0; i < 12; i++) { await page.mouse.move(m[0] - 40 + i * 8, m[1] - 30 + i * 3); await wait(30); } await page.mouse.up(); await wait(1000);
     await check("tah změní donut", (s) => s.zsum !== s0.zsum || s.zmax !== s0.zmax); await page.screenshot({ path: "out/jr_donut_sculpt.png" });
   },
+  /* Sculpt 2: symetrie X, maska (M + tah, Alt+M), voxel remesh (Ctrl+R), undo, dyntopo (klik v hlavičce; Ctrl+D v keymapě není). */
+  sculpt2: async ({ tab, check, page, wait, cmd, mid, key, box }) => {
+    const m = mid(), stroke = async (dx = -40, dy = -30) => { await page.mouse.move(m[0] + dx, m[1] + dy); await wait(300); await page.mouse.down(); for (let i = 0; i < 12; i++) { await page.mouse.move(m[0] + dx + i * 8, m[1] + dy + i * 3); await wait(30); } await page.mouse.up(); await wait(1000); };
+    await cmd("bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=5, radius=1.3)"); await wait(800);
+    await tab("Sculpting"); const s0 = await check("Sculpting: sculpt mode", (s) => s.mode === "SCULPT");
+    await cmd("bpy.context.object.use_mesh_mirror_x=True"); await stroke(40, -30);
+    const asym = await cmd("eval:(lambda o: (o.update_from_editmode(), (lambda d: sum(1 for v in d.vertices if abs(v.co.x)>0.01 and abs(v.co.length-1.3)>1e-3))(o.data))[1])(bpy.context.object)");
+    const sides = await cmd("eval:(lambda d: [sum(1 for v in d.vertices if v.co.x>0.01 and abs(v.co.length-1.3)>1e-3), sum(1 for v in d.vertices if v.co.x<-0.01 and abs(v.co.length-1.3)>1e-3)])(bpy.context.object.data)");
+    await check(`tah se symetrií X změní obě strany (${asym}, ${sides})`, () => sides && sides[0] > 0 && sides[1] > 0);
+    const mask = "eval:(lambda a: 0 if a is None else sum(1 for x in a.data if x.value>0.5))(bpy.context.object.data.attributes.get('.sculpt_mask'))";
+    await page.mouse.move(m[0], m[1]); await key("m", 700); const tool = await cmd("eval:bpy.context.workspace.tools.from_space_view3d_mode('SCULPT').idname"); await check(`M = maska (${tool})`, () => /mask/i.test(tool || ""));
+    await stroke(-40, -30); await cmd("bpy.ops.object.mode_set(mode='OBJECT'); bpy.ops.object.mode_set(mode='SCULPT')"); const n1 = await cmd(mask); await check(`tah maskou označí vrcholy (${n1})`, () => n1 > 0);
+    await page.keyboard.press("Alt+m"); await wait(900); await cmd("bpy.ops.object.mode_set(mode='OBJECT'); bpy.ops.object.mode_set(mode='SCULPT')"); const n2 = await cmd(mask); await check(`Alt+M vymaže masku (${n2})`, () => n2 === 0);
+    await page.screenshot({ path: "out/jr_sculpt2_mask.png" });
+    await page.mouse.move(m[0], m[1]); await cmd("bpy.context.object.data.remesh_voxel_size=0.1"); const v0 = (await check("před remesh", (s) => s.mode === "SCULPT")).v;
+    await page.keyboard.press("Control+r"); await wait(3000); const s3 = await check("Ctrl+R voxel remesh změní počet vrcholů", (s) => s.mode === "SCULPT" && s.v !== v0 && s.v > 100);
+    await page.keyboard.press("Control+z"); await wait(1500); await check("Ctrl+Z vrátí remesh", (s) => s.v === v0);
+    const dyn = "eval:bpy.context.object.use_dynamic_topology_sculpting"; const clickDyn = async () => { await page.mouse.move(box.x + 948, box.y + 64, { steps: 2 }); await wait(400); await page.mouse.click(box.x + 948, box.y + 64); await wait(1500); };
+    await clickDyn(); await page.screenshot({ path: "out/jr_sculpt2_dynclick.png" }); const dt = await cmd(dyn); await check(`klik na Dyntopo zapne dyntopo (${dt})`, () => dt === true);
+    await cmd("bpy.context.tool_settings.sculpt.detail_size=4"); await page.mouse.move(box.x + 30, box.y + 102, { steps: 2 }); await wait(400); await page.mouse.click(box.x + 30, box.y + 102); await wait(800); const br = await cmd("eval:bpy.context.tool_settings.sculpt.brush.name"); await check(`klik v toolbaru: štětec ${br}`, () => br !== "Mask"); await stroke(-60, 10); const st = await cmd("eval:bpy.context.scene.statistics(bpy.context.view_layer)"); const dv = +/Verts:([\d,]+)/.exec(st)[1].replace(/,/g, ""); await page.screenshot({ path: "out/jr_sculpt2_dyntopo.png" });
+    await check(`dyntopo tah přidá vrcholy (${v0} -> ${dv})`, (s) => s.mode === "SCULPT" && dv > v0);
+    await clickDyn(); const dt2 = await cmd(dyn); await check(`klik vypne dyntopo (${dt2})`, () => dt2 === false);
+  },
   /* UI: F3 hledání, Modifier přes Shift+A menu v nodech není; rozdělení oblasti přes menu View, Preferences okno. */
   ui: async ({ hover, key, check, page, wait, type, tab }) => {
     await hover(); await key("F3", 700); await type("subdivide"); await wait(500); await page.keyboard.press("Escape"); await wait(300); await page.keyboard.press("Escape"); await wait(400); await check("F3 a Esc nezmění mód", (s) => s.mode === "OBJECT");
