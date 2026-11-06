@@ -9,6 +9,7 @@ Výsledek: 🟡 PC ✅ H25d-c; H31 a H30 se na PC nepodařilo vyvolat
 - H31: Kde se to stalo (PC, nebo iPad)? Jaká scéna? Jsou ty obrázky starší pohledy kamery? Pošli 2 screenshoty přes Win+Shift+S.
 - H30: Klikal jsi na „Obnovit poslední práci“? Scéna po startu byla kostka, nebo tvůj soubor? Napiš přibližný čas, sonda to pak dohledá.
 - Pozor: moje testy otevírají okna Chrome, když běží smyčka. Tvoje karta se pak hlásí jako skrytá (18:27).
+- Pozor: v 18:31 moje změna `main.js` přes vite obnovila tvou otevřenou kartu (relace `2zyry6`, od 18:23 bez akcí). Totéž se mohlo stát při pozdějších linkách (20:12). Neuložené změny by byly jen v `_autosave_prev.blend` (nabídka obnovení po startu). Promiň.
 
 **Predikce H31:** Pokud se v MP střídají staré snímky, 20 pohybů myši bez změny scény dá po doběhnutí vzorků víc než 1 různý obrázek. **Měření: neplatí**, vždy 1 obrázek (`scripts/h31_win.sh`, 4 běhy, kontrola citlivosti PASS). `window_backbuffer_color` je 1 textura, hypotéza „kruh 4 backbufferů“ neplatí.
 **Predikce H30:** Pokud to dělají naše klávesy nebo startup, tak v čisté kartě po kliknutí na MP bude snap/prop zapnuté. **Měření: neplatí** (`scripts/h30_win.sh`). Přenese se jen při obnově `_autosave_prev.blend`.
