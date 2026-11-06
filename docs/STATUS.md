@@ -14,6 +14,14 @@ Výsledek: 🟡 PC ✅ (regres 0 FAIL), iPad neověřeno; H31 a H30 NEJSOU oprav
 - Testy kostí: bone_bbone OCTAHEDRAL PASS, bone_miss 0 FAIL, bone_click 10/10, obj_click 8/8, arm_obj 12/12, rigify 21/9/21, bone_box PASS. Zmizel i včerejší FAIL `bone_box` bez `VIEW=hand`.
 - J1: `check('bl_pkg')` před opravou (True, False), po ní (True, True), i po 2. startu.
 
+- Cesty (21:45, `journey_win.sh all`, Chrome): 14/14 OK, 0 chyb konzole. addons, model, scene, uvmat, anim, sculpt, rig, files, gn, weights, gp, texpaint, edit2, ui. Desktop 5.2.3 ověřil jen počty v `model` a kouli, ne všechny cesty. `webkit_sim` ještě neexistuje (část A, od so 7. 11.).
+
+**Co dál**
+- So 7. 11.: `VELKA_ZKOUSKA.md` A1, A2, B1, B2.
+- J1 přenést do `ipad-5.3-wip`. Zjistit, proč `ui_fuzz` jednou nedoběhl a proč `seed_verify` hlásí 6 překladů.
+
+**Úklid:** viz níže, testy zastavené, dev server a tunel nechávám běžet (spustil je Lukáš).
+
 **Co nefunguje / není jisté**
 - H31 a H30 jsem nevyvolal, BLOCKED. Oprava není. `page.screenshot` nevidí výstup na monitor, takže chybu kompozitoru Chrome + NVIDIA nevylučuje (odhad).
 - První regres (20:02) měl `ui_fuzz` na timeoutu bez výsledku, druhý PASS. Příčina neznámá.
