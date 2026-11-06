@@ -1554,10 +1554,22 @@ def _open_tick():
     except Exception as e: print('OPEN_REQ failed', e)
     return 0.3
 bpy.app.timers.register(_open_tick, first_interval=1.0, persistent=True)`;
+/* H30 sonda (jen s telemetrií): každá změna snap/proportional jde do logu s posledními klávesami v telemetrii; zjistí příčinu, až se to stane Lukášovi. */
+const H30_PROBE_PY = `import bpy
+_h30 = {'v': None}
+def _h30_tick():
+    try:
+        ts = bpy.context.scene.tool_settings
+        v = (ts.use_snap, ts.use_proportional_edit, ts.use_proportional_edit_objects, bpy.data.filepath)
+        if v != _h30['v']:
+            _h30['v'] = v; print('H30_STATE snap=%d prop=%d prop_obj=%d file=%s' % v, flush=True)
+    except Exception: pass
+    return 0.5
+bpy.app.timers.register(_h30_tick, first_interval=1.0, persistent=True)`;
 const _mcp = mcpConfig(_qp);
 window.Module = {
   poolSize: POOL_N,
-  arguments: ["--factory-startup", "--python-expr", SHADOW_POOL_PY, "--python-expr", OPEN_REQ_PY, ...autoArgs(), ...mcpPyArgs(_mcp), ...(window.__BARGS || [])],
+  arguments: ["--factory-startup", "--python-expr", SHADOW_POOL_PY, "--python-expr", OPEN_REQ_PY, ...autoArgs(), ...mcpPyArgs(_mcp), ...(telEnabled ? ["--python-expr", H30_PROBE_PY] : []), ...(window.__BARGS || [])],
   canvas,
   print: (t) => { log(t); scan(t); },
   printErr: (t) => { log("[err] " + t); scan(t); },

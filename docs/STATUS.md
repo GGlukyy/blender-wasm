@@ -1,3 +1,7 @@
+# 6. 11. večer — H31 a H30 nereprodukované, sonda H30
+**Predikce H31:** Pokud se v MP střídají staré snímky, 20 pohybů myši bez změny scény dá po doběhnutí vzorků víc než 1 různý obrázek. **Měření: neplatí**, vždy 1 obrázek (`scripts/h31_win.sh`, 4 běhy, kontrola citlivosti PASS). `window_backbuffer_color` je 1 textura, hypotéza „kruh 4 backbufferů“ neplatí.
+**Predikce H30:** Pokud to dělají naše klávesy nebo startup, tak v čisté kartě po kliknutí na MP bude snap/prop zapnuté. **Měření: neplatí** (`scripts/h30_win.sh`). Přenese se jen při obnově `_autosave_prev.blend`.
+
 # 5. 11. 22:58 — výběr kostí podle tvaru + Mac Safari
 Výsledek: 🟡 PC ✅, regres jen částečně, iPad/Mac neověřeno
 
