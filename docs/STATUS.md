@@ -1,15 +1,39 @@
-# 6. 11. večer — H31 a H30 nereprodukované, sonda H30, H25d-c hotovo
-Výsledek: 🟡 PC ✅ H25d-c; H31 a H30 se na PC nepodařilo vyvolat
+# 6. 11. 21:45 — H25d-c hotovo, add-on Extensions opraven, H31 a H30 nereprodukované
+Výsledek: 🟡 PC ✅ (regres 0 FAIL), iPad neověřeno; H31 a H30 NEJSOU opravené
+
 **Co jsem udělal**
-- H25d-c: klik na tlusté tělo octahedral kosti vybere kost. Fork `ipad` da18923f, `BLENDER_REF`, `master` P39. Build je v `demo/public`.
-- H30: sonda v telemetrii. S `?tel=1` se každá změna snap/proportional zapíše jako `H30_STATE` (`master` P38).
-- H31, H30: nové testy `h31_win.sh`, `h30_win.sh`. Část D: `journey_win.sh` + `journey_desktop.py` (desktop 5.2.3 ze Steamu).
+- H25d-c: klik na tlusté tělo octahedral kosti vybere kost. Commit forku da18923f.
+- J1 (nový nález): add-on Extensions (`bl_pkg`) po každém startu spadl v `register()`, chyběl `_multiprocessing`. Desktop to nedělá. Opraveno jen v Pythonu.
+- H30: sonda v telemetrii. S `?tel=1` se každá změna snap/proportional zapíše jako `H30_STATE`.
+- J2: `regress_all.sh` teď hlásí timeout jako FAIL (dřív ho tiše přešel) a uklidí jen vlastní procesy.
+- Nové testy: `h31_win.sh`, `h30_win.sh`, `journey_win.sh` (14 cest, od teď v regresu), `journey_desktop.py`.
+- Pushnuto: fork `ipad` 1f31e88a, `BLENDER_REF`, `master` P38 až P40 + testy. Zip `out/itch_2026-11-06_2127.zip` (nahrává Lukáš).
+
+**Důkaz**
+- Regres po P40 (21:27): 59 sekcí, 0 FAIL, 0 ❌, 0 PAGEERROR, `ui_fuzz` PASS.
+- Testy kostí: bone_bbone OCTAHEDRAL PASS, bone_miss 0 FAIL, bone_click 10/10, obj_click 8/8, arm_obj 12/12, rigify 21/9/21, bone_box PASS. Zmizel i včerejší FAIL `bone_box` bez `VIEW=hand`.
+- J1: `check('bl_pkg')` před opravou (True, False), po ní (True, True), i po 2. startu.
+
+**Co nefunguje / není jisté**
+- H31 a H30 jsem nevyvolal, BLOCKED. Oprava není. `page.screenshot` nevidí výstup na monitor, takže chybu kompozitoru Chrome + NVIDIA nevylučuje (odhad).
+- První regres (20:02) měl `ui_fuzz` na timeoutu bez výsledku, druhý PASS. Příčina neznámá.
+- `seed_verify`: 6 překladů místo 2 (z toho 2 ve `wpaint`, zbytek nevím), nezkoumáno.
+- J1 není v `ipad-5.3-wip`. Vzdálené knihovny assetů (experimental) na webu dál nejdou.
+- Safari ani iPad jsem netestoval, všechno je z Chrome na PC.
+
+**Co otestovat na iPadu (podle důležitosti)**
+1. Hard reload, rig postavy, Pose mode: klik na tlusté tělo kosti vybere tu kost?
+2. Klik na kontrolku (kruh, kvádr) vybere ji? Klik trochu dál nevybere nic?
+3. Edit ▸ Preferences ▸ Get Extensions / Add-ons: vypadá to normálně? Jsou add-ony ještě 2× (H27)?
 
 **Otázky na Lukáše**
 - H31: Kde se to stalo (PC, nebo iPad)? Jaká scéna? Jsou ty obrázky starší pohledy kamery? Pošli 2 screenshoty přes Win+Shift+S.
 - H30: Klikal jsi na „Obnovit poslední práci“? Scéna po startu byla kostka, nebo tvůj soubor? Napiš přibližný čas, sonda to pak dohledá.
-- Pozor: moje testy otevírají okna Chrome, když běží smyčka. Tvoje karta se pak hlásí jako skrytá (18:27).
-- Pozor: v 18:31 moje změna `main.js` přes vite obnovila tvou otevřenou kartu (relace `2zyry6`, od 18:23 bez akcí). Totéž se mohlo stát při pozdějších linkách (20:12). Neuložené změny by byly jen v `_autosave_prev.blend` (nabídka obnovení po startu). Promiň.
+
+**Pozor**
+- V 18:31 moje změna `main.js` přes vite obnovila tvou otevřenou kartu (relace `2zyry6`, od 18:23 bez akcí). Totéž se mohlo stát při pozdějších linkách. Neuložené změny by byly jen v autosave (nabídka obnovení po startu, `_autosave_prev.blend`). Promiň.
+- Moje testy otevírají okna Chrome, když běží smyčka. Tvoje karta se pak hlásí jako skrytá.
+- Osiřelý `ui_fuzz` z prvního regresu běžel od 19:42 do 21:36 (mohl být vidět jako okno). Uklizeno.
 
 **Predikce H31:** Pokud se v MP střídají staré snímky, 20 pohybů myši bez změny scény dá po doběhnutí vzorků víc než 1 různý obrázek. **Měření: neplatí**, vždy 1 obrázek (`scripts/h31_win.sh`, 4 běhy, kontrola citlivosti PASS). `window_backbuffer_color` je 1 textura, hypotéza „kruh 4 backbufferů“ neplatí.
 **Predikce H30:** Pokud to dělají naše klávesy nebo startup, tak v čisté kartě po kliknutí na MP bude snap/prop zapnuté. **Měření: neplatí** (`scripts/h30_win.sh`). Přenese se jen při obnově `_autosave_prev.blend`.

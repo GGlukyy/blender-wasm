@@ -3,7 +3,9 @@ export IN_REGRESS=1  # povolí fuzz skripty s GUARDem
 # Celá regresní sada ve Windows Chrome (vyžaduje dev server :5173). Trvá ~25 min. Výstup: out/regress.log
 cd "$(dirname "$0")/.."
 L=out/regress.log; : > $L
-run() { echo "=== $1" | tee -a $L; shift; timeout 900 "$@" 2>&1 | tail -${TAILN:-6} | tee -a $L; }
+# Timeout zabije jen cmd.exe; node a Chrome testu zůstanou. Uklízet jen podle příkazové řádky (na PC běží i cizí node.exe).
+kill_test_procs() { powershell.exe -NoProfile -c "Get-CimInstance Win32_Process -Filter \"name='node.exe'\" | Where-Object { \$_.CommandLine -like '*_test*.mjs*' } | ForEach-Object { Stop-Process -Id \$_.ProcessId -Force }; Get-CimInstance Win32_Process -Filter \"name='chrome.exe'\" | Where-Object { \$_.CommandLine -like '*enable-unsafe-webgpu*' -and \$_.CommandLine -notlike '*--type=*' } | ForEach-Object { Stop-Process -Id \$_.ProcessId -Force }" >/dev/null 2>&1; }
+run() { echo "=== $1" | tee -a $L; shift; timeout ${RUN_TIMEOUT:-900} "$@" 2>&1 | tail -${TAILN:-6} | tee -a $L; if [ "${PIPESTATUS[0]}" = 124 ]; then echo "FAIL timeout ${RUN_TIMEOUT:-900} s: $*" | tee -a $L; kill_test_procs; fi; }
 TAILN=30 run parity scripts/parity_win.sh
 run ops scripts/ops_win.sh | grep -v PASS
 run undo scripts/undo_win.sh
@@ -58,6 +60,7 @@ TAILN=25 run ops_sweeps_extra scripts/ops_sweeps_extra_win.sh
 run sculpt_ops_sweep scripts/sculpt_ops_sweep_win.sh
 run paint_ops_sweep scripts/paint_ops_sweep_win.sh
 run lattice_ops_sweep scripts/lattice_ops_sweep_win.sh
+TAILN=20 run journey scripts/journey_win.sh
 run fuzz scripts/fuzz_win.sh
 run ui_fuzz scripts/ui_fuzz_win.sh
 run fuzz_obj scripts/fuzz_obj_win.sh
