@@ -19,6 +19,8 @@ Výsledek: 🟡 PC ✅ (prohlídka, parity), regres běží, iPad oprava zatím 
 - S opravou: prohlídka 48 kroků, 0 problémů, parity bez ❌.
 - T1: okno na x=-3000, prohlídka Chrome 75/75 za 274 s (dřív taky 274), `sim+ipad` 75/75, `bone_click` 10/10.
 
+- `regress_all` po P61 (`out/regress_p61.log`): 62 sekcí, 0 ❌, 0 PAGEERROR. Jeden FAIL = timeout `journey` 900 s, sada má teď 33 cest a dojela do `nodes`, žádná nevisela. Zbylých 8 cest zvlášť: OK. Celkem cesty 33/33 v Chrome (bez `j4`). Limit jen pro `journey` zvednut na 2400 s, asserty beze změny.
+
 **Co nefunguje / není jisté**
 - **Nevím, jestli to iPadu stačí.** Oprava bind groupy jen pustí, paměť se uvolní až po GC v Safari. Když to nestačí, další krok je přimět GC běžet častěji.
 - Moje hypotéza „WebKit drží paměť přes bind group" je z poznámky z 25. 10., přímo v Safari jsem ji neměřil.

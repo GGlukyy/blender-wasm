@@ -63,7 +63,7 @@ export DESKTOP=0; run objpick scripts/objpick_win.sh
 run h32 scripts/h32_win.sh
 run paint_ops_sweep scripts/paint_ops_sweep_win.sh
 run lattice_ops_sweep scripts/lattice_ops_sweep_win.sh
-TAILN=20 run journey scripts/journey_win.sh
+TAILN=20 RUN_TIMEOUT=2400 run journey scripts/journey_win.sh # >30 cest, 900 s nestačí (7. 11.)
 run fuzz scripts/fuzz_win.sh
 run ui_fuzz scripts/ui_fuzz_win.sh
 run fuzz_obj scripts/fuzz_obj_win.sh
