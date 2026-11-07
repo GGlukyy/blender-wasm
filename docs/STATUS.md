@@ -17,7 +17,7 @@ Výsledek: 🟡 PC ✅ (regres Chrome po H33: 0 FAIL), `webkit_sim` regres ješt
 - A1: `simcheck_win.sh`: S1 zreprodukována („9 storage buffers ... limit 8"), GP taky (`PIPE_THROW gpencil_antialiasing_stage_2`, jako iPad 3. 11.). S opravami 0 chyb, tah vidět.
 - B1: Chrome, `webkit_sim`, `webkit_sim&ipad=1`: 75 kroků, 0 problémů. Se zapnutou chybou S1: 3 kroky s chybou GPU.
 - U2: `u2_win.sh` PASS, skutečné kliky, screenshot kontrolován.
-- Regres po H33 (`out/regress_p51.log`): 59 sekcí, 0 FAIL, cesty 24/24. Běžel ještě se starým `bar`, ten je ověřen zvlášť.
+- Regres po H33 (`out/regress_p51.log`): 62 sekcí, 0 FAIL, cesty 24/24. Běžel ještě se starým `bar`, ten je ověřen zvlášť.
 
 **Co nefunguje / není jisté**
 - H32: `h32stress_win.sh` 30 startů + klik na MP bez pojistky: 0 výskytů. Robot ztrátu nevyvolal, takže nevím, kde se `mouseup` u tebe ztrácí. S `tel=1` to ukáže událost `h32_release`.

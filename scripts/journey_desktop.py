@@ -21,7 +21,7 @@ t.update_from_editmode(); print('DESK proportional moved', sum(abs(v.co.z - z) >
 bpy.ops.object.mode_set(mode='OBJECT')
 bpy.ops.wm.read_factory_settings(use_empty=False)
 bpy.ops.object.text_add(); t = bpy.context.object; print('DESK text', repr(t.data.body), t.type)
-bpy.ops.curve.primitive_bezier_curve_add(); c = bpy.context.object; bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.curve.select_all(action='DESELECT'); c.data.splines[0].bezier_points[-1].select_control_point = True; bpy.ops.curve.extrude_move(TRANSFORM_OT_translate={'value': (1, 0, 0)}); bpy.ops.object.mode_set(mode='OBJECT'); print('DESK curve pts', len(c.data.splines[0].bezier_points))
+bpy.ops.curve.primitive_bezier_curve_add(); c = bpy.context.object; bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.curve.select_all(action='SELECT'); bpy.ops.curve.extrude_move(TRANSFORM_OT_translate={'value': (1, 0, 0)}); bpy.ops.object.mode_set(mode='OBJECT'); print('DESK curve pts', len(c.data.splines[0].bezier_points))
 bpy.ops.object.convert(target='MESH'); print('DESK curve mesh v', len(bpy.context.object.data.vertices))
 bpy.ops.wm.read_factory_settings(use_empty=False)
 n = len(bpy.data.objects); bpy.ops.mesh.primitive_monkey_add(location=(0, 3, 0)); print('DESK monkey objs', n, '->', len(bpy.data.objects), 'v', len(bpy.context.object.data.vertices))
