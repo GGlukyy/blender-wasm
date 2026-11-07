@@ -366,6 +366,34 @@ const J = {
     await page.mouse.move(box.x + 1290, box.y + 330, { steps: 3 }); await wait(400); await page.keyboard.press("Control+a"); await wait(900); await check("Ctrl+A nad panelem = apply: 24 v", (s) => s.mods.length === 0 && s.v === 24);
     await page.keyboard.press("Control+z"); await wait(900); await check("Ctrl+Z vrátí apply", (s) => s.mods.length === 1 && s.v === 8);
   },
+  /* Preferences: web má jedno okno. Otevření přes Edit ▸ Preferences, přepnutí sekce, návrat, práce v pohledu dál. */
+  prefs: async ({ hover, check, cmd, page, wait, box, key }) => {
+    const areas = "eval:[a.type for a in bpy.context.window_manager.windows[0].screen.areas]", a0 = await cmd(areas), nw0 = await cmd("eval:len(bpy.context.window_manager.windows)");
+    await page.mouse.move(box.x + 75, box.y + 13, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 75, box.y + 13); await wait(700); await page.screenshot({ path: "out/jr_prefs_menu.png" });
+    await cmd("bpy.ops.screen.userpref_show()"); await wait(2000); await page.screenshot({ path: "out/jr_prefs_open.png" });
+    const a1 = await cmd(areas), nw1 = await cmd("eval:len(bpy.context.window_manager.windows)"); console.log("PREFS " + JSON.stringify([a0, a1, nw0, nw1]));
+    await page.keyboard.press("Escape"); await wait(1200); await page.screenshot({ path: "out/jr_prefs_esc.png" });
+    await check("Preferences přes celé okno, jedno okno", () => a1.length === 1 && a1[0] === "PREFERENCES" && nw1 === 1);
+    await page.mouse.move(box.x + 40, box.y + 271, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 40, box.y + 271); await wait(900); const sec = await cmd("eval:bpy.context.preferences.active_section"); await check(`klik na Themes (${sec})`, () => sec === "THEMES");
+    await page.mouse.move(box.x + 320, box.y + 13, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 320, box.y + 13); await wait(1500); const a3 = await cmd(areas); await check(`Back to Previous vrátí rozložení ${JSON.stringify(a3)}`, () => JSON.stringify(a3) === JSON.stringify(a0));
+    await hover(); await key("Tab", 700); await check("pohled dál reaguje: Tab = edit", (s) => s.mode === "EDIT_MESH"); await key("Tab", 700);
+  },
+  /* Nody v Shading: Shift+A + hledání, klik položí, G posune, X smaže, Ctrl+Z. */
+  nodes: async ({ check, cmd, page, wait, box, type, key, tab }) => {
+    await tab("Shading"); await wait(6000); const R = await cmd("eval:(lambda w: [[r.x, w.height - r.y - r.height, r.width, r.height] for a in w.screen.areas if a.type == 'NODE_EDITOR' for r in a.regions if r.type == 'WINDOW'][0])(bpy.context.window_manager.windows[0])");
+    const x = box.x + R[0] + R[2] * 0.25, y = box.y + R[1] + R[3] * 0.5, N = "eval:len(bpy.context.object.active_material.node_tree.nodes)", n0 = await cmd(N);
+    await page.mouse.move(x, y, { steps: 3 }); await wait(400); await page.keyboard.press("Shift+a"); await wait(700); await type("image tex"); await wait(500); await page.screenshot({ path: "out/jr_nodes_search.png" }); await key("Enter", 800); await page.mouse.move(x + 10, y + 10, { steps: 3 }); await wait(300); await page.mouse.click(x + 10, y + 10); await wait(900); await page.screenshot({ path: "out/jr_nodes_add.png" });
+    const n1 = await cmd(N); await check(`Shift+A přidá nod (${n0} -> ${n1})`, () => n1 === n0 + 1);
+    const pos = "eval:[round(v) for v in bpy.context.object.active_material.node_tree.nodes.active.location]", p0 = await cmd(pos); await key("g", 300); await page.mouse.move(x + 90, y + 40, { steps: 5 }); await wait(300); await page.mouse.click(x + 90, y + 40); await wait(700); const p1 = await cmd(pos); await check(`G posune nod ${JSON.stringify([p0, p1])}`, () => p1[0] !== p0[0]);
+    await key("x", 700); const n2 = await cmd(N); await check(`X smaže (${n2})`, () => n2 === n0); await page.keyboard.press("Control+z"); await wait(900); const n3 = await cmd(N); await check(`Ctrl+Z vrátí (${n3})`, () => n3 === n1);
+  },
+  /* Append a Link z jiného .blend (Python cesta, prohlížeč souborů testuje files). */
+  append: async ({ check, cmd, wait }) => {
+    await cmd("bpy.ops.mesh.primitive_monkey_add(location=(0,4,0)); bpy.context.object.name='Zdroj'"); await wait(600); await cmd("bpy.ops.wm.save_as_mainfile(filepath='/opfs/home/jr_src.blend')"); await wait(1500);
+    await cmd("bpy.ops.wm.read_homefile(app_template='', use_factory_startup=True)"); await wait(2500); await check("nový soubor", (s) => s.objs === 3);
+    await cmd("bpy.ops.wm.append(directory='/opfs/home/jr_src.blend/Object/', filename='Zdroj')"); await wait(1500); await check("Append přidá objekt", (s) => s.objs === 4); const v = await cmd("eval:len(bpy.data.objects['Zdroj'].data.vertices)"); await check(`mesh ${v} v (desktop 507)`, () => v === 507);
+    await cmd("bpy.data.objects.remove(bpy.data.objects['Zdroj']); bpy.ops.wm.link(directory='/opfs/home/jr_src.blend/Object/', filename='Zdroj')"); await wait(1500); const l = await cmd("eval:bool(bpy.data.objects['Zdroj'].library)"); await check(`Link: objekt z knihovny (${l})`, () => l === true);
+  },
   /* UI: F3 hledání, Modifier přes Shift+A menu v nodech není; rozdělení oblasti přes menu View, Preferences okno. */
   ui: async ({ hover, key, check, page, wait, type, tab }) => {
     await hover(); await key("F3", 700); await type("subdivide"); await wait(500); await page.keyboard.press("Escape"); await wait(300); await page.keyboard.press("Escape"); await wait(400); await check("F3 a Esc nezmění mód", (s) => s.mode === "OBJECT");

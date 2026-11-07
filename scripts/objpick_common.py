@@ -55,6 +55,14 @@ def pick():
             bpy.ops.view3d.select(location=(int(p.x), int(p.y)), deselect_all=True)
         sel = sorted(o.name for o in bpy.data.objects if o.select_get())
         out('PICK', name, 'chci=' + (want or '-'), 'je=' + (','.join(sel) or '-'))
+    # Box select: obdélník 20 px kolem bodu, vybírá se přes prázdný roh AABB jen na webu se starým kódem.
+    for name, co, want in [('Box_Tyc_stred', (15, 0, 0), 'Bar'), ('Box_Tyc_roh', (19.5, 0, -4), ''), ('Box_prazdno', (9, 0, 12), '')]:
+        p = view3d_utils.location_3d_to_region_2d(r, rv, co)
+        with bpy.context.temp_override(window=w, area=a, region=r):
+            bpy.ops.object.select_all(action='DESELECT')
+            bpy.ops.view3d.select_box(xmin=int(p.x) - 10, xmax=int(p.x) + 10, ymin=int(p.y) - 10, ymax=int(p.y) + 10, mode='SET')
+        sel = sorted(o.name for o in bpy.data.objects if o.select_get())
+        out('PICK', name, 'chci=' + (want or '-'), 'je=' + (','.join(sel) or '-'))
     a.spaces[0].shading.type = 'WIREFRAME'
     for name, co, want in WIRE:
         p = view3d_utils.location_3d_to_region_2d(r, rv, co)
