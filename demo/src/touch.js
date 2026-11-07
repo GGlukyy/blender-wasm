@@ -391,6 +391,7 @@ export function installTouch(canvas) {
   window.addEventListener("keyup", fixKey, true);
   window.__touchCodeFromKey = codeFromKey;
 
+  const kbdSeen = [];
   const showKeyboard = () => {
     let inp = document.getElementById("kbd-input");
     if (!inp) {
@@ -401,7 +402,19 @@ export function installTouch(canvas) {
       /* 16px+ font avoids iOS zoom-on-focus; nearly invisible but focusable. */
       inp.style.cssText = "position:fixed;left:0;bottom:0;width:1px;height:1px;opacity:.01;font-size:16px;border:0;padding:0;z-index:95";
       document.body.appendChild(inp);
-      inp.addEventListener("input", () => { inp.value = ""; });   /* keys go to Blender via keydown; keep the field empty */
+      /* Keys go to Blender via keydown; keep the field empty. Characters that arrive ONLY as text (iOS
+       * long-press accents č ř ž, autocorrect) have no keydown: send them as a code-less key carrying
+       * the character (GHOST takes it as text). Characters already seen as keydown are skipped. */
+      window.addEventListener("keydown", (e) => { if (document.activeElement === inp && e.key && [...e.key].length === 1) kbdSeen.push(e.key); }, true);
+      inp.addEventListener("input", (e) => {
+        const d = e.inputType === "insertText" || e.inputType === "insertReplacementText" ? e.data || "" : "";
+        for (const ch of d) {
+          const i = kbdSeen.indexOf(ch);
+          if (i >= 0) { kbdSeen.splice(0, i + 1); continue; }
+          for (const t of ["keydown", "keyup"]) window.dispatchEvent(new KeyboardEvent(t, { key: ch, code: "", bubbles: true, cancelable: true }));
+        }
+        kbdSeen.length = 0; inp.value = "";
+      });
     }
     inp.focus({ preventScroll: true });
   };

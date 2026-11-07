@@ -548,6 +548,21 @@ const J = {
     await hover(); await key("Control+Alt+q", 900); const q1 = await qv(); await page.screenshot({ path: "out/jr_keys2_quad.png" }); await check(`Ctrl+Alt+Q quad view (${q1}, 4 regiony jako rna_space.cc)`, () => q1 === 4);
     await hover(); await key("Control+Alt+q", 900); const q2 = await qv(); await check(`Ctrl+Alt+Q zpět (${q2})`, () => q2 === 0);
   },
+  /* 8. 11.: české znaky: psaní do pole (F2) a soubor s diakritikou v OPFS (uložit, otevřít, výpis). */
+  unicode: async ({ hover, key, check, cmd, page, wait }) => {
+    await hover(); await key("F2", 600); await page.keyboard.press("Control+a");
+    /* press() po znaku = keydown s key "č" jako skutečná česká klávesnice (type() u ne-US znaků posílá jen insertText bez klávesy) */
+    for (const c of "Kočička ŽÁÚ") { await page.keyboard.press(c === " " ? "Space" : c); await wait(120); } await wait(400); await key("Enter", 800);
+    await check("F2 + česká slova", (s) => s.ob === "Kočička ŽÁÚ");
+    const P = "/opfs/home/židle ěščř.blend";
+    await cmd(`bpy.ops.wm.save_as_mainfile(filepath=${JSON.stringify(P)})`); await wait(1500);
+    await check("uložit do souboru s diakritikou", (s) => s.file === P);
+    const ls = await cmd("eval:[n for n in os.listdir('/opfs/home') if n.endswith('.blend')]"); await check(`výpis /opfs/home (${JSON.stringify(ls)})`, () => ls && ls.includes("židle ěščř.blend"));
+    await cmd("bpy.ops.mesh.primitive_monkey_add()"); await wait(800); await check("přidaná opice", (s) => s.objs === 4);
+    await cmd(`bpy.ops.wm.open_mainfile(filepath=${JSON.stringify(P)})`); await wait(3000);
+    await check("otevřít soubor s diakritikou: 3 objekty, jméno", (s) => s.objs === 3 && s.file === P);
+    const nm = await cmd("eval:sorted(o.name for o in bpy.data.objects)"); await check(`jméno objektu přežilo uložení (${JSON.stringify(nm)})`, () => nm && nm.includes("Kočička ŽÁÚ"));
+  },
   /* 8. 11.: schránka. Ctrl+C/Ctrl+V v pohledu = copybuffer.blend v dočasné složce; Ctrl+C/Ctrl+V nad polem = textová schránka (GHOST). */
   clip: async ({ hover, key, check, cmd, page, wait, at }) => {
     await hover(); await key("Control+c", 900); await key("Control+v", 1200); await check("Ctrl+C, Ctrl+V v pohledu: kopie objektu", (s) => s.objs === 4 && s.ob === "Cube.001");
