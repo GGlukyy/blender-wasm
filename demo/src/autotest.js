@@ -1,8 +1,10 @@
 /* A1: `?auto=<scénář>` — stránka po startu sama provede scénář (iPad test bez Lukášových rukou).
  * Scénáře: light (MP + pohyb světla přes bpy), lightdrag (MP + G-tažení světla syntetickými myšími událostmi),
  * orbit (otáčení pohledu syntetickou myší), ws (projde všechny workspace, 6 s pauza, krok ws_<jméno> PŘED přepnutím), mp (jen MP a čekání 60 s).
+ * tour = prohlídka všeho, viz tour.js.
  * Python (timery) hlásí řádky "AUTO_*" do konzole; scan() v main.js je přepošle jako telEvent. */
 import { telEvent as _telEvent } from "./telemetry.js";
+import { TOUR_PY, tourRun, tourReply } from "./tour.js";
 const telEvent = (k, d) => { if (k === "auto_done") window.__AUTO_DONE = d.name; _telEvent(k, d); };
 
 const _q = new URLSearchParams(location.search);
@@ -113,6 +115,7 @@ def _sw():
     a.spaces[0].shading.type = t
     return 15.0
 _gated(lambda: bpy.app.timers.register(_sw, first_interval=3.0))`,
+  tour: PY_HEAD + TOUR_PY,
   mp: PY_HEAD + `
 _gated(lambda: (_mp(), bpy.app.timers.register(lambda: (_say('AUTO_DONE mp'), None)[1], first_interval=60.0)))`,
 };
@@ -173,6 +176,8 @@ export function autoStart() {
 export function autoScan(t) {
   if (!AUTO || !t.startsWith("AUTO_")) return;
   const s = t.trim();
+  if (s.startsWith("AUTO_TOUR_R ")) { tourReply(s.slice(12)); return; }
+  if (s === "AUTO_TOUR_READY") { tourRun(); return; }
   window.__AUTO_LOG = (window.__AUTO_LOG || []).concat(s);
   if (s === "AUTO_DRAG_READY") drag();
   else if (s === "AUTO_ORBIT_READY") orbit();

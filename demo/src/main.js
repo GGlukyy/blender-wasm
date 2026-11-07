@@ -884,7 +884,7 @@ let pickerBusy = false;
  * (itch.io runs the game from html-classic.itch.zone). When framed, behave like Safari/Firefox: file
  * <input> for Open (drop modal), blob download for Save. A button offers the full page in a new tab. */
 const IS_FRAMED = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
-const HAS_FSACCESS = !!window.showDirectoryPicker && !IS_FRAMED;
+const HAS_FSACCESS = !!window.showDirectoryPicker && !IS_FRAMED && new URLSearchParams(location.search).get("webkit_sim") !== "1"; /* A1: Safari File System Access nemá */
 if (IS_FRAMED) {
   const b = document.createElement("a");
   b.id = "open-new-window";
@@ -1564,7 +1564,7 @@ bpy.app.timers.register(_autosave, first_interval=_AS_EVERY, persistent=True)`;
  * → iPad 8, jinde 32. Přepsat ?pool=N. */
 const _isIpadUA = navigator.maxTouchPoints > 1 && /Macintosh|iPad/.test(navigator.userAgent);
 /* S1b: obchvaty chyb WebKitu platí pro Safari na Macu i iPadu; _isIpadUA dál řídí jen paměťová opatření (lite, pool, bp, memwarn). */
-const _isWebKit = /AppleWebKit/.test(navigator.userAgent) && !/Chrome|Chromium|CriOS|Edg|Firefox|FxiOS/.test(navigator.userAgent);
+const _isWebKit = _qp.get("webkit_sim") === "1" || /AppleWebKit/.test(navigator.userAgent) && !/Chrome|Chromium|CriOS|Edg|Firefox|FxiOS/.test(navigator.userAgent);
 const POOL_N = parseInt(_qp.get("pool") || (_isIpadUA ? "8" : "32"), 10) || 32;
 /* H29b: File ▸ Open of a single .blend skips Blender's file browser: JS writes the path to /tmp/open_req.txt, this timer
  * opens it; /tmp/dirty.txt tells JS whether the current scene has unsaved changes (JS asks before discarding). */
@@ -1597,10 +1597,27 @@ def _h30_tick():
     except Exception: pass
     return 0.5
 bpy.app.timers.register(_h30_tick, first_interval=1.0, persistent=True)`;
+/* U2: credit + zdroje natively in Blender (GPL: source links stay reachable), no HTML over the canvas. */
+const CREDIT_PY = `import bpy
+_WEB_LINKS = (
+    ("About Blender Web (unofficial)", "https://github.com/GGlukyy/blender-wasm#readme"),
+    ("GitHub: GGlukyy/blender-wasm", "https://github.com/GGlukyy/blender-wasm"),
+    ("itch.io: ggluki", "https://ggluki.itch.io/blender-web-unofficial-test"),
+    ("Source code (GPL): GGlukyy/blender", "https://github.com/GGlukyy/blender"),
+    ("Based on HeyPuter/blender-wasm", "https://github.com/heyputer/blender-wasm"),
+)
+def _web_status(self, context):
+    self.layout.operator("wm.url_open", text="Unofficial web port \u00b7 GGluki", emboss=False).url = _WEB_LINKS[1][1]
+def _web_help(self, context):
+    self.layout.separator()
+    for t, u in _WEB_LINKS:
+        self.layout.operator("wm.url_open", text=t, icon='URL').url = u
+bpy.types.STATUSBAR_HT_header.append(_web_status)
+bpy.types.TOPBAR_MT_help.append(_web_help)`;
 const _mcp = mcpConfig(_qp);
 window.Module = {
   poolSize: POOL_N,
-  arguments: ["--factory-startup", "--python-expr", SHADOW_POOL_PY, "--python-expr", OPEN_REQ_PY, ...autoArgs(), ...mcpPyArgs(_mcp), ...(telEnabled ? ["--python-expr", H30_PROBE_PY] : []), ...(window.__BARGS || [])],
+  arguments: ["--factory-startup", "--python-expr", SHADOW_POOL_PY, "--python-expr", OPEN_REQ_PY, "--python-expr", CREDIT_PY, ...autoArgs(), ...mcpPyArgs(_mcp), ...(telEnabled ? ["--python-expr", H30_PROBE_PY] : []), ...(window.__BARGS || [])],
   canvas,
   print: (t) => { log(t); scan(t); },
   printErr: (t) => { log("[err] " + t); scan(t); },
@@ -1766,6 +1783,21 @@ try {
     /* S1 (Mac Safari 5.11.): Safari vynucuje i nové limity `max{Storage,}*In{Fragment,Vertex}Stage` (výchozí 8),
      * které emdawnwebgpu (WGPULimits) neumí poslat -> EEVEE shader s 9 SSBO = neplatná pipeline, MP nic nekreslí.
      * Doplň je do requiredLimits z adapteru. Ověřeno v konzoli na Macu: s tímhle MP kreslí. Běží i ve workerech. */
+    /* A1 (VELKA_ZKOUSKA): ?webkit_sim=1 = omezení Safari v Chrome. Featury a limity adaptéru změřené na Macu a iPadu (telemetrie, 234 záznamů),
+     * jen to, co je v Safari HORŠÍ než v Chrome. Neumí chyby překladu WebKitu (např. location(115)). Testovací přepínač &sim_nos1=1 vrátí chybu S1. */
+    const simQ = globalThis.__PT_SEARCH || location.search;
+    const sim = /[?&]webkit_sim=1/.test(simQ), simNoS1 = sim && /[?&]sim_nos1=1/.test(simQ);
+    if (sim && globalThis.GPUAdapter && !GPUAdapter.prototype.__sim) {
+      const A = GPUAdapter.prototype; A.__sim = true;
+      const NO = new Set(["atomic-vec2u-min-max", "clip-distances", "dual-source-blending", "primitive-index", "subgroup-size-control", "subgroups",
+                          "texture-component-swizzle", "texture-compression-unaligned", "texture-formats-tier2"]);
+      const CAP = { maxBufferSize: 1073741824, maxStorageBufferBindingSize: 1073741824, maxColorAttachmentBytesPerSample: 64, maxSampledTexturesPerShaderStage: 44 };
+      if (simNoS1) CAP.maxStorageBuffersPerShaderStage = 8; /* Dawn In*Stage nevynucuje, chyba S1 jde vyvolat jen přes limit na stage */
+      const fd = Object.getOwnPropertyDescriptor(A, "features"), ld = Object.getOwnPropertyDescriptor(A, "limits");
+      Object.defineProperty(A, "features", { get() { return new Set([...fd.get.call(this)].filter((f) => !NO.has(f) && !f.startsWith("chromium-"))); } });
+      Object.defineProperty(A, "limits", { get() { const l = ld.get.call(this), o = {}; for (const k in l) o[k] = k in CAP ? Math.min(l[k], CAP[k]) : l[k]; return o; } });
+      console.log("WEBKIT_SIM on");
+    }
     if (globalThis.GPUAdapter && !GPUAdapter.prototype.__s1) {
       const A = GPUAdapter.prototype, orig = A.requestDevice;
       A.__s1 = true;
@@ -1774,7 +1806,7 @@ try {
         const r = Object.assign({}, d.requiredLimits || {});
         for (const k of ["maxStorageBuffersInFragmentStage", "maxStorageBuffersInVertexStage",
                          "maxStorageTexturesInFragmentStage", "maxStorageTexturesInVertexStage"])
-          if (k in this.limits && !(k in r)) r[k] = this.limits[k];
+          if (k in this.limits && !(k in r)) r[k] = simNoS1 ? 8 : this.limits[k];
         d.requiredLimits = r;
         return orig.call(this, d);
       };
@@ -1822,7 +1854,7 @@ try {
             if (def !== undefined) return `const ${name} : ${type} = ${def.trim()};`;
             return all;
           });
-        if (/\boverride\b/.test(code)) stats.leftover++;
+        if (/\boverride\b/.test(code)) { stats.leftover++; if (sim) console.log("WEBKIT_SIM_BAD override zůstal: '" + (desc.label || "?") + "'"); }
         stats.specialized++;
         mod = origCSM.call(dev, { ...desc, code });
         specCache.set(key, mod);
