@@ -21,7 +21,11 @@ Výsledek: 🟡 PC ✅ (prohlídka, parity), regres běží, iPad oprava zatím 
 
 - `regress_all` po P61 (`out/regress_p61.log`): 62 sekcí, 0 ❌, 0 PAGEERROR. Jeden FAIL = timeout `journey` 900 s, sada má teď 33 cest a dojela do `nodes`, žádná nevisela. Zbylých 8 cest zvlášť: OK. Celkem cesty 33/33 v Chrome (bez `j4`). Limit jen pro `journey` zvednut na 2400 s, asserty beze změny.
 
+- `regress_sim` (`webkit_sim=1`) po P62: 62 sekcí, 0 FAIL, 0 ❌, cesty 33/33.
+- Nová cesta `objops` (Shift+D, Alt+D, H, Alt+H, Ctrl+P, Alt+P, Ctrl+J, P L, M, Ctrl+Z): Chrome i `webkit_sim` OK, žádná chyba. Desktop 5.2.3 má stejné počty, web je 5.3 alpha, takže ne stejná verze.
+
 **Co nefunguje / není jisté**
+- iPad test jsem nabídl v pruhu, ~2 h nikdo neotevřel, `ipad_wait` skončil timeoutem. Pruh jsem vyčistil.
 - **Nevím, jestli to iPadu stačí.** Oprava bind groupy jen pustí, paměť se uvolní až po GC v Safari. Když to nestačí, další krok je přimět GC běžet častěji.
 - Moje hypotéza „WebKit drží paměť přes bind group" je z poznámky z 25. 10., přímo v Safari jsem ji neměřil.
 - Hypotéza „viewporty neviditelných workspace" na PC neplatí: 3 průchody, konec 3797 / 3834 / 3821 MB.

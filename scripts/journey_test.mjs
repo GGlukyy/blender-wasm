@@ -342,6 +342,40 @@ const J = {
     await page.keyboard.press("Control+z"); await wait(800); await check("Ctrl+Z vrátí křivku", (s) => s.type === "CURVE");
   },
   /* Přejmenování: F2 v pohledu, dvojklik v Outlineru, M nová kolekce, Ctrl+P parent, Ctrl+J join. */
+  /* Základní práce s objekty klávesami: Shift+D, Alt+D, Ctrl+J, P, H, Alt+H, Ctrl+P, Alt+P, M. Desktop 5.2.3: journey_desktop.py (DESK objops). */
+  objops: async ({ hover, key, check, cmd, page, wait, box }) => {
+    const meshes = "sum(o.type == 'MESH' for o in bpy.data.objects)";
+    await hover(); await key("Shift+d", 500); await key("Escape", 700);
+    await check("Shift+D + Esc: kopie na místě, vlastní mesh", (s) => s.objs === 4 && s.ob === "Cube.001" && s.loc[0] === 0);
+    const m0 = await cmd("eval:bpy.context.object.data.name"); await check(`Shift+D má vlastní mesh (${m0})`, () => m0 !== "Cube");
+    await key("Alt+d", 500); await key("Escape", 700);
+    await check("Alt+D + Esc: sdílený mesh", (s) => s.objs === 5 && s.ob === "Cube.002");
+    const users = await cmd("eval:bpy.context.object.data.users"); await check(`Alt+D users=${users}`, () => users === 2);
+    await key("h", 600); await check("H skryje", (s) => s.objs === 5);
+    const hid = await cmd("eval:bpy.data.objects['Cube.002'].visible_get()"); await check(`H skryl Cube.002 (${hid})`, () => hid === false);
+    await key("Alt+h", 600);
+    const back = await cmd("eval:bpy.data.objects['Cube.002'].visible_get()"); await check(`Alt+H vrátil (${back})`, () => back === true);
+    /* Dva objekty vybrané, aktivní rodič: Ctrl+P a první položka menu (Object) */
+    await cmd("[o.select_set(False) for o in bpy.data.objects]; bpy.data.objects['Cube.001'].select_set(True); bpy.data.objects['Cube'].select_set(True); bpy.context.view_layer.objects.active = bpy.data.objects['Cube']"); await wait(400);
+    await hover(); await key("Control+p", 600); await page.screenshot({ path: "out/jr_objops_parent.png" }); await key("Enter", 700);
+    const par = await cmd("eval:(bpy.data.objects['Cube.001'].parent.name if bpy.data.objects['Cube.001'].parent else None)"); await check(`Ctrl+P rodič=${par}`, () => par === "Cube");
+    await cmd("[o.select_set(False) for o in bpy.data.objects]; bpy.data.objects['Cube.001'].select_set(True); bpy.context.view_layer.objects.active = bpy.data.objects['Cube.001']"); await wait(400);
+    await hover(); await key("Alt+p", 600); await page.screenshot({ path: "out/jr_objops_clear.png" }); await key("Enter", 700);
+    const par2 = await cmd("eval:(bpy.data.objects['Cube.001'].parent.name if bpy.data.objects['Cube.001'].parent else None)"); await check(`Alt+P rodič=${par2}`, () => par2 === null);
+    /* Ctrl+J všech tří, pak v Edit módu P ▸ By Loose Parts je zase rozdělí */
+    await cmd("[o.select_set(o.type == 'MESH') for o in bpy.data.objects]; bpy.context.view_layer.objects.active = bpy.data.objects['Cube']"); await wait(400);
+    await hover(); await key("Control+j", 900); const m1 = await cmd("eval:" + meshes); await check(`Ctrl+J meshů=${m1}`, () => m1 === 1);
+    await check("po Ctrl+J 24 vrcholů", (s) => s.v === 24);
+    await key("Tab", 800); await key("a", 400); await key("p", 600); await page.screenshot({ path: "out/jr_objops_sep.png" }); await key("l", 1000); await key("Tab", 800);
+    const m2 = await cmd("eval:" + meshes); await check(`P L meshů=${m2}`, () => m2 === 3);
+    /* M ▸ + New Collection ▸ Enter */
+    const c0 = await cmd("eval:len(bpy.data.collections)");
+    await hover(); await key("m", 600);
+    /* menu se otevře u kurzoru, New Collection je pod ním (Search je první řádek): pozice ze screenshotu 1400×850 */
+    await page.mouse.move(box.x + 501, box.y + 423, { steps: 3 }); await wait(400); await page.screenshot({ path: "out/jr_objops_m.png" }); await page.mouse.down(); await wait(80); await page.mouse.up(); await wait(800); await page.screenshot({ path: "out/jr_objops_m2.png" }); await key("Enter", 500); await page.mouse.move(box.x + 473, box.y + 463, { steps: 3 }); await wait(400); await page.mouse.down(); await wait(80); await page.mouse.up(); await wait(900);
+    const c1 = await cmd("eval:len(bpy.data.collections)"); await check(`M nová kolekce ${c0} -> ${c1}`, () => c1 === c0 + 1);
+    await page.keyboard.press("Control+z"); await wait(900); const c2 = await cmd("eval:len(bpy.data.collections)"); await check(`Ctrl+Z kolekce ${c2}`, () => c2 === c0);
+  },
   rename: async ({ hover, key, type, check, cmd, page, wait, box }) => {
     await hover(); await key("F2", 500); await page.keyboard.press("Control+a"); await page.keyboard.type("Krabice"); await wait(300); await key("Enter", 700); await check("F2 přejmenuje", (s) => s.ob === "Krabice");
     const row = await cmd("eval:(lambda w: [[r.x, w.height - r.y - r.height, r.width, r.height] for a in w.screen.areas if a.type == 'OUTLINER' for r in a.regions if r.type == 'WINDOW'][0])(bpy.context.window_manager.windows[0])"); console.log("OUTLINER " + JSON.stringify(row));
