@@ -1,11 +1,11 @@
-# 7. 11. 20:35 — H35: Exact a Manifold boolean na webu (nový nález), H35 nad B3 níže
+# 7. 11. 21:58 — H35: Exact a Manifold boolean na webu (nový nález), B3 a T1 v bloku níže
 Výsledek: 🟡 PC ✅ (jen vybrané testy, regres běží), iPad neověřeno
 
 **Co jsem udělal**
 - **H35 (nový nález, jen web):** výchozí solver modifikátoru Boolean je Exact, ale web byl přeložený bez GMP a Manifold. Exact tiše běžel jako Float a Manifold taky. U překrytých kostek to dávalo rozbitý mesh.
 - Oprava: GMP 6.3.0 a Manifold v3.4.1 (stejné verze jako Blender) přeloženy do wasm, `WITH_GMP` a `WITH_MANIFOLD` zapnuty. V kódu Blenderu žádná změna.
 - Nové cesty: `objops`, `modtab`, `boolcop`.
-- Pushnuto: `master` P63, P64, P65. Zip `out/itch_2026-11-07_2008.zip` H35 **nemá**, má B3 a H34.
+- Pushnuto: `master` P63, P64, P65, P66. Nový zip `out/itch_2026-11-07_2148.zip` (B3, H34, H35), nahrává Lukáš. Vznikl před koncem regresu a bez `regress_sim`, zvaž to před nahráním.
 
 **Důkaz**
 - Predikce: pokud web tiše padá na Float, tak Exact = Float a build má GMP vypnuté. Měření: platí (`WITH_GMP=OFF`, stejná čísla).
@@ -14,12 +14,18 @@ Výsledek: 🟡 PC ✅ (jen vybrané testy, regres běží), iPad neověřeno
 - `blender.wasm.zst` 26,57 -> 26,80 MB.
 
 **Co nefunguje / není jisté**
-- Celý regres po H35 běží, výsledek níže, až doběhne. `regress_sim` po H35 se do 22:00 nevejde.
+- `regress_all` po H35 (`out/regress_p65.log`): do deadlinu 61 sekcí, 0 FAIL, 0 ❌, cesty 36/36 OK. Zastavil jsem ho ve 21:57 při `seed_verify`, ten výsledek nemám.
+- **`regress_sim` po H35 neběžel** (nevešel se). `objops` je ve `webkit_sim` ověřen jen na buildu bez H35, `modtab` a `boolcop` jen v Chrome. Pravidlo 3.3 tedy pro H35 splněno není: pusť ho jako první.
 - Web je 5.3 alpha, desktop 5.2.3, není to stejná verze.
 - Solver Manifold běží bez paralelismu (`MANIFOLD_PAR=OFF`, odhad: pomalejší na velkých meshích, neměřeno). Exact na webu může být na velkých meshích pomalý, neměřeno, na iPadu nezkoušeno.
 - Float je u překrytých kostek nestabilní i v desktopu 5.2.3: (24,5) (27,8) (27,6) mezi opakováními. Chyba původního Blenderu, můžeš nahlásit. Neopravuji.
 
-**Co otestovat na iPadu (po bloku B3 níže)**
+**Co dál**
+- `regress_sim.sh`. Podle iPadu B3: když prohlídka pořád padá, přimět GC běžet častěji.
+
+**Úklid:** testy zastavené, `pgrep -af "regress|fuzz|_win.sh|_test"` prázdné, `demo/public/ask.txt` smazaný. Dev server a tunel nechávám (spustil je Lukáš). `web/` dál netrackované, necommitoval jsem. `p2win/node.cmd` tam zůstává záměrně (T1). `out/.idle_stop` nezapisuji, položka 6 fronty není nikdy hotová. Starý Chrome PID 16832 jsem nechal, viz níže.
+
+**Co otestovat na iPadu (nejdřív B3 z bloku níže, pak tohle)**
 1. Kostka + druhá kostka posunutá o 1 v X, modifikátor Boolean na první, Union, solver Exact, pak Manifold. Čekám čistý tvar bez děr. Přepnutí solveru nesmí spadnout.
 
 # 7. 11. 17:15 — B3: proč iPad padá v prohlídce + oprava, T1 okna testů
