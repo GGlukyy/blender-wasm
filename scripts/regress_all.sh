@@ -58,7 +58,7 @@ run rna_signatures python3 scripts/check_rna_update_signatures.py
 run prefs_input scripts/prefs_input_win.sh
 TAILN=25 run ops_sweeps_extra scripts/ops_sweeps_extra_win.sh
 run sculpt_ops_sweep scripts/sculpt_ops_sweep_win.sh
-DESKTOP=0 run objpick scripts/objpick_win.sh
+export DESKTOP=0; run objpick scripts/objpick_win.sh
 run h32 scripts/h32_win.sh
 run paint_ops_sweep scripts/paint_ops_sweep_win.sh
 run lattice_ops_sweep scripts/lattice_ops_sweep_win.sh
