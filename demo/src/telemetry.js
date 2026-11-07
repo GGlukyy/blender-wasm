@@ -44,8 +44,12 @@ export function telAdapterLimits(a) {
 
 export function installTelemetry() {
   if (!telEnabled) return;
-  send({ kind: "start", url: location.search, dpr: devicePixelRatio, screen: [screen.width, screen.height], inner: [innerWidth, innerHeight], isolated: crossOriginIsolated, mem: navigator.deviceMemory || null });
+  /* B3: nav = reload bez pagehide předchozí relace (prev_clean false) => Safari načetlo stránku samo po pádu procesu */
+  let prev = null; try { prev = sessionStorage.getItem("tel_prev"); sessionStorage.setItem("tel_prev", sid); } catch (e) {}
+  send({ kind: "start", url: location.search, dpr: devicePixelRatio, screen: [screen.width, screen.height], inner: [innerWidth, innerHeight], isolated: crossOriginIsolated, mem: navigator.deviceMemory || null,
+    nav: (performance.getEntriesByType("navigation")[0] || {}).type, prev_sid: prev && prev.split(":")[0], prev_clean: !!prev && prev.endsWith(":bye") });
   try {
+    new BroadcastChannel("blender-pipe").onmessage = (e) => send({ kind: "pipe", ...e.data }, true);
     new BroadcastChannel("blender-perf").onmessage = (e) => { perf = e.data; };
     new BroadcastChannel("blender-gpuerr").onmessage = (e) => gpuErr(e.data);
     new BroadcastChannel("blender-gpumem").onmessage = (e) => {
@@ -108,6 +112,7 @@ export function installTelemetry() {
     send(o);
   };
   setInterval(() => { try { sample(); } catch (e) { send({ kind: 'sample_err', msg: String(e && e.stack || e).slice(0, 300) }); } flush(); }, /[?&]mp=1/.test(location.search) ? 1000 : 2000); // H22e: v MP po 1 s, ať je před případným pádem co nejnovější vzorek
+  addEventListener("pagehide", () => { try { sessionStorage.setItem("tel_prev", sid + ":bye"); } catch (e) {} });
   const bye = (why) => () => { sample(); send({ kind: why }, false); flush(); if (navigator.sendBeacon && queue.length === 0) navigator.sendBeacon("/__telemetry", JSON.stringify({ sid, kind: why + "_beacon", t: Math.round(performance.now() - t0) }) + "\n"); };
   addEventListener("pagehide", bye("pagehide"));
   document.addEventListener("visibilitychange", bye("visibility"));

@@ -8,6 +8,7 @@ import argparse, glob, json, os, time
 ap = argparse.ArgumentParser()
 ap.add_argument("--max-sec", type=int, default=540); ap.add_argument("--quiet-sec", type=int, default=25)
 ap.add_argument("--freeze-ms", type=int, default=30000); ap.add_argument("--dir", default="out/ipad")
+ap.add_argument("--url-has", default="", help="jen relace, jejichž URL to obsahuje (ostatní otevřené karty se ignorují)")
 a = ap.parse_args()
 start = time.time(); sess = {}  # sid -> dict
 def files(): return sorted(glob.glob(os.path.join(a.dir, "tel_*.jsonl")))
@@ -28,6 +29,7 @@ while time.time() - start < a.max_sec:
             except Exception: continue
             sid = r.get("sid")
             if not sid: continue
+            if a.url_has and sid not in sess and not (r.get("kind") == "start" and a.url_has in r.get("url", "") and "Chrome" not in r.get("ua", "")): continue
             d = sess.setdefault(sid, dict(url="", n=0, last_t=0, events=[], last="", seen=time.time(), hang=False))
             d["n"] += 1; d["seen"] = time.time(); d["last_t"] = r.get("t", d["last_t"]) or d["last_t"]
             k = r.get("kind")

@@ -1873,9 +1873,17 @@ try {
     let badMod = null;
     let noteCh = null; /* -> telemetry "gpuerr" record (visible in out/ipad even if the thread dies) */
     const note = (m) => { try { (noteCh || (noteCh = new BroadcastChannel("blender-gpuerr"))).postMessage(m); } catch (_) {} };
+    /* B3: stopa před každou pipeline. iPad může spadnout bez jediné chyby, tohle je pak poslední, co PC vidí. */
+    const crumbOn = /[?&]tel=1/.test(globalThis.__PT_SEARCH || location.search);
+    let crumbCh = null;
+    const crumb = (d) => { try {
+      const vb = ((d.vertex && d.vertex.buffers) || []).map((b) => b ? b.arrayStride + ":" + [...b.attributes].map((a) => a.shaderLocation + "=" + a.format).join(",") : "-").join("|");
+      (crumbCh || (crumbCh = new BroadcastChannel("blender-pipe"))).postMessage({ label: d.label, vb, n: stats.pipes });
+    } catch (_) {} };
     P.createRenderPipeline = function (d) {
       stats.pipes++;
       try {
+        if (crumbOn) crumb(d);
         specialize(this, d.vertex); specialize(this, d.fragment);
         const t = d.fragment && d.fragment.targets;
         if (t) {
