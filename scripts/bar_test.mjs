@@ -12,7 +12,7 @@ def probe():
     return 0.4
 bpy.app.timers.register(probe, first_interval=5.0)`;
 const browser = await chromium.launch({ headless: false, executablePath: process.env.CHROME, args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
-const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
+const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 }, hasTouch: true })).newPage();
 let last = ""; let errs = 0;
 page.on("pageerror", (e) => { errs++; console.log("PAGEERROR", String(e).slice(0, 200)); });
 page.on("console", (m) => { const t = m.text(); const i = t.indexOf("BPROBE"); if (i >= 0) last = t.slice(i + 7); });
@@ -25,7 +25,7 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
 await wait(8000); await page.keyboard.press("Escape"); await wait(800);
 await page.mouse.move(600, 400); await wait(300);
 const g = async () => { await wait(1100); const m = last.match(/mode=(\S+) nv=(\d+) play=(\d) hide=(\d) anim=(\d) frame=(\d+)/); return m ? { mode: m[1], nv: +m[2], play: +m[3], hide: +m[4], anim: +m[5], frame: +m[6] } : {}; };
-const tap = async (label) => { await page.locator("#touchbar button", { hasText: new RegExp("^" + label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "$") }).first().click(); await wait(250); await page.mouse.move(600, 400); };
+const tap = async (label) => { await page.locator("#touchbar button", { hasText: new RegExp("^" + label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "$") }).first().tap(); await wait(250); await page.mouse.move(600, 400); };
 let fail = 0; const check = (n, ok, x = "") => { console.log(`${ok ? "PASS" : "FAIL"} ${n} ${x}`); if (!ok) fail++; };
 await tap("⋯");
 const s0 = await g();
@@ -34,7 +34,7 @@ await tap("Space"); await wait(1500); const s2 = await g(); check("Space spustí
 await tap("Space"); const s3 = await g(); check("Space zastaví", s3.play === 0, JSON.stringify(s3));
 await tap("H"); const s4 = await g(); check("H skryje objekt", s4.hide === 1, JSON.stringify(s4));
 await page.keyboard.press("Alt+h"); await wait(500); await page.keyboard.press("Escape");
-await page.locator("#touchbar button", { hasText: /^Tab$/ }).click(); await wait(500);
+await page.locator("#touchbar button", { hasText: /^Tab$/ }).tap(); await wait(500);
 await tap("3"); await tap("A");
 const e0 = await g(); check("edit mode", e0.mode === "EDIT", JSON.stringify(e0));
 await tap("E"); await wait(300); await page.mouse.move(650, 380, { steps: 5 }); await tap("Enter");

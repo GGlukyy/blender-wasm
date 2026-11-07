@@ -5,7 +5,8 @@ cd "$(dirname "$0")/.."
 L=${REGRESS_LOG:-out/regress.log}; : > $L
 # Timeout zabije jen cmd.exe; node a Chrome testu zůstanou. Uklízet jen podle příkazové řádky (na PC běží i cizí node.exe).
 kill_test_procs() { powershell.exe -NoProfile -c "Get-CimInstance Win32_Process -Filter \"name='node.exe'\" | Where-Object { \$_.CommandLine -like '*_test*.mjs*' } | ForEach-Object { Stop-Process -Id \$_.ProcessId -Force }; Get-CimInstance Win32_Process -Filter \"name='chrome.exe'\" | Where-Object { \$_.CommandLine -like '*enable-unsafe-webgpu*' -and \$_.CommandLine -notlike '*--type=*' } | ForEach-Object { Stop-Process -Id \$_.ProcessId -Force }" >/dev/null 2>&1; }
-run() { echo "=== $1" | tee -a $L; shift; timeout ${RUN_TIMEOUT:-900} "$@" 2>&1 | tail -${TAILN:-6} | tee -a $L; if [ "${PIPESTATUS[0]}" = 124 ]; then echo "FAIL timeout ${RUN_TIMEOUT:-900} s: $*" | tee -a $L; kill_test_procs; fi; }
+# Spadlý node (nezachycená výjimka) se dřív tvářil jako úspěch: `bar` takhle padal od 3. 11. a nikdo to neviděl.
+run() { echo "=== $1" | tee -a $L; shift; local o; o=$(mktemp); timeout ${RUN_TIMEOUT:-900} "$@" > "$o" 2>&1; local rc=$?; tail -${TAILN:-6} "$o" | tee -a $L; if [ "$rc" = 124 ]; then echo "FAIL timeout ${RUN_TIMEOUT:-900} s: $*" | tee -a $L; kill_test_procs; elif grep -q "^Node.js v\|triggerUncaughtException" "$o"; then echo "FAIL test spadl: $*" | tee -a $L; fi; rm -f "$o"; }
 TAILN=30 run parity scripts/parity_win.sh
 run ops scripts/ops_win.sh | grep -v PASS
 run undo scripts/undo_win.sh

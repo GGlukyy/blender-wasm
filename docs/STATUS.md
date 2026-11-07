@@ -1,7 +1,45 @@
-# 7. 11. noc — běží (smyčka, deadline 09:00)
-**Predikce H32:** Pokud Blender po ztraceném `mouseup` zůstane v drag-toggle (`handler_region_drag_toggle`, zámek osy Y v hlavičce, BLOCKING), pak po stisku na MP, uvolnění mimo canvas a vodorovném pohybu (bez tlačítka) se změní shading a/nebo Snap/Proportional. Měření: `scripts/h32_win.sh`.
-**Predikce H33:** Pokud je příčina AABB ve `cpu_pick_fallback`, pak test paprskem proti trojúhelníkům meshe dá v `objpick_win.sh` 8/8 jako desktop. Měření před opravou: desktop 8/8, web 5/8.
-**Fakt z telemetrie:** sonda H30 chytila výskyt: relace `5t7t2k` (7. 11., Windows Chrome), LMB 58150 ms, `H30_STATE snap=1 prop=0 prop_obj=1` nejpozději v 62001 ms, soubor prázdný (žádná obnova autosave). Hypotéza „jen z autosave" tím neplatí.
+# 7. 11. 06:40 — průběžně: H32, U2, A1, B1, B2 a H33 (nový nález)
+Výsledek: 🟡 PC ✅ (regres Chrome po H33: 0 FAIL), `webkit_sim` regres ještě běží, iPad neověřeno
+
+**Co jsem udělal**
+- H32 pojistka: ztracený `mouseup` se dopošle Blenderu. Mechanismus potvrzen, přesné místo ztráty u tebe NEZNÁM (viz níže).
+- U2: odznak pryč. Vpravo ve stavové liště `Unofficial web port · GGluki`, v Help 5 odkazů.
+- A1: `?webkit_sim=1` = limity a featury Safari z telemetrie, v Chrome.
+- B1, B2: prohlídka `?auto=tour&tel=1` (75 kroků, ~5 min) + `scripts/tour_report.py`.
+- **H33 (nový nález cesty `select`): výběr objektu klikem podle bounding boxu.** Objekt uvnitř většího (nábytek v pokoji) nešel vybrat, klik do prázdného rohu vybral šikmý objekt. Teď mesh podle trojúhelníků, kamera, světlo a empty podle tvaru.
+- Cesty navíc: text3d, pie, select, f12, script, curve, rename.
+- `regress_all` teď hlásí spadlý test jako FAIL. **Pozor: `bar` padal od G1 (3. 11.) a regres ho hlásil jako OK. Starší „0 FAIL" tuhle sekci nepokrývaly.** Chyba byla v testu (ovládal lištu myší, E zapnul Pointer Lock), test teď používá dotyk: PASS.
+- Pushnuto: fork `ipad` 2bbe06a6, `ipad-5.3-wip` 77e849e9 (J1, nepřeloženo a netestováno), `master` po regresi.
+
+**Důkaz**
+- H32: `h32_win.sh` bez opravy 2 FAIL, stav `snap=1 prop=0 prop_obj=1`, stejný jako sonda v tvé relaci `5t7t2k` (žádný autosave). S opravou 4 PASS, záměrný drag-toggle dál funguje.
+- H33: `objpick_win.sh` desktop 5.2.3 15/15, web před opravou 3 FAIL z prvních 8, po ní 15/15. bone_click 10/10, obj_click 8/8, arm_obj 12/12, bone_box, bone_miss PASS.
+- A1: `simcheck_win.sh`: S1 zreprodukována („9 storage buffers ... limit 8"), GP taky (`PIPE_THROW gpencil_antialiasing_stage_2`, jako iPad 3. 11.). S opravami 0 chyb, tah vidět.
+- B1: Chrome, `webkit_sim`, `webkit_sim&ipad=1`: 75 kroků, 0 problémů. Se zapnutou chybou S1: 3 kroky s chybou GPU.
+- U2: `u2_win.sh` PASS, skutečné kliky, screenshot kontrolován.
+- Regres po H33 (`out/regress_p51.log`): 59 sekcí, 0 FAIL, cesty 24/24. Běžel ještě se starým `bar`, ten je ověřen zvlášť.
+
+**Co nefunguje / není jisté**
+- H32: `h32stress_win.sh` 30 startů + klik na MP bez pojistky: 0 výskytů. Robot ztrátu nevyvolal, takže nevím, kde se `mouseup` u tebe ztrácí. S `tel=1` to ukáže událost `h32_release`.
+- H31 (střídání obrázků): sedí na stejný mechanismus (odhad), neověřeno.
+- J3: `prefs_sweep` jednou spadl `memory access out of bounds`, pak 7× PASS. Příčina neznámá.
+- H33: armatura v Object módu, lattice, metaball, GP, křivky bez objemu dál podle bounding boxu.
+- `webkit_sim` neumí chyby překladu WebKitu (např. `location(115)`). Cmd v prohlídce nejde.
+- Na `objpick` bylo potřeba otevřít desktop Blender v okně (krátce, spustil jsem ho já).
+
+**Co otestovat na iPadu (podle důležitosti)**
+1. Otevři `…/?auto=tour&tel=1` a nech běžet ~5 min bez klikání. Pak mi řekni, ať pustím `tour_report.py`.
+2. Rendered/MP po startu, hýbej myší nebo prstem: přepíná se něco samo? (H32)
+3. Scéna s objektem uvnitř většího: klik vybere ten menší?
+4. Help ▸ odkaz: otevře se? (Safari může `window.open` blokovat.)
+5. Stavová lišta: nepřekrývá text lišta kláves?
+
+**Co dál**
+- Doběhnout A2 (`regress_sim.sh`), nálezy do BACKLOGu. Další cesty část D.
+
+**Predikce (splněné)**
+- H32: Pokud Blender po ztraceném `mouseup` zůstane v drag-toggle, po uvolnění mimo canvas a vodorovném pohybu se přepne hlavička. Měření: platí.
+- H33: Pokud je příčina AABB, test proti trojúhelníkům dá 8/8. Měření: platí, navíc wireframe jen hrany.
 
 # 6. 11. 21:58 — tři nové cesty (donut, sculpt2, anim2), žádná nová chyba
 Výsledek: 🟡 PC ✅ (jen `donut`, `sculpt2`, `anim2`), iPad neověřeno
