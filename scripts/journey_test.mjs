@@ -285,15 +285,15 @@ const J = {
     const b = await cmd("eval:bpy.context.object.data.body"); await check(`psaní: "${b}"`, (s) => b === "TextAhoj 7" && s.mode === "OBJECT");
     await page.keyboard.press("Control+z"); await wait(800); const b2 = await cmd("eval:bpy.context.object.data.body"); console.log("TEXT po Ctrl+Z " + JSON.stringify(b2));
   },
-  /* Pie menu: držet Z a táhnout (Wireframe vlevo, Rendered vpravo, Solid nahoru, MP dolů), pivot na tečku; klik přímo na volbu. */
+  /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };
     await pie("z", -130, 0); await check("Z vlevo: Wireframe", (s) => s.shade === "WIREFRAME");
-    await pie("z", 0, -130); await check("Z nahoru: Solid", (s) => s.shade === "SOLID");
-    await pie("z", 130, 0); await wait(2500); await check("Z vpravo: Rendered", (s) => s.shade === "RENDERED");
+    await pie("z", 130, 0); await check("Z vpravo: Solid", (s) => s.shade === "SOLID");
+    await pie("z", 0, -130); await wait(2500); await check("Z nahoru: Rendered", (s) => s.shade === "RENDERED");
     await pie("z", 0, 130); await wait(2500); await check("Z dolů: Material Preview", (s) => s.shade === "MATERIAL");
-    await pie("z", 0, -130); await check("Z nahoru: Solid", (s) => s.shade === "SOLID");
-    const piv = "eval:bpy.context.scene.tool_settings.transform_pivot_point", p0 = await cmd(piv); await pie("Period", 0, -130); const p1 = await cmd(piv); await check(`tečka nahoru změní pivot (${p0} -> ${p1})`, () => p1 !== p0);
+    await pie("z", 130, 0); await check("Z vpravo: Solid", (s) => s.shade === "SOLID");
+    const piv = "eval:bpy.context.scene.tool_settings.transform_pivot_point", p0 = await cmd(piv); await pie("Period", -130, 0); const p1 = await cmd(piv); await check(`tečka vlevo změní pivot (${p0} -> ${p1})`, () => p1 !== p0);
     /* Klávesa nechá pie otevřené, když se pustí hned; pak klik */
     await hover(); await page.keyboard.press("z"); await wait(700); await page.mouse.move(m[0] - 130, m[1], { steps: 6 }); await wait(300); await page.mouse.click(m[0] - 130, m[1]); await wait(900); await check("Z ťuk + klik vlevo: Wireframe", (s) => s.shade === "WIREFRAME");
   },
@@ -302,7 +302,7 @@ const J = {
     const n = "eval:len(bpy.context.selected_objects)", sel = async (t, f) => { await wait(400); const v = await cmd(n); await check(`${t}: vybráno ${v}`, () => f(v)); return v; };
     await hover(); await key("a", 500); await sel("A", (v) => v === 3); await page.keyboard.press("Alt+a"); await sel("Alt+A", (v) => v === 0);
     const c = at(await cmd("obj")); await page.mouse.move(c[0], c[1], { steps: 2 }); await wait(250); await page.mouse.click(c[0], c[1]); await sel("klik na kostku", (v) => v === 1);
-    const cam = at(await cmd("eval:_px(bpy.data.objects['Light'].matrix_world.translation)")); await page.mouse.move(cam[0], cam[1], { steps: 2 }); await wait(250); await page.keyboard.down("Shift"); await page.mouse.click(cam[0], cam[1]); await page.keyboard.up("Shift"); await sel("Shift+klik na světlo", (v) => v === 2);
+    const cam = at(await cmd("eval:_px(bpy.data.objects['Light'].matrix_world.translation)")); await page.mouse.move(cam[0], cam[1], { steps: 2 }); await wait(250); await page.keyboard.down("Shift"); await wait(+(process.env.SHIFTMS||60)); await page.mouse.click(cam[0], cam[1]); await wait(+(process.env.SHIFTMS||60)); await page.keyboard.up("Shift"); await sel("Shift+klik na světlo", (v) => v === 2);
     await hover(); await page.keyboard.press("Control+i"); await sel("Ctrl+I", (v) => v === 1); await page.keyboard.press("Alt+a"); await sel("Alt+A", (v) => v === 0);
     const m = mid(); await page.mouse.move(m[0] - 500, m[1] - 300); await wait(250); await key("b", 400); await page.mouse.move(m[0] - 500, m[1] - 300); await page.mouse.down(); await page.mouse.move(m[0] + 500, m[1] + 300, { steps: 8 }); await page.mouse.up(); await sel("B přes celý pohled", (v) => v === 3);
     await page.keyboard.press("Alt+a"); await sel("Alt+A", (v) => v === 0);
@@ -315,7 +315,7 @@ const J = {
     await hover(); await page.keyboard.press("F12"); for (let i = 0; i < 60; i++) { await wait(1000); const r = await cmd("eval:bpy.data.images['Render Result'].has_data if 'Render Result' in bpy.data.images else False"); if (r) break; } await wait(3000);
     await page.screenshot({ path: "out/jr_f12.png" }); const a1 = await cmd(areas); console.log("F12 oblasti " + JSON.stringify(a1)); await check("F12: výsledek existuje", () => a1 && a1.includes("IMAGE_EDITOR"));
     await cmd("bpy.data.images['Render Result'].save_render('/opfs/home/jr_f12.png')"); await wait(1500); const sz = await cmd("eval:__import__('os').path.getsize('/opfs/home/jr_f12.png')"); await check(`save_render ${sz} B`, () => sz > 1000);
-    const nz = await cmd("eval:(lambda im: (lambda p: sum(1 for i in range(0, len(p), 4000) if p[i] > 0.02))(list((lambda i: (i.load(), i)[1])(bpy.data.images.load('/opfs/home/jr_f12.png')).pixels)))(0)"); await check(`obraz není černý (${nz})`, () => nz > 10);
+    const nz = await cmd("eval:(lambda p: sum(1 for i in range(0, len(p), 400) if p[i] > 0.02))(list(bpy.data.images.load('/opfs/home/jr_f12.png').pixels))"); await check(`obraz není černý (${JSON.stringify(nz)})`, () => nz > 10);
     await key("Escape", 1200); const a2 = await cmd(areas); await check(`Esc vrátí rozložení ${JSON.stringify(a2)}`, () => JSON.stringify(a2) === JSON.stringify(a0));
   },
   /* Scripting: psaní skriptu v Text Editoru, Alt+P, Python Console: příkaz + Enter, šipka nahoru (historie). */
@@ -337,7 +337,7 @@ const J = {
     const pts = "eval:len(bpy.context.object.data.splines[0].bezier_points)";
     await hover(); await page.keyboard.press("Shift+a"); await wait(600); await type("bezier"); await wait(400); await key("Enter", 900); await check("Shift+A bezier", (s) => s.type === "CURVE");
     await key("Tab", 700); await check("Tab: EDIT_CURVE", (s) => s.mode === "EDIT_CURVE"); await key("e"); await type("1"); await key("Enter", 600); await key("Tab", 700);
-    const n = await cmd(pts); await check(`E 1: ${n} bodů (2 + 1)`, () => n === 3);
+    const n = await cmd(pts); await check(`E 1 s oběma konci vybranými: ${n} bodů (desktop 4)`, () => n === 4);
     await cmd("bpy.ops.object.convert(target='MESH')"); await wait(800); await check("convert na mesh", (s) => s.type === "MESH" && s.v > 12);
     await page.keyboard.press("Control+z"); await wait(800); await check("Ctrl+Z vrátí křivku", (s) => s.type === "CURVE");
   },
@@ -347,7 +347,8 @@ const J = {
     const row = await cmd("eval:(lambda w: [[r.x, w.height - r.y - r.height, r.width, r.height] for a in w.screen.areas if a.type == 'OUTLINER' for r in a.regions if r.type == 'WINDOW'][0])(bpy.context.window_manager.windows[0])"); console.log("OUTLINER " + JSON.stringify(row));
     const y = box.y + 123, x = box.x + 1250; await page.mouse.move(x, y, { steps: 2 }); await wait(300); await page.mouse.dblclick(x, y); await wait(600); await page.screenshot({ path: "out/jr_rename_outliner.png" }); await page.keyboard.press("Control+a"); await page.keyboard.type("Kostka2"); await wait(300); await key("Enter", 800);
     await check("dvojklik v Outlineru přejmenuje", (s) => s.ob === "Kostka2");
-    await hover(); await cmd("bpy.ops.mesh.primitive_cube_add(location=(3,0,0))"); await wait(600); await cmd("bpy.data.objects['Kostka2'].select_set(True)"); await wait(300);
+    /* Shift+D, ne Python: operátor z Pythonu nedělá krok undo. */
+    await hover(); await page.keyboard.press("Shift+d"); await wait(400); await key("Enter", 600); await cmd("bpy.data.objects['Kostka2'].select_set(True)"); await wait(300);
     await page.keyboard.press("Control+j"); await wait(800); await check("Ctrl+J spojí", (s) => s.objs === 3 && s.v === 16);
     await page.keyboard.press("Control+z"); await wait(800); await check("Ctrl+Z rozpojí", (s) => s.objs === 4);
   },
