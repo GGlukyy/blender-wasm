@@ -565,6 +565,19 @@ const J = {
     await check("otevřít soubor s diakritikou: 3 objekty, jméno", (s) => s.objs === 3 && s.file === P);
     const nm = await cmd("eval:sorted(o.name for o in bpy.data.objects)"); await check(`jméno objektu přežilo uložení (${JSON.stringify(nm)})`, () => nm && nm.includes("Kočička řežů"));
   },
+  /* 8. 11.: výrazy v číselných polích (Python): 1+2, jednotky 10cm, 90 ve stupních, 2*pi. Desktop: stejné hodnoty. */
+  expr: async ({ hover, key, check, cmd, page, wait, at }) => {
+    await hover(); await key("n", 900);
+    const fx = await cmd("eval:(lambda w: [[r.x, w.height - r.y - r.height, r.width, r.height] for a in w.screen.areas if a.type == 'VIEW_3D' for r in a.regions if r.type == 'UI'][0])(bpy.context.window_manager.windows[0])");
+    const put = async (dy, txt) => { const [x, y] = at([fx[0] + fx[2] * 0.62, fx[1] + dy]); await page.mouse.move(x, y, { steps: 2 }); await wait(300); await page.mouse.dblclick(x, y); await wait(500);
+      await page.keyboard.press("Control+a"); await page.keyboard.type(txt, { delay: 60 }); await wait(300); await page.keyboard.press("Enter"); await wait(800); };
+    await put(64, "1+2"); await check("Location X = 1+2", (s) => s.loc[0] === 3);
+    await put(84, "10cm"); await check("Location Y = 10cm", (s) => s.loc[1] === 0.1);
+    await put(104, "-2*0.25"); await check("Location Z = -2*0.25", (s) => s.loc[2] === -0.5);
+    await put(146, "90"); await check("Rotation X = 90° (1.571 rad)", (s) => s.rot[0] === 1.571);
+    await put(250, "2*pi/pi"); await check("Scale X = 2*pi/pi", (s) => s.scale[0] === 2);
+    await page.screenshot({ path: "out/jr_expr.png" });
+  },
   /* 8. 11.: schránka. Ctrl+C/Ctrl+V v pohledu = copybuffer.blend v dočasné složce; Ctrl+C/Ctrl+V nad polem = textová schránka (GHOST). */
   clip: async ({ hover, key, check, cmd, page, wait, at }) => {
     await hover(); await key("Control+c", 900); await key("Control+v", 1200); await check("Ctrl+C, Ctrl+V v pohledu: kopie objektu", (s) => s.objs === 4 && s.ob === "Cube.001");
