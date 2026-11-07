@@ -352,6 +352,20 @@ const J = {
     await page.keyboard.press("Control+j"); await wait(800); await check("Ctrl+J spojí", (s) => s.objs === 3 && s.v === 16);
     await page.keyboard.press("Control+z"); await wait(800); await check("Ctrl+Z rozpojí", (s) => s.objs === 4);
   },
+  /* Properties klikáním: Add Modifier + hledání v menu, Ctrl+A na panelu, kontextové menu v pohledu (Shade Smooth), hodnota dvojklikem a tažením. Desktop: bevel kostky 24 v. */
+  modui: async ({ check, cmd, page, wait, box, mid, type, key }) => {
+    const c = async (x, y, ms = 700) => { await page.mouse.move(box.x + x, box.y + y, { steps: 3 }); await wait(300); await page.mouse.click(box.x + x, box.y + y); await wait(ms); };
+    const m = mid(); await page.mouse.move(m[0], m[1] + 10, { steps: 2 }); await wait(300); await page.mouse.click(m[0], m[1] + 10, { button: "right" }); await wait(800); await page.mouse.click(m[0], m[1] + 10); await wait(800);
+    const sm = await cmd("eval:bpy.context.object.data.polygons[0].use_smooth"); await check(`kontextové menu: první položka Shade Smooth (${sm})`, () => sm === true);
+    await c(1167, 442, 900); const fld = [1304, 318];
+    await page.mouse.move(box.x + fld[0], box.y + fld[1], { steps: 3 }); await wait(300); await page.mouse.dblclick(box.x + fld[0], box.y + fld[1]); await wait(600); await page.keyboard.press("Control+a"); await type("2.5"); await key("Enter", 700); await check("Location X dvojklik + 2.5", (s) => s.loc[0] === 2.5);
+    await page.mouse.move(box.x + fld[0], box.y + fld[1]); await wait(300); await page.mouse.down(); await page.mouse.move(box.x + fld[0] + 60, box.y + fld[1], { steps: 8 }); await wait(200); await page.mouse.up(); await wait(700); const s1 = await check("tažení hodnoty změní X", (s) => s.loc[0] !== 2.5 && s.loc[0] > 2.5); await page.screenshot({ path: "out/jr_modui_drag.png" });
+    await page.keyboard.press("Control+z"); await wait(700); await check("Ctrl+Z vrátí tažení", (s) => s.loc[0] === 2.5);
+    await c(1167, 470, 900); await c(1290, 255, 800); await type("bevel"); await wait(500); await page.screenshot({ path: "out/jr_modui_search.png" }); await key("Enter", 900); await check("Add Modifier, hledání bevel", (s) => s.mods.includes("BEVEL"));
+    const n = await cmd("eval:len(bpy.context.object.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.vertices)"); await check(`bevel vyhodnocen: ${n} v (desktop 24)`, () => n === 24); await page.screenshot({ path: "out/jr_modui_panel.png" });
+    await page.mouse.move(box.x + 1290, box.y + 330, { steps: 3 }); await wait(400); await page.keyboard.press("Control+a"); await wait(900); await check("Ctrl+A nad panelem = apply: 24 v", (s) => s.mods.length === 0 && s.v === 24);
+    await page.keyboard.press("Control+z"); await wait(900); await check("Ctrl+Z vrátí apply", (s) => s.mods.length === 1 && s.v === 8);
+  },
   /* UI: F3 hledání, Modifier přes Shift+A menu v nodech není; rozdělení oblasti přes menu View, Preferences okno. */
   ui: async ({ hover, key, check, page, wait, type, tab }) => {
     await hover(); await key("F3", 700); await type("subdivide"); await wait(500); await page.keyboard.press("Escape"); await wait(300); await page.keyboard.press("Escape"); await wait(400); await check("F3 a Esc nezmění mód", (s) => s.mode === "OBJECT");

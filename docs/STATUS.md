@@ -1,5 +1,5 @@
-# 7. 11. 06:40 — průběžně: H32, U2, A1, B1, B2 a H33 (nový nález)
-Výsledek: 🟡 PC ✅ (regres Chrome po H33: 0 FAIL), `webkit_sim` regres ještě běží, iPad neověřeno
+# 7. 11. 08:40 — H32, U2, A1, A2, B1, B2 a H33 (nový nález)
+Výsledek: 🟡 PC ✅ (regres Chrome i `webkit_sim`: 0 FAIL), iPad a Mac neověřeno
 
 **Co jsem udělal**
 - H32 pojistka: ztracený `mouseup` se dopošle Blenderu. Mechanismus potvrzen, přesné místo ztráty u tebe NEZNÁM (viz níže).
@@ -7,9 +7,9 @@ Výsledek: 🟡 PC ✅ (regres Chrome po H33: 0 FAIL), `webkit_sim` regres ješt
 - A1: `?webkit_sim=1` = limity a featury Safari z telemetrie, v Chrome.
 - B1, B2: prohlídka `?auto=tour&tel=1` (75 kroků, ~5 min) + `scripts/tour_report.py`.
 - **H33 (nový nález cesty `select`): výběr objektu klikem podle bounding boxu.** Objekt uvnitř většího (nábytek v pokoji) nešel vybrat, klik do prázdného rohu vybral šikmý objekt. Teď mesh podle trojúhelníků, kamera, světlo a empty podle tvaru.
-- Cesty navíc: text3d, pie, select, f12, script, curve, rename.
+- Cesty navíc: text3d, pie, select, f12, script, curve, rename, modui.
 - `regress_all` teď hlásí spadlý test jako FAIL. **Pozor: `bar` padal od G1 (3. 11.) a regres ho hlásil jako OK. Starší „0 FAIL" tuhle sekci nepokrývaly.** Chyba byla v testu (ovládal lištu myší, E zapnul Pointer Lock), test teď používá dotyk: PASS.
-- Pushnuto: fork `ipad` 2bbe06a6, `ipad-5.3-wip` 77e849e9 (J1, nepřeloženo a netestováno), `master` po regresi.
+- Pushnuto: fork `ipad` 2bbe06a6, `ipad-5.3-wip` 77e849e9 (J1, nepřeloženo a netestováno), `master` P45 až P53. Zip `out/itch_2026-11-07_0825.zip` (nahrává Lukáš).
 
 **Důkaz**
 - H32: `h32_win.sh` bez opravy 2 FAIL, stav `snap=1 prop=0 prop_obj=1`, stejný jako sonda v tvé relaci `5t7t2k` (žádný autosave). S opravou 4 PASS, záměrný drag-toggle dál funguje.
@@ -18,10 +18,14 @@ Výsledek: 🟡 PC ✅ (regres Chrome po H33: 0 FAIL), `webkit_sim` regres ješt
 - B1: Chrome, `webkit_sim`, `webkit_sim&ipad=1`: 75 kroků, 0 problémů. Se zapnutou chybou S1: 3 kroky s chybou GPU.
 - U2: `u2_win.sh` PASS, skutečné kliky, screenshot kontrolován.
 - Regres po H33 (`out/regress_p51.log`): 62 sekcí, 0 FAIL, cesty 24/24. Běžel ještě se starým `bar`, ten je ověřen zvlášť.
+- A2: `regress_sim.sh` (`webkit_sim=1`): 62 sekcí, 0 FAIL, cesty 24/24, žádná nová chyba. Hook ověřen: `s1b` pod ním správně selhává. Varianta `ipad=1` jen cesty a prohlídka (celý regres ~80 min se nevešel): cesty 23/24, `ui` 1× ze 4 selhalo (J4).
+- Prohlídka na posledním buildu: Chrome a `webkit_sim&ipad=1`: 75 kroků, 0 problémů.
+- `modui` (Chrome i `webkit_sim`): kontextové menu, hodnota dvojklikem a tažením, Add Modifier, apply. OK, desktop bevel 24 v = web.
 
 **Co nefunguje / není jisté**
 - H32: `h32stress_win.sh` 30 startů + klik na MP bez pojistky: 0 výskytů. Robot ztrátu nevyvolal, takže nevím, kde se `mouseup` u tebe ztrácí. S `tel=1` to ukáže událost `h32_release`.
 - H31 (střídání obrázků): sedí na stejný mechanismus (odhad), neověřeno.
+- J4: klik na záložku workspace se 1× ze 4 nechytil (`ipad=1` sim), příčina neznámá.
 - J3: `prefs_sweep` jednou spadl `memory access out of bounds`, pak 7× PASS. Příčina neznámá.
 - H33: armatura v Object módu, lattice, metaball, GP, křivky bez objemu dál podle bounding boxu.
 - `webkit_sim` neumí chyby překladu WebKitu (např. `location(115)`). Cmd v prohlídce nejde.
@@ -35,7 +39,10 @@ Výsledek: 🟡 PC ✅ (regres Chrome po H33: 0 FAIL), `webkit_sim` regres ješt
 5. Stavová lišta: nepřekrývá text lišta kláves?
 
 **Co dál**
-- Doběhnout A2 (`regress_sim.sh`), nálezy do BACKLOGu. Další cesty část D.
+- Tvoje prohlídka na iPadu a Macu (B3), podle ní část C.
+- Celý `regress_sim.sh "webkit_sim=1&ipad=1" ipad` (A2 zbytek), J4, další cesty.
+
+**Úklid:** viz konec běhu, dev server a tunel nechávám (spustil je Lukáš).
 
 **Predikce (splněné)**
 - H32: Pokud Blender po ztraceném `mouseup` zůstane v drag-toggle, po uvolnění mimo canvas a vodorovném pohybu se přepne hlavička. Měření: platí.
