@@ -7,9 +7,9 @@ Výsledek: 🟡 PC ✅ (regres Chrome i `webkit_sim`: 0 FAIL), iPad a Mac neově
 - A1: `?webkit_sim=1` = limity a featury Safari z telemetrie, v Chrome.
 - B1, B2: prohlídka `?auto=tour&tel=1` (75 kroků, ~5 min) + `scripts/tour_report.py`.
 - **H33 (nový nález cesty `select`): výběr objektu klikem podle bounding boxu.** Objekt uvnitř většího (nábytek v pokoji) nešel vybrat, klik do prázdného rohu vybral šikmý objekt. Teď mesh podle trojúhelníků, kamera, světlo a empty podle tvaru.
-- Cesty navíc: text3d, pie, select, f12, script, curve, rename, modui, prefs, nodes, append, uvedit, wpaint, gp2. Žádná další chyba.
+- Cesty navíc: text3d, pie, select, f12, script, curve, rename, modui, prefs, nodes, append, uvedit, wpaint, gp2, lock. Žádná další chyba.
 - `regress_all` teď hlásí spadlý test jako FAIL. **Pozor: `bar` padal od G1 (3. 11.) a regres ho hlásil jako OK. Starší „0 FAIL" tuhle sekci nepokrývaly.** Chyba byla v testu (ovládal lištu myší, E zapnul Pointer Lock), test teď používá dotyk: PASS.
-- Pushnuto: fork `ipad` 2bbe06a6, `ipad-5.3-wip` 77e849e9 (J1, nepřeloženo a netestováno), `master` P45 až P55. Zip `out/itch_2026-11-07_0825.zip` (nahrává Lukáš).
+- Pushnuto: fork `ipad` 2bbe06a6, `ipad-5.3-wip` 77e849e9 (J1, nepřeloženo a netestováno), `master` P45 až P56. Zip `out/itch_2026-11-07_0825.zip` (nahrává Lukáš).
 
 **Důkaz**
 - H32: `h32_win.sh` bez opravy 2 FAIL, stav `snap=1 prop=0 prop_obj=1`, stejný jako sonda v tvé relaci `5t7t2k` (žádný autosave). S opravou 4 PASS, záměrný drag-toggle dál funguje.
@@ -20,7 +20,7 @@ Výsledek: 🟡 PC ✅ (regres Chrome i `webkit_sim`: 0 FAIL), iPad a Mac neově
 - Regres po H33 (`out/regress_p51.log`): 62 sekcí, 0 FAIL, cesty 24/24. Běžel ještě se starým `bar`, ten je ověřen zvlášť.
 - A2: `regress_sim.sh` (`webkit_sim=1`): 62 sekcí, 0 FAIL, cesty 24/24, žádná nová chyba. Hook ověřen: `s1b` pod ním správně selhává. Varianta `ipad=1` jen cesty a prohlídka (celý regres ~80 min se nevešel): cesty 23/24, `ui` 1× ze 4 selhalo (J4).
 - Prohlídka na posledním buildu: Chrome a `webkit_sim&ipad=1`: 75 kroků, 0 problémů.
-- `modui` (Chrome i `webkit_sim`): kontextové menu, hodnota dvojklikem a tažením, Add Modifier, apply. OK, desktop bevel 24 v = web. `prefs`, `nodes`, `append` taky OK v obou. `uvedit`, `wpaint`, `gp2` OK jen v Chrome. Všechny tyhle cesty a 3 případy box selectu vznikly po regresi, běžely jen samostatně.
+- `modui` (Chrome i `webkit_sim`): kontextové menu, hodnota dvojklikem a tažením, Add Modifier, apply. OK, desktop bevel 24 v = web. `prefs`, `nodes`, `append` taky OK v obou. `uvedit`, `wpaint`, `gp2` taky OK v obou. `lock` jen Chrome: rychlé G+Esc a MMB nenechají viset Pointer Lock (0× z 24), moje hypotéza neplatila. Všechny tyhle cesty a 3 případy box selectu vznikly po regresi, běžely jen samostatně.
 
 **Co nefunguje / není jisté**
 - H32: `h32stress_win.sh` 30 startů + klik na MP bez pojistky: 0 výskytů. Robot ztrátu nevyvolal, takže nevím, kde se `mouseup` u tebe ztrácí. S `tel=1` to ukáže událost `h32_release`.
@@ -31,12 +31,24 @@ Výsledek: 🟡 PC ✅ (regres Chrome i `webkit_sim`: 0 FAIL), iPad a Mac neově
 - `webkit_sim` neumí chyby překladu WebKitu (např. `location(115)`). Cmd v prohlídce nejde.
 - Na `objpick` bylo potřeba otevřít desktop Blender v okně (krátce, spustil jsem ho já).
 
+**Výkon (záložní fronta 5, jen PC, Solid a MP při otáčení, 1400×850, `perfmp_win.sh`)**
+| dotaz | Solid dt ms | MP dt ms | MP tex MB |
+|---|---|---|---|
+| (nic) | 23,1 | 31,2 | 408 |
+| `ipad=1` | 34,1 | 45,0 | 253 |
+| `webkit_sim=1&ipad=1` | 33,0 | 45,1 | 253 |
+| `ipad=1&bp=0` | 23,5 | 25,2 | 253 |
+| `bp=1` | 34,6 | 49,0 | 408 |
+- Predikce: pokud zpomaluje `bp` (max 2 snímky ve frontě), `ipad=1&bp=0` vrátí Solid k 23 ms. Měření: platí. `bp` stojí na PC ~11 ms v Solidu a ~20 ms v MP.
+- Návrh (nic jsem nezměnil, `bp` je na iPadu kvůli paměti): zkusit na iPadu MP s `&bp=0` proti výchozímu, pozorovat fps a jestli nespadne. Čísla z PC na iPad přenést nejdou (odhad: tam brzdí GPU). Na 1 snímek jde 25 až 53 submitů, 64 passů, kandidát na další měření.
+
 **Co otestovat na iPadu (podle důležitosti)**
 1. Otevři `…/?auto=tour&tel=1` a nech běžet ~5 min bez klikání. Pak mi řekni, ať pustím `tour_report.py`.
 2. Rendered/MP po startu, hýbej myší nebo prstem: přepíná se něco samo? (H32)
 3. Scéna s objektem uvnitř většího: klik vybere ten menší?
 4. Help ▸ odkaz: otevře se? (Safari může `window.open` blokovat.)
 5. Stavová lišta: nepřekrývá text lišta kláves?
+6. MP s `&bp=0` proti bez něj: je plynulejší? Nespadne?
 
 **Co dál**
 - Tvoje prohlídka na iPadu a Macu (B3), podle ní část C.

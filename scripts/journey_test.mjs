@@ -431,6 +431,17 @@ const J = {
     }
     await check(`ztracených kliků ${lost} z 6`, () => lost === 0);
   },
+  /* Pointer Lock: rychlé G + Esc a krátké MMB nesmí nechat zámek viset (požadavek běží asynchronně, exit může přijít dřív). Po něm klik musí trefit správné místo. */
+  lock: async ({ check, cmd, page, wait, hover, mid }) => {
+    const m = mid(), locked = () => page.evaluate(() => !!document.pointerLockElement); let stuck = 0;
+    for (let i = 0; i < 12; i++) {
+      await hover(); await page.keyboard.press("g"); await wait(i % 4 * 15); await page.keyboard.press("Escape"); await wait(700); if (await locked()) { stuck++; console.log(`LOCK po G+Esc #${i} visí`); await page.evaluate(() => document.exitPointerLock()); await wait(300); }
+      await page.mouse.down({ button: "middle" }); await wait(i % 4 * 15); await page.mouse.up({ button: "middle" }); await wait(700); if (await locked()) { stuck++; console.log(`LOCK po MMB #${i} visí`); await page.evaluate(() => document.exitPointerLock()); await wait(300); }
+    }
+    await check(`zámek po rychlém zrušení visí ${stuck}× z 24`, (s) => stuck === 0 && s.loc[0] === 0);
+    await page.mouse.move(m[0], m[1]); await wait(300); await page.mouse.down({ button: "middle" }); await page.mouse.move(m[0] + 80, m[1] + 30, { steps: 6 }); await page.mouse.up({ button: "middle" }); await wait(500);
+    const c = await cmd("obj"); const b = await page.locator("#canvas").boundingBox(); await page.keyboard.press("Alt+a"); await wait(400); await page.mouse.move(b.x + c[0], b.y + c[1], { steps: 2 }); await wait(250); await page.mouse.click(b.x + c[0], b.y + c[1]); await wait(600); const n = await cmd("eval:[o.name for o in bpy.context.selected_objects]"); await check(`klik po orbitu trefí kostku ${JSON.stringify(n)}`, () => n.length === 1 && n[0] === "Cube");
+  },
   /* UI: F3 hledání, Modifier přes Shift+A menu v nodech není; rozdělení oblasti přes menu View, Preferences okno. */
   ui: async ({ hover, key, check, page, wait, type, tab }) => {
     await hover(); await key("F3", 700); await type("subdivide"); await wait(500); await page.keyboard.press("Escape"); await wait(300); await page.keyboard.press("Escape"); await wait(400); await check("F3 a Esc nezmění mód", (s) => s.mode === "OBJECT");
