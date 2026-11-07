@@ -753,6 +753,37 @@ const releaseHeldKeys = () => {
 window.addEventListener("blur", releaseHeldKeys);
 document.addEventListener("visibilitychange", () => { if (document.hidden) releaseHeldKeys(); });
 
+/* H32: GHOST listens for mouseup on the canvas only. A release over another element (toast, key bar) or outside the
+ * window is lost and Blender stays in its header drag-toggle: every horizontal move anywhere flips shading/Snap/Proportional
+ * and blocks the viewport. Replay the release; `?mouserelease=0` turns this off. */
+if (new URLSearchParams(location.search).get("mouserelease") !== "0") {
+  const heldBtns = new Set();
+  const BTN_BIT = { 0: 1, 1: 4, 2: 2, 3: 8, 4: 16 };
+  let lastX = 0, lastY = 0;
+  const releaseBtn = (b, why, target) => {
+    heldBtns.delete(b);
+    const msg = `H32_RELEASE why=${why} button=${b} target=${target ? target.id || target.tagName : "-"}`;
+    console.log(msg); telEvent("h32_release", { why, button: b, target: target ? target.id || target.tagName : "" });
+    canvas.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true, view: window, clientX: lastX, clientY: lastY, button: b, buttons: 0 }));
+  };
+  const releaseAllBtns = (why) => { for (const b of [...heldBtns]) releaseBtn(b, why); };
+  canvas.addEventListener("mousedown", (e) => { if (e.isTrusted) { heldBtns.add(e.button); lastX = e.clientX; lastY = e.clientY; } }, true);
+  window.addEventListener("mouseup", (e) => {
+    if (!e.isTrusted) return;
+    lastX = e.clientX; lastY = e.clientY;
+    if (e.target === canvas) heldBtns.delete(e.button);
+    else if (heldBtns.has(e.button)) releaseBtn(e.button, "offcanvas", e.target);
+  }, true);
+  window.addEventListener("mousemove", (e) => {
+    if (!e.isTrusted) return;
+    lastX = e.clientX; lastY = e.clientY;
+    for (const b of [...heldBtns]) if (!(e.buttons & BTN_BIT[b])) releaseBtn(b, "move_nobtn", e.target);
+  }, true);
+  window.addEventListener("pointercancel", (e) => { if (e.isTrusted && e.pointerType === "mouse") releaseAllBtns("pointercancel"); }, true);
+  window.addEventListener("blur", () => releaseAllBtns("blur"));
+  document.addEventListener("visibilitychange", () => { if (document.hidden) releaseAllBtns("hidden"); });
+}
+
 /* ---- File ▸ Open hijack: a REAL, lazy mount (no copying) of a folder the
  * user picks on their machine. Blender's wm_open_mainfile invoke (wasm build)
  * calls window.__blenderFileOpenHook() on every File ▸ Open press and forces
