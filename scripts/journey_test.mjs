@@ -527,6 +527,43 @@ const J = {
     await hover(); await key("F3", 700); await type("subdivide"); await wait(500); await page.keyboard.press("Escape"); await wait(300); await page.keyboard.press("Escape"); await wait(400); await check("F3 a Esc nezmění mód", (s) => s.mode === "OBJECT");
     for (const t of ["Modeling", "Sculpting", "UV Editing", "Texture Paint", "Shading", "Animation", "Rendering", "Compositing", "Geometry Nodes", "Layout"]) { await tab(t); await check("workspace " + t, (s) => s.ws === t); }
   },
+  /* 8. 11.: klávesy, které jiné cesty nemají. Desktop 5.2.3 má stejné chování (standardní keymap); počty jsou z výchozí kostky. */
+  keys2: async ({ hover, key, check, cmd, page, wait, type }) => {
+    await hover(); await key("Tab", 800); await check("Tab: edit, vše vybráno", (s) => s.mode === "EDIT_MESH" && s.vsel === 8);
+    await key("Alt+a", 600); await check("Alt+A odznačí", (s) => s.vsel === 0);
+    await cmd("import bmesh; _bm = bmesh.from_edit_mesh(bpy.context.object.data); _bm.verts.ensure_lookup_table(); _bm.verts[0].select_set(True); bmesh.update_edit_mesh(bpy.context.object.data)"); await wait(400);
+    await check("jeden vrchol vybraný", (s) => s.vsel === 1);
+    await hover(); await key("Control+l", 700); await check("Ctrl+L vybere spojené", (s) => s.vsel === 8);
+    await key("Control+i", 600); await check("Ctrl+I invertuje", (s) => s.vsel === 0);
+    await key("Control+i", 600); await check("Ctrl+I zpět", (s) => s.vsel === 8);
+    await key("Tab", 800); await check("Tab: zpět Object", (s) => s.mode === "OBJECT");
+    await hover(); await key("g", 400); await key("x", 300); await type("1"); await key("Enter", 700); await check("G X 1", (s) => s.loc[0] === 1);
+    await hover(); await key("Shift+r", 800); await check("Shift+R zopakuje posun", (s) => s.loc[0] === 2);
+    const sn = async () => cmd("eval:bpy.context.scene.tool_settings.use_snap");
+    const s0 = await sn(); await hover(); await key("Shift+Tab", 600); const s1 = await sn(); await check(`Shift+Tab zapne snap (${s0} -> ${s1})`, () => s0 === false && s1 === true);
+    await key("Shift+Tab", 600); const s2 = await sn(); await check(`Shift+Tab vypne snap (${s2})`, () => s2 === false);
+    await cmd("bpy.context.scene.cursor.location = (3, 2, 1)"); await wait(300); await hover(); await key("Shift+c", 900);
+    const cur = await cmd("eval:[round(v, 3) for v in bpy.context.scene.cursor.location]"); await check(`Shift+C vrátí kurzor (${cur})`, () => cur && cur.every((v) => v === 0));
+    const qv = async () => cmd("eval:len(bpy.context.window_manager.windows[0].screen.areas[[a.type for a in bpy.context.window_manager.windows[0].screen.areas].index('VIEW_3D')].spaces[0].region_quadviews)");
+    await hover(); await key("Control+Alt+q", 900); const q1 = await qv(); await page.screenshot({ path: "out/jr_keys2_quad.png" }); await check(`Ctrl+Alt+Q quad view (${q1}, 4 regiony jako rna_space.cc)`, () => q1 === 4);
+    await hover(); await key("Control+Alt+q", 900); const q2 = await qv(); await check(`Ctrl+Alt+Q zpět (${q2})`, () => q2 === 0);
+  },
+  /* 8. 11.: schránka. Ctrl+C/Ctrl+V v pohledu = copybuffer.blend v dočasné složce; Ctrl+C/Ctrl+V nad polem = textová schránka (GHOST). */
+  clip: async ({ hover, key, check, cmd, page, wait, at }) => {
+    await hover(); await key("Control+c", 900); await key("Control+v", 1200); await check("Ctrl+C, Ctrl+V v pohledu: kopie objektu", (s) => s.objs === 4 && s.ob === "Cube.001");
+    /* copybuffer.blend v /tmp je interní soubor Blenderu, ne export: dřív vyskočil pruh "Export hotový: Stáhnout copybuffer.blend" */
+    await wait(1500); const toast = await page.evaluate(() => document.body.innerText.includes("copybuffer")); await check(`žádný pruh exportu pro copybuffer.blend (${toast})`, () => toast === false);
+    await cmd("bpy.context.object.location.x = 4.25"); await wait(500);
+    /* Location X v N-panelu: N, najet na pole, Ctrl+C; pak jiný objekt a Ctrl+V */
+    await hover(); await key("n", 900);
+    const fx = await cmd("eval:(lambda w: [[r.x, w.height - r.y - r.height, r.width, r.height] for a in w.screen.areas if a.type == 'VIEW_3D' for r in a.regions if r.type == 'UI'][0])(bpy.context.window_manager.windows[0])");
+    await page.screenshot({ path: "out/jr_clip_npanel.png" }); console.log("NPANEL " + JSON.stringify(fx));
+    const fieldAt = async () => { const [x, y] = at([fx[0] + fx[2] * 0.62, fx[1] + 64]); await page.mouse.move(x, y, { steps: 2 }); await wait(400); };
+    await fieldAt(); await key("Control+c", 600);
+    const clip = await cmd("eval:bpy.context.window_manager.clipboard"); await check(`Ctrl+C nad polem do schránky (${JSON.stringify(clip)})`, () => clip && Math.abs(parseFloat(clip) - 4.25) < 1e-3);
+    await cmd("[o.select_set(False) for o in bpy.data.objects]; bpy.context.view_layer.objects.active = bpy.data.objects['Cube']; bpy.data.objects['Cube'].select_set(True)"); await wait(600);
+    await fieldAt(); await key("Control+v", 800); await check("Ctrl+V nad polem vloží hodnotu", (s) => s.ob === "Cube" && s.loc[0] === 4.25);
+  },
 };
 for (const [n, f] of Object.entries(J)) if ((which === "all" && n !== "j4") || which.split(",").includes(n)) await run(n, f); /* j4 = otevřená chyba, BACKLOG J4: spouštět zvlášť */
 console.log("TABULKA " + results.map((r) => `${r[0]}:${r[1] || r[2] || r[3] || r[4] ? "CHYBA" : "OK"}`).join(" "));

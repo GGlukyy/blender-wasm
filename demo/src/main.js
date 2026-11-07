@@ -1472,7 +1472,7 @@ def _ew_scan():
                 try:
                     if e.is_dir(follow_symlinks=False):
                         if k + 1 < depth and e.name not in ('.config', '__pycache__', '.cache'): stack.append((e.path, k + 1))
-                    elif e.name.lower().endswith(_EW_EXT) and 'autosave' not in e.name and not e.name.endswith(('.blend1', '.blend@')) and e.name != 'quit.blend':
+                    elif e.name.lower().endswith(_EW_EXT) and 'autosave' not in e.name and not e.name.endswith(('.blend1', '.blend@')) and e.name != 'quit.blend' and not e.name.startswith('copybuffer'):
                         st = e.stat(); out[e.path] = (st.st_mtime_ns, st.st_size)
                 except Exception: pass
     return out
