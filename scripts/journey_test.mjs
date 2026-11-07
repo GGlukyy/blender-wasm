@@ -551,9 +551,11 @@ const J = {
   /* 8. 11.: české znaky: psaní do pole (F2) a soubor s diakritikou v OPFS (uložit, otevřít, výpis). */
   unicode: async ({ hover, key, check, cmd, page, wait }) => {
     await hover(); await key("F2", 600); await page.keyboard.press("Control+a");
-    /* press() po znaku = keydown s key "č" jako skutečná česká klávesnice (type() u ne-US znaků posílá jen insertText bez klávesy) */
-    for (const c of "Kočička ŽÁÚ") { await page.keyboard.press(c === " " ? "Space" : c); await wait(120); } await wait(400); await key("Enter", 800);
-    await check("F2 + česká slova", (s) => s.ob === "Kočička ŽÁÚ");
+    /* česká klávesnice (Windows/Mac): keydown s key "č" a code podle polohy (č = Digit4); type() u ne-US znaků posílá jen insertText bez klávesy */
+    const cdp = await page.context().newCDPSession(page), CZ = { "ě": "Digit2", "š": "Digit3", "č": "Digit4", "ř": "Digit5", "ž": "Digit6", "ý": "Digit7", "á": "Digit8", "í": "Digit9", "é": "Digit0", "ú": "BracketLeft", "ů": "Semicolon", " ": "Space" };
+    for (const c of "Kočička řežů") { const code = CZ[c] || "Key" + c.toUpperCase(); await cdp.send("Input.dispatchKeyEvent", { type: "keyDown", key: c, code, text: c, unmodifiedText: c }); await cdp.send("Input.dispatchKeyEvent", { type: "keyUp", key: c, code }); await wait(120); }
+    await wait(400); await key("Enter", 800);
+    await check("F2 + česká slova", (s) => s.ob === "Kočička řežů");
     const P = "/opfs/home/židle ěščř.blend";
     await cmd(`bpy.ops.wm.save_as_mainfile(filepath=${JSON.stringify(P)})`); await wait(1500);
     await check("uložit do souboru s diakritikou", (s) => s.file === P);
@@ -561,7 +563,7 @@ const J = {
     await cmd("bpy.ops.mesh.primitive_monkey_add()"); await wait(800); await check("přidaná opice", (s) => s.objs === 4);
     await cmd(`bpy.ops.wm.open_mainfile(filepath=${JSON.stringify(P)})`); await wait(3000);
     await check("otevřít soubor s diakritikou: 3 objekty, jméno", (s) => s.objs === 3 && s.file === P);
-    const nm = await cmd("eval:sorted(o.name for o in bpy.data.objects)"); await check(`jméno objektu přežilo uložení (${JSON.stringify(nm)})`, () => nm && nm.includes("Kočička ŽÁÚ"));
+    const nm = await cmd("eval:sorted(o.name for o in bpy.data.objects)"); await check(`jméno objektu přežilo uložení (${JSON.stringify(nm)})`, () => nm && nm.includes("Kočička řežů"));
   },
   /* 8. 11.: schránka. Ctrl+C/Ctrl+V v pohledu = copybuffer.blend v dočasné složce; Ctrl+C/Ctrl+V nad polem = textová schránka (GHOST). */
   clip: async ({ hover, key, check, cmd, page, wait, at }) => {
