@@ -1,3 +1,27 @@
+# 7. 11. 20:35 — H35: Exact a Manifold boolean na webu (nový nález), H35 nad B3 níže
+Výsledek: 🟡 PC ✅ (jen vybrané testy, regres běží), iPad neověřeno
+
+**Co jsem udělal**
+- **H35 (nový nález, jen web):** výchozí solver modifikátoru Boolean je Exact, ale web byl přeložený bez GMP a Manifold. Exact tiše běžel jako Float a Manifold taky. U překrytých kostek to dávalo rozbitý mesh.
+- Oprava: GMP 6.3.0 a Manifold v3.4.1 (stejné verze jako Blender) přeloženy do wasm, `WITH_GMP` a `WITH_MANIFOLD` zapnuty. V kódu Blenderu žádná změna.
+- Nové cesty: `objops`, `modtab`, `boolcop`.
+- Pushnuto: `master` P63, P64, P65. Zip `out/itch_2026-11-07_2008.zip` H35 **nemá**, má B3 a H34.
+
+**Důkaz**
+- Predikce: pokud web tiše padá na Float, tak Exact = Float a build má GMP vypnuté. Měření: platí (`WITH_GMP=OFF`, stejná čísla).
+- `modtab` (21 modifikátorů, vrcholy, plochy, objem proti desktopu 5.2.3): dřív 19/21, teď **21/21**.
+- `boolcop` překrytí o polovinu: Exact (16, 14), Manifold (16, 10), stejné jako desktop. Dřív (24, 5) rozbité.
+- `blender.wasm.zst` 26,57 -> 26,80 MB.
+
+**Co nefunguje / není jisté**
+- Celý regres po H35 běží, výsledek níže, až doběhne. `regress_sim` po H35 se do 22:00 nevejde.
+- Web je 5.3 alpha, desktop 5.2.3, není to stejná verze.
+- Solver Manifold běží bez paralelismu (`MANIFOLD_PAR=OFF`, odhad: pomalejší na velkých meshích, neměřeno). Exact na webu může být na velkých meshích pomalý, neměřeno, na iPadu nezkoušeno.
+- Float je u překrytých kostek nestabilní i v desktopu 5.2.3: (24,5) (27,8) (27,6) mezi opakováními. Chyba původního Blenderu, můžeš nahlásit. Neopravuji.
+
+**Co otestovat na iPadu (po bloku B3 níže)**
+1. Kostka + druhá kostka posunutá o 1 v X, modifikátor Boolean na první, Union, solver Exact, pak Manifold. Čekám čistý tvar bez děr. Přepnutí solveru nesmí spadnout.
+
 # 7. 11. 17:15 — B3: proč iPad padá v prohlídce + oprava, T1 okna testů
 Výsledek: 🟡 PC ✅ (prohlídka, parity), regres běží, iPad oprava zatím NEOVĚŘENA
 
