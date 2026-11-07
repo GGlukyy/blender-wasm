@@ -578,6 +578,25 @@ const J = {
     await put(250, "2*pi/pi"); await check("Scale X = 2*pi/pi", (s) => s.scale[0] === 2);
     await page.screenshot({ path: "out/jr_expr.png" });
   },
+  /* 8. 11.: soubor přetažený na plátno. Dřív žádný handler: prohlížeč soubor otevřel místo Blenderu (stránka pryč).
+   * Desktop 5.2.3: .obj se importuje (FileHandler), .blend se otevře. */
+  dropfile: async ({ check, cmd, page, wait }) => {
+    const drop = (name, bytes) => page.evaluate(([n, b]) => {
+      const dt = new DataTransfer(); dt.items.add(new File([new Uint8Array(b)], n));
+      const c = document.getElementById("canvas"), r = c.getBoundingClientRect(), o = { dataTransfer: dt, bubbles: true, cancelable: true, clientX: r.x + r.width / 2, clientY: r.y + r.height / 2 };
+      c.dispatchEvent(new DragEvent("dragenter", o)); const over = new DragEvent("dragover", o); c.dispatchEvent(over);
+      c.dispatchEvent(new DragEvent("drop", o)); return over.defaultPrevented; }, [name, [...bytes]]);
+    const obj = Buffer.from("o Tri\nv 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3\n");
+    const prevented = await drop("trojuhelnik.obj", obj); await wait(2500);
+    await check(`dragover zrušen (prohlížeč soubor neotevře): ${prevented}`, () => prevented === true);
+    await check("přetažený .obj se importuje", (s) => s.objs === 4 && s.ob === "Tri" && s.v === 3);
+    await cmd("bpy.ops.wm.save_as_mainfile(filepath='/tmp/drop_src.blend')"); await wait(1200);
+    const blend = await page.evaluate(() => [...window.Module.FS.readFile("/tmp/drop_src.blend")]);
+    await cmd("bpy.ops.wm.read_homefile(use_factory_startup=True); bpy.ops.wm.save_as_mainfile(filepath='/tmp/empty.blend')"); await wait(2000);
+    await check("nová scéna (3 objekty)", (s) => s.objs === 3);
+    await drop("s_trojuhelnikem.blend", Buffer.from(blend)); await wait(3500);
+    await check("přetažený .blend se otevře", (s) => s.objs === 4 && s.file === "/uploads/s_trojuhelnikem.blend");
+  },
   /* 8. 11.: schránka. Ctrl+C/Ctrl+V v pohledu = copybuffer.blend v dočasné složce; Ctrl+C/Ctrl+V nad polem = textová schránka (GHOST). */
   clip: async ({ hover, key, check, cmd, page, wait, at }) => {
     await hover(); await key("Control+c", 900); await key("Control+v", 1200); await check("Ctrl+C, Ctrl+V v pohledu: kopie objektu", (s) => s.objs === 4 && s.ob === "Cube.001");

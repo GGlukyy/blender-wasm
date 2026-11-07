@@ -1205,6 +1205,24 @@ function openBlendDirect(path) {
   log("open .blend directly: " + path);
 }
 
+/* H38: a file dropped onto Blender (outside the Open dialog) had no handler, so the browser opened the
+ * file instead of the page (unsaved work gone). Like desktop: one .blend opens, meshes/scenes import,
+ * images load; everything lands in /uploads. The Open dialog's own drop zone stops propagation first. */
+const hasFiles = (e) => !!e.dataTransfer && [...(e.dataTransfer.types || [])].includes("Files");
+window.addEventListener("dragover", (e) => { if (hasFiles(e)) e.preventDefault(); });
+window.addEventListener("drop", async (e) => {
+  if (!hasFiles(e)) return;
+  e.preventDefault();
+  const files = [...e.dataTransfer.files];
+  if (!files.length || !window.Module || !window.Module.FS) return;
+  const FS = window.Module.FS;
+  try { FS.mkdir("/uploads"); } catch (_) { /* exists */ }
+  for (const f of files) FS.writeFile("/uploads/" + f.name, new Uint8Array(await f.arrayBuffer()));
+  log("dropped " + files.map((f) => f.name).join(", "));
+  if (files.length === 1 && /\.blend$/i.test(files[0].name)) openBlendDirect("/uploads/" + files[0].name);
+  else FS.writeFile("/tmp/drop_req.txt", files.map((f) => "/uploads/" + f.name).join("\n"));
+});
+
 window.__blenderFileOpenHook = async () => {
   if (pickerBusy) return;
   if (!window.Module || !window.Module.ccall) return;
@@ -1572,6 +1590,21 @@ const POOL_N = parseInt(_qp.get("pool") || (_isIpadUA ? "8" : "32"), 10) || 32;
  * opens it; /tmp/dirty.txt tells JS whether the current scene has unsaved changes (JS asks before discarding). */
 const OPEN_REQ_PY = `import bpy, os
 _dirty = [None]
+def _drop_one(fp):
+    # H38: soubor přetažený na plátno (main.js): import jako FileHandlery desktopu, obrázky načíst
+    ext = os.path.splitext(fp)[1].lower()
+    imp = {'.obj': 'wm.obj_import', '.stl': 'wm.stl_import', '.ply': 'wm.ply_import', '.fbx': 'import_scene.fbx',
+           '.glb': 'import_scene.gltf', '.gltf': 'import_scene.gltf', '.usd': 'wm.usd_import', '.usda': 'wm.usd_import',
+           '.usdc': 'wm.usd_import', '.usdz': 'wm.usd_import', '.abc': 'wm.alembic_import', '.svg': 'import_curve.svg', '.bvh': 'import_anim.bvh'}
+    try:
+        if ext in imp:
+            mod, op = imp[ext].split('.'); r = getattr(getattr(bpy.ops, mod), op)(filepath=fp)
+        elif ext in ('.png', '.jpg', '.jpeg', '.exr', '.hdr', '.tif', '.tiff', '.bmp', '.tga', '.webp'):
+            r = bpy.data.images.load(fp, check_existing=True).name
+        else:
+            r = 'jen nahráno do /uploads'
+        print('DROP_REQ', fp, r)
+    except Exception as e: print('DROP_REQ failed', fp, e)
 def _open_tick():
     try:
         d = '1' if bpy.data.is_dirty else '0'
@@ -1584,6 +1617,11 @@ def _open_tick():
             os.remove(p)
             print('OPEN_REQ', fp)
             bpy.ops.wm.open_mainfile(filepath=fp)
+        p = '/tmp/drop_req.txt'
+        if os.path.exists(p):
+            with open(p) as f: fps = [x for x in f.read().split('\\n') if x]
+            os.remove(p)
+            for fp in fps: _drop_one(fp)
     except Exception as e: print('OPEN_REQ failed', e)
     return 0.3
 bpy.app.timers.register(_open_tick, first_interval=1.0, persistent=True)`;
