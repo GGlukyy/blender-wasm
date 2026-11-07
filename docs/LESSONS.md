@@ -49,3 +49,4 @@
 - 6. 11.: `pgrep -f "[r]egress_all.sh"` se chytí sám, když je v téže příkazové řádce i `regress_all.sh` bez závorek (vrátil 1 před startem).
 - 6. 11.: `page.screenshot` čte stránku z Chromu, ne to, co jde na monitor. PASS v `h31_win.sh` nevylučuje chybu kompozitoru. Telemetrie ukázala, že je Lukáš u PC i při „běžící smyčce“ (živá relace, jiný sid): kontrolovat dřív, než změním `demo/`.
 - 7. 11.: Úprava `demo/src/*` za běhu testu = vite stránku znovu načte (i otevřené karty na iPadu). `bone_click` dal 4/10 (poslední `BPROBE` zůstal stát, screenshot = „Launch Blender“), vypadalo to na chybu okna mimo obrazovku. Za běhu testu do `demo/` nesahat, nepullovat. Taky: uprostřed rebase nedělat `git commit`, neuložená změna blokuje `--continue`.
+- 8. 11.: telemetrie se zapisuje do `out/ipad/tel_<UTC datum>.jsonl` (vite `toISOString`), mezi 0:00 a 1:00 místního času je to ještě včerejší soubor. Skripty musí brát `date -u +%F`.
