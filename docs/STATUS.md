@@ -1,3 +1,44 @@
+# 7. 11. 17:15 — B3: proč iPad padá v prohlídce + oprava, T1 okna testů
+Výsledek: 🟡 PC ✅ (prohlídka, parity), regres běží, iPad oprava zatím NEOVĚŘENA
+
+**Co jsem udělal**
+- **B3 příčina (silný kandidát, na iPadu neověřeno):** Blender drží v cache bind groupy i pro už zničené textury. WebKit paměť zničené textury neuvolní, dokud na ni bind group ukazuje. `tex_mb` to nevidí, proto vypadal plochý.
+- Oprava (fork `306bfce0`): když se textura zničí, její bind groupy jdou z cache pryč. `?bgpurge=0` ji vypne pro srovnání.
+- Upřesnění: padá to na **Material Preview ve Sculptu** (krok po `ws_Sculpting_SOLID`), tabulka jen neukázala poslední krok, protože fronta telemetrie se nestihla odeslat.
+- Telemetrie navíc (jen `tel=1`): stopa před každou pipeline, `tex_alloc_mb`, `tex_freed_mb`, typ načtení stránky. Prohlídka: `tourws=`, `tourskip=`, `tourrep=`.
+- **T1 hotovo:** okna testů jsou mimo obrazovku. Jeden soubor `p2win/node.cmd`, žádný test jsem neupravoval.
+- Pushnuto: fork `ipad` 306bfce0, `master` P59, P60, P61. Zip jsem nedělal.
+
+**Důkaz**
+- Predikce: pokud cache drží zničené textury, sonda to ukáže. Platí. Prohlídka `webkit_sim=1&ipad=1&pool=4`, vstup do Sculptingu:
+| | MB zničených textur držené živými bind groupy |
+|---|---|
+| bez opravy (`bgpurge=0`) | **1009** (později až 1213) |
+| s opravou | **0** |
+- Do Sculptingu se zničí 1742 MB. iPad v klidu 3,4 GB (tvůj Jetsam 14:43) + 1,74 = 5,14 GB, zabití při 5121 MB. To je jen shoda čísel, navíc čísla z PC (odhad).
+- S opravou: prohlídka 48 kroků, 0 problémů, parity bez ❌.
+- T1: okno na x=-3000, prohlídka Chrome 75/75 za 274 s (dřív taky 274), `sim+ipad` 75/75, `bone_click` 10/10.
+
+**Co nefunguje / není jisté**
+- **Nevím, jestli to iPadu stačí.** Oprava bind groupy jen pustí, paměť se uvolní až po GC v Safari. Když to nestačí, další krok je přimět GC běžet častěji.
+- Moje hypotéza „WebKit drží paměť přes bind group" je z poznámky z 25. 10., přímo v Safari jsem ji neměřil.
+- Hypotéza „viewporty neviditelných workspace" na PC neplatí: 3 průchody, konec 3797 / 3834 / 3821 MB.
+- Jetsam z 14:24:57 sedí na relaci `q5zugd` (44 s po startu, pátý start za sebou), ne na pád v kroku 28. Z časů těch pádů log nemám.
+- `wpaf0m` (device lost, GPU proces restartován) je jiný problém, neřešil jsem ho.
+- Jestli okno mimo obrazovku krade fokus při spuštění, nezměřeno. Řekni, jestli to pořád ruší.
+- Z Windows zůstal starý proces Chrome PID 16832 (3,3 GB, běží od 6. 11.). Není z tohoto běhu, nezabíjel jsem ho. Když ho nechceš: `taskkill /PID 16832 /PID 30244 /F`.
+
+**T1: nastavení oken**
+- Druhý monitor: `echo 2560,174 > /mnt/c/Users/lukil/p2win/pw_win_pos.txt`
+- Staré chování: `echo off > /mnt/c/Users/lukil/p2win/pw_win_pos.txt`. Zrušit úplně: smaž `p2win/node.cmd`. Instalace znovu: `scripts/pw_win_setup.sh`.
+
+**Co otestovat na iPadu (podle důležitosti)**
+1. Zavři kartu, otevři `…/?auto=tour&tel=1&pool=4`, nech běžet ~5 min, nezamykej. Čekám: přejde přes `ws_Sculpting_MATERIAL`.
+2. Když spadne: pošli Jetsam log z času pádu (Nastavení ▸ Soukromí ▸ Analýza), hlavně `per-process-limit` a kolik MB.
+
+**Co dál**
+- Regres `regress_all`, pak `regress_sim.sh` (obojí po H34 chybělo). Pak zip (nahrává Lukáš).
+
 # 7. 11. 08:55 — H34: F-klávesy a Alt+písmeno šly i do prohlížeče (cesta `areas`)
 Výsledek: 🟡 PC ✅ (jen vybrané testy, celý regres ne), iPad a Mac neověřeno
 
