@@ -394,13 +394,50 @@ const J = {
     await cmd("bpy.ops.wm.append(directory='/opfs/home/jr_src.blend/Object/', filename='Zdroj')"); await wait(1500); await check("Append přidá objekt", (s) => s.objs === 4); const v = await cmd("eval:len(bpy.data.objects['Zdroj'].data.vertices)"); await check(`mesh ${v} v (desktop 507)`, () => v === 507);
     await cmd("bpy.data.objects.remove(bpy.data.objects['Zdroj']); bpy.ops.wm.link(directory='/opfs/home/jr_src.blend/Object/', filename='Zdroj')"); await wait(1500); const l = await cmd("eval:bool(bpy.data.objects['Zdroj'].library)"); await check(`Link: objekt z knihovny (${l})`, () => l === true);
   },
+  /* UV Editor: A, G posun UV (hover nad editorem), Ctrl+Z. Pozice se čtou z dat. */
+  uvedit: async ({ check, cmd, page, wait, box, key, type, tab }) => {
+    await tab("UV Editing"); await check("UV Editing: edit mode", (s) => s.mode === "EDIT_MESH");
+    const R = await cmd("eval:(lambda w: [[r.x, w.height - r.y - r.height, r.width, r.height] for a in w.screen.areas if a.type == 'IMAGE_EDITOR' for r in a.regions if r.type == 'WINDOW'][0])(bpy.context.window_manager.windows[0])");
+    const x = box.x + R[0] + R[2] / 2, y = box.y + R[1] + R[3] / 2; await page.mouse.move(x, y, { steps: 3 }); await wait(400);
+    const uv = "eval:(lambda o: (o.update_from_editmode(), round(sum(d.uv[0] for d in o.data.uv_layers.active.data), 3))[1])(bpy.context.object)", u0 = await cmd(uv);
+    await key("a", 500); await key("g", 300); await key("x", 200); await type("0.25"); await key("Enter", 800); await page.screenshot({ path: "out/jr_uvedit.png" });
+    const u1 = await cmd(uv), n = await cmd("eval:len(bpy.context.object.data.uv_layers.active.data)"); await check(`G X 0.25 posune UV (${u0} -> ${u1}, ${n} rohů)`, () => Math.abs(u1 - u0 - 0.25 * n) < 0.01);
+    await page.keyboard.press("Control+z"); await wait(900); const u2 = await cmd(uv); await check(`Ctrl+Z vrátí UV (${u2})`, () => Math.abs(u2 - u0) < 0.01);
+  },
+  /* Weight paint: vrstva vah, tah, Ctrl+Z. */
+  wpaint: async ({ check, cmd, page, wait, mid }) => {
+    await cmd("o=bpy.context.object; bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.subdivide(number_cuts=8); bpy.ops.object.mode_set(mode='OBJECT'); g=o.vertex_groups.new(name='W'); bpy.ops.object.mode_set(mode='WEIGHT_PAINT')"); await wait(2000); await check("Weight Paint mód", (s) => s.mode === "PAINT_WEIGHT");
+    const n = "eval:sum(1 for v in bpy.context.object.data.vertices for g in v.groups if g.weight > 0.01)", n0 = await cmd(n), m = mid(); await page.mouse.move(m[0] - 30, m[1] - 20); await wait(300); await page.mouse.down(); for (let i = 0; i < 14; i++) { await page.mouse.move(m[0] - 30 + i * 5, m[1] - 20 + i * 2); await wait(30); } await page.mouse.up(); await wait(1200); await page.screenshot({ path: "out/jr_wpaint.png" });
+    const n1 = await cmd(n); await check(`tah přidá váhy (${n0} -> ${n1})`, () => n1 > n0); await page.keyboard.press("Control+z"); await wait(1000); const n2 = await cmd(n); await check(`Ctrl+Z vrátí (${n2})`, () => n2 === n0);
+  },
+  /* 2D Animation: nová vrstva, tah do ní, přepnutí materiálu (barvy), guma (Ctrl+tah). */
+  gp2: async ({ cmd, check, page, wait, box }) => {
+    await cmd("bpy.ops.wm.read_homefile(app_template='2D_Animation', use_factory_startup=True)"); await wait(6000); await page.keyboard.press("Escape"); await wait(600);
+    const V = await cmd("view"), m = [box.x + V[0] + V[2] / 2, box.y + V[1] + V[3] / 2]; const pts = "eval:[[l.name, sum(len(d.strokes) for d in [l.current_frame().drawing] if l.current_frame())] for l in bpy.context.object.data.layers]";
+    const stroke = async (dy) => { await page.mouse.move(m[0] - 100, m[1] + dy); await wait(150); await page.mouse.down(); for (let i = 0; i < 20; i++) { await page.mouse.move(m[0] - 100 + i * 10, m[1] + dy); await wait(16); } await page.mouse.up(); await wait(800); };
+    const l0 = await cmd(pts); console.log("GP2 " + JSON.stringify(l0)); await cmd("gp=bpy.context.object.data; gp.layers.active=gp.layers.new('Nova', set_active=True); gp.layers.active.frames.new(bpy.context.scene.frame_current)"); await wait(800); await stroke(-40);
+    const l1 = await cmd(pts); console.log("GP2 " + JSON.stringify(l1)); await check("tah je v nové vrstvě", () => Array.isArray(l1) && l1.some((x) => x[0] === "Nova" && x[1] === 1)); await page.screenshot({ path: "out/jr_gp2_layer.png" });
+    await page.keyboard.down("Control"); await page.mouse.move(m[0] - 100, m[1] - 40); await wait(200); await page.mouse.down(); for (let i = 0; i < 20; i++) { await page.mouse.move(m[0] - 100 + i * 10, m[1] - 40); await wait(16); } await page.mouse.up(); await page.keyboard.up("Control"); await wait(900);
+    const l2 = await cmd(pts); console.log("GP2 " + JSON.stringify(l2)); await page.screenshot({ path: "out/jr_gp2_erase.png" }); await check("Ctrl+tah (guma) smaže tah", () => Array.isArray(l2) && l2.every((x) => x[0] !== "Nova" || x[1] === 0));
+  },
+  /* J4: klik na záložku workspace hned po přepnutí na Shading (běží překlad MP). Bez čekání na překreslení. */
+  j4: async ({ check, cmd, page, wait, box }) => {
+    const xs = { Shading: 655, Animation: 725, Layout: 287, Modeling: 350 }, go = async (n, ms) => { await page.mouse.move(box.x + xs[n], box.y + 13); await wait(ms); await page.mouse.click(box.x + xs[n], box.y + 13); };
+    let lost = 0; const ws = "eval:bpy.context.window_manager.windows[0].workspace.name";
+    for (const [a, ms] of [["Animation", 250], ["Layout", 100], ["Modeling", 30], ["Animation", 250], ["Layout", 100], ["Modeling", 30]]) {
+      await go("Shading", 250); await wait(150); await go(a, ms);
+      let w = null; for (let i = 0; i < 40; i++) { await wait(500); w = await cmd(ws); if (w === a) break; }
+      console.log(`J4 Shading -> ${a} prodleva ${ms} ms: ${w}`); if (w !== a) lost++;
+    }
+    await check(`ztracených kliků ${lost} z 6`, () => lost === 0);
+  },
   /* UI: F3 hledání, Modifier přes Shift+A menu v nodech není; rozdělení oblasti přes menu View, Preferences okno. */
   ui: async ({ hover, key, check, page, wait, type, tab }) => {
     await hover(); await key("F3", 700); await type("subdivide"); await wait(500); await page.keyboard.press("Escape"); await wait(300); await page.keyboard.press("Escape"); await wait(400); await check("F3 a Esc nezmění mód", (s) => s.mode === "OBJECT");
     for (const t of ["Modeling", "Sculpting", "UV Editing", "Texture Paint", "Shading", "Animation", "Rendering", "Compositing", "Geometry Nodes", "Layout"]) { await tab(t); await check("workspace " + t, (s) => s.ws === t); }
   },
 };
-for (const [n, f] of Object.entries(J)) if (which === "all" || which.split(",").includes(n)) await run(n, f);
+for (const [n, f] of Object.entries(J)) if ((which === "all" && n !== "j4") || which.split(",").includes(n)) await run(n, f); /* j4 = otevřená chyba, BACKLOG J4: spouštět zvlášť */
 console.log("TABULKA " + results.map((r) => `${r[0]}:${r[1] || r[2] || r[3] || r[4] ? "CHYBA" : "OK"}`).join(" "));
 await browser.close();
 process.exit(results.some((r) => r[1] || r[2] || r[3] || r[4]) ? 1 : 0);

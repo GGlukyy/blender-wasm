@@ -7,9 +7,9 @@ Výsledek: 🟡 PC ✅ (regres Chrome i `webkit_sim`: 0 FAIL), iPad a Mac neově
 - A1: `?webkit_sim=1` = limity a featury Safari z telemetrie, v Chrome.
 - B1, B2: prohlídka `?auto=tour&tel=1` (75 kroků, ~5 min) + `scripts/tour_report.py`.
 - **H33 (nový nález cesty `select`): výběr objektu klikem podle bounding boxu.** Objekt uvnitř většího (nábytek v pokoji) nešel vybrat, klik do prázdného rohu vybral šikmý objekt. Teď mesh podle trojúhelníků, kamera, světlo a empty podle tvaru.
-- Cesty navíc: text3d, pie, select, f12, script, curve, rename, modui, prefs, nodes, append. Žádná další chyba.
+- Cesty navíc: text3d, pie, select, f12, script, curve, rename, modui, prefs, nodes, append, uvedit, wpaint, gp2. Žádná další chyba.
 - `regress_all` teď hlásí spadlý test jako FAIL. **Pozor: `bar` padal od G1 (3. 11.) a regres ho hlásil jako OK. Starší „0 FAIL" tuhle sekci nepokrývaly.** Chyba byla v testu (ovládal lištu myší, E zapnul Pointer Lock), test teď používá dotyk: PASS.
-- Pushnuto: fork `ipad` 2bbe06a6, `ipad-5.3-wip` 77e849e9 (J1, nepřeloženo a netestováno), `master` P45 až P54. Zip `out/itch_2026-11-07_0825.zip` (nahrává Lukáš).
+- Pushnuto: fork `ipad` 2bbe06a6, `ipad-5.3-wip` 77e849e9 (J1, nepřeloženo a netestováno), `master` P45 až P55. Zip `out/itch_2026-11-07_0825.zip` (nahrává Lukáš).
 
 **Důkaz**
 - H32: `h32_win.sh` bez opravy 2 FAIL, stav `snap=1 prop=0 prop_obj=1`, stejný jako sonda v tvé relaci `5t7t2k` (žádný autosave). S opravou 4 PASS, záměrný drag-toggle dál funguje.
@@ -20,12 +20,12 @@ Výsledek: 🟡 PC ✅ (regres Chrome i `webkit_sim`: 0 FAIL), iPad a Mac neově
 - Regres po H33 (`out/regress_p51.log`): 62 sekcí, 0 FAIL, cesty 24/24. Běžel ještě se starým `bar`, ten je ověřen zvlášť.
 - A2: `regress_sim.sh` (`webkit_sim=1`): 62 sekcí, 0 FAIL, cesty 24/24, žádná nová chyba. Hook ověřen: `s1b` pod ním správně selhává. Varianta `ipad=1` jen cesty a prohlídka (celý regres ~80 min se nevešel): cesty 23/24, `ui` 1× ze 4 selhalo (J4).
 - Prohlídka na posledním buildu: Chrome a `webkit_sim&ipad=1`: 75 kroků, 0 problémů.
-- `modui` (Chrome i `webkit_sim`): kontextové menu, hodnota dvojklikem a tažením, Add Modifier, apply. OK, desktop bevel 24 v = web. `prefs`, `nodes`, `append` taky OK v obou. `modui`, `prefs`, `nodes`, `append` a 3 případy box selectu vznikly po regresi, běžely jen samostatně.
+- `modui` (Chrome i `webkit_sim`): kontextové menu, hodnota dvojklikem a tažením, Add Modifier, apply. OK, desktop bevel 24 v = web. `prefs`, `nodes`, `append` taky OK v obou. `uvedit`, `wpaint`, `gp2` OK jen v Chrome. Všechny tyhle cesty a 3 případy box selectu vznikly po regresi, běžely jen samostatně.
 
 **Co nefunguje / není jisté**
 - H32: `h32stress_win.sh` 30 startů + klik na MP bez pojistky: 0 výskytů. Robot ztrátu nevyvolal, takže nevím, kde se `mouseup` u tebe ztrácí. S `tel=1` to ukáže událost `h32_release`.
 - H31 (střídání obrázků): sedí na stejný mechanismus (odhad), neověřeno.
-- J4: klik na záložku workspace se 1× ze 4 nechytil (`ipad=1` sim), příčina neznámá.
+- J4: rychlý klik na záložku hned po přepnutí na Shading se ztratí 1× z 6, i v čistém Chrome (prodleva 30 až 100 ms po pohybu myši, `journey_win.sh j4`). Příčina neznámá, s desktopem nesrovnáno, neopravuji.
 - J3: `prefs_sweep` jednou spadl `memory access out of bounds`, pak 7× PASS. Příčina neznámá.
 - H33: armatura v Object módu, lattice, metaball, GP, křivky bez objemu dál podle bounding boxu.
 - `webkit_sim` neumí chyby překladu WebKitu (např. `location(115)`). Cmd v prohlídce nejde.
