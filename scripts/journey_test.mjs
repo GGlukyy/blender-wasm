@@ -602,6 +602,19 @@ const J = {
     await drop("s_trojuhelnikem.blend", Buffer.from(blend)); await wait(3500);
     await check("přetažený .blend se otevře", (s) => s.objs === 4 && s.file === "/uploads/s_trojuhelnikem.blend");
   },
+  /* 8. 11.: Safari dialog Open ("Drag & drop a folder"): přetažený SOUBOR dřív hlásil "Please drop a folder, not a file". Jen webkit_sim (Chrome má jiný dialog). */
+  dropmodal: async ({ check, cmd, page, wait }) => {
+    if (!/webkit_sim=1/.test(Q)) { await check("jen s webkit_sim=1 (Safari dialog)", () => true); return; }
+    await cmd("bpy.ops.mesh.primitive_monkey_add(location=(0, 3, 0)); bpy.ops.wm.save_as_mainfile(filepath='/tmp/dm_src.blend')"); await wait(1500);
+    const blend = await page.evaluate(() => [...window.Module.FS.readFile("/tmp/dm_src.blend")]);
+    await cmd("bpy.ops.wm.read_homefile(use_factory_startup=True); bpy.ops.wm.save_as_mainfile(filepath='/tmp/dm_empty.blend')"); await wait(2000);
+    await page.evaluate(() => { window.__blenderFileOpenHook(); }); await wait(800);
+    const zone = await page.evaluate(() => !!document.getElementById("localdir-dropzone")); await check(`Safari dialog Open je vidět (${zone})`, () => zone);
+    await page.evaluate((b) => { const dt = new DataTransfer(); dt.items.add(new File([new Uint8Array(b)], "opice.blend"));
+      document.getElementById("localdir-dropzone").dispatchEvent(new DragEvent("drop", { dataTransfer: dt, bubbles: true, cancelable: true })); }, blend);
+    await wait(3500);
+    await check("přetažený .blend v dialogu se otevře", (s) => s.objs === 4 && s.file === "/uploads/opice.blend");
+  },
   /* 8. 11.: sevření prstů na trackpadu v Safari (Mac, iPad s Magic Keyboard) = jen gesturestart/gesturechange, žádné ctrl+wheel.
    * Chrome nemá GestureEvent, proto Event + scale. Desktop Blender na Macu sevřením zoomuje. */
   pinch: async ({ check, cmd, page, wait, mid }) => {

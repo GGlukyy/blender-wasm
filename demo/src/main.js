@@ -981,21 +981,22 @@ function dropModalPick() {
      * wasm FS and let Blender's file browser open that directory. */
     const fileInput = zone.querySelector("#dz-input");
     zone.querySelector("#dz-files").onclick = () => fileInput.click();
-    fileInput.onchange = async () => {
+    const takeFiles = async (list) => {
       try {
         const FS = window.Module.FS;
         try { FS.mkdir("/uploads"); } catch (e) { /* exists */ }
-        for (const f of fileInput.files) {
+        for (const f of list) {
           statusEl.textContent = "Loading “" + f.name + "”…";
           FS.writeFile("/uploads/" + f.name, new Uint8Array(await f.arrayBuffer()));
         }
-        const fl = [...fileInput.files];
+        const fl = [...list];
         if (fl.length === 1 && /\.blend$/i.test(fl[0].name)) finish("file:/uploads/" + fl[0].name);
         else if (fl.length) finish("/uploads");
       } catch (err) {
         statusEl.textContent = "Failed: " + (err && err.message || err);
       }
     };
+    fileInput.onchange = () => takeFiles(fileInput.files);
     ov.addEventListener("click", (e) => { if (e.target === ov) finish(null); });
 
     const hl = (on) => { zone.style.borderColor = on ? "#e87d0d" : "#555"; zone.style.background = on ? "#242018" : "#1c1c1c"; };
@@ -1010,7 +1011,8 @@ function dropModalPick() {
         const entry = items[i].webkitGetAsEntry && items[i].webkitGetAsEntry();
         if (entry && entry.isDirectory) { rootEntry = entry; break; }
       }
-      if (!rootEntry) { statusEl.textContent = "Please drop a folder, not a file."; return; }
+      /* Dropped file(s) instead of a folder: same as "Choose file(s)…" (one .blend opens right away). */
+      if (!rootEntry) { if (e.dataTransfer.files.length) takeFiles(e.dataTransfer.files); else statusEl.textContent = "Please drop a folder or a file."; return; }
       try {
         statusEl.textContent = "Reading “" + rootEntry.name + "”…";
         const mountPoint = await mountDropEntry(rootEntry);
