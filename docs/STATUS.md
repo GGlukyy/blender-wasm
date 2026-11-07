@@ -1,3 +1,30 @@
+# 8. 11. noc — lov chyb jako uživatel: 4 nové opravy jen pro web (H36–H39)
+Výsledek: 🟡 PC ✅ (každá oprava test Chrome i `webkit_sim`, bez opravy test FAIL), iPad neověřeno
+
+**Co jsem udělal**
+- **H36:** Ctrl+C v 3D pohledu ukázal zelený pruh „Export hotový: Stáhnout copybuffer.blend". Je to interní soubor Blenderu. Už se neukazuje.
+- **H37 (iPad klávesnice):** znaky z dlouhého podržení (č, ř, ž) a z autokorekce přijdou jen jako text bez klávesy. Shell je zahazoval, v Blenderu chyběla diakritika („Kočička" -> „Koika"). Teď dojdou.
+- **H38:** soubor přetažený na Blender (mimo dialog Open) neměl obsluhu. Prohlížeč pak soubor otevřel místo stránky a rozdělaná práce zmizela. Teď: .blend se otevře (zeptá se na neuložené změny), .obj/.stl/.ply/.fbx/.gltf/.glb/.usd se importují jako v desktopu, obrázky se načtou.
+- **H39 (Safari trackpad):** sevření prstů na trackpadu (Mac, iPad s Magic Keyboard) nezoomovalo. Teď zoomuje, s prstem na displeji se nic nemění (to dělá touch.js).
+- Nové cesty bez nálezu: `keys2` (Alt+A, Ctrl+L, Ctrl+I, Shift+R, Shift+Tab, Shift+C, Ctrl+Alt+Q), `expr` (1+2, 10cm, 90°), `unicode` (česká klávesnice, soubor s diakritikou), `clip` (Ctrl+C/V objektu i hodnoty).
+- J4 (ztracený klik na záložku): hypotéza dvojkliku nepotvrzena, nerozhodné, nechávám.
+- Pushnuto: `master` P68–P71.
+
+**Důkaz**
+- `journey_win.sh clip|dropfile|pinch|unicode|expr|keys2` a `kbdtext_win.sh`: Chrome i `webkit_sim` PASS. Bez opravy: `clip` FAIL (pruh), `kbdtext` FAIL („Koika e"), `dropfile` FAIL, `pinch` FAIL (zoom beze změny).
+- Desktop 5.2.3: import téhož .obj = 4 objekty, „Tri", 3 vrcholy, jako web.
+- Po změnách: `touch`, `touch_modal`, `autokbd`, `autokbd_mid`, `open_single` PASS.
+
+**Co nefunguje / není jisté**
+- `regress_sim` běží (od 00:10). `editors` FAIL = nedoběhl do limitu, souběžně jsem pouštěl své testy (odhad: souběh). Pustím znovu sám.
+- `autokbd_mouse` padá i bez mých změn (myší režim nemá touchbar), v regresu není.
+- Na iPadu nic z toho neověřeno.
+
+**Co otestovat na iPadu (po B3 níže)**
+1. Klepni dvakrát na jméno objektu ve Vlastnostech, na klávesnici podrž „c" a vyber „č". Čekám: „č" se objeví v Blenderu.
+2. Split View se Soubory: přetáhni .obj nebo .blend na Blender. Čekám: import / otevření, stránka zůstane.
+3. S Magic Keyboard: sevření na trackpadu nad 3D pohledem. Čekám: zoom.
+
 # 8. 11. 00:05 — B3c/B3d: proč iPad večer padal (ne paměť) + lepší telemetrie
 Výsledek: 🟡 PC ✅ (testy níže), příčinu pádu na iPadu ještě NEZNÁM
 
