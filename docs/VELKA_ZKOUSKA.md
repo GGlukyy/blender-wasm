@@ -9,7 +9,7 @@ a v tom, že na iPadu/Macu nikdo neprojde všechno najednou.
   ...InFragmentStage/InVertexStage = 8, maxBindGroups 4…), BEZ featury `dual-source-blending`, storage textury jen tier1 (r32*),
   `override` zakázané (vynutit náš ovrPatch), stejné cesty jako `_isIpadUA`/WebKit (S1b). Ověřit, že S1 chybu (MP nekreslí) a GP
   chybu (tahy chybí) tento režim ZREPRODUKUJE na starém buildu -> pak je režim užitečný.
-- [ ] A2 Celý `regress_all.sh` ještě jednou s `webkit_sim=1` (+ `ipad=1` varianta). Každá nová chyba = položka v BACKLOGu (důkaz + 3b).
+- [~] (7.11. 07:43 `regress_sim.sh` po H33: 62 sekcí, 0 FAIL, cesty 24/24, žádná nová chyba. Hook ověřen: `s1b` pod ním správně selhává na `webkit:true`. `ipad=1`: celý regres se do 09:00 nevešel, jen cesty a prohlídka) A2 Celý `regress_all.sh` ještě jednou s `webkit_sim=1` (+ `ipad=1` varianta). Každá nová chyba = položka v BACKLOGu (důkaz + 3b).
 - [x] (7.11. pravidlo v CLAUDE.md 3.3) A3 Pravidlo do budoucna: každá změna se testuje v obou režimech (Chrome i webkit_sim).
 
 ## Část B — "Prohlídka" jedním odkazem (Lukáš: iPad, školní Mac přes tunel, ~5 min bez klikání)
