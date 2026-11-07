@@ -10,6 +10,8 @@ const want = (_q.get("tourpart") || PARTS.join(",")).split(",");
 /* B3: `&tourws=Sculpting` = v části ws jen tyhle workspace, `&tourskip=Sculpting` = všechny kromě nich (čárky, _ místo mezery) */
 const wsList = (k) => (_q.get(k) || "").split(",").filter(Boolean);
 const wsOnly = wsList("tourws"), wsSkip = wsList("tourskip");
+/* B3b: `&tourrep=3` = část ws třikrát: roste paměť při každém průchodu (únik), nebo jen poprvé? */
+const wsRep = +_q.get("tourrep") || 1;
 
 export const TOUR_PY = `
 import json
@@ -130,9 +132,10 @@ const setWs = (n) => py(`bpy.context.window.workspace = bpy.data.workspaces[${JS
 
 const SCEN = {
   ws: async () => {
-    for (const n of await ev("[w.name for w in bpy.data.workspaces]")) {
-      const id = n.replace(/ /g, "_");
-      if ((wsOnly.length && !wsOnly.includes(id)) || wsSkip.includes(id)) continue;
+    for (let rep = 0; rep < wsRep; rep++) for (const n of await ev("[w.name for w in bpy.data.workspaces]")) {
+      const id = (rep ? "r" + rep + "_" : "") + n.replace(/ /g, "_");
+      const base = n.replace(/ /g, "_");
+      if ((wsOnly.length && !wsOnly.includes(base)) || wsSkip.includes(base)) continue;
       await step("ws_" + id, () => setWs(n), 2500);
       if (!await ev("bool(_view()[1])")) continue;
       for (const t of ["SOLID", "MATERIAL", "RENDERED", "WIREFRAME"]) await step(`ws_${id}_${t}`, () => py(`_shade('${t}')`), t === "MATERIAL" || t === "RENDERED" ? 4000 : 1500);
