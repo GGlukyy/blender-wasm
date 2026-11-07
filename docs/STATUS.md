@@ -10,7 +10,7 @@ Výsledek: 🟡 PC ✅ (jen vybrané testy, celý regres ne), iPad a Mac neově�
 **Důkaz**
 - Predikce: pokud zkratku nikdo neblokuje, záznam ukáže `defaultPrevented=false`. Platí: bez opravy 18 kombinací propadlo, např. Shift+F5, F3, Alt+D.
 - `journey_win.sh areas` s opravou: Chrome i `webkit_sim=1`: propadlo 0 z 68 stisků, OK, fail=0 err=0 gpu=0 py=0.
-- Klávesy dál dojdou do Blenderu: Shift+F1 až F12 přepnou všech 12 editorů. `utf8`, `autokbd`, cesty `scene`, `edit2` PASS (jen Chrome).
+- Klávesy dál dojdou do Blenderu: Shift+F1 až F12 přepnou všech 12 editorů. `scene`, `edit2` OK v Chrome i `webkit_sim=1`. `utf8`, `autokbd` PASS (jen Chrome).
 
 **Co nefunguje / není jisté**
 - **Celý regres po této změně neběžel** (60+ min, nevešel se do deadlinu 09:00). Je potřeba ho pustit, změna se týká všech kláves.
@@ -27,7 +27,8 @@ Výsledek: 🟡 PC ✅ (jen vybrané testy, celý regres ne), iPad a Mac neově�
 - Celý `regress_all`, pak `regress_sim.sh`. Pak nový zip pro itch (nahrává Lukáš).
 - Seznam a body B3, J4 z bloku níže platí dál.
 
-**Úklid:** viz řádek v běhu níže, testy zastavené. Dev server a tunel nechávám (spustil je Lukáš). `web/` dál netrackované, necommitoval jsem.
+**Úklid:** `pgrep -af "regress|fuzz|_win.sh|_test"` prázdné, testový `node` na Windows 0. Dev server a tunel nechávám (spustil je Lukáš). `web/` dál netrackované, necommitoval jsem. `out/.idle_stop` nezapisuji, položka 6 fronty není nikdy hotová.
+- Na Windows zůstaly 2 procesy `chrome.exe` (PID 16832 renderer, 30244 crashpad, profil `playwright_chromiumdev_profile-Tc3ePd`), běží od 6. 11. 19:42. Bez okna. Tento běh je nespustil a nevím jistě, čí jsou, tak jsem je nezabíjel. Vypadají jako zbytek testu (odhad). Když je nechceš: `taskkill /PID 16832 /PID 30244 /F`.
 
 # 7. 11. 08:40 — H32, U2, A1, A2, B1, B2 a H33 (nový nález)
 Výsledek: 🟡 PC ✅ (regres Chrome i `webkit_sim`: 0 FAIL), iPad a Mac neověřeno
