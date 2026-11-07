@@ -82,6 +82,7 @@ const run = async (name, fn) => {
   console.log(`CESTA ${name}: ${fails === 0 && !errs.length && !gpuerrs.length && !py.length ? "OK" : "CHYBA"} fail=${fails} err=${errs.length} gpu=${gpuerrs.length} py=${py.length}`);
   await page.context().close();
 };
+const __MODTAB__ = (await import("node:fs")).readFileSync(new URL("./modtab.py", import.meta.url), "utf8");
 const J = {
   /* Add-on Extensions (bl_pkg) po startu i po druhém startu s uloženými Preferences. */
   addons: async ({ cmd, check, page, wait, hover, key }) => {
@@ -376,6 +377,28 @@ const J = {
     const c1 = await cmd("eval:len(bpy.data.collections)"); await check(`M nová kolekce ${c0} -> ${c1}`, () => c1 === c0 + 1);
     await page.keyboard.press("Control+z"); await wait(900); const c2 = await cmd("eval:len(bpy.data.collections)"); await check(`Ctrl+Z kolekce ${c2}`, () => c2 === c0);
   },
+  /* Modifikátory: počty a objem porovnat s desktopem (scripts/modtab.py, journey_desktop.py, DESK modtab). Kód tabulky sem vkládá journey_win.sh jako __MODTAB__. */
+  modtab: async ({ cmd, check, wait }) => {
+    await cmd(__MODTAB__); await wait(300); const n = await cmd("eval:len(MODTAB)"); const rows = [];
+    for (let i = 0; i < n; i++) { await cmd(`_mt = modtab_row(${i})`); let r = null; for (let k = 0; k < 40 && !r; k++) { r = await cmd("eval:_mt"); await wait(100); } rows.push(r); console.log("MODTAB " + JSON.stringify(r)); }
+    await check("všechny řádky", () => rows.length === n && rows.every((r) => r && r[1] !== "ERR"));
+  },
+  /* Boolean se společnou stěnou (FLOAT selhává) + hláška v UI. Web nemá GMP ani Manifold (BACKLOG H35). Desktop 5.2.3: EXACT (12,10) (16,14) (20,12). */
+  boolcop: async ({ cmd, check, wait, page }) => {
+    await cmd(`def _bc(solver, loc):
+    for o in list(bpy.data.objects):
+        if o.type == 'MESH': bpy.data.objects.remove(o)
+    bpy.ops.mesh.primitive_cube_add(size=2, location=(0,0,0)); a=bpy.context.object
+    bpy.ops.mesh.primitive_cube_add(size=2, location=loc); b=bpy.context.object
+    bpy.context.view_layer.objects.active=a
+    m=a.modifiers.new('b','BOOLEAN'); m.object=b; m.operation='UNION'; m.solver=solver
+    e=a.evaluated_get(bpy.context.evaluated_depsgraph_get()); me=e.to_mesh(); r=[len(me.vertices),len(me.polygons)]; e.to_mesh_clear(); return r`); await wait(300);
+    const row = {};
+    for (const s of ["FLOAT", "EXACT", "MANIFOLD"]) { row[s] = [await cmd(`eval:_bc('${s}',(2,0,0))`), await cmd(`eval:_bc('${s}',(1,0,0))`), await cmd(`eval:_bc('${s}',(1,1,1))`)]; console.log("BOOLCOP " + s + " " + JSON.stringify(row[s])); }
+    const def = await cmd("eval:bpy.data.objects.new('x', bpy.data.meshes.new('x')).modifiers.new('b','BOOLEAN').solver"); console.log("BOOLCOP výchozí solver " + def);
+    await page.screenshot({ path: "out/jr_boolcop.png" });
+    await check("EXACT jako desktop", () => JSON.stringify(row.EXACT) === "[[12,10],[16,14],[20,12]]");
+  },
   rename: async ({ hover, key, type, check, cmd, page, wait, box }) => {
     await hover(); await key("F2", 500); await page.keyboard.press("Control+a"); await page.keyboard.type("Krabice"); await wait(300); await key("Enter", 700); await check("F2 přejmenuje", (s) => s.ob === "Krabice");
     const row = await cmd("eval:(lambda w: [[r.x, w.height - r.y - r.height, r.width, r.height] for a in w.screen.areas if a.type == 'OUTLINER' for r in a.regions if r.type == 'WINDOW'][0])(bpy.context.window_manager.windows[0])"); console.log("OUTLINER " + JSON.stringify(row));
@@ -503,7 +526,7 @@ const J = {
     for (const t of ["Modeling", "Sculpting", "UV Editing", "Texture Paint", "Shading", "Animation", "Rendering", "Compositing", "Geometry Nodes", "Layout"]) { await tab(t); await check("workspace " + t, (s) => s.ws === t); }
   },
 };
-for (const [n, f] of Object.entries(J)) if ((which === "all" && n !== "j4") || which.split(",").includes(n)) await run(n, f); /* j4 = otevřená chyba, BACKLOG J4: spouštět zvlášť */
+for (const [n, f] of Object.entries(J)) if ((which === "all" && !["j4", "boolcop"].includes(n)) || which.split(",").includes(n)) await run(n, f); /* j4, boolcop = otevřené chyby (BACKLOG J4, H35): spouštět zvlášť */
 console.log("TABULKA " + results.map((r) => `${r[0]}:${r[1] || r[2] || r[3] || r[4] ? "CHYBA" : "OK"}`).join(" "));
 await browser.close();
 process.exit(results.some((r) => r[1] || r[2] || r[3] || r[4]) ? 1 : 0);
