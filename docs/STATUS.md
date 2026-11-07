@@ -1,3 +1,7 @@
+# 7. 11. noc — běží (smyčka, deadline 09:00)
+**Predikce H32:** Pokud Blender po ztraceném `mouseup` zůstane v drag-toggle (`handler_region_drag_toggle`, zámek osy Y v hlavičce, BLOCKING), pak po stisku na MP, uvolnění mimo canvas a vodorovném pohybu (bez tlačítka) se změní shading a/nebo Snap/Proportional. Měření: `scripts/h32_win.sh`.
+**Fakt z telemetrie:** sonda H30 chytila výskyt: relace `5t7t2k` (7. 11., Windows Chrome), LMB 58150 ms, `H30_STATE snap=1 prop=0 prop_obj=1` nejpozději v 62001 ms, soubor prázdný (žádná obnova autosave). Hypotéza „jen z autosave" tím neplatí.
+
 # 6. 11. 21:58 — tři nové cesty (donut, sculpt2, anim2), žádná nová chyba
 Výsledek: 🟡 PC ✅ (jen `donut`, `sculpt2`, `anim2`), iPad neověřeno
 
