@@ -442,6 +442,27 @@ const J = {
     await page.mouse.move(m[0], m[1]); await wait(300); await page.mouse.down({ button: "middle" }); await page.mouse.move(m[0] + 80, m[1] + 30, { steps: 6 }); await page.mouse.up({ button: "middle" }); await wait(500);
     const c = await cmd("obj"); const b = await page.locator("#canvas").boundingBox(); await page.keyboard.press("Alt+a"); await wait(400); await page.mouse.move(b.x + c[0], b.y + c[1], { steps: 2 }); await wait(250); await page.mouse.click(b.x + c[0], b.y + c[1]); await wait(600); const n = await cmd("eval:[o.name for o in bpy.context.selected_objects]"); await check(`klik po orbitu trefí kostku ${JSON.stringify(n)}`, () => n.length === 1 && n[0] === "Cube");
   },
+  /* Oblasti skutečnou myší: rozdělení a spojení rohem, tažení hranice, Shift+F1..F12 mění editor. Zkratky nesmí jít do prohlížeče (Shift+F5 = reload = ztráta práce). */
+  areas: async ({ check, cmd, page, wait, hover, key, at }) => {
+    const H = (await cmd("view"))[5], list = () => cmd("eval:[(a.type, a.x, a.y, a.width, a.height) for a in bpy.context.window_manager.windows[0].screen.areas]"), views = async () => (await list()).filter((a) => a[0] === "VIEW_3D").sort((a, b) => a[1] - b[1]);
+    const drag = async (p, q) => { const a = at(p), b = at(q); await page.mouse.move(a[0], a[1], { steps: 3 }); await wait(400); await page.mouse.down(); await wait(150); await page.mouse.move(b[0], b[1], { steps: 12 }); await wait(400); await page.mouse.up(); await wait(1200); };
+    await page.evaluate(() => { window.__KD = []; window.addEventListener("keydown", (e) => { const n = (e.ctrlKey ? "Ctrl+" : "") + (e.altKey ? "Alt+" : "") + (e.shiftKey ? "Shift+" : "") + e.key; setTimeout(() => window.__KD.push([n, e.defaultPrevented]), 0); }, true); });
+    const n0 = (await list()).length; let [v] = await views(); const top = H - (v[2] + v[4]);
+    await drag([v[1] + 4, top + 4], [v[1] + 300, top + 8]); let s = await check(`roh dovnitř rozdělí oblast (${n0} -> ${n0 + 1})`, (s) => s.areas === n0 + 1);
+    let vs = await views(); console.log("AREAS " + JSON.stringify(vs)); await page.screenshot({ path: "out/jr_areas_split.png" });
+    if (vs.length === 2) { await drag([vs[1][1] + 4, top + 4], [vs[0][1] + vs[0][3] - 12, top + vs[0][4] / 2]); await check(`roh ven spojí oblasti (${n0})`, (s) => s.areas === n0); }
+    [v] = await views(); const h0 = v[4], y0 = H - v[2]; await drag([v[1] + 300, y0], [v[1] + 300, y0 - 80]); [v] = await views(); console.log(`AREAS hranice ${h0} -> ${v[4]}`); await check(`tažení hranice o 80 px změní výšku (${h0} -> ${v[4]})`, () => Math.abs(h0 - v[4] - 80) < 25);
+    await hover();
+    const want = { F1: "FILE_BROWSER", F2: "CLIP_EDITOR", F3: "NODE_EDITOR", F4: "CONSOLE", F5: "VIEW_3D", F6: "GRAPH_EDITOR", F7: "PROPERTIES", F8: "SEQUENCE_EDITOR", F9: "OUTLINER", F10: "IMAGE_EDITOR", F11: "TEXT_EDITOR", F12: "DOPESHEET_EDITOR" };
+    const base = await list(), idx = base.findIndex((a) => a[0] === "VIEW_3D"), got = {};
+    for (const k of Object.keys(want)) { await page.keyboard.press("Shift+" + k); await wait(900); got[k] = (await list())[idx][0]; }
+    console.log("AREAS editory " + JSON.stringify(got)); await page.keyboard.press("Shift+F5"); await wait(900);
+    const bad = Object.keys(want).filter((k) => got[k] !== want[k]); await check(`Shift+F1..F12 přepnou editor, špatně: ${bad.join(",") || "nic"}`, () => bad.length === 0); await check("Shift+F5 vrátí 3D pohled", (s) => s.shade === "SOLID");
+    await hover(); for (const k of ["s", "o", "n", "p", "r", "f", "g", "d", "l"]) { await page.keyboard.press("Control+" + k); await wait(500); await page.keyboard.press("Escape"); await wait(400); }
+    for (const k of ["F2", "F3", "F5", "Alt+d", "Alt+f", "Alt+e"]) { await page.keyboard.press(k); await wait(500); await page.keyboard.press("Escape"); await wait(400); }
+    const kd = await page.evaluate(() => window.__KD), leak = [...new Set(kd.filter((x) => !x[1] && /^(Ctrl\+|Shift\+F|F\d|Alt\+[a-z]$)/.test(x[0])).map((x) => x[0]))]; console.log("AREAS klávesy " + kd.length + " do prohlížeče: " + JSON.stringify(leak));
+    await check(`zkratky zablokované pro prohlížeč, propadlo: ${leak.join(",") || "nic"}`, () => kd.length > 0 && leak.length === 0);
+  },
   /* UI: F3 hledání, Modifier přes Shift+A menu v nodech není; rozdělení oblasti přes menu View, Preferences okno. */
   ui: async ({ hover, key, check, page, wait, type, tab }) => {
     await hover(); await key("F3", 700); await type("subdivide"); await wait(500); await page.keyboard.press("Escape"); await wait(300); await page.keyboard.press("Escape"); await wait(400); await check("F3 a Esc nezmění mód", (s) => s.mode === "OBJECT");

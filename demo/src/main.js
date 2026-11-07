@@ -724,7 +724,9 @@ window.addEventListener(
      * character keys have no page default over the canvas, so leave them be. */
     /* Ctrl/Cmd+V must keep its default or the browser never fires `paste` (clipboard bridge below). */
     if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === "v" || e.key === "V")) return;
-    if (e.ctrlKey || e.metaKey || NAV_KEYS.has(e.key)) e.preventDefault();
+    /* F1-F12 (Shift+F5 = reload, F3 = find, F12 = devtools) and Alt+ASCII letter (Alt+D = address bar) are Blender shortcuts too.
+     * Alt with a non-ASCII `key` is Mac Option typing a character: leave it alone. */
+    if (e.ctrlKey || e.metaKey || NAV_KEYS.has(e.key) || /^F([1-9]|1[0-2])$/.test(e.key) || (e.altKey && /^[a-zA-Z]$/.test(e.key))) e.preventDefault();
   },
   { capture: true },
 );

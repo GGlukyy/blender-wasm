@@ -1,3 +1,34 @@
+# 7. 11. 08:55 — H34: F-klávesy a Alt+písmeno šly i do prohlížeče (cesta `areas`)
+Výsledek: 🟡 PC ✅ (jen vybrané testy, celý regres ne), iPad a Mac neověřeno
+
+**Co jsem udělal**
+- Nová cesta `areas` (skutečná myš): rozdělení oblasti rohem, spojení, tažení hranice, Shift+F1 až F12 mění editor. To všechno v Blenderu fungovalo.
+- **H34 (nový nález):** stránka neblokovala F1 až F12 ani Alt+písmeno. V prohlížeči tedy mohly spustit svou akci: Shift+F5 reload (ztráta neuložené práce), F3 hledání, F12 DevTools, Alt+D adresní řádek. Oprava jen v `demo/src/main.js`, bez rebuildu Blenderu.
+- Alt s ne-ASCII znakem (Option na Macu píše znaky) nechávám být.
+- Pushnuto: `master` P57. Zip jsem nedělal, oprava v `out/itch_2026-11-07_0825.zip` není.
+
+**Důkaz**
+- Predikce: pokud zkratku nikdo neblokuje, záznam ukáže `defaultPrevented=false`. Platí: bez opravy 18 kombinací propadlo, např. Shift+F5, F3, Alt+D.
+- `journey_win.sh areas` s opravou: Chrome i `webkit_sim=1`: propadlo 0 z 68 stisků, OK, fail=0 err=0 gpu=0 py=0.
+- Klávesy dál dojdou do Blenderu: Shift+F1 až F12 přepnou všech 12 editorů. `utf8`, `autokbd`, cesty `scene`, `edit2` PASS (jen Chrome).
+
+**Co nefunguje / není jisté**
+- **Celý regres po této změně neběžel** (60+ min, nevešel se do deadlinu 09:00). Je potřeba ho pustit, změna se týká všech kláves.
+- Skutečný reload jsem neviděl: Playwright zkratky prohlížeče nespouští, důkaz je jen `defaultPrevented`. V opravdovém prohlížeči to nikdo nezkusil.
+- Na Macu/Safari netestováno. Psaní přes AltGr a Option robot nezkoušel.
+- Vedlejší efekt: při běžícím Blenderu nejde F5 (reload) ani F12 (DevTools) z klávesnice, DevTools otevřeš z menu prohlížeče. Když to bude vadit, řekni.
+- `areas` nemá srovnání s desktopem: počty oblastí a editory plynou z keymapy (odhad), stejné kroky v desktop 5.2.3 jsem nedělal. U H34 není co srovnávat, je to chyba jen webu.
+
+**Co otestovat na iPadu / Macu (před seznamem z bloku níže)**
+1. Mac Safari nebo iPad s klávesnicí: Shift+F5 nad 3D pohledem. Stránka se nesmí načíst znovu, editor se přepne na 3D.
+2. Mac: Alt+D nad vybraným objektem udělá linked duplicate. V textovém poli Blenderu Option+písmeno pořád píše znak.
+
+**Co dál**
+- Celý `regress_all`, pak `regress_sim.sh`. Pak nový zip pro itch (nahrává Lukáš).
+- Seznam a body B3, J4 z bloku níže platí dál.
+
+**Úklid:** viz řádek v běhu níže, testy zastavené. Dev server a tunel nechávám (spustil je Lukáš). `web/` dál netrackované, necommitoval jsem.
+
 # 7. 11. 08:40 — H32, U2, A1, A2, B1, B2 a H33 (nový nález)
 Výsledek: 🟡 PC ✅ (regres Chrome i `webkit_sim`: 0 FAIL), iPad a Mac neověřeno
 
