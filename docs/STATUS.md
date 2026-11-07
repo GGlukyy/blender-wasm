@@ -7,6 +7,7 @@ Výsledek: 🟡 PC ✅ (testy níže), příčinu pádu na iPadu ještě NEZNÁM
   - Prohlídka si ztráty nevšimla, jela dál 2 kroky. Pak `createBindGroup` chyba a vykreslování se zaseklo.
   - `e26w8l`: žádná ztráta GPU v telemetrii. Data prostě skončí při tvorbě shaderu Material Preview ve Sculptingu. Odhad: spadla celá karta (WebContent), ale bez Jetsamu.
   - Padá to na různých místech, takže to není jedna konkrétní operace.
+- **Vzor ze všech 7 prohlídek z iPadu (7. 11.):** 5× konec přesně ve **Sculptingu** (14:25, 14:28, 14:32, 22:25, 22:29, tedy před opravou bind groups i po ní). 4× je poslední událost tvorba pipeline `MADefault_Surface_depth_mesh` / `_deferred_mesh` s rozložením vrcholů ze sculpt módu (pozice a normála ve dvou bufferech). Pak telemetrie úplně zmlkne, bez `lost`. Na PC (Chrome, sim, sim+ipad) tytéž pipeline projdou. 2× `destroyed` jinde (Geometry Nodes RENDERED, Scripting).
 - **Co znamená `destroyed`:** podle WebGPU spec a zdrojáku WebKitu buď (1) JS zavolal `device.destroy()`, nebo (2) WebKit zrušil zařízení na straně GPU procesu. Náš C++ kód zařízení nikdy neuvolňuje (`wgpuDeviceRelease` je vypnutý). Odhad: spíš (2).
 - **Nová telemetrie (fork `5256d10d`):** `lost_detail` má `destroy_called` a `destroy_stack`. Ukáže, jestli `destroy()` volal náš kód a odkud.
 - **Prohlídka:** po ztrátě GPU skončí a označí krok `GPU LOST`. Dřív jela dál a chyba se ukázala jinde. Když Blender po ztrátě neodpovídá, čeká jen 15 s místo 240 s.
@@ -23,9 +24,10 @@ Výsledek: 🟡 PC ✅ (testy níže), příčinu pádu na iPadu ještě NEZNÁM
 - `regress_all`/`regress_sim` po této změně neběžel (změna je jen telemetrie a prohlídka). Viz konec běhu níže.
 
 **Co otestovat na iPadu (ráno, nejdřív tohle)**
-1. Normální karta (ne soukromá): `https://<tunel>/?auto=tour&tel=1&pool=4`. Nech běžet, nesahej. Až se zasekne nebo ukáže červený pruh, napiš mi čas.
-2. Hned potom: Nastavení → Soukromí a zabezpečení → Analýza a vylepšení → Data analýzy. Hledej soubory z té doby, které začínají **`com.apple.WebKit.GPU`** nebo **`com.apple.WebKit.WebContent`** (i `JetsamEvent`). Pošli mi jejich jména a časy, jeden otevři a vyfoť začátek.
-3. Když pruh ukáže `GPU se odpojila (destroyed)`, nic víc nedělej, telemetrie řekne, kdo ji zavřel.
+1. **Nejdřív krátký test (~1 min):** `https://<tunel>/?auto=tour&tel=1&pool=4&tourws=Sculpting`. Jen Sculpting: Solid, Material Preview, Rendered, Wireframe. Čekám: spadne při Material Preview. Když spadne i takhle, je to jedna konkrétní věc a umím ji honit. Když nespadne, pád potřebuje předchozí workspace.
+2. Celá prohlídka: normální karta (ne soukromá): `https://<tunel>/?auto=tour&tel=1&pool=4`. Nech běžet, nesahej. Až se zasekne nebo ukáže červený pruh, napiš mi čas.
+3. Po každém pádu: Nastavení → Soukromí a zabezpečení → Analýza a vylepšení → Data analýzy. Hledej soubory z té doby, které začínají **`com.apple.WebKit.GPU`** nebo **`com.apple.WebKit.WebContent`** (i `JetsamEvent`). Pošli mi jejich jména a časy, jeden otevři a vyfoť začátek.
+4. Když pruh ukáže `GPU se odpojila (destroyed)`, nic víc nedělej, telemetrie řekne, kdo ji zavřel.
 
 **Co dál**
 - Podle `destroy_called` z iPadu: 1 -> opravit místo ve stacku. 0 -> GPU proces / WebKit: hledat, jakou zprávu WebKit odmítá (crash log GPU procesu).
