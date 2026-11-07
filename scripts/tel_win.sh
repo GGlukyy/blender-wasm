@@ -2,7 +2,7 @@
 # M0 telemetrie: Windows Chrome, ?tel=1, ztráta GPU; kontrola out/ipad/tel_*.jsonl. Vyžaduje vite na :5173 (WSL).
 U=${WINUSER:-$(ls /mnt/c/Users | grep -v -i -E 'public|default|all users|desktop.ini' | head -1)}
 W=/mnt/c/Users/$U/p2win; ROOT=$(cd "$(dirname "$0")/.." && pwd)
-F=$ROOT/out/ipad/tel_$(date +%F).jsonl; B=$(wc -l < "$F" 2>/dev/null || echo 0)
+F=$ROOT/out/ipad/tel_$(date -u +%F).jsonl; B=$(wc -l < "$F" 2>/dev/null || echo 0)
 export Q DESTROY WSLENV="Q:DESTROY${WSLENV:+:$WSLENV}"  # "&" v Q by v cmd.exe rozdělilo příkaz
 cp "$ROOT/scripts/tel_test.mjs" "$W/"
 cd "$W" && cmd.exe /c "set CHROME=C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe&& set PW=playwright-core&& node tel_test.mjs" 2>&1 | tr -d '\r' | tail -10

@@ -78,6 +78,11 @@ export function installTelemetry() {
   for (const ev of ["keydown", "pointerdown"]) {
     addEventListener(ev, (e) => inputs.push(Math.round(performance.now() - t0) + " " + ev + " " + (e.key || e.pointerType + ":" + e.button)), true);
   }
+  /* Kolečko vs trackpad: GHOST dělá z každé wheel události celý zub zoomu. Velikosti deltaY ze Safari (Mac, iPad + trackpad)
+   * rozhodnou, jestli sčítat malé kroky (max 1 záznam za 150 ms, ať ring nezaplaví). */
+  let wLast = 0;
+  addEventListener("wheel", (e) => { const n = performance.now(); if (n - wLast < 150) return; wLast = n;
+    inputs.push(Math.round(n - t0) + " wheel dy=" + Math.round(e.deltaY * 10) / 10 + " dx=" + Math.round(e.deltaX * 10) / 10 + " m=" + e.deltaMode + (e.ctrlKey ? " ctrl" : "")); }, { capture: true, passive: true });
   /* D1: render-thread heartbeat (shared wasm memory, see gpu/webgpu/webgpu_heartbeat.hh). Read on the
    * main thread so it is still reported when the render pthread is frozen. */
   const PHASES = ["", "draw", "shader_module", "pipeline", "map_read", "submit", "present", "idle"];
