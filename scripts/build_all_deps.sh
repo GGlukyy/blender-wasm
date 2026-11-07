@@ -45,6 +45,8 @@ wave openexr openexr
 wave ocio ocio
 # Wave 6: OpenImageIO (OpenEXR, OCIO, png, jpeg, fmt, robin-map, zstd).
 wave oiio oiio
+# H35: Exact a Manifold boolean
+wave boolean gmp manifold
 # Wave 7: OpenVDB (TBB, Imath, zlib) — Voxel Remesh / Mesh to Volume (kolo 66).
 wave openvdb openvdb
 

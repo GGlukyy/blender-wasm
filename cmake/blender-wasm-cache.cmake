@@ -64,10 +64,10 @@ set(WITH_PULSEAUDIO          OFF CACHE BOOL "")
 set(WITH_OPENAL              OFF CACHE BOOL "")
 set(WITH_FFTW3               OFF CACHE BOOL "")
 set(WITH_IMAGE_OPENJPEG      OFF CACHE BOOL "")
-set(WITH_GMP                 OFF CACHE BOOL "")
+set(WITH_GMP                 ON  CACHE BOOL "") # H35: Exact boolean, scripts/build_gmp.sh
 set(WITH_POTRACE             OFF CACHE BOOL "")
 set(WITH_HARU                OFF CACHE BOOL "")
-set(WITH_MANIFOLD            OFF CACHE BOOL "")
+set(WITH_MANIFOLD            ON  CACHE BOOL "") # H35, scripts/build_manifold.sh
 set(WITH_QUADRIFLOW          ON  CACHE BOOL "")   # bundled extern/quadriflow (kolo 66): Quad Remesh
 set(WITH_INPUT_NDOF          OFF CACHE BOOL "")
 set(WITH_BULLET              ON  CACHE BOOL "")   # bundled extern/bullet2 (kolo 66): Rigid Body

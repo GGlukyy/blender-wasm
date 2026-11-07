@@ -383,7 +383,7 @@ const J = {
     for (let i = 0; i < n; i++) { await cmd(`_mt = modtab_row(${i})`); let r = null; for (let k = 0; k < 40 && !r; k++) { r = await cmd("eval:_mt"); await wait(100); } rows.push(r); console.log("MODTAB " + JSON.stringify(r)); }
     await check("všechny řádky", () => rows.length === n && rows.every((r) => r && r[1] !== "ERR"));
   },
-  /* Boolean se společnou stěnou (FLOAT selhává) + hláška v UI. Web nemá GMP ani Manifold (BACKLOG H35). Desktop 5.2.3: EXACT (12,10) (16,14) (20,12). */
+  /* Boolean se společnou stěnou (FLOAT selhává), BACKLOG H35. Čísla z desktopu 5.2.3. */
   boolcop: async ({ cmd, check, wait, page }) => {
     await cmd(`def _bc(solver, loc):
     for o in list(bpy.data.objects):
@@ -398,6 +398,8 @@ const J = {
     const def = await cmd("eval:bpy.data.objects.new('x', bpy.data.meshes.new('x')).modifiers.new('b','BOOLEAN').solver"); console.log("BOOLCOP výchozí solver " + def);
     await page.screenshot({ path: "out/jr_boolcop.png" });
     await check("EXACT jako desktop", () => JSON.stringify(row.EXACT) === "[[12,10],[16,14],[20,12]]");
+    await check("MANIFOLD jako desktop", () => JSON.stringify(row.MANIFOLD) === "[[12,10],[16,10],[20,12]]");
+    /* FLOAT se tu netestuje: u překryvu je nestabilní i v desktopu 5.2.3, mezi opakováními (24,5) (27,8) (27,6). */
   },
   rename: async ({ hover, key, type, check, cmd, page, wait, box }) => {
     await hover(); await key("F2", 500); await page.keyboard.press("Control+a"); await page.keyboard.type("Krabice"); await wait(300); await key("Enter", 700); await check("F2 přejmenuje", (s) => s.ob === "Krabice");
@@ -526,7 +528,7 @@ const J = {
     for (const t of ["Modeling", "Sculpting", "UV Editing", "Texture Paint", "Shading", "Animation", "Rendering", "Compositing", "Geometry Nodes", "Layout"]) { await tab(t); await check("workspace " + t, (s) => s.ws === t); }
   },
 };
-for (const [n, f] of Object.entries(J)) if ((which === "all" && !["j4", "boolcop"].includes(n)) || which.split(",").includes(n)) await run(n, f); /* j4, boolcop = otevřené chyby (BACKLOG J4, H35): spouštět zvlášť */
+for (const [n, f] of Object.entries(J)) if ((which === "all" && n !== "j4") || which.split(",").includes(n)) await run(n, f); /* j4 = otevřená chyba, BACKLOG J4: spouštět zvlášť */
 console.log("TABULKA " + results.map((r) => `${r[0]}:${r[1] || r[2] || r[3] || r[4] ? "CHYBA" : "OK"}`).join(" "));
 await browser.close();
 process.exit(results.some((r) => r[1] || r[2] || r[3] || r[4]) ? 1 : 0);
