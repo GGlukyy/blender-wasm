@@ -7,7 +7,7 @@ const sid = Math.random().toString(36).slice(2, 8);
 const t0 = performance.now();
 const ring = (n) => { const a = []; return { push(x) { a.push(x); if (a.length > n) a.shift(); }, all: () => a.slice() }; };
 const logs = ring(15), inputs = ring(12), events = [];
-let perf = null, gmem = null, adapter = null, queue = [];
+let perf = null, gmem = null, adapter = null, queue = [], churn = null;
 
 const send = (o, beacon) => {
   o.sid = sid; o.t = Math.round(performance.now() - t0);
@@ -50,6 +50,7 @@ export function installTelemetry() {
     nav: (performance.getEntriesByType("navigation")[0] || {}).type, prev_sid: prev && prev.split(":")[0], prev_clean: !!prev && prev.endsWith(":bye") });
   try {
     new BroadcastChannel("blender-pipe").onmessage = (e) => send({ kind: "pipe", ...e.data }, true);
+    new BroadcastChannel("blender-churn").onmessage = (e) => { churn = e.data; };
     new BroadcastChannel("blender-perf").onmessage = (e) => { perf = e.data; };
     new BroadcastChannel("blender-gpuerr").onmessage = (e) => gpuErr(e.data);
     new BroadcastChannel("blender-gpumem").onmessage = (e) => {
@@ -103,6 +104,7 @@ export function installTelemetry() {
       o.imm_bufs = perf.imm_bufs; o.imm_kb = perf.imm_kb; o.heap_mb = Math.round(perf.heap_mb); o.heap_used_mb = Math.round(perf.heap_used_mb);
     }
     if (gmem) o.gpu = gmem;
+    if (churn) { o.tex_alloc_mb = Math.round(churn.alloc); o.tex_freed_mb = Math.round(churn.freed); }
     try { heartbeat(o); } catch (e) { o.rt_err = String(e).slice(0, 80); }
     if (performance.memory) { o.js_used_mb = Math.round(performance.memory.usedJSHeapSize / 1048576); o.js_total_mb = Math.round(performance.memory.totalJSHeapSize / 1048576); }
     /* D5b (JS část): „účetní“ součet toho, co alokujeme my. Jetsam − acct_mb = paměť Safari, kterou neovládáme. */

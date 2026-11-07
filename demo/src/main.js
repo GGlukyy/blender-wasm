@@ -1642,6 +1642,7 @@ window.Module = {
       if (window.__CAPENV) for (const k in window.__CAPENV) ENV[k] = window.__CAPENV[k];
       ENV.WGPU_PERF = "1"; /* cheap; also feeds the memory guard */
       { const _q = new URLSearchParams(location.search); /* T3: max 2 snímky v GPU frontě; iPad default zapnuto, ?bp=0 vypne, ?bp=1 zapne na PC */
+        if (_q.get("bgpurge") === "0") ENV.WGPU_BG_PURGE = "0"; /* B3: A/B, bind groupy zničených textur zůstanou v cache */
         const _bp = _q.get("bp"); if (_bp === "1" || (_bp !== "0" && (_q.get("ipad") === "1" || _isIpadUA))) ENV.WGPU_BP = "1"; }
       telEvent("flags", { bp: ENV.WGPU_BP || "0", mp_lite: MP_LITE, pool: POOL_N, ipad_ua: _isIpadUA }); /* D1: co se na zařízení opravdu zapnulo */
       if (new URLSearchParams(location.search).get("perf") === "1" && new URLSearchParams(location.search).get("reglog") === "1") ENV.WGPU_REGIONLOG = "1";
@@ -1880,6 +1881,27 @@ try {
       const vb = ((d.vertex && d.vertex.buffers) || []).map((b) => b ? b.arrayStride + ":" + [...b.attributes].map((a) => a.shaderLocation + "=" + a.format).join(",") : "-").join("|");
       (crumbCh || (crumbCh = new BroadcastChannel("blender-pipe"))).postMessage({ label: d.label, vb, n: stats.pipes });
     } catch (_) {} };
+    /* B3: kolik MB textur vzniklo a kolik se zničilo za celou relaci (živé počítadlo tex_mb tohle nevidí) */
+    if (crumbOn) {
+      const BPP = { rgba32float: 16, rg32float: 8, rgba16float: 8, "depth32float-stencil8": 8, r8unorm: 1, r8uint: 1, r8snorm: 1, rg8unorm: 2, r16float: 2, r16uint: 2, rg16float: 4 };
+      const texMB = new WeakMap(), churn = { alloc: 0, freed: 0 };
+      let churnCh = null;
+      const post = () => { try { (churnCh || (churnCh = new BroadcastChannel("blender-churn"))).postMessage(churn); } catch (_) {} };
+      const origCT = P.createTexture, TP = globalThis.GPUTexture && GPUTexture.prototype, origD = TP && TP.destroy;
+      if (TP) {
+        P.createTexture = function (d) {
+          const t = origCT.call(this, d);
+          const mb = t.width * t.height * t.depthOrArrayLayers * (BPP[t.format] || 4) * (t.mipLevelCount > 1 ? 1.33 : 1) / 1048576;
+          texMB.set(t, mb); churn.alloc += mb; post();
+          return t;
+        };
+        TP.destroy = function () {
+          const mb = texMB.get(this);
+          if (mb) { churn.freed += mb; texMB.delete(this); post(); }
+          return origD.call(this);
+        };
+      }
+    }
     P.createRenderPipeline = function (d) {
       stats.pipes++;
       try {
