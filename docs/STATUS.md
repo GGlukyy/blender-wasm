@@ -1,3 +1,35 @@
+# 8. 11. 00:05 — B3c/B3d: proč iPad večer padal (ne paměť) + lepší telemetrie
+Výsledek: 🟡 PC ✅ (testy níže), příčinu pádu na iPadu ještě NEZNÁM
+
+**Co jsem udělal**
+- **B3c rozbor obou večerních relací.** Obě měly opravu bind groups (`bg_purged` v logu).
+  - `rt5vum`: GPU se ztratila 0,5 s po přepnutí na workspace Scripting. Důvod od Safari: **`destroyed`**, ne `unknown`. V tu chvíli textury 96 MB, buffery 16 MB, fronta prázdná. **Paměť to není.**
+  - Prohlídka si ztráty nevšimla, jela dál 2 kroky. Pak `createBindGroup` chyba a vykreslování se zaseklo.
+  - `e26w8l`: žádná ztráta GPU v telemetrii. Data prostě skončí při tvorbě shaderu Material Preview ve Sculptingu. Odhad: spadla celá karta (WebContent), ale bez Jetsamu.
+  - Padá to na různých místech, takže to není jedna konkrétní operace.
+- **Co znamená `destroyed`:** podle WebGPU spec a zdrojáku WebKitu buď (1) JS zavolal `device.destroy()`, nebo (2) WebKit zrušil zařízení na straně GPU procesu. Náš C++ kód zařízení nikdy neuvolňuje (`wgpuDeviceRelease` je vypnutý). Odhad: spíš (2).
+- **Nová telemetrie (fork `5256d10d`):** `lost_detail` má `destroy_called` a `destroy_stack`. Ukáže, jestli `destroy()` volal náš kód a odkud.
+- **Prohlídka:** po ztrátě GPU skončí a označí krok `GPU LOST`. Dřív jela dál a chyba se ukázala jinde. Když Blender po ztrátě neodpovídá, čeká jen 15 s místo 240 s.
+- Pushnuto: fork `ipad` 5256d10d, `master` P67 (`BLENDER_REF`, testy, tour.js).
+
+**Důkaz**
+- Predikce: když `destroy()` volá náš kód, telemetrie ukáže `destroy_called=1` a stack. Když ne, `destroy_called=0`.
+- `tel_win.sh`: pád GPU procesu -> `destroy_called=0`. `DESTROY=1` (`destroy()` ve vlákně) -> `destroy_called=1` + stack. Obojí PASS, Chrome i `webkit_sim`.
+- `DESTROY_AT=ws_Layout_SOLID tour_win.sh` (shodí GPU proces): prohlídka skončí krokem `ws_Layout_MATERIAL` s `GPU LOST`. PASS Chrome i `webkit_sim`.
+- Celá prohlídka Chrome 75/75 a `webkit_sim` 75/75, 0 problémů.
+
+**Co nefunguje / není jisté**
+- Proč WebKit zařízení ruší, nevím. Na PC to neumím vyvolat (Chrome dává při pádu `unknown`).
+- `regress_all`/`regress_sim` po této změně neběžel (změna je jen telemetrie a prohlídka). Viz konec běhu níže.
+
+**Co otestovat na iPadu (ráno, nejdřív tohle)**
+1. Normální karta (ne soukromá): `https://<tunel>/?auto=tour&tel=1&pool=4`. Nech běžet, nesahej. Až se zasekne nebo ukáže červený pruh, napiš mi čas.
+2. Hned potom: Nastavení → Soukromí a zabezpečení → Analýza a vylepšení → Data analýzy. Hledej soubory z té doby, které začínají **`com.apple.WebKit.GPU`** nebo **`com.apple.WebKit.WebContent`** (i `JetsamEvent`). Pošli mi jejich jména a časy, jeden otevři a vyfoť začátek.
+3. Když pruh ukáže `GPU se odpojila (destroyed)`, nic víc nedělej, telemetrie řekne, kdo ji zavřel.
+
+**Co dál**
+- Podle `destroy_called` z iPadu: 1 -> opravit místo ve stacku. 0 -> GPU proces / WebKit: hledat, jakou zprávu WebKit odmítá (crash log GPU procesu).
+
 # 7. 11. 21:58 — H35: Exact a Manifold boolean na webu (nový nález), B3 a T1 v bloku níže
 Výsledek: 🟡 PC ✅ (jen vybrané testy, regres běží), iPad neověřeno
 

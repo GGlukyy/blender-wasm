@@ -80,8 +80,11 @@ export function tourReply(s) { reply && reply(JSON.parse(s)); }
 /* Blender stojí, když překládá shadery: na iPadu klidně minuty. Bez odpovědi do limitu = zaseklý. */
 const PY_TIMEOUT = 240000;
 const py = (code) => new Promise((res, rej) => {
-  const t = setTimeout(() => { reply = null; rej(new Error("HANG: Python neodpověděl do " + PY_TIMEOUT / 1000 + " s")); }, PY_TIMEOUT);
-  reply = (v) => { clearTimeout(t); reply = null;
+  const t = setTimeout(() => { reply = null; clearInterval(lt); rej(new Error("HANG: Python neodpověděl do " + PY_TIMEOUT / 1000 + " s")); }, PY_TIMEOUT);
+  /* B3d: po ztrátě GPU Blender často už neodpoví; nečekat celý limit */
+  const t0 = performance.now();
+  const lt = setInterval(() => { if (window.__GPU_LOST__ && performance.now() - t0 > 15000) { clearTimeout(t); clearInterval(lt); reply = null; rej(new Error("HANG: Python po ztrátě GPU neodpověděl do 15 s")); } }, 1000);
+  reply = (v) => { clearTimeout(t); clearInterval(lt); reply = null;
     if (v && v.err) rej(new Error(v.err)); else res(v); };
   const FS = window.Module.FS;
   try { FS.unlink("/tmp/tour_cmd"); } catch (_) {}
@@ -118,6 +121,8 @@ const step = async (name, fn, ms = 1500) => {
   const t0 = performance.now(); let ok = true, err = "";
   try { await fn(); await quiet(ms); }
   catch (e) { ok = false; err = String(e.message || e).slice(0, 300); if (err.startsWith("HANG")) hung = true; }
+  /* B3d: po ztrátě GPU prohlídka dřív jela dál a padala jinde; teď krok, kde se GPU ztratila, ukončí prohlídku */
+  if (window.__GPU_LOST__) { ok = false; err = "GPU LOST " + window.__GPU_LOST__ + (err ? " | " + err : ""); hung = true; }
   const dur = Math.round(performance.now() - t0);
   const s = hung ? { url: "", std: -1, blank: true } : await shot();
   const r = { i: count++, name, ok, err, ms: dur, gpuerrs: cur.errs.slice(0, 4), nerr: cur.errs.length, blank: s.blank, std: s.std };

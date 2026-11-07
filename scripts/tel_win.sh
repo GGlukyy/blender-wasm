@@ -3,6 +3,7 @@
 U=${WINUSER:-$(ls /mnt/c/Users | grep -v -i -E 'public|default|all users|desktop.ini' | head -1)}
 W=/mnt/c/Users/$U/p2win; ROOT=$(cd "$(dirname "$0")/.." && pwd)
 F=$ROOT/out/ipad/tel_$(date +%F).jsonl; B=$(wc -l < "$F" 2>/dev/null || echo 0)
+export Q DESTROY WSLENV="Q:DESTROY${WSLENV:+:$WSLENV}"  # "&" v Q by v cmd.exe rozdělilo příkaz
 cp "$ROOT/scripts/tel_test.mjs" "$W/"
 cd "$W" && cmd.exe /c "set CHROME=C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe&& set PW=playwright-core&& node tel_test.mjs" 2>&1 | tr -d '\r' | tail -10
 tail -n +$((B+1)) "$F" > "$ROOT/out/tel_last.jsonl"
@@ -10,3 +11,8 @@ S=$(grep -c '"kind":"sample"' "$ROOT/out/tel_last.jsonl"); L=$(grep -c '"kind":"
 G=$(grep -c '"gpu":{' "$ROOT/out/tel_last.jsonl"); D=$(grep -c '"kind":"lost_detail"' "$ROOT/out/tel_last.jsonl")
 H=$(grep '"kind":"sample"' "$ROOT/out/tel_last.jsonl" | grep -c '"heap_mb"')
 if [ "$S" -ge 10 ] && [ "$L" -ge 1 ] && [ "$A" -ge 1 ] && [ "$H" -ge 5 ] && [ "$G" -ge 5 ] && [ "$D" -ge 1 ]; then echo "PASS tel: samples=$S (s heap=$H, s gpu=$G) adapter=$A lost=$L lost_detail=$D"; else echo "FAIL tel: samples=$S heap=$H gpu=$G adapter=$A lost=$L lost_detail=$D"; fi
+# B3d: kdo zavolal device.destroy(). DESTROY=1 -> čekám destroy_called=1 + stack, jinak (pád GPU procesu) 0.
+DC=$(grep '"kind":"lost_detail"' "$ROOT/out/tel_last.jsonl" | grep -o '"destroy_called":[01]' | head -1 | cut -d: -f2)
+DS=$(grep '"kind":"lost_detail"' "$ROOT/out/tel_last.jsonl" | grep -c '"destroy_stack":"Error')
+if [ -n "$DESTROY" ]; then W1=1; else W1=0; fi
+if [ "$DC" = "$W1" ] && { [ "$W1" = 0 ] || [ "$DS" -ge 1 ]; }; then echo "PASS tel destroy: destroy_called=$DC stack=$DS (DESTROY=${DESTROY:-0})"; else echo "FAIL tel destroy: destroy_called=$DC stack=$DS (DESTROY=${DESTROY:-0})"; fi
