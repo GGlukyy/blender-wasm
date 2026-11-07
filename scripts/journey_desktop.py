@@ -29,7 +29,7 @@ bpy.ops.wm.read_factory_settings(use_empty=False)
 a = bpy.data.objects['Cube']; bpy.ops.mesh.primitive_cube_add(location=(3, 0, 0)); a.select_set(True); bpy.ops.object.join(); print('DESK join objs', len(bpy.data.objects), 'v', len(bpy.context.object.data.vertices))
 bpy.ops.wm.read_factory_settings(use_empty=False)
 o = bpy.data.objects['Cube']; bpy.context.view_layer.objects.active = o; o.modifiers.new('B', 'BEVEL'); print('DESK bevel v', len(o.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.vertices))
-# Cesta objops 7. 11.: duplikáty, Ctrl+J, P L, M.
+# Cesta objops 7. 11.: duplikáty, Ctrl+J, P L (M na pozadí nejde, chce UI: 'No collection selected').
 bpy.ops.wm.read_factory_settings(use_empty=False)
 c = bpy.data.objects['Cube']; bpy.context.view_layer.objects.active = c; c.select_set(True)
 bpy.ops.object.duplicate(linked=False); a = bpy.context.object; print('DESK objops dup', a.name, a.data.name, len(bpy.data.objects))
@@ -37,4 +37,3 @@ bpy.ops.object.duplicate(linked=True); b = bpy.context.object; print('DESK objop
 for o in bpy.data.objects: o.select_set(o.type == 'MESH')
 bpy.context.view_layer.objects.active = c; bpy.ops.object.join(); print('DESK objops join v', len(c.data.vertices), sum(o.type == 'MESH' for o in bpy.data.objects))
 bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.mesh.separate(type='LOOSE'); bpy.ops.object.mode_set(mode='OBJECT'); print('DESK objops separate', sum(o.type == 'MESH' for o in bpy.data.objects))
-n = len(bpy.data.collections); bpy.ops.object.move_to_collection(is_new=True, new_collection_name='C2'); print('DESK objops collection', n, '->', len(bpy.data.collections))
