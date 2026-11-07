@@ -483,10 +483,15 @@ const J = {
   j4: async ({ check, cmd, page, wait, box }) => {
     const xs = { Shading: 655, Animation: 725, Layout: 287, Modeling: 350 }, go = async (n, ms) => { await page.mouse.move(box.x + xs[n], box.y + 13); await wait(ms); await page.mouse.click(box.x + xs[n], box.y + 13); };
     let lost = 0; const ws = "eval:bpy.context.window_manager.windows[0].workspace.name";
+    /* J4 pokus: J4DBL=ms nastaví dobu dvojkliku (je-li příčinou dvojklik, při 50 ms ztráty zmizí) */
+    if (process.env.J4DBL) { await cmd(`bpy.context.preferences.inputs.mouse_double_click_time = ${+process.env.J4DBL}`); await wait(300); }
+    /* J4EV=1: výpis událostí Blenderu (LEFTMOUSE PRESS / DBL_CLICK) pro každý pokus */
+    let evs = []; if (process.env.J4EV) { await cmd("bpy.app.debug_events = True"); page.on("console", (m) => { const t = m.text(); if (/LEFTMOUSE/.test(t)) evs.push(t.replace(/\s+/g, " ").slice(0, 160)); }); }
     for (const [a, ms] of [["Animation", 250], ["Layout", 100], ["Modeling", 30], ["Animation", 250], ["Layout", 100], ["Modeling", 30]]) {
       await go("Shading", 250); await wait(150); await go(a, ms);
       let w = null; for (let i = 0; i < 40; i++) { await wait(500); w = await cmd(ws); if (w === a) break; }
       console.log(`J4 Shading -> ${a} prodleva ${ms} ms: ${w}`); if (w !== a) lost++;
+      if (process.env.J4EV) { console.log("J4EV " + evs.join(" || ")); evs = []; }
     }
     await check(`ztracených kliků ${lost} z 6`, () => lost === 0);
   },
