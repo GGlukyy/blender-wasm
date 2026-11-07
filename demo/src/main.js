@@ -613,9 +613,27 @@ window.addEventListener("contextmenu", (e) => e.preventDefault());
 installTouch(canvas);
 const eatGesture = (e) => e.preventDefault();
 canvas.addEventListener("wheel", eatGesture, { passive: false });
-canvas.addEventListener("gesturestart", eatGesture);
-canvas.addEventListener("gesturechange", eatGesture);
-canvas.addEventListener("gestureend", eatGesture);
+/* Safari sends a trackpad pinch (Mac, iPad + Magic Keyboard) ONLY as gesture* events, no ctrl+wheel like
+ * Chrome, so after eating them nothing zoomed. Turn each 1.2x scale step into one wheel notch (= one Blender zoom step, so the view follows the fingers; desktop
+ * Blender zooms on pinch too). */
+let pinchScale = 1, touchesDown = 0;
+/* iOS fires gesture* for a touchscreen pinch too; touch.js already zooms from the touches, so only a
+ * pinch with no finger on the screen (trackpad) is handled here. */
+for (const t of ["touchstart", "touchend", "touchcancel"]) canvas.addEventListener(t, (e) => { touchesDown = e.touches.length; }, { passive: true, capture: true });
+const pinchGesture = (e) => {
+  e.preventDefault();
+  if (touchesDown > 0) return;
+  if (e.type === "gesturestart" || typeof e.scale !== "number" || !(e.scale > 0)) { pinchScale = 1; return; }
+  if (e.type !== "gesturechange") return;
+  while (e.scale / pinchScale > 1.2 || e.scale / pinchScale < 1 / 1.2) {
+    const zoomIn = e.scale > pinchScale;
+    pinchScale *= zoomIn ? 1.2 : 1 / 1.2;
+    canvas.dispatchEvent(new WheelEvent("wheel", { deltaY: zoomIn ? -100 : 100, clientX: e.clientX, clientY: e.clientY, bubbles: true, cancelable: true }));
+  }
+};
+canvas.addEventListener("gesturestart", pinchGesture);
+canvas.addEventListener("gesturechange", pinchGesture);
+canvas.addEventListener("gestureend", pinchGesture);
 /* Middle-mouse over the canvas triggers the browser's autoscroll widget, which
  * steals MMB (Blender's orbit/pan). Same proxied-event reason emscripten can't
  * cancel it; do it here. dragstart would otherwise start a browser drag during

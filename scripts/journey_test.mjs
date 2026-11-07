@@ -602,6 +602,24 @@ const J = {
     await drop("s_trojuhelnikem.blend", Buffer.from(blend)); await wait(3500);
     await check("přetažený .blend se otevře", (s) => s.objs === 4 && s.file === "/uploads/s_trojuhelnikem.blend");
   },
+  /* 8. 11.: sevření prstů na trackpadu v Safari (Mac, iPad s Magic Keyboard) = jen gesturestart/gesturechange, žádné ctrl+wheel.
+   * Chrome nemá GestureEvent, proto Event + scale. Desktop Blender na Macu sevřením zoomuje. */
+  pinch: async ({ check, cmd, page, wait, mid }) => {
+    const dist = () => cmd("eval:round([a for a in bpy.context.window_manager.windows[0].screen.areas if a.type == 'VIEW_3D'][0].spaces[0].region_3d.view_distance, 3)");
+    const m = mid(); await page.mouse.move(m[0], m[1]); await wait(400);
+    const g = (scales) => page.evaluate(([sc, x, y]) => { const c = document.getElementById("canvas");
+      const ev = (t, s) => { const e = new Event(t, { bubbles: true, cancelable: true }); Object.assign(e, { scale: s, clientX: x, clientY: y }); c.dispatchEvent(e); };
+      ev("gesturestart", 1); for (const s of sc) ev("gesturechange", s); ev("gestureend", sc[sc.length - 1]); }, [scales, m[0], m[1]]);
+    const d0 = await dist(); await g([1.1, 1.25, 1.4, 1.6, 1.8, 2.0]); await wait(1200); const d1 = await dist();
+    await check(`roztažení přiblíží: view_distance ${d0} -> ${d1}`, () => d1 < d0);
+    await g([0.9, 0.8, 0.7, 0.6, 0.5]); await wait(1200); const d2 = await dist();
+    await check(`sevření oddálí: ${d1} -> ${d2}`, () => d2 > d1);
+    /* displej iPadu: gesture* chodí i s prsty na displeji; ty zoomuje touch.js, gesto se nesmí přičíst podruhé */
+    await page.evaluate(([x, y]) => { const c = document.getElementById("canvas"), t = new Event("touchstart", { bubbles: true }); t.touches = { length: 2 }; c.dispatchEvent(t); }, [m[0], m[1]]);
+    await g([1.4, 2.0]); await wait(1000); const d3 = await dist();
+    await page.evaluate(() => { const c = document.getElementById("canvas"), t = new Event("touchend", { bubbles: true }); t.touches = { length: 0 }; c.dispatchEvent(t); });
+    await check(`gesto s prsty na displeji nezoomuje: ${d2} -> ${d3}`, () => d3 === d2);
+  },
   /* 8. 11.: schránka. Ctrl+C/Ctrl+V v pohledu = copybuffer.blend v dočasné složce; Ctrl+C/Ctrl+V nad polem = textová schránka (GHOST). */
   clip: async ({ hover, key, check, cmd, page, wait, at }) => {
     await hover(); await key("Control+c", 900); await key("Control+v", 1200); await check("Ctrl+C, Ctrl+V v pohledu: kopie objektu", (s) => s.objs === 4 && s.ob === "Cube.001");
