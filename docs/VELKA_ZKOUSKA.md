@@ -5,19 +5,19 @@ nikdy neviděly. Regrese má 59 sekcí a 0 FAIL, ale **testuje jen Chrome na PC*
 a v tom, že na iPadu/Macu nikdo neprojde všechno najednou.
 
 ## Část A — "Safari na PC" (smyčka sama, hlavní páka)
-- [ ] A1 Režim `?webkit_sim=1` v Chrome, který napodobí omezení Safari: requestDevice JEN s výchozími limity WebGPU (8 SSBO na stage,
+- [x] (7.11. P48 `simcheck_win.sh`: S1 i GP zreprodukované přepínači `sim_nos1=1` a `nodualsrc=0`, s opravami 0 chyb. Neumí chyby překladu WebKitu, např. `location(115)`) A1 Režim `?webkit_sim=1` v Chrome, který napodobí omezení Safari: requestDevice JEN s výchozími limity WebGPU (8 SSBO na stage,
   ...InFragmentStage/InVertexStage = 8, maxBindGroups 4…), BEZ featury `dual-source-blending`, storage textury jen tier1 (r32*),
   `override` zakázané (vynutit náš ovrPatch), stejné cesty jako `_isIpadUA`/WebKit (S1b). Ověřit, že S1 chybu (MP nekreslí) a GP
   chybu (tahy chybí) tento režim ZREPRODUKUJE na starém buildu -> pak je režim užitečný.
 - [ ] A2 Celý `regress_all.sh` ještě jednou s `webkit_sim=1` (+ `ipad=1` varianta). Každá nová chyba = položka v BACKLOGu (důkaz + 3b).
-- [ ] A3 Pravidlo do budoucna: každá změna se testuje v obou režimech (Chrome i webkit_sim).
+- [x] (7.11. pravidlo v CLAUDE.md 3.3) A3 Pravidlo do budoucna: každá změna se testuje v obou režimech (Chrome i webkit_sim).
 
 ## Část B — "Prohlídka" jedním odkazem (Lukáš: iPad, školní Mac přes tunel, ~5 min bez klikání)
-- [ ] B1 Scénář `?auto=tour&tel=1`: projde VŠECHNY workspace (Layout…Scripting), v každém Solid -> Material Preview -> Rendered ->
+- [x] (7.11. P49, `tour_win.sh`: 75 kroků za 274 s, s `tourpart=` jen části. Cmd nejde, main.js překládá jen skutečné klávesy) B1 Scénář `?auto=tour&tel=1`: projde VŠECHNY workspace (Layout…Scripting), v každém Solid -> Material Preview -> Rendered ->
   Wireframe, Edit mode (extrude, loop cut, undo/redo vč. Cmd), Sculpt (tah), Texture Paint (tah), 2D Animation (tah tužkou),
   Geometry Nodes (přidat modifier), Rigify (generate + klik na kost + box), File Save -> reopen, Export glTF. Každý krok
   `auto_step <název>`, po každém kroku screenshot do telemetrie (malý, 256 px) + všechny gpuerr/abort/PIPE_INVALID s názvem kroku.
-- [ ] B2 `scripts/tour_report.py <soubor>`: tabulka krok × zařízení: OK / chyba (první řádek chyby) / chybí obraz (prázdný screenshot).
+- [x] (7.11. P49, screenshoty do `out/tour/<relace>/`) B2 `scripts/tour_report.py <soubor>`: tabulka krok × zařízení: OK / chyba (první řádek chyby) / chybí obraz (prázdný screenshot).
 - [ ] B3 Lukáš spustí na iPadu a na školním Macu (přes tunel z domácího PC, ten musí běžet) — jedna prohlídka = kompletní seznam
   chyb pro daný prohlížeč. Opakovat po každé větší opravě.
 

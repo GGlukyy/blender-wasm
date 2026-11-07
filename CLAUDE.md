@@ -36,7 +36,8 @@ newer Blender/Emscripten versions.
 2. **JS first.** If a problem can be solved in `demo/` (no Blender rebuild), do it there.
 3. **Proof.** A fix is done when (a) a test in `scripts/` or a new one passes on the
    PC (Chrome), and (b) Lukáš confirmed it on the iPad. Write both into
-   `docs/STATUS.md`.
+   `docs/STATUS.md`. Every change is tested in both modes: Chrome and `?webkit_sim=1`
+   (`Q=webkit_sim=1 scripts/tour_win.sh`, whole suite `scripts/regress_sim.sh`).
 4. **Never weaken tests.** No raised tolerances, no deleted asserts.
 5. **Stuck rule.** Same error 2× → ask the `architect` subagent (Opus). 3× → stop,
    write what you tried into `docs/STATUS.md`, propose another task.
