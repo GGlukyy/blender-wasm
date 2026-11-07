@@ -1,3 +1,9 @@
+## T1 — Okna testů (Chrome z Playwrightu) nesmí Lukášovi skákat do očí (7.11. 15:57) — PRIORITA 1, malé, udělej PŘED B3
+Lukáš: okna Blenderu z testů se mu otevírají přes práci, štve ho to. 209 testů volá `chromium.launch` každý zvlášť -> NEupravovat 209 souborů.
+- [ ] Jedno globální místo: `scripts/pw_preload.mjs` načtený přes `NODE_OPTIONS=--import=<cesta>` (dostat do Windows node přes WSLENV, viz LESSONS). Importuje `playwright` a obalí `chromium.launch` (sdílený objekt -> platí i pro `import { chromium }` v testech): přidá `--window-position=$PW_WIN_POS` (výchozí: mimo obrazovku, např. `-3000,0`; Lukáš může nastavit druhý monitor, třeba `1920,0`), a proti zastavení vykreslování skrytého okna: `--disable-backgrounding-occluded-windows --disable-renderer-backgrounding --disable-background-timer-throttling`. Nastavit v jednom místě, které volají všechny `*_win.sh` (společný env/regress_all).
+- [ ] Ověřit, že WebGPU a screenshoty fungují i v okně mimo obrazovku (Chrome může okno vrátit na monitor -> pak druhý monitor nebo `--start-minimized` ZKUSIT jen s anti-throttle flagy). Test: `bone_click_win.sh` + `tour_win.sh` PASS s oknem mimo obrazovku; časy kroků ne horší než dřív.
+- [ ] Do STATUS: jak si Lukáš nastaví druhý monitor (`PW_WIN_POS`), a že může vypnout (`PW_WIN_POS=` prázdné = staré chování).
+
 ## B3 VÝSLEDEK (7.11. 14:31) — prohlídka na iPadu NEDOBĚHLA — PRIORITA 1 dnes
 `tour_report.py`: iPad Safari `8oswfh` 29 kroků, 0 chyb, konec u `ws_Sculpting`; `u5hxxr` 9 kroků, 0 chyb, konec u `ws_Geometry_Nodes_SOLID`. Chrome / sim / sim+ipad=1 doběhnou 75/75 (jen 1 sim+ipad běh `b8q4te` skončil u gn_MATERIAL).
 Žádná zachycená chyba => stránka nejspíš UMŘELA nebo se zastavila (odhad: Jetsam paměť po opakovaném přepínání workspace × Solid/MP/Rendered/Wireframe; nebo uspání karty/zámek obrazovky).
