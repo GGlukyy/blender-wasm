@@ -700,6 +700,16 @@ const J = {
     await page.mouse.move(box.x + 1140, box.y + 143, { steps: 3 }); await wait(300); await page.mouse.move(box.x + 1140, box.y + 169, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 1140, box.y + 169); await wait(1000);
     const gone = await cmd("eval:'Light' not in bpy.data.objects"); await check(`pravé tlačítko ▸ Delete smaže Light (objektů ${n0} -> ${n0 - 1}, ${gone})`, (s) => s.objs === n0 - 1 && gone === true);
   },
+  /* 8. 11.: Preferences ▸ Interface ▸ Resolution Scale 1.5 (na iPadu kvůli prstům): UI se překreslí, kliky trefují zvětšené prvky (záložka, pole v N-panelu), pak zpět 1.0. */
+  uiscale: async ({ check, cmd, page, wait, box, hover, key }) => {
+    await cmd("bpy.context.preferences.view.ui_scale = 1.5"); await wait(2500); await page.screenshot({ path: "out/jr_uiscale_15.png" });
+    const sc = await cmd("eval:round(bpy.context.preferences.system.ui_scale, 3)"); console.log("UISCALE system " + sc);
+    await page.mouse.move(box.x + 525, box.y + 19, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 525, box.y + 19); await wait(2500); await check(`klik na zvětšenou záložku Modeling (ui_scale ${sc})`, (s) => s.ws === "Modeling");
+    await page.mouse.move(box.x + 430, box.y + 19, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 430, box.y + 19); await wait(2500); await check("klik zpět na Layout", (s) => s.ws === "Layout");
+    await hover(); await key("g", 300); await key("x", 200); await key("1", 200); await key("Enter", 900); await check("G X 1 se zvětšeným UI", (s) => s.loc[0] === 1);
+    await cmd("bpy.context.preferences.view.ui_scale = 1.0"); await wait(2000); await page.screenshot({ path: "out/jr_uiscale_10.png" });
+    await page.mouse.move(box.x + 350, box.y + 13, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 350, box.y + 13); await wait(2500); await check("po návratu na 1.0 klik na Modeling", (s) => s.ws === "Modeling");
+  },
   /* 8. 11.: sevření prstů na trackpadu v Safari (Mac, iPad s Magic Keyboard) = jen gesturestart/gesturechange, žádné ctrl+wheel.
    * Chrome nemá GestureEvent, proto Event + scale. Desktop Blender na Macu sevřením zoomuje. */
   pinch: async ({ check, cmd, page, wait, mid }) => {
