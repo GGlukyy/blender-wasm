@@ -860,6 +860,20 @@ const J = {
     await check(`7 = ORTHO, 5 přepne na PERSP (${o1 && o1[0]} -> ${o2 && o2[0]})`, () => o1 && o1[0] === "ORTHO" && o2 && o2[0] === "PERSP");
     await cmd("bpy.context.preferences.inputs.use_emulate_numpad = False");
   },
+  /* 8. 11. večer: trackpad bez prostředního tlačítka: Preferences ▸ Input ▸ Emulate 3 Button Mouse, Alt+tah levým = orbit (mění se rotace
+   * pohledu), Shift+Alt+tah = posun (mění se view_location, rotace ne). Desktop: stejné. Na konci předvolbu vrátit. */
+  emu3: async ({ check, cmd, page, wait, mid }) => {
+    const v = "eval:(lambda r: [[round(x, 3) for x in r.view_rotation], [round(x, 3) for x in r.view_location]])([a.spaces[0].region_3d for a in bpy.context.window.screen.areas if a.type == 'VIEW_3D'][0])";
+    await cmd("bpy.context.preferences.inputs.use_mouse_emulate_3_button = True"); await wait(500);
+    const m = mid();
+    const drag = async (mods) => { await page.mouse.move(m[0], m[1], { steps: 2 }); await wait(250); for (const k of mods) await page.keyboard.down(k); await wait(60); await page.mouse.down();
+      for (let i = 1; i <= 12; i++) { await page.mouse.move(m[0] + i * 10, m[1] + i * 3); await wait(40); } await page.mouse.up(); for (const k of mods.slice().reverse()) await page.keyboard.up(k); await wait(800); };
+    const a0 = await cmd(v); await drag(["Alt"]); const a1 = await cmd(v);
+    await check(`Alt+tah: orbit (rotace ${JSON.stringify(a0 && a0[0])} -> ${JSON.stringify(a1 && a1[0])})`, (s) => a1 && a1[0].join() !== a0[0].join() && s.mode === "OBJECT" && s.sel === 1);
+    await drag(["Shift", "Alt"]); const a2 = await cmd(v);
+    await check(`Shift+Alt+tah: posun (poloha ${JSON.stringify(a1 && a1[1])} -> ${JSON.stringify(a2 && a2[1])}, rotace stejná)`, () => a2 && a2[1].join() !== a1[1].join() && a2[0].join() === a1[0].join());
+    await cmd("bpy.context.preferences.inputs.use_mouse_emulate_3_button = False");
+  },
   /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
   undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
     const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };
