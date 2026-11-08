@@ -1559,18 +1559,38 @@ class _WebBrowser(_wb.BaseBrowser):
 _wb.register('blender-web', None, _WebBrowser('blender-web'), preferred=True)
 _cap_pool()
 bpy.app.handlers.load_post.append(_on_new)
+# B3k: lite platí i po File ▸ New / otevření souboru (persistent). Původní hodnoty si pamatuje a do .blend je při ukládání
+# vrátí (save_pre), po uložení zase lite (save_post), takže soubor z iPadu má na PC svoje stíny / vzorky.
+_ml_orig = {}
+def _ml_items(sc):
+    return ((sc.render, 'render', 'preview_pixel_size', '${MP_LITE_PX}'), (sc.eevee, 'eevee', 'taa_samples', 1), (sc.eevee, 'eevee', 'use_shadows', False),
+            (sc.eevee, 'eevee', 'use_raytracing', False), (sc.eevee, 'eevee', 'use_volumetric_shadows', False), (sc.eevee, 'eevee', 'use_gtao', False))
 def _mp_lite_eevee(*a):
     if '${MP_LITE}' != '1': return
     ok = []
     for sc in bpy.data.scenes:
-        for obj, name, val in ((sc.render, 'preview_pixel_size', '${MP_LITE_PX}'), (sc.eevee, 'taa_samples', 1), (sc.eevee, 'use_shadows', False),
-                               (sc.eevee, 'use_raytracing', False), (sc.eevee, 'use_volumetric_shadows', False), (sc.eevee, 'use_gtao', False)):
+        for obj, grp, name, val in _ml_items(sc):
             try:
-                if hasattr(obj, name): setattr(obj, name, val); ok.append(name)
+                if hasattr(obj, name):
+                    k = (sc.name, grp, name)
+                    if k not in _ml_orig: _ml_orig[k] = getattr(obj, name)
+                    setattr(obj, name, val); ok.append(name)
             except Exception as e: print('MPLITE_EEVEE', name, e)
     print('MPLITE_EEVEE applied ' + ','.join(sorted(set(ok))), flush=True)
+def _ml_load(*a):
+    _ml_orig.clear(); _mp_lite_eevee()
+def _ml_save_pre(*a):
+    for sc in bpy.data.scenes:
+        for obj, grp, name, val in _ml_items(sc):
+            k = (sc.name, grp, name)
+            try:
+                if k in _ml_orig and getattr(obj, name) == val: setattr(obj, name, _ml_orig[k])
+            except Exception as e: print('MPLITE_EEVEE save', name, e)
 _mp_lite_eevee()
-bpy.app.handlers.load_post.append(_mp_lite_eevee)
+if '${MP_LITE}' == '1':
+    bpy.app.handlers.load_post.append(bpy.app.handlers.persistent(_ml_load))
+    bpy.app.handlers.save_pre.append(bpy.app.handlers.persistent(_ml_save_pre))
+    bpy.app.handlers.save_post.append(bpy.app.handlers.persistent(_mp_lite_eevee))
 # Autosave: Blenderův vlastní autosave timer na webu nezapíše nic (ověřeno 3 min, 1 min interval) a /tmp je v paměti.
 # iPad Safari zabíjí tab na pozadí → vlastní kopie do /opfs/home/_autosave.blend (viditelná v 📁), jen když je scéna změněná.
 import os, time
