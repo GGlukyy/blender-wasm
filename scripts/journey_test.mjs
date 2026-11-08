@@ -835,6 +835,19 @@ const J = {
     const b = await cmd(imgs); await check(`Shift+Alt+S, Enter: uloženo na disk (${JSON.stringify(b)})`, () => b && b.some((x) => x[1] === 1024 && x[2] && x[3] === true));
     await tab("Layout");
   },
+  /* 8. 11. večer: G G = posun vrcholu PO HRANĚ (vertex slide): mřížka 5×5, vrchol uprostřed, G, G, tah myší, klik. Desktop: vrchol zůstane
+   * na jedné z hran (x nebo y zůstane 0, z 0), počet vrcholů stejný. Pak Esc během G G vrátí polohu. */
+  slide: async ({ check, cmd, page, wait, hover, key, at, mid }) => {
+    await cmd("bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete(); bpy.ops.mesh.primitive_grid_add(x_subdivisions=4, y_subdivisions=4, size=4); bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_mode(type='VERT'); bpy.ops.mesh.select_all(action='DESELECT'); import bmesh; _bm = bmesh.from_edit_mesh(bpy.context.object.data); _v = min(_bm.verts, key=lambda v: v.co.length); _v.select = True; bmesh.update_edit_mesh(bpy.context.object.data); bpy.ops.ed.undo_push(message='grid')"); await wait(1200);
+    const co = "eval:(lambda o: (o.update_from_editmode(), [[round(c, 3) for c in v.co] for v in o.data.vertices if v.select])[1])(bpy.context.object)";
+    const c = at(await cmd("eval:_px(mathutils.Vector((0, 0, 0)))")); const e = at(await cmd("eval:_px(mathutils.Vector((1, 0, 0)))"));
+    await page.mouse.move(c[0], c[1], { steps: 3 }); await wait(300); await key("g", 300); await key("g", 500);
+    for (let i = 1; i <= 10; i++) { await page.mouse.move(c[0] + (e[0] - c[0]) * i / 16, c[1] + (e[1] - c[1]) * i / 16); await wait(50); }
+    await page.mouse.down(); await wait(80); await page.mouse.up(); await wait(900);
+    const a = await cmd(co); await check(`G G, tah, klik: vrchol na hraně (${JSON.stringify(a)})`, (s) => s.v === 25 && a && a.length === 1 && a[0][2] === 0 && (a[0][0] === 0) !== (a[0][1] === 0));
+    await page.mouse.move(c[0], c[1], { steps: 2 }); await key("g", 300); await key("g", 500); for (let i = 1; i <= 6; i++) { await page.mouse.move(c[0] - i * 8, c[1]); await wait(40); } await key("Escape", 800);
+    const b = await cmd(co); await check(`G G a Esc: beze změny (${JSON.stringify(b)})`, () => b && JSON.stringify(b) === JSON.stringify(a));
+  },
   /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
   undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
     const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };
