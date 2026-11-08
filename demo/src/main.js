@@ -1487,7 +1487,12 @@ def _is_import_op(idn):
     idn = idn.lower().replace('_ot_', '.')
     # H24: Preferences ▸ Add-ons/Extensions ▸ Install from Disk (extensions.package_install_files, preferences.addon_install,
     # theme/studiolight/app_template_install) je taky čtecí file browser → stejná lišta „Vybrat soubory z počítače“.
-    return ('import' in idn or 'install' in idn or idn in {'image.open', 'image.replace', 'sound.open', 'clip.open', 'text.open', 'font.open', 'volume.open', 'cachefile.open', 'wm.append', 'wm.link'}) and 'export' not in idn
+    # H42 (Lukáš 9.11.): seznam povolených operátorů pořád něco vynechal (Add ▸ Image ▸ Reference, ikonka složky u cesty
+    # v poli = buttons.file_browse, sequencer strip_add, node.add_file…). Obráceně: KAŽDÝ souborový prohlížeč je "čtecí"
+    # (ukáže lištu „Vybrat soubory ze zařízení“), KROMĚ těch, co ukládají. Zbytečná lišta nevadí, chybějící zablokuje uživatele.
+    if any(w in idn for w in ('export', 'save', 'render.', 'bake', 'write', 'screenshot', 'directory_browse')):
+        return False
+    return True
 def _import_assist():
     try:
         cur = set()
