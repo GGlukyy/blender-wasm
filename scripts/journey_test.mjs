@@ -937,6 +937,25 @@ const J = {
     const d1 = await cmd(dim), r1 = await cmd(rot); await page.screenshot({ path: "out/jr_touchhud_2.png" });
     await check(`tah prstem po Size v HUD: kostka větší (${JSON.stringify(d0)} -> ${JSON.stringify(d1)}), pohled stejný (${JSON.stringify(r0)} -> ${JSON.stringify(r1)})`, () => d1 && d1[0] > d0[0] && r1.join() === r0.join());
   },
+  /* 8. 11. večer: Node editor PRSTY (iPad): 3D pohled přepnout na Shader Editor (materiál kostky), dva prsty táhnout = posun pohledu
+   * (střed view2d se změní), uzly zůstanou na místě. Desktop s trackpadem/dotykem: dva prsty = pan. */
+  touchnode: async ({ check, cmd, page, wait, at }) => {
+    const cdp = await page.context().newCDPSession(page);
+    const P = (x, y, id) => ({ x, y, id, radiusX: 4, radiusY: 4, force: 1 });
+    const touch = (type, pts) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: pts });
+    await cmd("[setattr(a, 'ui_type', 'ShaderNodeTree') for a in bpy.context.window.screen.areas if a.type == 'VIEW_3D']"); await wait(2500);
+    const reg = await cmd("eval:(lambda w: [[r.x, w.height - r.y - r.height, r.width, r.height] for a in w.screen.areas if a.type == 'NODE_EDITOR' for r in a.regions if r.type == 'WINDOW'][0])(bpy.context.window_manager.windows[0])");
+    const vc = "eval:(lambda r: [round(c, 1) for c in r.view2d.region_to_view(r.width // 2, r.height // 2)])([r for a in bpy.context.window.screen.areas if a.type == 'NODE_EDITOR' for r in a.regions if r.type == 'WINDOW'][0])";
+    const nl = "eval:sorted([n.name, round(n.location.x, 1), round(n.location.y, 1)] for n in bpy.data.materials['Material'].node_tree.nodes)";
+    await page.screenshot({ path: "out/jr_touchnode_0.png" });
+    const c = at([reg[0] + reg[2] / 2, reg[1] + reg[3] / 2]); const v0 = await cmd(vc), n0 = await cmd(nl);
+    await touch("touchStart", [P(c[0] - 40, c[1], 0), P(c[0] + 40, c[1], 1)]);
+    for (let i = 1; i <= 12; i++) { await touch("touchMove", [P(c[0] - 40 + i * 8, c[1] + i * 3, 0), P(c[0] + 40 + i * 8, c[1] + i * 3, 1)]); await wait(30); }
+    await touch("touchEnd", []); await wait(1000); await page.screenshot({ path: "out/jr_touchnode_1.png" });
+    const v1 = await cmd(vc), n1 = await cmd(nl);
+    await check(`dva prsty: pohled posunut (${JSON.stringify(v0)} -> ${JSON.stringify(v1)}), uzly na místě`, () => v1 && v0 && v1.join() !== v0.join() && JSON.stringify(n1) === JSON.stringify(n0));
+    await cmd("[setattr(a, 'ui_type', 'VIEW_3D') for a in bpy.context.window.screen.areas if a.type == 'NODE_EDITOR']"); await wait(1500);
+  },
   /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
   undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
     const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };
