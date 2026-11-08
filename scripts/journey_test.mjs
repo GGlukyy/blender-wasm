@@ -809,6 +809,19 @@ const J = {
     await hover(); await key("Control+Space", 1200); const f1 = (await cmd("state")).screen_full; await hover(); await key("Control+Space", 1200);
     await check(`Ctrl+Space: maximalizace a zpět (${f1})`, (s) => f1 === true && s.screen_full === false && s.areas === 4);
   },
+  /* 8. 11. večer: výběr smyčky: mřížka 5×5 vrcholů, Edit, 2 (hrany), Alt+klik na hranu prostřední řady = celá řada (5 vrcholů),
+   * Shift+Alt+klik na hranu o řadu výš = přidá druhou (10). Desktop: stejné (edge loop přes čtyřúhelníky). Na Macu Option+klik. */
+  loopsel: async ({ check, cmd, page, wait, hover, key, at }) => {
+    await cmd("bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete(); bpy.ops.mesh.primitive_grid_add(x_subdivisions=4, y_subdivisions=4, size=4); bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_mode(type='EDGE'); bpy.ops.mesh.select_all(action='DESELECT'); bpy.ops.ed.undo_push(message='grid')"); await wait(1200);
+    await check("mřížka 25 vrcholů, nic vybráno", (s) => s.v === 25 && s.vsel === 0);
+    const e1 = at(await cmd("eval:_px(bpy.context.object.matrix_world @ mathutils.Vector((0.5, 0, 0)))"));
+    const e2 = at(await cmd("eval:_px(bpy.context.object.matrix_world @ mathutils.Vector((0.5, 1, 0)))"));
+    const altClick = async (p, shift) => { await page.mouse.move(p[0], p[1], { steps: 4 }); await wait(250); if (shift) await page.keyboard.down("Shift"); await page.keyboard.down("Alt"); await wait(60); await page.mouse.click(p[0], p[1]); await wait(60); await page.keyboard.up("Alt"); if (shift) await page.keyboard.up("Shift"); await wait(700); };
+    await altClick(e1, false); await page.screenshot({ path: "out/jr_loopsel_1.png" });
+    await check("Alt+klik: řada 5 vrcholů", (s) => s.vsel === 5);
+    await altClick(e2, true); await page.screenshot({ path: "out/jr_loopsel_2.png" });
+    await check("Shift+Alt+klik: druhá řada (10)", (s) => s.vsel === 10);
+  },
   /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
   undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
     const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };
