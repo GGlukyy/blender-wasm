@@ -1,3 +1,9 @@
+## B3g — iPad test jen Sculpting (8.11. 15:54, `tourws=Sculpting`, relace `tuzvou`)
+Výsledek: 20 kroků, 0 problémů, NEDOBĚHLA, poslední krok `gn_MATERIAL`. => **Sculpting workspace vč. Material Preview a Rendered PROŠEL** (prohlídka pak pokračuje edit/sculpt/texpaint/gn a umřela u Material Preview v Geometry Nodes, krok ~20).
+=> Hypotéza "jeden konkrétní sculpt shader (MADefault_Surface s 2 vertex buffery)" NEPLATÍ. Smrt přichází po ~20–29 krocích, typicky při přepnutí na Material Preview, bez ohledu na workspace => kumulativní (něco roste nebo se hromadí: pipeline v GPU procesu / Metal kompilace / počet shader modulů / JS wrappery / paměť GPU procesu), ne jedna operace. Jetsam: Lukáš dodá.
+- [ ] B3h: z telemetrie `tuzvou` + večerních relací vypsat po krocích: pipelines_created, počet shader modulů, wgpu_live, tex/buf, acct_mb, čas tvorby pipeline (roste?), poslední událost. Hledat veličinu, která v okamžiku smrti dosáhne podobné hodnoty ve všech relacích (prahová hodnota).
+- [ ] B3i: test na PC `webkit_sim+ipad`: kolik pipeline/shader modulů vznikne za prohlídku; zkusit omezit (cache pipeline napříč workspace, sdílení shader modulů, uvolňování nepoužívaných pipeline) a na iPadu porovnat počet kroků do smrti (pokus `tourrep`/2 průchody).
+
 ## NOC 7.–8.11. — PRIORITA 1: B3 po opravě bind group cache iPad POŘÁD nedoběhne (Lukáš 22:37)
 `tour_report`: `e26w8l` 29 kroků, konec `ws_Sculpting` (NEVÍM, jestli byl na buildu s opravou 306bfce0 — ověř z telemetrie: čas startu vs. nasazení, flag `bgpurge`); `rt5vum` (nejnovější) 25 kroků, 2 s problémem, konec `ws_Scripting_SOLID`, **lost: device lost** (GPU proces). Lukáš: "někde to asi spadlo zase GPU".
 - **Lukáš 22:42: po 14:43 ŽÁDNÝ nový JetsamEvent** => večerní pády (`e26w8l`, `rt5vum`) NEBYLY zabití karty kvůli paměti. Oprava B3 (bind groupy) nejspíš paměť drží pod limitem (odhad); zbývá pád GPU procesu (device lost) / zaseknutí. Priorita = B3d.
