@@ -914,6 +914,29 @@ const J = {
     await check("klepnutí = psaní, 2 Enter: x = 2", (s) => s.loc[0] === 2);
     await hover(); await key("n", 500);
   },
+  /* 8. 11. večer: panel Adjust Last Operation (HUD, plovoucí vlevo dole v 3D pohledu) PRSTEM: Shift+A, „cube", Enter, rozbalit HUD klepnutím
+   * na jeho hlavičku, tah prstem po poli Size = kostka se zvětší (desktop dotykem: tah = změna hodnoty), pohled se neotočí. */
+  touchhud: async ({ check, cmd, page, wait, hover, key, at }) => {
+    const cdp = await page.context().newCDPSession(page);
+    const P = (x, y) => ({ x, y, id: 0, radiusX: 4, radiusY: 4, force: 1 });
+    const touch = (type, pts) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: pts });
+    const tap = async (q, ms = 900) => { await touch("touchStart", [P(q[0], q[1])]); await wait(80); await touch("touchEnd", []); await wait(ms); };
+    await cmd("bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete(); bpy.ops.ed.undo_push(message='clear')"); await wait(600);
+    await hover(); await page.keyboard.press("Shift+a"); await wait(900); await page.keyboard.type("cube", { delay: 60 }); await wait(800); await key("Enter", 1500);
+    const hud = "eval:(lambda w: [[r.x, w.height - r.y - r.height, r.width, r.height] for a in w.screen.areas if a.type == 'VIEW_3D' for r in a.regions if r.type == 'HUD' and r.height > 1])(bpy.context.window_manager.windows[0])";
+    let h = await cmd(hud); await page.screenshot({ path: "out/jr_touchhud_0.png" });
+    await check(`Shift+A cube: kostka a HUD (${JSON.stringify(h)})`, (s) => s.objs === 1 && h && h.length === 1);
+    if (!h || !h.length) return;
+    if (h[0][3] < 60) { await tap(at([h[0][0] + 40, h[0][1] + h[0][3] / 2])); h = await cmd(hud); }
+    await page.screenshot({ path: "out/jr_touchhud_1.png" }); console.log("HUD " + JSON.stringify(h));
+    const dim = "eval:[round(x, 3) for x in bpy.context.object.dimensions]";
+    const rot = "eval:[round(x, 3) for x in [a.spaces[0].region_3d for a in bpy.context.window.screen.areas if a.type == 'VIEW_3D'][0].view_rotation]";
+    const d0 = await cmd(dim), r0 = await cmd(rot);
+    const F = at([h[0][0] + h[0][2] * 0.7, h[0][1] + 45]);
+    await touch("touchStart", [P(F[0], F[1])]); for (let i = 1; i <= 12; i++) { await touch("touchMove", [P(F[0] + i * 6, F[1])]); await wait(30); } await touch("touchEnd", []); await wait(1200);
+    const d1 = await cmd(dim), r1 = await cmd(rot); await page.screenshot({ path: "out/jr_touchhud_2.png" });
+    await check(`tah prstem po Size v HUD: kostka větší (${JSON.stringify(d0)} -> ${JSON.stringify(d1)}), pohled stejný (${JSON.stringify(r0)} -> ${JSON.stringify(r1)})`, () => d1 && d1[0] > d0[0] && r1.join() === r0.join());
+  },
   /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
   undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
     const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };

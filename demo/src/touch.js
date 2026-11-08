@@ -144,6 +144,10 @@ export function installTouch(canvas) {
     const a = new Int32Array(M.HEAPU8.buffer, M._blender_web_viewport_rects(), 33);
     const n = a[0];
     if (n === 0) return true;
+    if (M._blender_web_viewport_holes) { /* T3: Adjust Last Operation panel over the viewport = UI (drag its values) */
+      const h = new Int32Array(M.HEAPU8.buffer, M._blender_web_viewport_holes(), 33);
+      for (let i = 0; i < h[0]; i++) if (x >= h[1 + 4 * i] && y >= h[2 + 4 * i] && x <= h[3 + 4 * i] && y <= h[4 + 4 * i]) return false;
+    }
     for (let i = 0; i < n; i++) {
       if (x >= a[1 + 4 * i] && y >= a[2 + 4 * i] && x <= a[3 + 4 * i] && y <= a[4 + 4 * i]) return true;
     }
