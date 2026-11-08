@@ -14,13 +14,14 @@ Výsledek: 🟡 PC ✅ (každá oprava test Chrome i `webkit_sim`, bez opravy te
 - **B3h (jen data):** 6 iPad prohlídek umřelo 222–236 s po načtení stránky, ale na různých krocích. Spíš čas / nahromaděná práce než konkrétní krok. Nový přepínač `&tourwait=240` (P80) to rozliší (viz bod 1 níže).
 - Nové cesty (část D), bez nálezu, Chrome i sim: `knife` (nůž K), `bevel` (Ctrl+B + kolečko, = desktop v56 f54), `dupsnap` (Shift+D + pravé tlačítko, G+Ctrl), `autosmooth` (Shade Auto Smooth z assetu, = desktop), `mergedist` (M ▸ By Distance), `inset` (I myší, proporcionální O).
 - Další cesty: `origin`, `loose`, `keys3`, `loopsel` (Alt+klik), `imgsave`, `slide` (G G), `numemu` (Emulate Numpad), `emu3` (Emulate 3 Button Mouse), `fielddrag`, `touchfield` (= nález T3).
-- Pushnuto: `master` P76–P81 + cesty, fork `ipad` 39f6cd36.
+- Pushnuto: `master` P76–P82 + cesty, fork `ipad` c9c7cc83 (`BLENDER_REF`). Build v `demo/public` je nasazený (záloha předchozích v `out/bak_p76`, `out/bak_p80`).
 
 **Důkaz**
 - P76: renderer Chrome (sim+ipad, 30 s po startu) 2681/2672 MB → 2442/2448 MB (`b3j_win.sh`). Predikce „≥ 150 MB méně" splněna. Prohlídka Chrome i sim 75/75, `pwa_offline` PASS.
 - P77: `crashsave_win.sh shading|workspace`. Přidá kouli, přepne, za 1 s shodí kartu (`chrome://crash`). Po startu je koule v obnově: PASS Chrome i sim. Bez opravy FAIL (autosave neexistuje). `restore`, `autosave` PASS.
 - `regress_sim` po P80 (18:19–19:53, `out/regress_sim_p80.log`): 61 sad, **0 FAIL**, všechny cesty OK (vč. nových), `fuzz`, `ui_fuzz`, `fuzz_obj` PASS, `seed_verify` 2 překlady mimo seed. Celý regres v Chrome jsem nepouštěl (časově), Chrome ověřeno cíleně (prohlídky 75/75, testy výše).
 - P81: `journey_win.sh touchfield` se starým buildem FAIL (obdélník pohledu `[2,27,1148,767]` zahrnoval N-panel), s novým PASS (`[57,27,869,767]`). `touch`, `touch_modal`, `touch_loopcut`, `touch_boxsel`, `touch_shiftsel`, `touch_sculpt`, `gizmo_touch` + cesty `touchui`, `touchcolor`, `touchmisc`, `fielddrag` PASS v Chrome i sim.
+- P82: `touchhud` se starým buildem FAIL (Size `[2,2,2] -> [2,2,2]`), s novým `-> [2.54,…]`. Dotyková sada znovu PASS v Chrome i sim, prohlídka sim+ipad na finálním buildu 75/75.
 - P79: `mplite_reload_win.sh`. Bez opravy po File ▸ New `shadows=True taa=16`. S opravou všude lite, uložený soubor i kopie mají `shadows=True taa=16`, `is_dirty=False`. Prohlídka sim+ipad i Chrome 75/75, `crashsave` sim, `restore` PASS.
 
 **Co nefunguje / není jisté**
