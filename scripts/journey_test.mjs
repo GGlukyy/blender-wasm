@@ -735,7 +735,7 @@ const J = {
     await check(`pak Ctrl+S stáhne znovu (${d && d.suggestedFilename()}, is_dirty ${dirty})`, (s) => d && dirty === false && s.loc[0] === 3);
   },
   /* 8. 11.: Properties ▸ Material ▸ Base Color: klik na pole otevře výběr barvy, tažení v kolečku, hex FF0000, zavřít klikem mimo, Ctrl+Z.
-   * Myš chvíli stojí nad kolečkem před stiskem (stisk hned po příjezdu se 1× ze 2 ztratil, BACKLOG J4). Celé sezení ve výběru = 1 krok undo. */
+   * Myš chvíli stojí nad kolečkem před stiskem (stisk myší hned po příjezdu se 1× ze 2 ztratil, BACKLOG J4; prstem 12/12 OK, journey touchcolor). Celé sezení ve výběru = 1 krok undo. */
   color: async ({ check, cmd, page, wait, box, key }) => {
     const col = "eval:[round(v, 3) for v in bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value]";
     const click = async (x, y, ms = 900) => { await page.mouse.move(box.x + x, box.y + y, { steps: 3 }); await wait(300); await page.mouse.click(box.x + x, box.y + y); await wait(ms); };
@@ -790,6 +790,21 @@ const J = {
     const v0 = await cmd(pv);
     await touch("touchStart", [P(1280, 600, 0), P(1320, 600, 1)]); for (let i = 1; i <= 15; i++) { await touch("touchMove", [P(1280, 600 - 18 * i, 0), P(1320, 600 - 18 * i, 1)]); await wait(30); } await touch("touchEnd", []); await wait(900);
     const v1 = await cmd(pv); await page.screenshot({ path: "out/jr_touchui_scroll.png" }); await check(`dva prsty nahoru posunou Properties (${JSON.stringify(v0)} -> ${JSON.stringify(v1)})`, () => v0 && v1 && Math.abs(v1[1] - v0[1]) > 50);
+  },
+  /* 8. 11.: výběr barvy prstem: klepnout na Base Color, tah prstem v kolečku (touch.js uidrag = pohyb+stisk naráz). 4 tahy, každý musí barvu změnit. */
+  touchcolor: async ({ check, cmd, page, wait, box }) => {
+    const cdp = await page.context().newCDPSession(page);
+    const P = (x, y) => ({ x: box.x + x, y: box.y + y, id: 0, radiusX: 4, radiusY: 4, force: 1 });
+    const touch = (type, pts) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: pts });
+    const tap = async (x, y) => { await touch("touchStart", [P(x, y)]); await wait(80); await touch("touchEnd", []); await wait(1000); };
+    const col = "eval:[round(v, 3) for v in bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value]";
+    await tap(1167, 610); await tap(1323, 466); await page.screenshot({ path: "out/jr_touchcolor_open.png" });
+    const starts = [[1251, 196, 5, 3], [1230, 170, -4, 4], [1270, 220, 4, -5], [1240, 210, -5, -3]]; let ok = 0, prev = await cmd(col); const got = [];
+    for (const [x, y, dx, dy] of starts) {
+      await touch("touchStart", [P(x, y)]); for (let i = 1; i <= 8; i++) { await touch("touchMove", [P(x + dx * i, y + dy * i)]); await wait(30); } await touch("touchEnd", []); await wait(900);
+      const c = await cmd(col); const ch = JSON.stringify(c) !== JSON.stringify(prev); if (ch) ok++; got.push(ch ? "ok" : "ztracen"); prev = c;
+    }
+    await page.screenshot({ path: "out/jr_touchcolor_end.png" }); await check(`4 tahy prstem v kolečku změní barvu (${got.join(", ")})`, () => ok === 4);
   },
   /* 8. 11.: sevření prstů na trackpadu v Safari (Mac, iPad s Magic Keyboard) = jen gesturestart/gesturechange, žádné ctrl+wheel.
    * Chrome nemá GestureEvent, proto Event + scale. Desktop Blender na Macu sevřením zoomuje. */
