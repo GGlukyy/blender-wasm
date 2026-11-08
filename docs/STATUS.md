@@ -7,7 +7,7 @@ Výsledek: 🟡 PC ✅ (každá oprava test Chrome i `webkit_sim`, bez opravy te
 - **P79 (B3k, důležité):** úsporný režim pro iPad (MP lite: bez stínů, 1 vzorek TAA) platil jen po startu. Po File ▸ New, otevření .blend nebo obnově autosave zmizel. Pak měl iPad stíny zapnuté: +112 MB stínový atlas a +64 MB pomocná textura. Teď platí vždy. Do uloženého .blend se ale zapíšou tvoje původní hodnoty (na PC budou stíny jako dřív).
 - **P81 (T3, iPad, důležité):** prstem nešlo táhnout číselné pole v N-panelu (Location, Rotation, Scale…). Klepnutí a psaní šlo. Příčina: `touch.js` bral N-panel i toolbar jako 3D pohled, takže tah prstem byl orbit. Teď se boční panely počítají jako UI. Našla to nová cesta `touchfield`.
   - Totéž platilo pro panel „Adjust Last Operation" vlevo dole (třeba Size po přidání kostky). Opraveno taky (P82, cesta `touchhud`).
-  - Vedlejší efekt (odhad): tah prstem v prázdném místě pod panely v N-panelu nebo toolbaru už neorbituje.
+  - Vedlejší efekt (změřeno, cesta `touchsideempty`): tah prstem v prázdném místě pod panely v N-panelu už neorbituje. Udělá výběr tažením v pohledu (výběr kostky zmizí). Dřív orbit. Zlepšení: vyříznout jen skutečné panely (rozměr obsahu regionu), zatím neuděláno.
 - **Telemetrie (fork aca8319d, P78):** GPU paměť textur se počítala jako 4 B na pixel. Většina textur EEVEE má 8 B, takže čísla byla asi poloviční. Teď počítá správně a posílá i živé MB podle druhu textury (`tlive`).
 - **Měření PC** (prohlídka sim+ipad): textury max 551 MB. Na 1 instanci EEVEE je napevno ~75 MB (stínové textury 32 MB i bez stínů, atlas sond 43 MB). Atlas sond je konstanta v EEVEE, to neměním.
 - Pipeline za celou prohlídku jen ~200. Asi nejsou hlavní příčina (odhad).

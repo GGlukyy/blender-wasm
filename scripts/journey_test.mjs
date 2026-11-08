@@ -964,6 +964,21 @@ const J = {
     await tap(30, 178); const a = await cmd(tool); await tap(30, 213); const b = await cmd(tool); await tap(30, 103); const c = await cmd(tool);
     await check(`klepnutí prstem v toolbaru: ${a}, ${b}, ${c}`, () => a === "builtin.move" && b === "builtin.rotate" && /builtin.select/.test(c || ""));
   },
+  /* 8. 11. večer: vedlejší efekt T3 (jen data, vždy PASS): co udělá tah prstem v prázdném místě N-panelu pod panely (dřív orbit). */
+  touchsideempty: async ({ check, cmd, page, wait, hover, key, box }) => {
+    const cdp = await page.context().newCDPSession(page);
+    const P = (x, y) => ({ x: box.x + x, y: box.y + y, id: 0, radiusX: 4, radiusY: 4, force: 1 });
+    const touch = (type, pts) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: pts });
+    await hover(); await key("n", 900);
+    const rot = "eval:[round(x, 3) for x in [a.spaces[0].region_3d for a in bpy.context.window.screen.areas if a.type == 'VIEW_3D'][0].view_rotation]";
+    const sel = "eval:sorted(o.name for o in bpy.context.selected_objects)";
+    const r0 = await cmd(rot), s0 = await cmd(sel);
+    await touch("touchStart", [P(1000, 650)]); for (let i = 1; i <= 12; i++) { await touch("touchMove", [P(1000 - i * 10, 650 - i * 4)]); await wait(30); } await touch("touchEnd", []); await wait(1000);
+    const r1 = await cmd(rot), s1 = await cmd(sel); await page.screenshot({ path: "out/jr_touchsideempty.png" });
+    console.log(`SIDEEMPTY rot ${JSON.stringify(r0)} -> ${JSON.stringify(r1)} sel ${JSON.stringify(s0)} -> ${JSON.stringify(s1)}`);
+    await check("tah v prázdném N-panelu proběhl (data v SIDEEMPTY)", () => true);
+    await hover(); await key("n", 500);
+  },
   /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
   undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
     const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };
