@@ -699,6 +699,22 @@ const J = {
     await hover(); await page.keyboard.press("Control+z"); await wait(1000);
     await check("Ctrl+Z: zase kostka (v 8)", (s) => s.v === 8 && s.f === 6);
   },
+  /* 8. 11. večer: Shift+D a pohyb zrušený PRAVÝM tlačítkem (desktop: kopie zůstane na místě originálu), pak G + držený Ctrl = snap
+   * po celých jednotkách (výchozí Increment, pohled z výchozí vzdálenosti), Esc během G vrátí polohu. */
+  dupsnap: async ({ check, cmd, page, wait, hover, key, mid }) => {
+    const st = "eval:[(o.name, [round(v, 3) for v in o.location]) for o in bpy.context.selected_objects]";
+    await cmd("[o.select_set(o.name == 'Cube') for o in bpy.data.objects]; bpy.context.view_layer.objects.active = bpy.data.objects['Cube']"); await wait(300);
+    const m = mid(); await hover(); await page.keyboard.press("Shift+d"); await wait(600);
+    for (let i = 1; i <= 10; i++) { await page.mouse.move(m[0] + i * 12, m[1]); await wait(40); }
+    await wait(300); await page.mouse.click(m[0] + 120, m[1], { button: "right" }); await wait(900);
+    const a = await cmd(st); await check(`Shift+D, tah, pravé tlačítko: kopie na místě (${JSON.stringify(a)})`, (s) => s.objs === 4 && a && a.length === 1 && a[0][0] === "Cube.001" && a[0][1].join() === "0,0,0");
+    await hover(); await key("g", 500); await page.keyboard.down("Control"); await wait(150);
+    for (let i = 1; i <= 15; i++) { await page.mouse.move(m[0] + i * 11, m[1] + i * 2); await wait(50); }
+    await wait(300); await page.mouse.down(); await wait(80); await page.mouse.up(); await page.keyboard.up("Control"); await wait(900);
+    const b = await cmd(st); await check(`G + Ctrl: snap na celé jednotky (${JSON.stringify(b)})`, () => b && b[0][1].every((v) => Math.abs(v - Math.round(v)) < 1e-3) && b[0][1].some((v) => v !== 0));
+    await hover(m); await key("g", 500); for (let i = 1; i <= 8; i++) { await page.mouse.move(m[0] - i * 10, m[1]); await wait(40); } await key("Escape", 800);
+    const c = await cmd(st); await check(`G a Esc: poloha beze změny (${JSON.stringify(c)})`, () => c && c[0][1].join() === b[0][1].join());
+  },
   /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
   undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
     const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };
