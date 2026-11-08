@@ -1,33 +1,38 @@
-# 8. 11. odpoledne — B3: méně paměti na iPadu (−230 MB JS, lite i po otevření souboru) + autosave při přepnutí
+# 8. 11. odpoledne a večer — B3: méně paměti na iPadu, autosave při přepnutí, T3: prstem jde táhnout pole v N-panelu
 Výsledek: 🟡 PC ✅ (každá oprava test Chrome i `webkit_sim`, bez opravy test FAIL), iPad neověřeno
 
 **Co jsem udělal**
 - **P76, paměť −230 MB:** knihovna na rozbalení (`zstddec`) si po startu navždy nechala svou paměť (~230 MB). Teď rozbaluje ve zvláštním workeru a ten se po startu ukončí.
 - **P77 (B3-POJISTKA):** autosave se teď spustí i hned po přepnutí shadingu (Material Preview…) nebo workspace. Uloží ještě před vykreslením, tedy před chvílí, kdy iPad padá. Jen když jsou změny, nejvýš 1× za 3 s. Dál platí i 30s autosave. Uložení trvá 0,02 s.
 - **P79 (B3k, důležité):** úsporný režim pro iPad (MP lite: bez stínů, 1 vzorek TAA) platil jen po startu. Po File ▸ New, otevření .blend nebo obnově autosave zmizel. Pak měl iPad stíny zapnuté: +112 MB stínový atlas a +64 MB pomocná textura. Teď platí vždy. Do uloženého .blend se ale zapíšou tvoje původní hodnoty (na PC budou stíny jako dřív).
+- **P81 (T3, iPad, důležité):** prstem nešlo táhnout číselné pole v N-panelu (Location, Rotation, Scale…). Klepnutí a psaní šlo. Příčina: `touch.js` bral N-panel i toolbar jako 3D pohled, takže tah prstem byl orbit. Teď se boční panely počítají jako UI. Našla to nová cesta `touchfield`.
+  - Vedlejší efekt (odhad): tah prstem v prázdném místě pod panely v N-panelu nebo toolbaru už neorbituje.
 - **Telemetrie (fork aca8319d, P78):** GPU paměť textur se počítala jako 4 B na pixel. Většina textur EEVEE má 8 B, takže čísla byla asi poloviční. Teď počítá správně a posílá i živé MB podle druhu textury (`tlive`).
 - **Měření PC** (prohlídka sim+ipad): textury max 551 MB. Na 1 instanci EEVEE je napevno ~75 MB (stínové textury 32 MB i bez stínů, atlas sond 43 MB). Atlas sond je konstanta v EEVEE, to neměním.
 - Pipeline za celou prohlídku jen ~200. Asi nejsou hlavní příčina (odhad).
 - **B3h (jen data):** 6 iPad prohlídek umřelo 222–236 s po načtení stránky, ale na různých krocích. Spíš čas / nahromaděná práce než konkrétní krok. Nový přepínač `&tourwait=240` (P80) to rozliší (viz bod 1 níže).
 - Nové cesty (část D), bez nálezu, Chrome i sim: `knife` (nůž K), `bevel` (Ctrl+B + kolečko, = desktop v56 f54), `dupsnap` (Shift+D + pravé tlačítko, G+Ctrl), `autosmooth` (Shade Auto Smooth z assetu, = desktop), `mergedist` (M ▸ By Distance), `inset` (I myší, proporcionální O).
-- Pushnuto: `master` P76–P80 + cesty, fork `ipad` aca8319d.
+- Další cesty: `origin`, `loose`, `keys3`, `loopsel` (Alt+klik), `imgsave`, `slide` (G G), `numemu` (Emulate Numpad), `emu3` (Emulate 3 Button Mouse), `fielddrag`, `touchfield` (= nález T3).
+- Pushnuto: `master` P76–P81 + cesty, fork `ipad` 39f6cd36.
 
 **Důkaz**
 - P76: renderer Chrome (sim+ipad, 30 s po startu) 2681/2672 MB → 2442/2448 MB (`b3j_win.sh`). Predikce „≥ 150 MB méně" splněna. Prohlídka Chrome i sim 75/75, `pwa_offline` PASS.
 - P77: `crashsave_win.sh shading|workspace`. Přidá kouli, přepne, za 1 s shodí kartu (`chrome://crash`). Po startu je koule v obnově: PASS Chrome i sim. Bez opravy FAIL (autosave neexistuje). `restore`, `autosave` PASS.
 - `regress_sim` po P80 (18:19–19:53, `out/regress_sim_p80.log`): 61 sad, **0 FAIL**, všechny cesty OK (vč. nových), `fuzz`, `ui_fuzz`, `fuzz_obj` PASS, `seed_verify` 2 překlady mimo seed. Celý regres v Chrome jsem nepouštěl (časově), Chrome ověřeno cíleně (prohlídky 75/75, testy výše).
+- P81: `journey_win.sh touchfield` se starým buildem FAIL (obdélník pohledu `[2,27,1148,767]` zahrnoval N-panel), s novým PASS (`[57,27,869,767]`). `touch`, `touch_modal`, `touch_loopcut`, `touch_boxsel`, `touch_shiftsel`, `touch_sculpt`, `gizmo_touch` + cesty `touchui`, `touchcolor`, `touchmisc`, `fielddrag` PASS v Chrome i sim.
 - P79: `mplite_reload_win.sh`. Bez opravy po File ▸ New `shadows=True taa=16`. S opravou všude lite, uložený soubor i kopie mají `shadows=True taa=16`, `is_dirty=False`. Prohlídka sim+ipad i Chrome 75/75, `crashsave` sim, `restore` PASS.
 
 **Co nefunguje / není jisté**
 - Jetsam ukazuje kartu 4,3–4,7 GB, ale my vidíme jen ~1,1–1,6 GB. Zbytek (~2,5 GB) je uvnitř Safari (kód wasm, Metal, workery?). Z PC to změřit neumím.
 - Kolik ušetří P76 a P79 na iPadu, nevím. Odhad: 230 MB vždy, +176 MB po otevření souboru.
-- Živý test 17:15: iPad nic neposlal (Lukáš nebyl u iPadu), neopakoval jsem.
+- Živé testy 17:15 a 18:01 (`tourwait`): iPad nic neposlal (Lukáš nebyl u iPadu). Dnes už 2×, víc se neptám.
 
 **Co otestovat na iPadu (podle důležitosti)**
 1. **Prohlídka s klidem:** zavři kartu, otevři `?auto=tour&tel=1&pool=4&tourwait=240`, nech ~9 min (nezamykej). Prvních 4 min nic nedělá, pak prohlídka. Predikce: když je příčina čas, spadne v klidu kolem 230 s. Když nahromaděná práce, klid přežije a spadne ~95 s po začátku prohlídky. Když doběhne, pomohly dnešní opravy (odhad). Pošli Jetsam z času pádu.
-2. **Pojistka:** přidej objekt, hned přepni na Material Preview. Když karta spadne, po novém startu dej „Obnovit poslední práci". Čekám: objekt tam je.
-3. **Lite po otevření:** otevři svůj .blend, přepni na Material Preview. Čekám: stejně rychlé jako nový soubor (bez stínů). Ulož, otevři na PC: stíny zapnuté jako dřív.
-4. T2 a F1 z rána (níže).
+2. **T3:** otevři N-panel (klávesa N nebo šipka vpravo nahoře v 3D pohledu), prstem táhni doleva/doprava po Location X. Čekám: hodnota se mění, pohled se neotáčí.
+3. **Pojistka:** přidej objekt, hned přepni na Material Preview. Když karta spadne, po novém startu dej „Obnovit poslední práci". Čekám: objekt tam je.
+4. **Lite po otevření:** otevři svůj .blend, přepni na Material Preview. Čekám: stejně rychlé jako nový soubor (bez stínů). Ulož, otevři na PC: stíny zapnuté jako dřív.
+5. T2 a F1 z rána (níže).
 
 # 8. 11. ráno — F1 celá obrazovka z menu, T2 prstem jde táhnout hrana oblasti, 11 nových cest
 Výsledek: 🟡 PC ✅ (každá oprava test Chrome i `webkit_sim`, bez opravy test FAIL), iPad neověřeno
