@@ -893,6 +893,27 @@ const J = {
     await check("stisk na X, dolů přes Y, Z, doprava: všechna tři změněna stejně", (s) => s.loc[1] !== 0 && s.loc[2] !== 0 && Math.abs(s.loc[1] - s.loc[2]) < 1e-3 && Math.abs((s.loc[0] - 1.5) - s.loc[1]) < 1e-3);
     await hover(); await key("n", 500);
   },
+  /* 8. 11. večer: číselné pole PRSTEM (iPad): tah po Location X v N-panelu = hodnota roste; klepnutí = editace textu (pak klávesnice „2" Enter).
+   * Desktop s dotykem: tah = změna hodnoty, klepnutí = psaní. */
+  touchfield: async ({ check, cmd, page, wait, hover, key, at, box }) => {
+    const cdp = await page.context().newCDPSession(page);
+    const P = (x, y) => ({ x, y, id: 0, radiusX: 4, radiusY: 4, force: 1 });
+    const touch = (type, pts) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: pts });
+    await hover(); await key("n", 900);
+    const fx = await cmd("eval:(lambda w: [[r.x, w.height - r.y - r.height, r.width, r.height] for a in w.screen.areas if a.type == 'VIEW_3D' for r in a.regions if r.type == 'UI'][0])(bpy.context.window_manager.windows[0])");
+    const X = at([fx[0] + fx[2] * 0.62, fx[1] + 64]);
+    const rot = "eval:[round(x, 3) for x in [a.spaces[0].region_3d for a in bpy.context.window.screen.areas if a.type == 'VIEW_3D'][0].view_rotation]";
+    const r0 = await cmd(rot);
+    const vr = await page.evaluate(() => { const M = window.Module; const a = new Int32Array(M.HEAPU8.buffer, M._blender_web_viewport_rects(), 33); return Array.from(a.slice(0, 1 + 4 * a[0])); });
+    const cr = await page.locator("#canvas").boundingBox(); console.log("TFDBG X=" + JSON.stringify([X[0] - cr.x, X[1] - cr.y]) + " rects=" + JSON.stringify(vr) + " dpr=" + await page.evaluate(() => window.__DPR__ || 1));
+    await touch("touchStart", [P(X[0], X[1])]); for (let i = 1; i <= 12; i++) { await touch("touchMove", [P(X[0] + i * 6, X[1])]); await wait(30); } await touch("touchEnd", []); await wait(900);
+    const r1 = await cmd(rot);
+    await check(`tah prstem po poli X: x > 0, pohled se neotočí (${JSON.stringify(r0)} -> ${JSON.stringify(r1)})`, (s) => s.loc[0] > 0 && s.loc[1] === 0 && r1 && r1.join() === r0.join());
+    await touch("touchStart", [P(X[0], X[1])]); await wait(80); await touch("touchEnd", []); await wait(900); await page.screenshot({ path: "out/jr_touchfield_edit.png" });
+    await page.keyboard.press("Control+a"); await page.keyboard.type("2", { delay: 60 }); await key("Enter", 800);
+    await check("klepnutí = psaní, 2 Enter: x = 2", (s) => s.loc[0] === 2);
+    await hover(); await key("n", 500);
+  },
   /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
   undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
     const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };
