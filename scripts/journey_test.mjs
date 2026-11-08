@@ -765,6 +765,18 @@ const J = {
     await check(`O, G Z tah, klik: pohne se víc vrcholů (${n}, proportional=${pe})`, () => pe === true && n > 1);
     await key("o", 400);
   },
+  /* 8. 11. večer: S 2, F3 „apply scale" (Object ▸ Apply ▸ Scale: scale 1, vrcholy ×2, zmax 2), Tab, G X 2, Tab, F3 „origin to geometry"
+   * (Object ▸ Set Origin: loc x 2, síť zase kolem počátku objektu). Desktop: tytéž operátory, stejné hodnoty. */
+  origin: async ({ check, page, wait, hover, key }) => {
+    const f3 = async (t) => { await hover(); await key("F3", 800); await page.keyboard.type(t, { delay: 50 }); await wait(900); await page.screenshot({ path: "out/jr_origin_f3.png" }); await key("Enter", 1500); };
+    await hover(); await key("s", 400); await key("2", 300); await key("Enter", 800);
+    await check("S 2: scale 2", (s) => s.scale.join() === "2,2,2");
+    await f3("apply scale"); await check("F3 Apply ▸ Scale: scale 1, zmax 2", (s) => s.scale.join() === "1,1,1" && s.zmax === 2);
+    await hover(); await key("Tab", 900); await key("a", 300); await key("g", 400); await key("x", 300); await key("2", 300); await key("Enter", 800); await key("Tab", 900);
+    await check("Tab, G X 2, Tab: objekt pořád v počátku", (s) => s.mode === "OBJECT" && s.loc.join() === "0,0,0");
+    await f3("origin to geometry"); await check("F3 Origin to Geometry: loc x 2", (s) => Math.abs(s.loc[0] - 2) < 1e-3 && s.loc[1] === 0 && s.loc[2] === 0);
+    await hover(); await page.keyboard.press("Control+z"); await wait(1000); await check("Ctrl+Z: loc 0", (s) => s.loc.join() === "0,0,0");
+  },
   /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
   undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
     const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };
