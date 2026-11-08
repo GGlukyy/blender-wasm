@@ -715,6 +715,20 @@ const J = {
     await hover(m); await key("g", 500); for (let i = 1; i <= 8; i++) { await page.mouse.move(m[0] - i * 10, m[1]); await wait(40); } await key("Escape", 800);
     const c = await cmd(st); await check(`G a Esc: poloha beze změny (${JSON.stringify(c)})`, () => c && c[0][1].join() === b[0][1].join());
   },
+  /* 8. 11. večer: F3 „Shade Auto Smooth" na opici: Blender 5 přidá modifikátor z essentials assetu (smooth_by_angle.blend). Desktop 5.2.3: modifikátor
+   * „Smooth by Angle" (NODES) s node group „Smooth by Angle". Pak F3 „Shade Flat": desktop 5.2.3 modifikátor smaže a plochy flat ([] 0), Ctrl+Z. */
+  autosmooth: async ({ check, cmd, page, wait, hover, key }) => {
+    const st = "eval:(lambda o: [o.name, [(m.type, m.name, m.node_group.name if m.type == 'NODES' and m.node_group else None) for m in o.modifiers], sum(p.use_smooth for p in o.data.polygons)])(bpy.context.object)";
+    await cmd("bpy.ops.mesh.primitive_monkey_add(location=(0, 0, 0)); bpy.ops.ed.undo_push(message='monkey')"); await wait(900);
+    const f3 = async (t) => { await hover(); await key("F3", 800); await page.keyboard.type(t, { delay: 50 }); await wait(900); await key("Enter", 2500); };
+    await f3("auto smooth"); await page.screenshot({ path: "out/jr_autosmooth.png" });
+    const a = await cmd(st); await check(`F3 Shade Auto Smooth: modifikátor Smooth by Angle (${JSON.stringify(a)})`, () => a && a[1].length === 1 && a[1][0][0] === "NODES" && /Smooth by Angle/.test(a[1][0][2] || "") && a[2] === 500);
+    await f3("shade flat"); const b = await cmd(st); await check(`F3 Shade Flat: plochy flat, modifikátor pryč jako desktop (${JSON.stringify(b)})`, () => b && b[2] === 0 && b[1].length === 0);
+    await hover(); await page.keyboard.press("Control+z"); await wait(1200);
+    const c = await cmd(st); await check(`Ctrl+Z: modifikátor zpět (${JSON.stringify(c)})`, () => c && c[1].length === 1 && c[2] === 500);
+    await page.keyboard.press("Control+z"); await wait(1200);
+    const d = await cmd(st); await check(`2. Ctrl+Z: bez modifikátoru (${JSON.stringify(d)})`, () => d && d[1].length === 0);
+  },
   /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
   undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
     const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };
