@@ -21,7 +21,8 @@ Výsledek: 🟡 PC ✅ (každá oprava test Chrome i `webkit_sim`, bez opravy te
 - `regress_all` po F1 (P74): 0 FAIL (jediný FAIL byla chyba mého nového testu, opravena).
 
 **Co nefunguje / není jisté**
-- `regress_sim` po P75 běží (start 07:30). Výsledek níže, pokud doběhne.
+- `regress_sim` po P75 (07:30–08:52): 58 sad bez FAIL až po `journey` včetně. V journey jediná CHYBA `saveui` = chyba mého testu (sim přes hook v adrese, test čekal Chrome), opravena, `saveui` přes hook PASS. Poslední 4 sady (`fuzz`, `ui_fuzz`, `fuzz_obj`, `seed_verify`) jsem zastavil kvůli termínu 09:00, neproběhly.
+- Úklid: regres zastaven, `pgrep -af "regress|fuzz|_win.sh|_test"` prázdné. Dev server a tunel nechávám.
 - 60 ms v T2 je změřeno na PC. Na iPadu s pomalými snímky (Material Preview) nemusí stačit (odhad).
 
 **Co otestovat na iPadu (podle důležitosti)**

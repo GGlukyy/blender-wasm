@@ -713,7 +713,7 @@ const J = {
   /* 8. 11.: ukládání klávesami jako uživatel. Web nemá Blenderův souborový prohlížeč pro Save (záměr portu, wm_files.cc __EMSCRIPTEN__):
    * Chrome = výběr složky prohlížeče (__blenderSaveHook, systémový dialog, test ho jen zachytí), Safari (webkit_sim) = stažení .blend. */
   saveui: async ({ check, cmd, page, wait, hover, key }) => {
-    const sim = /webkit_sim=1/.test(Q);
+    const sim = /webkit_sim=1/.test(Q + page.url());
     await page.evaluate(() => { window.__saveHookCalls = 0; const o = window.__blenderSaveHook; window.__blenderSaveHook = () => { window.__saveHookCalls++; }; window.__saveHookOrig = o; });
     const dl = () => page.waitForEvent("download", { timeout: 8000 }).catch(() => null);
     if (!sim) {
