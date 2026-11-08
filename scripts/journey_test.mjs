@@ -757,6 +757,21 @@ const J = {
     const m = mid(); await hover(); await page.keyboard.press("Shift+a"); await wait(900); await page.screenshot({ path: "out/jr_popout_adde.png" }); await away(m[0] - box.x, m[1] - box.y, "add");
     await page.mouse.move(box.x + 200, box.y + 300, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 200, box.y + 300, { button: "right" }); await wait(900); await page.screenshot({ path: "out/jr_popout_ctxe.png" }); await away(200, 300, "ctx");
   },
+  /* 8. 11.: Properties ▸ Modifiers: přetáhnout panel modifikátoru za úchyt (⠿) nad jiný = změna pořadí, Ctrl+Z. Desktop: totéž. */
+  moddrag: async ({ check, cmd, page, wait, box }) => {
+    const ord = "eval:[m.type for m in bpy.data.objects['Cube'].modifiers]";
+    await cmd("o = bpy.data.objects['Cube']; o.modifiers.new('Bevel', 'BEVEL'); o.modifiers.new('Subdivision', 'SUBSURF'); bpy.ops.ed.undo_push(message='setup')"); await wait(800);
+    await page.mouse.move(box.x + 1167, box.y + 470, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 1167, box.y + 470); await wait(1200);
+    const o0 = await cmd(ord);
+    /* úchyt ⠿ Subdivision (1375,555) nahoru nad hlavičku Bevel (287) */
+    await page.mouse.move(box.x + 1375, box.y + 555, { steps: 3 }); await wait(400); await page.mouse.down(); await wait(150);
+    for (let i = 1; i <= 20; i++) { await page.mouse.move(box.x + 1375, box.y + 555 - 14 * i); await wait(40); } await wait(400); await page.screenshot({ path: "out/jr_moddrag_drag.png" }); await page.mouse.up(); await wait(1200);
+    const o1 = await cmd(ord); await page.screenshot({ path: "out/jr_moddrag_1.png" }); await check(`tažení za úchyt prohodí pořadí (${JSON.stringify(o0)} -> ${JSON.stringify(o1)})`, () => o1 && o1.join() === "SUBSURF,BEVEL");
+    await page.mouse.move(box.x + 500, box.y + 400, { steps: 3 }); await wait(300); await page.keyboard.press("Control+z"); await wait(1000); const o2 = await cmd(ord);
+    await check(`Ctrl+Z vrátí pořadí (${JSON.stringify(o2)})`, () => o2 && o2.join() === "BEVEL,SUBSURF");
+    await page.mouse.move(box.x + 1202, box.y + 287, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 1202, box.y + 287); await wait(900); const ex = await cmd("eval:[m.show_expanded for m in bpy.data.objects['Cube'].modifiers]");
+    await check(`klik na šipku sbalí první panel (${JSON.stringify(ex)})`, () => ex && ex[0] === false && ex[1] === true);
+  },
   /* 8. 11.: sevření prstů na trackpadu v Safari (Mac, iPad s Magic Keyboard) = jen gesturestart/gesturechange, žádné ctrl+wheel.
    * Chrome nemá GestureEvent, proto Event + scale. Desktop Blender na Macu sevřením zoomuje. */
   pinch: async ({ check, cmd, page, wait, mid }) => {
