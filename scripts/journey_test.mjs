@@ -822,6 +822,19 @@ const J = {
     await altClick(e2, true); await page.screenshot({ path: "out/jr_loopsel_2.png" });
     await check("Shift+Alt+klik: druhá řada (10)", (s) => s.vsel === 10);
   },
+  /* 8. 11. večer: obrázek pro texturu: UV Editing, nad Image Editorem Alt+N (dialog New Image: pole Name je hned v editaci, Enter Enter = OK), Shift+Alt+S (Save As, Blenderův
+   * souborový prohlížeč), Enter = uložit. Desktop: soubor „untitled.png" ve výchozí složce prohlížeče, image.filepath vyplněná. */
+  imgsave: async ({ check, cmd, page, wait, tab, at, key }) => {
+    await tab("UV Editing");
+    const ie = await cmd("eval:(lambda w: [[r.x + r.width // 2, w.height - r.y - r.height // 2] for a in w.screen.areas if a.type == 'IMAGE_EDITOR' for r in a.regions if r.type == 'WINDOW'][0])(bpy.context.window_manager.windows[0])");
+    const p = at(ie); const imgs = "eval:[(i.name, i.size[0], i.filepath, os.path.exists(bpy.path.abspath(i.filepath)) if i.filepath else False) for i in bpy.data.images if i.source in ('GENERATED', 'FILE')]";
+    await page.mouse.move(p[0], p[1], { steps: 3 }); await wait(300); await key("Alt+n", 1000); await page.screenshot({ path: "out/jr_imgsave_new.png" }); await key("Enter", 500); await key("Enter", 1200);
+    const a = await cmd(imgs); await check(`Alt+N, Enter, Enter: nový obrázek 1024 (${JSON.stringify(a)})`, () => a && a.some((x) => x[1] === 1024));
+    await page.mouse.move(p[0], p[1], { steps: 2 }); await wait(300); await key("Shift+Alt+s", 2000); await page.screenshot({ path: "out/jr_imgsave_fb.png" });
+    await key("Enter", 2500); await page.screenshot({ path: "out/jr_imgsave_done.png" });
+    const b = await cmd(imgs); await check(`Shift+Alt+S, Enter: uloženo na disk (${JSON.stringify(b)})`, () => b && b.some((x) => x[1] === 1024 && x[2] && x[3] === true));
+    await tab("Layout");
+  },
   /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
   undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
     const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };
