@@ -750,6 +750,13 @@ const J = {
     await page.mouse.move(box.x + 600, box.y + 500, { steps: 4 }); await wait(400); await page.keyboard.press("Control+z"); await wait(900); const c3 = await cmd(col);
     await check(`klik mimo zavře, Ctrl+Z vrátí barvu před otevřením (${JSON.stringify(c3)})`, () => c3 && JSON.stringify(c3) === JSON.stringify(c0));
   },
+  /* 8. 11. (W2 data, mimo all): zavře se odjetím myši menu Shift+A a kontextové menu? Jen screenshoty. */
+  popout: async ({ page, wait, box, hover, mid, cmd }) => {
+    console.log("POPOUT menu_close_leave " + JSON.stringify(await cmd("eval:bpy.context.preferences.view.menu_close_leave")));
+    const away = async (x0, y0, tag) => { for (let i = 1; i <= 30; i++) { await page.mouse.move(box.x + x0 + 20 * i, box.y + y0 + 8 * i); await wait(30); } await wait(1200); await page.screenshot({ path: `out/jr_popout_${tag}.png` }); await page.keyboard.press("Escape"); await wait(500); };
+    const m = mid(); await hover(); await page.keyboard.press("Shift+a"); await wait(900); await page.screenshot({ path: "out/jr_popout_adde.png" }); await away(m[0] - box.x, m[1] - box.y, "add");
+    await page.mouse.move(box.x + 200, box.y + 300, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 200, box.y + 300, { button: "right" }); await wait(900); await page.screenshot({ path: "out/jr_popout_ctxe.png" }); await away(200, 300, "ctx");
+  },
   /* 8. 11.: sevření prstů na trackpadu v Safari (Mac, iPad s Magic Keyboard) = jen gesturestart/gesturechange, žádné ctrl+wheel.
    * Chrome nemá GestureEvent, proto Event + scale. Desktop Blender na Macu sevřením zoomuje. */
   pinch: async ({ check, cmd, page, wait, mid }) => {
@@ -785,7 +792,7 @@ const J = {
     await fieldAt(); await key("Control+v", 800); await check("Ctrl+V nad polem vloží hodnotu", (s) => s.ob === "Cube" && s.loc[0] === 4.25);
   },
 };
-for (const [n, f] of Object.entries(J)) if ((which === "all" && n !== "j4" && n !== "windows") || which.split(",").includes(n)) await run(n, f); /* j4 = otevřená chyba, BACKLOG J4: spouštět zvlášť; windows = ověřit (8. 11.) */
+for (const [n, f] of Object.entries(J)) if ((which === "all" && n !== "j4" && n !== "windows" && n !== "popout") || which.split(",").includes(n)) await run(n, f); /* j4 = otevřená chyba, BACKLOG J4: spouštět zvlášť; windows = ověřit (8. 11.) */
 console.log("TABULKA " + results.map((r) => `${r[0]}:${r[1] || r[2] || r[3] || r[4] ? "CHYBA" : "OK"}`).join(" "));
 await browser.close();
 process.exit(results.some((r) => r[1] || r[2] || r[3] || r[4]) ? 1 : 0);
