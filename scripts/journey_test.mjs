@@ -734,6 +734,22 @@ const J = {
     p = dl(); await hover(); await page.keyboard.press("Control+s"); d = await p; const dirty = await cmd("eval:bpy.data.is_dirty");
     await check(`pak Ctrl+S stáhne znovu (${d && d.suggestedFilename()}, is_dirty ${dirty})`, (s) => d && dirty === false && s.loc[0] === 3);
   },
+  /* 8. 11.: Properties ▸ Material ▸ Base Color: klik na pole otevře výběr barvy, tažení v kolečku, hex FF0000, zavřít klikem mimo, Ctrl+Z.
+   * Myš chvíli stojí nad kolečkem před stiskem (stisk hned po příjezdu se 1× ze 2 ztratil, BACKLOG J4). Celé sezení ve výběru = 1 krok undo. */
+  color: async ({ check, cmd, page, wait, box, key }) => {
+    const col = "eval:[round(v, 3) for v in bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value]";
+    const click = async (x, y, ms = 900) => { await page.mouse.move(box.x + x, box.y + y, { steps: 3 }); await wait(300); await page.mouse.click(box.x + x, box.y + y); await wait(ms); };
+    await click(1167, 610, 1200); const c0 = await cmd(col);
+    await click(1323, 466, 1200); await page.screenshot({ path: "out/jr_color_picker.png" });
+    /* kolečko: střed (1251,196), poloměr ~78 */
+    await page.mouse.move(box.x + 1251, box.y + 196, { steps: 3 }); await wait(400); await page.mouse.down(); await wait(150); for (let i = 1; i <= 8; i++) { await page.mouse.move(box.x + 1251 + 6 * i, box.y + 196 + 4 * i); await wait(60); } await wait(200); await page.mouse.up(); await wait(900);
+    const c1 = await cmd(col); await page.screenshot({ path: "out/jr_color_wheel.png" }); await check(`tažení v kolečku změní barvu (${JSON.stringify(c0)} -> ${JSON.stringify(c1)})`, () => c1 && Math.max(...c1.slice(0, 3)) - Math.min(...c1.slice(0, 3)) > 0.1);
+    await page.mouse.move(box.x + 1263, box.y + 437, { steps: 3 }); await wait(300); await page.mouse.dblclick(box.x + 1263, box.y + 437); await wait(600); await page.keyboard.press("Control+a"); await page.keyboard.type("FF0000", { delay: 40 }); await key("Enter", 900);
+    const c2 = await cmd(col); await check(`hex FF0000 = červená (${JSON.stringify(c2)})`, () => c2 && c2[0] > 0.99 && c2[1] < 0.01 && c2[2] < 0.01);
+    await click(1263, 700); await page.screenshot({ path: "out/jr_color_closed.png" });
+    await page.mouse.move(box.x + 600, box.y + 500, { steps: 4 }); await wait(400); await page.keyboard.press("Control+z"); await wait(900); const c3 = await cmd(col);
+    await check(`klik mimo zavře, Ctrl+Z vrátí barvu před otevřením (${JSON.stringify(c3)})`, () => c3 && JSON.stringify(c3) === JSON.stringify(c0));
+  },
   /* 8. 11.: sevření prstů na trackpadu v Safari (Mac, iPad s Magic Keyboard) = jen gesturestart/gesturechange, žádné ctrl+wheel.
    * Chrome nemá GestureEvent, proto Event + scale. Desktop Blender na Macu sevřením zoomuje. */
   pinch: async ({ check, cmd, page, wait, mid }) => {
