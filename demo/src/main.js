@@ -1611,11 +1611,29 @@ def _autosave():
             t = time.time()
             bpy.ops.wm.save_as_mainfile(filepath=_AS, copy=True, compress=True)
             dt = time.time() - t
-            _as['wait'] = max(_AS_EVERY, dt * 20)
+            _as['wait'] = max(_AS_EVERY, dt * 20); _as['last'] = time.time()
             print('AUTOSAVE', os.path.getsize(_AS), round(dt, 2))
     except Exception as e: print('AUTOSAVE ERR', e)
     return _as['wait']
-bpy.app.timers.register(_autosave, first_interval=_AS_EVERY, persistent=True)`;
+bpy.app.timers.register(_autosave, first_interval=_AS_EVERY, persistent=True)
+# B3-POJISTKA: iPad padá typicky 0,2–2 s po přepnutí na Material Preview / jiný workspace (tvorba shaderů). msgbus zavolá
+# uložení hned po přepnutí, ještě před vykreslením, takže se neztratí práce od posledního 30s autosave.
+_as['last'] = 0.0
+def _autosave_now(reason):
+    try:
+        if bpy.data.is_dirty and time.time() - _as['last'] > 3.0:
+            t = time.time()
+            bpy.ops.wm.save_as_mainfile(filepath=_AS, copy=True, compress=True)
+            _as['last'] = time.time()
+            print('AUTOSAVE', reason, os.path.getsize(_AS), round(_as['last'] - t, 2), flush=True)
+    except Exception as e: print('AUTOSAVE ERR', reason, e)
+_as_owner = object()
+def _as_subscribe(*_):
+    bpy.msgbus.clear_by_owner(_as_owner)
+    bpy.msgbus.subscribe_rna(key=(bpy.types.View3DShading, 'type'), owner=_as_owner, args=('shading',), notify=_autosave_now)
+    bpy.msgbus.subscribe_rna(key=(bpy.types.Window, 'workspace'), owner=_as_owner, args=('workspace',), notify=_autosave_now)
+_as_subscribe()
+bpy.app.handlers.load_post.append(bpy.app.handlers.persistent(_as_subscribe))`;
 /* H22d: počet pthread workerů se čte při startu (link: PTHREAD_POOL_SIZE=Module.poolSize||32). Každý worker v Safari = vlastní JS VM
  * → iPad 8, jinde 32. Přepsat ?pool=N. */
 const _isIpadUA = navigator.maxTouchPoints > 1 && /Macintosh|iPad/.test(navigator.userAgent);
