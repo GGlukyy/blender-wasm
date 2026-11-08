@@ -710,6 +710,30 @@ const J = {
     await cmd("bpy.context.preferences.view.ui_scale = 1.0"); await wait(2000); await page.screenshot({ path: "out/jr_uiscale_10.png" });
     await page.mouse.move(box.x + 350, box.y + 13, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 350, box.y + 13); await wait(2500); await check("po návratu na 1.0 klik na Modeling", (s) => s.ws === "Modeling");
   },
+  /* 8. 11.: ukládání klávesami jako uživatel. Web nemá Blenderův souborový prohlížeč pro Save (záměr portu, wm_files.cc __EMSCRIPTEN__):
+   * Chrome = výběr složky prohlížeče (__blenderSaveHook, systémový dialog, test ho jen zachytí), Safari (webkit_sim) = stažení .blend. */
+  saveui: async ({ check, cmd, page, wait, hover, key }) => {
+    const sim = /webkit_sim=1/.test(Q);
+    await page.evaluate(() => { window.__saveHookCalls = 0; const o = window.__blenderSaveHook; window.__blenderSaveHook = () => { window.__saveHookCalls++; }; window.__saveHookOrig = o; });
+    const dl = () => page.waitForEvent("download", { timeout: 8000 }).catch(() => null);
+    if (!sim) {
+      await hover(); await page.keyboard.press("Control+Shift+s"); await wait(1500); const n1 = await page.evaluate(() => window.__saveHookCalls);
+      await check(`Ctrl+Shift+S otevře výběr složky prohlížeče (${n1}×)`, () => n1 === 1);
+      await hover(); await page.keyboard.press("Control+s"); await wait(1500); const n2 = await page.evaluate(() => window.__saveHookCalls);
+      await check(`Ctrl+S u neuloženého souboru taky (${n2}×)`, () => n2 === 2);
+      await cmd("bpy.ops.wm.save_as_mainfile(filepath='/opfs/home/mujmodel.blend')"); await wait(1200);
+      await hover(); await key("g", 300); await key("x", 200); await key("3", 200); await key("Enter", 900);
+      await hover(); await page.keyboard.press("Control+s"); await wait(1500); const n3 = await page.evaluate(() => window.__saveHookCalls), dirty = await cmd("eval:bpy.data.is_dirty");
+      await check(`Ctrl+S uloženého souboru uloží bez dialogu (dialogů ${n3}, is_dirty ${dirty})`, () => n3 === 2 && dirty === false);
+      return;
+    }
+    let p = dl(); await hover(); await page.keyboard.press("Control+Shift+s"); let d = await p; let size = 0;
+    if (d) { const f = `out/jr_saveui_${d.suggestedFilename()}`; await d.saveAs(f); size = (await import("node:fs")).statSync(f).size; }
+    await check(`Ctrl+Shift+S stáhne .blend (${d && d.suggestedFilename()}, ${size} B)`, () => d && d.suggestedFilename().endsWith(".blend") && size > 1000);
+    await hover(); await key("g", 300); await key("x", 200); await key("3", 200); await key("Enter", 900);
+    p = dl(); await hover(); await page.keyboard.press("Control+s"); d = await p; const dirty = await cmd("eval:bpy.data.is_dirty");
+    await check(`pak Ctrl+S stáhne znovu (${d && d.suggestedFilename()}, is_dirty ${dirty})`, (s) => d && dirty === false && s.loc[0] === 3);
+  },
   /* 8. 11.: sevření prstů na trackpadu v Safari (Mac, iPad s Magic Keyboard) = jen gesturestart/gesturechange, žádné ctrl+wheel.
    * Chrome nemá GestureEvent, proto Event + scale. Desktop Blender na Macu sevřením zoomuje. */
   pinch: async ({ check, cmd, page, wait, mid }) => {
