@@ -777,6 +777,20 @@ const J = {
     await f3("origin to geometry"); await check("F3 Origin to Geometry: loc x 2", (s) => Math.abs(s.loc[0] - 2) < 1e-3 && s.loc[1] === 0 && s.loc[2] === 0);
     await hover(); await page.keyboard.press("Control+z"); await wait(1000); await check("Ctrl+Z: loc 0", (s) => s.loc.join() === "0,0,0");
   },
+  /* 8. 11. večer: Edit, A, Shift+D X 3 Enter (druhý kus vedle), P ▸ By Loose Parts (menu P: Selection, By Material, By Loose Parts; písmeno L),
+   * Tab: 2 objekty po 8 vrcholech (desktop stejně). Ctrl+Z vrátí nejdřív Tab (krok historie), druhé Ctrl+Z jeden objekt se 16 vrcholy. */
+  loose: async ({ check, cmd, page, wait, hover, key }) => {
+    await hover(); await key("Tab", 900); await key("a", 300); await page.keyboard.press("Shift+d"); await wait(500); await key("x", 300); await key("3", 300); await key("Enter", 800);
+    await check("Shift+D X 3: v 16", (s) => s.v === 16);
+    await hover(); await key("p", 900); await page.screenshot({ path: "out/jr_loose_menu.png" }); await key("l", 1200);
+    await key("Tab", 900);
+    const a = await cmd("eval:sorted((o.name, len(o.data.vertices)) for o in bpy.data.objects if o.type == 'MESH')");
+    await check(`P L (By Loose Parts): 2 kostky po 8 (${JSON.stringify(a)})`, (s) => s.objs === 4 && a && a.length === 2 && a.every((x) => x[1] === 8));
+    await hover(); await page.keyboard.press("Control+z"); await wait(1200);
+    await check("1. Ctrl+Z vrátí Tab: Edit, pořád 2 objekty", (s) => s.mode === "EDIT_MESH" && s.objs === 4);
+    await page.keyboard.press("Control+z"); await wait(1200);
+    await check("2. Ctrl+Z vrátí rozdělení: 1 objekt, v 16", (s) => s.objs === 3 && s.v === 16);
+  },
   /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
   undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
     const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };
