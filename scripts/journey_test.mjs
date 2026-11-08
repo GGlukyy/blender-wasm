@@ -645,6 +645,46 @@ const J = {
     await toggle(); const f2 = await fs(); await check(`podruhé ji vypne (${f2})`, () => !f2);
     await hover(); await key("g", 300); await key("x", 200); await key("1", 200); await key("Enter", 900); await check("pak G X 1 funguje", (s) => s.loc[0] === 1);
   },
+  /* 8. 11.: navigační gizmo vpravo nahoře myší (na iPadu bez numpadu hlavní cesta k pohledům): kamera, ortho, osa Z, tažení ruky / lupy / koule. */
+  gizmo: async ({ check, cmd, page, wait, box }) => {
+    const r3 = "eval:(lambda r: [r.view_perspective, round(r.view_distance, 3), [round(v, 3) for v in r.view_location], [round(v, 3) for v in r.view_rotation]])([a for a in bpy.context.window_manager.windows[0].screen.areas if a.type == 'VIEW_3D'][0].spaces[0].region_3d)";
+    const click = async (x, y) => { await page.mouse.move(box.x + x, box.y + y, { steps: 3 }); await wait(300); await page.mouse.click(box.x + x, box.y + y); await wait(900); };
+    const drag = async (x, y, dx, dy) => { await page.mouse.move(box.x + x, box.y + y, { steps: 3 }); await wait(300); await page.mouse.down(); for (let i = 1; i <= 10; i++) { await page.mouse.move(box.x + x + dx * i / 10, box.y + y + dy * i / 10); await wait(30); } await page.mouse.up(); await wait(800); };
+    const v0 = await cmd(r3); console.log("R3 start " + JSON.stringify(v0));
+    await click(1126, 246); const v1 = await cmd(r3); await page.screenshot({ path: "out/jr_gizmo_cam.png" }); await check(`ikona kamery = pohled kamery (${v1 && v1[0]})`, () => v1 && v1[0] === "CAMERA");
+    await click(1126, 246); const v2 = await cmd(r3); await check(`podruhé zpět (${v2 && v2[0]})`, () => v2 && v2[0] === "PERSP");
+    await click(1126, 277); const v3 = await cmd(r3); await check(`ikona mřížky = ortho (${v3 && v3[0]})`, () => v3 && v3[0] === "ORTHO");
+    await click(1126, 277); const v4 = await cmd(r3); await check(`podruhé perspektiva (${v4 && v4[0]})`, () => v4 && v4[0] === "PERSP");
+    await click(1097, 99); const v5 = await cmd(r3); await page.screenshot({ path: "out/jr_gizmo_top.png" });
+    await check(`klik na osu Z = pohled shora (${JSON.stringify(v5 && v5[3])})`, () => v5 && Math.abs(Math.abs(v5[3][0]) - 1) < 0.01);
+    await drag(1126, 217, -150, 60); const v6 = await cmd(r3); await check(`tažení ruky posune pohled (${JSON.stringify(v6 && v6[2])})`, () => v6 && JSON.stringify(v6[2]) !== JSON.stringify(v5[2]));
+    await drag(1126, 187, 0, 80); const v7 = await cmd(r3); await check(`tažení lupy změní vzdálenost (${v6 && v6[1]} -> ${v7 && v7[1]})`, () => v7 && v7[1] !== v6[1]);
+    await drag(1100, 125, -60, 30); const v8 = await cmd(r3); await check(`tažení koule otočí pohled (${JSON.stringify(v8 && v8[3])})`, () => v8 && JSON.stringify(v8[3]) !== JSON.stringify(v7[3]));
+  },
+  /* 8. 11.: skrýt/odkrýt, přesun do nové kolekce přes M (menu + pole se jménem), Ctrl+Z. Desktop: H skryje, Alt+H odkryje a vybere, M ▸ New Collection. */
+  hidecol: async ({ check, cmd, page, wait, hover, key, mid }) => {
+    const st = "eval:(lambda o: [o.hide_get(), o.select_get(), [c.name for c in o.users_collection], sorted(c.name for c in bpy.data.collections)])(bpy.data.objects['Cube'])";
+    await hover(); await key("h", 700); const a = await cmd(st); await check(`H skryje kostku (${JSON.stringify(a)})`, () => a && a[0] === true);
+    await hover(); await key("Alt+h", 700); const b = await cmd(st); await check(`Alt+H odkryje a vybere (${JSON.stringify(b)})`, () => b && b[0] === false && b[1] === true);
+    await cmd("[o.select_set(o.name == 'Cube') for o in bpy.data.objects]; bpy.context.view_layer.objects.active = bpy.data.objects['Cube']"); await wait(300);
+    /* menu M se otevře pod myší (Search… pod kurzorem), „New Collection" o řádek níž; psaní v menu = hledání, proto klik */
+    await hover(); await key("m", 900); await page.screenshot({ path: "out/jr_hidecol_menu.png" }); const m = mid(); await page.mouse.move(m[0] - 60, m[1] + 26, { steps: 3 }); await wait(300); await page.mouse.click(m[0] - 60, m[1] + 26); await wait(900); await page.screenshot({ path: "out/jr_hidecol_name.png" });
+    await page.keyboard.press("Control+a"); await page.keyboard.type("Nabytek", { delay: 40 }); await wait(300); await key("Enter", 700); await page.screenshot({ path: "out/jr_hidecol_name2.png" }); await key("Enter", 900);
+    const c = await cmd(st); await page.screenshot({ path: "out/jr_hidecol_done.png" }); await check(`M ▸ New Collection „Nabytek" (${JSON.stringify(c)})`, () => c && c[2].length === 1 && c[2][0] === "Nabytek");
+    await hover(); await page.keyboard.press("Control+z"); await wait(900); const d = await cmd(st); await check(`Ctrl+Z vrátí do Collection (${JSON.stringify(d)})`, () => d && d[2][0] === "Collection");
+  },
+  /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
+  undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
+    const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };
+    await mv("x"); await mv("y"); await mv("z"); await check("G X/Y/Z 1: loc [1,1,1]", (s) => s.loc.join() === "1,1,1");
+    /* výchozí keymap nemá zkratku (Ctrl+Alt+Z jen legacy) -> menu Edit myší */
+    await page.mouse.move(box.x + 75, box.y + 12, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 75, box.y + 12); await wait(900); await page.screenshot({ path: "out/jr_undohist_edit.png" });
+    await page.mouse.move(box.x + 125, box.y + 76, { steps: 4 }); await wait(1200); await page.screenshot({ path: "out/jr_undohist_sub.png" });
+    /* podmenu: Move (nynější), Move, Move, Original; 3. řádek = stav po G X 1 */
+    await page.mouse.move(box.x + 300, box.y + 76, { steps: 4 }); await wait(300); await page.mouse.move(box.x + 312, box.y + 119, { steps: 4 }); await wait(400); await page.mouse.click(box.x + 312, box.y + 119); await wait(1200);
+    await check("klik na 1. Move v Undo History: loc [1,0,0]", (s) => s.loc.join() === "1,0,0");
+    await hover(); await page.keyboard.press("Control+Shift+z"); await wait(900); await check("pak Ctrl+Shift+Z: loc [1,1,0]", (s) => s.loc.join() === "1,1,0");
+  },
   /* 8. 11.: sevření prstů na trackpadu v Safari (Mac, iPad s Magic Keyboard) = jen gesturestart/gesturechange, žádné ctrl+wheel.
    * Chrome nemá GestureEvent, proto Event + scale. Desktop Blender na Macu sevřením zoomuje. */
   pinch: async ({ check, cmd, page, wait, mid }) => {

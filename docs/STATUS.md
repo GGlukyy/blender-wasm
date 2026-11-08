@@ -1,3 +1,18 @@
+# 8. 11. ráno — F1 celá obrazovka z menu, regres noci dořešen
+Výsledek: 🟡 PC ✅ (F1 test Chrome i `webkit_sim`, bez opravy FAIL), iPad neověřeno
+
+**Co jsem udělal**
+- **Regres z noci:** `editors` a `eevee_sweep` ve `webkit_sim` padaly na timeout. Samostatně oba PASS. Byl to souběh s mými testy, ne chyba.
+- **F1:** Window ▸ Toggle Window Fullscreen na webu nedělal nic. Teď přepne stránku na celou obrazovku, podruhé zpět. Ve výchozích klávesách Blenderu zkratka není (Alt+F11 jen ve starém keymapu), takže přes menu Window nebo F3.
+  - Blender vypne jen celou obrazovku, kterou sám zapnul. Celá obrazovka z tlačítka itch.io tedy při startu nespadne. Vedlejší efekt: když jsi v celé obrazovce z itch, Toggle v Blenderu ji nevypne (Esc ano).
+- Pushnuto: fork `ipad` 1577e0e8, `master` P74 (`BLENDER_REF`, test).
+
+**Důkaz**
+- `journey_win.sh fullscreen`: Chrome i `webkit_sim` PASS (zapne, vypne, pak G X 1 funguje). Se starým buildem FAIL (`false -> false`).
+
+**Co otestovat na iPadu**
+1. Window ▸ Toggle Window Fullscreen. Čekám: zmizí lišta Safari, Blender přes celý displej. Znovu Toggle (nebo tah dolů) = zpět.
+
 # 8. 11. noc — lov chyb jako uživatel: 6 nových oprav jen pro web (H36–H41)
 Výsledek: 🟡 PC ✅ (každá oprava test Chrome i `webkit_sim`, bez opravy test FAIL), iPad neověřeno
 
