@@ -1225,6 +1225,18 @@ function openBlendDirect(path) {
   log("open .blend directly: " + path);
 }
 
+/* H41: browser Back (iPad: swipe from the left edge, Mac: two-finger swipe, Android back) left the page and the
+ * scene was gone. Keep one extra history entry; on Back with unsaved changes ask like desktop's quit does. */
+try {
+  history.pushState({ blender: 1 }, "");
+  window.addEventListener("popstate", () => {
+    let dirty = "0";
+    try { dirty = new TextDecoder().decode(window.Module.FS.readFile("/tmp/dirty.txt")); } catch (_) { /* not started */ }
+    if (dirty !== "1" || window.confirm("Odejít z Blenderu? Neuložené změny se ztratí.")) history.back();
+    else history.pushState({ blender: 1 }, "");
+  });
+} catch (_) { /* sandboxed iframe without history */ }
+
 /* H38: a file dropped onto Blender (outside the Open dialog) had no handler, so the browser opened the
  * file instead of the page (unsaved work gone). Like desktop: one .blend opens, meshes/scenes import,
  * images load; everything lands in /uploads. The Open dialog's own drop zone stops propagation first. */

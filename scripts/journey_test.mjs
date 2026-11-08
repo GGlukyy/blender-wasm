@@ -615,6 +615,16 @@ const J = {
     await wait(3500);
     await check("přetažený .blend v dialogu se otevře", (s) => s.objs === 4 && s.file === "/uploads/opice.blend");
   },
+  /* 8. 11.: Zpět v prohlížeči (iPad: tah od levého okraje, Mac: dva prsty doprava) s neuloženou scénou nesmí Blender zavřít bez dotazu. */
+  back: async ({ check, cmd, page, wait, hover, key }) => {
+    await hover(); await key("g", 300); await key("x", 200); await key("2", 200); await key("Enter", 1200);
+    await check("scéna změněná (G X 2)", (s) => s.loc[0] === 2);
+    let dlg = ""; page.once("dialog", (d) => { dlg = d.type() + ": " + d.message(); d.dismiss().catch(() => {}); });
+    const url0 = page.url(); await page.goBack({ timeout: 5000 }).catch(() => {}); await wait(2500);
+    await check(`Zpět se zeptá (${dlg})`, () => dlg.startsWith("confirm"));
+    const alive = await page.evaluate(() => !!(window.Module && window.Module.FS)).catch(() => false);
+    await check(`po „Zůstat" stránka s Blenderem zůstala (${alive})`, (s) => alive && s.loc[0] === 2);
+  },
   /* 8. 11.: sevření prstů na trackpadu v Safari (Mac, iPad s Magic Keyboard) = jen gesturestart/gesturechange, žádné ctrl+wheel.
    * Chrome nemá GestureEvent, proto Event + scale. Desktop Blender na Macu sevřením zoomuje. */
   pinch: async ({ check, cmd, page, wait, mid }) => {
