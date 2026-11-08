@@ -12,6 +12,8 @@ const wsList = (k) => (_q.get(k) || "").split(",").filter(Boolean);
 const wsOnly = wsList("tourws"), wsSkip = wsList("tourskip");
 /* B3b: `&tourrep=3` = část ws třikrát: roste paměť při každém průchodu (únik), nebo jen poprvé? */
 const wsRep = +_q.get("tourrep") || 1;
+/* B3h: `&tourwait=240` = N s klidu (Layout, Solid) před prvním krokem: umře iPad v ~230 s i bez práce (časovač), nebo až po stejné práci (JIT)? */
+const tourWait = Math.max(0, +_q.get("tourwait") || 0);
 
 export const TOUR_PY = `
 import json
@@ -223,6 +225,7 @@ export async function tourRun() {
   telEvent("tour_start", { touch: navigator.maxTouchPoints, q: location.search, parts: want });
   const t0 = performance.now();
   await sleep(1000); await press("Escape", {}, 600);
+  if (tourWait) { telEvent("tour_wait", { s: tourWait }); for (let i = 0; i < tourWait; i += 10) { await sleep(10000); telEvent("tour_wait_tick", { s: i + 10 }); } }
   await step("boot", async () => { await stateIs((s) => s.objs === 3, "startovní scéna"); });
   for (const p of PARTS) if (want.includes(p) && !hung) {
     try { await SCEN[p](); }
