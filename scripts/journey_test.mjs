@@ -673,6 +673,19 @@ const J = {
     const c = await cmd(st); await page.screenshot({ path: "out/jr_hidecol_done.png" }); await check(`M ▸ New Collection „Nabytek" (${JSON.stringify(c)})`, () => c && c[2].length === 1 && c[2][0] === "Nabytek");
     await hover(); await page.keyboard.press("Control+z"); await wait(900); const d = await cmd(st); await check(`Ctrl+Z vrátí do Collection (${JSON.stringify(d)})`, () => d && d[2][0] === "Collection");
   },
+  /* 8. 11. večer: nůž (K) myší: v Edit módu klik na střed přední a zadní hrany horní plochy, Enter. Desktop: horní plocha se rozdělí (v 8->10, f 6->7), Ctrl+Z zpět. */
+  knife: async ({ check, cmd, page, wait, hover, key, at }) => {
+    await hover(); await key("Tab", 900); await key("a", 400);
+    await check("Tab: edit mode", (s) => s.mode === "EDIT_MESH" && s.v === 8);
+    const p1 = at(await cmd("eval:_px(bpy.context.object.matrix_world @ mathutils.Vector((0, -1, 1)))"));
+    const p2 = at(await cmd("eval:_px(bpy.context.object.matrix_world @ mathutils.Vector((0, 1, 1)))"));
+    await hover(); await key("k", 700);
+    for (const p of [p1, p2]) { await page.mouse.move(p[0], p[1], { steps: 6 }); await wait(350); await page.mouse.click(p[0], p[1]); await wait(500); }
+    await page.screenshot({ path: "out/jr_knife_cut.png" }); await key("Enter", 1200);
+    await check("K klik, klik, Enter: horní plocha rozdělena (v 10, f 7)", (s) => s.mode === "EDIT_MESH" && s.v === 10 && s.f === 7);
+    await hover(); await page.keyboard.press("Control+z"); await wait(1000);
+    await check("Ctrl+Z: zase 8 vrcholů, 6 ploch", (s) => s.v === 8 && s.f === 6);
+  },
   /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
   undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
     const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };
