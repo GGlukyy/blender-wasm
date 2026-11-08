@@ -1,17 +1,33 @@
-# 8. 11. ráno — F1 celá obrazovka z menu, regres noci dořešen
-Výsledek: 🟡 PC ✅ (F1 test Chrome i `webkit_sim`, bez opravy FAIL), iPad neověřeno
+# 8. 11. ráno — F1 celá obrazovka z menu, T2 prstem jde táhnout hrana oblasti, 11 nových cest
+Výsledek: 🟡 PC ✅ (každá oprava test Chrome i `webkit_sim`, bez opravy test FAIL), iPad neověřeno
 
 **Co jsem udělal**
-- **Regres z noci:** `editors` a `eevee_sweep` ve `webkit_sim` padaly na timeout. Samostatně oba PASS. Byl to souběh s mými testy, ne chyba.
-- **F1:** Window ▸ Toggle Window Fullscreen na webu nedělal nic. Teď přepne stránku na celou obrazovku, podruhé zpět. Ve výchozích klávesách Blenderu zkratka není (Alt+F11 jen ve starém keymapu), takže přes menu Window nebo F3.
-  - Blender vypne jen celou obrazovku, kterou sám zapnul. Celá obrazovka z tlačítka itch.io tedy při startu nespadne. Vedlejší efekt: když jsi v celé obrazovce z itch, Toggle v Blenderu ji nevypne (Esc ano).
-- Pushnuto: fork `ipad` 1577e0e8, `master` P74 (`BLENDER_REF`, test).
+- **T2 (iPad, důležité):** prstem nešlo táhnout hranu mezi oblastmi (třeba zúžit Properties). Myší to šlo. Příčina: `touch.js` poslal stisk a hned další pohyb prstu. Blender vzal polohu stisku z toho pohybu, tedy o 6–10 px vedle. Hrana je široká jen pár px, tak ji minul. Teď `touch.js` po stisku chvíli (60 ms) počká. Pomůže to i u malých tlačítek a táhel.
+- **F1:** Window ▸ Toggle Window Fullscreen přepne stránku na celou obrazovku, podruhé zpět. Ve výchozích klávesách zkratka není, jen menu Window nebo F3.
+  - Blender vypne jen celou obrazovku, kterou sám zapnul. Celá obrazovka z itch.io při startu nespadne. Vedlejší efekt: celou obrazovku z itch tlačítko v Blenderu nevypne (Esc ano).
+- **Regres z noci:** `editors` a `eevee_sweep` ve `webkit_sim` samostatně PASS. Noční FAIL byl souběh testů.
+- **Nové cesty (část D), bez nálezu:** `fullscreen`, `gizmo` (klikání na navigační gizmo), `hidecol` (H, Alt+H, M ▸ New Collection), `undohist` (Edit ▸ Undo History), `outdrag` (Outliner: přetažení do kolekce, pravé tlačítko ▸ Delete), `uiscale` (Resolution Scale 1,5), `saveui` (Ctrl+S, Ctrl+Shift+S), `color` (výběr barvy), `moddrag` (pořadí modifikátorů tažením), `touchui` (podržení prstem = menu, 2 prsty posunou Properties), `touchcolor` (výběr barvy prstem), `touchmisc` (časová osa prstem, hrana oblasti, menu klepáním).
+- **Ověřeno, že NEJSOU chyby:**
+  - Menu a výběr barvy se nezavřou, když myš odjede. Desktop 5.2.3 má stejnou výchozí předvolbu (`menu_close_leave` = False). Klik vedle zavře.
+  - Save As na webu nemá Blenderův souborový prohlížeč. Je to záměr portu: Chrome ukáže výběr složky, Safari soubor stáhne.
+  - Ctrl+Alt+Z (Undo History) a Alt+F11 jsou jen ve starém keymapu, i na desktopu.
+- J4 (ztracený klik): nová data. Stisk myší v kolečku barev hned po příjezdu se 1× ze 2 ztratil, prstem 0 z 12. Pořád nerozhodné.
+- Pushnuto: fork `ipad` 1577e0e8 (F1), `master` P74, P75 + cesty.
 
 **Důkaz**
-- `journey_win.sh fullscreen`: Chrome i `webkit_sim` PASS (zapne, vypne, pak G X 1 funguje). Se starým buildem FAIL (`false -> false`).
+- `journey_win.sh touchmisc`: Chrome i `webkit_sim` PASS (hrana 1147 -> 996 px). Bez opravy FAIL (1147 -> 1147). Měření předem: syntetické události bez pauzy = stisk na 1141 a nic, s pauzou 60 ms = stisk na 1151 a hrana se pohne.
+- Po změně `touch.js`: `touch`, `touch_modal`, `touch_loopcut`, `touch_boxsel`, `touch_shiftsel`, `touch_sculpt` PASS v Chrome i sim; `touchui`, `touchcolor`, `autokbd` PASS.
+- `journey_win.sh fullscreen`: Chrome i `webkit_sim` PASS, se starým buildem FAIL.
+- `regress_all` po F1 (P74): 0 FAIL (jediný FAIL byla chyba mého nového testu, opravena).
 
-**Co otestovat na iPadu**
-1. Window ▸ Toggle Window Fullscreen. Čekám: zmizí lišta Safari, Blender přes celý displej. Znovu Toggle (nebo tah dolů) = zpět.
+**Co nefunguje / není jisté**
+- `regress_sim` po P75 běží (start 07:30). Výsledek níže, pokud doběhne.
+- 60 ms v T2 je změřeno na PC. Na iPadu s pomalými snímky (Material Preview) nemusí stačit (odhad).
+
+**Co otestovat na iPadu (podle důležitosti)**
+1. **T2:** prstem chyť svislou hranu mezi 3D pohledem a Properties a táhni doleva. Čekám: Properties se rozšíří. Zkus i v Material Preview.
+2. **F1:** Window ▸ Toggle Window Fullscreen. Čekám: zmizí lišta Safari. Znovu Toggle = zpět.
+3. Body 1–4 z noci níže (diakritika, přetažení souboru, trackpad, Zpět).
 
 # 8. 11. noc — lov chyb jako uživatel: 6 nových oprav jen pro web (H36–H41)
 Výsledek: 🟡 PC ✅ (každá oprava test Chrome i `webkit_sim`, bez opravy test FAIL), iPad neověřeno
