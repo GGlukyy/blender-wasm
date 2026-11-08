@@ -874,6 +874,25 @@ const J = {
     await check(`Shift+Alt+tah: posun (poloha ${JSON.stringify(a1 && a1[1])} -> ${JSON.stringify(a2 && a2[1])}, rotace stejná)`, () => a2 && a2[1].join() !== a1[1].join() && a2[0].join() === a1[0].join());
     await cmd("bpy.context.preferences.inputs.use_mouse_emulate_3_button = False");
   },
+  /* 8. 11. večer: číselná pole myší (N-panel, Location): tah doprava = hodnota roste; dvojklik = psaní „1.5" Enter; stisk na X, tah dolů
+   * přes Y a Z a pak doprava = všechna tři pole stejně (multi-drag). Desktop: stejné chování (výchozí předvolby). */
+  fielddrag: async ({ check, cmd, page, wait, hover, key, at }) => {
+    await hover(); await key("n", 900);
+    const fx = await cmd("eval:(lambda w: [[r.x, w.height - r.y - r.height, r.width, r.height] for a in w.screen.areas if a.type == 'VIEW_3D' for r in a.regions if r.type == 'UI'][0])(bpy.context.window_manager.windows[0])");
+    const X = at([fx[0] + fx[2] * 0.62, fx[1] + 64]), Y = at([fx[0] + fx[2] * 0.62, fx[1] + 64 + 20]), Z = at([fx[0] + fx[2] * 0.62, fx[1] + 64 + 40]);
+    await page.mouse.move(X[0], X[1], { steps: 2 }); await wait(300); await page.mouse.down();
+    for (let i = 1; i <= 10; i++) { await page.mouse.move(X[0] + i * 6, X[1]); await wait(40); } await page.mouse.up(); await wait(800);
+    await check("tah polem X doprava: x > 0", (s) => s.loc[0] > 0 && s.loc[1] === 0);
+    await page.mouse.move(X[0], X[1], { steps: 2 }); await wait(300); await page.mouse.dblclick(X[0], X[1]); await wait(600);
+    await page.keyboard.press("Control+a"); await page.keyboard.type("1.5", { delay: 60 }); await key("Enter", 800);
+    await check("dvojklik, 1.5, Enter: x = 1.5", (s) => s.loc[0] === 1.5);
+    await page.mouse.move(X[0], X[1], { steps: 2 }); await wait(300); await page.mouse.down(); await wait(100);
+    for (let i = 1; i <= 8; i++) { await page.mouse.move(X[0], X[1] + (Z[1] - X[1]) * i / 8); await wait(50); }
+    for (let i = 1; i <= 10; i++) { await page.mouse.move(X[0] + i * 6, Z[1]); await wait(40); } await page.mouse.up(); await wait(900);
+    await page.screenshot({ path: "out/jr_fielddrag_multi.png" });
+    await check("stisk na X, dolů přes Y, Z, doprava: všechna tři změněna stejně", (s) => s.loc[1] !== 0 && s.loc[2] !== 0 && Math.abs(s.loc[1] - s.loc[2]) < 1e-3 && Math.abs((s.loc[0] - 1.5) - s.loc[1]) < 1e-3);
+    await hover(); await key("n", 500);
+  },
   /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
   undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
     const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };
