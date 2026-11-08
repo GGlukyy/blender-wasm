@@ -686,6 +686,19 @@ const J = {
     await hover(); await page.keyboard.press("Control+z"); await wait(1000);
     await check("Ctrl+Z: zase 8 vrcholů, 6 ploch", (s) => s.v === 8 && s.f === 6);
   },
+  /* 8. 11. večer: Bevel myší: Edit, A, Ctrl+B, tah od středu, kolečko nahoru = +1 segment, klik. Desktop 5.2.3 (bmesh.ops.bevel všech hran):
+   * 1 seg v24 f26, 2 seg v56 f54, 3 seg v96 f98. Kolečko: 1 zub = +1 segment (1 -> 2). */
+  bevel: async ({ check, page, wait, hover, key, mid }) => {
+    await hover(); await key("Tab", 900); await key("a", 400);
+    const m = mid(); await page.mouse.move(m[0] + 120, m[1] + 40, { steps: 3 }); await wait(300);
+    await page.keyboard.press("Control+b"); await wait(700);
+    for (let i = 1; i <= 8; i++) { await page.mouse.move(m[0] + 120 + i * 8, m[1] + 40 + i * 3); await wait(60); }
+    await wait(400); await page.mouse.wheel(0, -100); await wait(700); await page.screenshot({ path: "out/jr_bevel_modal.png" });
+    await page.mouse.down(); await wait(80); await page.mouse.up(); await wait(1200);
+    await check("Ctrl+B, tah, 1 zub kolečka nahoru, klik: 2 segmenty (v 56, f 54 jako desktop)", (s) => s.mode === "EDIT_MESH" && s.v === 56 && s.f === 54);
+    await hover(); await page.keyboard.press("Control+z"); await wait(1000);
+    await check("Ctrl+Z: zase kostka (v 8)", (s) => s.v === 8 && s.f === 6);
+  },
   /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
   undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
     const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };
