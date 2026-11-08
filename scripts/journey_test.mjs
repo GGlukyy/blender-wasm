@@ -848,6 +848,18 @@ const J = {
     await page.mouse.move(c[0], c[1], { steps: 2 }); await key("g", 300); await key("g", 500); for (let i = 1; i <= 6; i++) { await page.mouse.move(c[0] - i * 8, c[1]); await wait(40); } await key("Escape", 800);
     const b = await cmd(co); await check(`G G a Esc: beze změny (${JSON.stringify(b)})`, () => b && JSON.stringify(b) === JSON.stringify(a));
   },
+  /* 8. 11. večer: iPad klávesnice nemá numpad: Preferences ▸ Input ▸ Emulate Numpad, pak 1 = Front, 3 = Right, 7 = Top, 0 = kamera,
+   * 5 = orto/perspektiva (desktop: stejné pohledy, view_perspective ORTHO po 1/3/7 z „Auto Perspective"). Na konci předvolbu vrátit. */
+  numemu: async ({ check, cmd, page, wait, hover, key }) => {
+    const v = "eval:(lambda r: [r.view_perspective, [round(x, 2) for x in r.view_rotation]])([a.spaces[0].region_3d for a in bpy.context.window.screen.areas if a.type == 'VIEW_3D'][0])";
+    await cmd("bpy.context.preferences.inputs.use_emulate_numpad = True"); await wait(500);
+    const q = {}; for (const k of ["1", "3", "7", "0"]) { await hover(); await key(k, 900); q[k] = await cmd(v); }
+    await check(`1/3/7/0: Front ${JSON.stringify(q[1])}, Right ${JSON.stringify(q[3])}, Top ${JSON.stringify(q[7])}, kamera ${JSON.stringify(q[0])}`, () =>
+      q[1] && q[1][1].join() === "0.71,0.71,0,0" && q[3][1].join() === "0.5,0.5,0.5,0.5" && q[7][1].join() === "1,0,0,0" && q[0][0] === "CAMERA");
+    await hover(); await key("7", 800); const o1 = await cmd(v); await hover(); await key("5", 800); const o2 = await cmd(v);
+    await check(`7 = ORTHO, 5 přepne na PERSP (${o1 && o1[0]} -> ${o2 && o2[0]})`, () => o1 && o1[0] === "ORTHO" && o2 && o2[0] === "PERSP");
+    await cmd("bpy.context.preferences.inputs.use_emulate_numpad = False");
+  },
   /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
   undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
     const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };
