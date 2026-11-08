@@ -1,3 +1,10 @@
+## B3 VÝSLEDEK 8.11. 23:43 — `tourwait=240` na iPadu (relace `uixsix`), po P76–P82
+**57 kroků ze 75** (dřív max 29–30!), `doběhla za 439 s; lost: device lost` (reason `destroyed`). => 240 s klidu PŘEŽIL (hypotéza "smrt po čase ~230 s" NEPLATÍ), umřel ~200 s po začátku prohlídky. Dnešní opravy (−230 MB zstddec, lite po otevření souboru) zjevně pomohly (z ~25 na 57 kroků), ale nestačí.
+V okamžiku ztráty: tex 167 MB, buf 12 MB (malé), **q_depth 16 (max 35)** — fronta GPU zase plná 16 nedokončených submitů (brzda bp má držet 1–2!), submits 13366 / completed 13350, buf_new 8232 / destroyed 7957, bg_new 13177, write 1045 MB celkem, map_n 92 / 196 MB.
+- [ ] B3m: zjistit krok 57 (tour_report detail) a `destroy_called` z lost_detail (náš kód vs WebKit). 
+- [ ] B3n: proč q_depth naroste na 16–35, když bp je na iPadu zapnutá (ověřit flags v relaci): fronta plná = WebKit drží spoustu command bufferů + jejich zdrojů v paměti -> tlak na paměť -> destroyed. Udělat bp tvrdší na WebKitu (max 2 rozpracované snímky, čekat na onSubmittedWorkDone) a změřit q_depth_max v prohlídce sim+ipad; cíl ≤ 3.
+- [ ] B3o: `map_mb` 196 MB přes 92 map (readback?) — co čte z GPU (výběr, depth snapshot?), zda mapované buffery nejsou drženy.
+
 ## B3g — iPad test jen Sculpting (8.11. 15:54, `tourws=Sculpting`, relace `tuzvou`)
 Výsledek: 20 kroků, 0 problémů, NEDOBĚHLA, poslední krok `gn_MATERIAL`. => **Sculpting workspace vč. Material Preview a Rendered PROŠEL** (prohlídka pak pokračuje edit/sculpt/texpaint/gn a umřela u Material Preview v Geometry Nodes, krok ~20).
 => Hypotéza "jeden konkrétní sculpt shader (MADefault_Surface s 2 vertex buffery)" NEPLATÍ. Smrt přichází po ~20–29 krocích, typicky při přepnutí na Material Preview, bez ohledu na workspace => kumulativní (něco roste nebo se hromadí: pipeline v GPU procesu / Metal kompilace / počet shader modulů / JS wrappery / paměť GPU procesu), ne jedna operace. Jetsam: Lukáš dodá.
