@@ -956,6 +956,14 @@ const J = {
     await check(`dva prsty: pohled posunut (${JSON.stringify(v0)} -> ${JSON.stringify(v1)}), uzly na místě`, () => v1 && v0 && v1.join() !== v0.join() && JSON.stringify(n1) === JSON.stringify(n0));
     await cmd("[setattr(a, 'ui_type', 'VIEW_3D') for a in bpy.context.window.screen.areas if a.type == 'NODE_EDITOR']"); await wait(1500);
   },
+  /* 8. 11. večer: po T3 je toolbar pro prst UI: klepnutí na Move / Rotate / zpět Select Box přepne nástroj (ikony x 30, y 178 / 213 / 103). */
+  touchtool: async ({ check, cmd, page, wait, box }) => {
+    const cdp = await page.context().newCDPSession(page);
+    const tap = async (x, y) => { await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: box.x + x, y: box.y + y, id: 0, radiusX: 4, radiusY: 4, force: 1 }] }); await wait(80); await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] }); await wait(900); };
+    const tool = "eval:bpy.context.workspace.tools.from_space_view3d_mode('OBJECT').idname";
+    await tap(30, 178); const a = await cmd(tool); await tap(30, 213); const b = await cmd(tool); await tap(30, 103); const c = await cmd(tool);
+    await check(`klepnutí prstem v toolbaru: ${a}, ${b}, ${c}`, () => a === "builtin.move" && b === "builtin.rotate" && /builtin.select/.test(c || ""));
+  },
   /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
   undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
     const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };
