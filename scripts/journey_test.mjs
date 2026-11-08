@@ -729,6 +729,20 @@ const J = {
     await page.keyboard.press("Control+z"); await wait(1200);
     const d = await cmd(st); await check(`2. Ctrl+Z: bez modifikátoru (${JSON.stringify(d)})`, () => d && d[1].length === 0);
   },
+  /* 8. 11. večer: úklid sítě: Edit, A, Shift+D a pravé tlačítko (duplikát na místě: v 16), A (slučuje jen vybrané), M ▸ By Distance (v 8, hlášení „Removed 8 vertices").
+   * Menu M v Edit módu nemá hledání: At Center, At Cursor, Collapse, By Distance; písmeno = podtržená zkratka položky (B = By Distance). */
+  mergedist: async ({ check, page, wait, hover, key, mid }) => {
+    await hover(); await key("Tab", 900); await key("a", 400);
+    const m = mid(); await page.keyboard.press("Shift+d"); await wait(600);
+    for (let i = 1; i <= 8; i++) { await page.mouse.move(m[0] + i * 10, m[1]); await wait(40); }
+    await page.mouse.click(m[0] + 80, m[1], { button: "right" }); await wait(900);
+    await check("Shift+D + pravé tlačítko v Edit: v 16", (s) => s.mode === "EDIT_MESH" && s.v === 16);
+    await hover(); await key("a", 400); await key("m", 900); await page.screenshot({ path: "out/jr_mergedist_menu.png" });
+    await key("b", 1200);
+    await check("M, B (By Distance): v 8", (s) => s.v === 8 && s.f === 6);
+    await hover(); await page.keyboard.press("Control+z"); await wait(1000);
+    await check("Ctrl+Z: v 16", (s) => s.v === 16);
+  },
   /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
   undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
     const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };
