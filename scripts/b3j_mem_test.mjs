@@ -24,6 +24,10 @@ function procs() {
     return s;
   });
 }
+const js0 = await page.evaluate(() => performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) : null);
+const pcdp = await page.context().newCDPSession(page); await pcdp.send("HeapProfiler.enable"); await pcdp.send("HeapProfiler.collectGarbage"); await wait(2000);
+const js1 = await page.evaluate(() => performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) : null);
+console.log("JSGC before=" + js0 + " after=" + js1);
 const pr = await procs();
 const ua = await page.evaluate(async () => {
   if (!performance.measureUserAgentSpecificMemory) return { err: "no api", coi: self.crossOriginIsolated };
@@ -33,7 +37,7 @@ const ua = await page.evaluate(async () => {
   return { total_mb: Math.round(r.bytes / 1048576), by };
 }).catch(e => ({ err: String(e) }));
 const pf = await page.evaluate(() => { const p = window.__PERF__ || {}, g = window.__GPUMEM__ || {};
-  return { heap_mb: p.heap_mb, heap_used_mb: p.heap_used_mb, acct_mb: p.acct_mb, gtex_mb: g.tex_mb, gbuf_mb: g.buf_mb, wgpu_live: g.wgpu_live, pipes: g.pipelines_created,
+  return { js_used_mb: performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) : null, js_total_mb: performance.memory ? Math.round(performance.memory.totalJSHeapSize / 1048576) : null, heap_mb: p.heap_mb, heap_used_mb: p.heap_used_mb, acct_mb: p.acct_mb, gtex_mb: g.tex_mb, gbuf_mb: g.buf_mb, wgpu_live: g.wgpu_live, pipes: g.pipelines_created,
     wmem_mb: (window.Module && Module.HEAPU8) ? Math.round(Module.HEAPU8.buffer.byteLength / 1048576) : null }; }).catch(() => ({}));
 console.log("MEM " + JSON.stringify({ q, jsf, renderer_priv: pr.renderer?.[0], renderer_ws: pr.renderer?.[1], gpu_priv: pr.GPU?.[0], browser_priv: pr.browser?.[0], ...pf, ua }));
 await page.screenshot({ path: "out/b3j_mem.png" });
