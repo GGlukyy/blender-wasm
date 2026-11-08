@@ -1,4 +1,4 @@
-# 8. 11. noc — lov chyb jako uživatel: 4 nové opravy jen pro web (H36–H39)
+# 8. 11. noc — lov chyb jako uživatel: 6 nových oprav jen pro web (H36–H41)
 Výsledek: 🟡 PC ✅ (každá oprava test Chrome i `webkit_sim`, bez opravy test FAIL), iPad neověřeno
 
 **Co jsem udělal**
@@ -6,17 +6,20 @@ Výsledek: 🟡 PC ✅ (každá oprava test Chrome i `webkit_sim`, bez opravy te
 - **H37 (iPad klávesnice):** znaky z dlouhého podržení (č, ř, ž) a z autokorekce přijdou jen jako text bez klávesy. Shell je zahazoval, v Blenderu chyběla diakritika („Kočička" -> „Koika"). Teď dojdou.
 - **H38:** soubor přetažený na Blender (mimo dialog Open) neměl obsluhu. Prohlížeč pak soubor otevřel místo stránky a rozdělaná práce zmizela. Teď: .blend se otevře (zeptá se na neuložené změny), .obj/.stl/.ply/.fbx/.gltf/.glb/.usd se importují jako v desktopu, obrázky se načtou.
 - **H39 (Safari trackpad):** sevření prstů na trackpadu (Mac, iPad s Magic Keyboard) nezoomovalo. Teď zoomuje, s prstem na displeji se nic nemění (to dělá touch.js).
+- **H40 (Mac Safari):** v dialogu File ▸ Open („Drag & drop a folder") přetažený soubor hlásil „Please drop a folder". Teď ho vezme (jeden .blend se otevře).
+- **H41:** Zpět v prohlížeči (iPad: tah od levého okraje) zavřel Blender i s neuloženou prací. Teď se zeptá „Odejít z Blenderu?". Bez změn pustí.
+- Telemetrie navíc zapisuje kolečko (`wheel dy=`), pro W1 (trackpad zoomuje moc rychle, odhad, bez dat neopravuji).
 - Nové cesty bez nálezu: `keys2` (Alt+A, Ctrl+L, Ctrl+I, Shift+R, Shift+Tab, Shift+C, Ctrl+Alt+Q), `expr` (1+2, 10cm, 90°), `unicode` (česká klávesnice, soubor s diakritikou), `clip` (Ctrl+C/V objektu i hodnoty).
 - J4 (ztracený klik na záložku): hypotéza dvojkliku nepotvrzena, nerozhodné, nechávám.
-- Pushnuto: `master` P68–P71.
+- Pushnuto: `master` P68–P73.
 
 **Důkaz**
-- `journey_win.sh clip|dropfile|pinch|unicode|expr|keys2` a `kbdtext_win.sh`: Chrome i `webkit_sim` PASS. Bez opravy: `clip` FAIL (pruh), `kbdtext` FAIL („Koika e"), `dropfile` FAIL, `pinch` FAIL (zoom beze změny).
+- `journey_win.sh clip|dropfile|pinch|back|unicode|expr|keys2` a `kbdtext_win.sh`: Chrome i `webkit_sim` PASS, `dropmodal` PASS ve `webkit_sim`. Bez opravy: `clip` FAIL (pruh), `kbdtext` FAIL („Koika e"), `dropfile` FAIL, `pinch` FAIL (zoom beze změny), `dropmodal` FAIL, `back` FAIL (stránka odešla).
 - Desktop 5.2.3: import téhož .obj = 4 objekty, „Tri", 3 vrcholy, jako web.
-- Po změnách: `touch`, `touch_modal`, `autokbd`, `autokbd_mid`, `open_single` PASS.
+- Po změnách: `touch`, `touch_modal`, `autokbd`, `autokbd_mid`, `open_single`, `open_file`, `pwa_offline`, `tel` PASS.
 
 **Co nefunguje / není jisté**
-- `regress_sim` běží (od 00:10). `editors` FAIL = nedoběhl do limitu, souběžně jsem pouštěl své testy (odhad: souběh). Pustím znovu sám.
+- `regress_sim` běží (od 00:10). `editors` a `eevee_sweep` FAIL = timeout, souběžně jsem pouštěl své testy (odhad: souběh). Pustím je znovu samostatně.
 - `autokbd_mouse` padá i bez mých změn (myší režim nemá touchbar), v regresu není.
 - Na iPadu nic z toho neověřeno.
 
@@ -24,6 +27,7 @@ Výsledek: 🟡 PC ✅ (každá oprava test Chrome i `webkit_sim`, bez opravy te
 1. Klepni dvakrát na jméno objektu ve Vlastnostech, na klávesnici podrž „c" a vyber „č". Čekám: „č" se objeví v Blenderu.
 2. Split View se Soubory: přetáhni .obj nebo .blend na Blender. Čekám: import / otevření, stránka zůstane.
 3. S Magic Keyboard: sevření na trackpadu nad 3D pohledem. Čekám: zoom.
+4. Změň scénu (posuň kostku), pak tah prstem od levého okraje obrazovky (Zpět). Čekám dotaz „Odejít z Blenderu?", Zrušit = Blender zůstane.
 
 # 8. 11. 00:05 — B3c/B3d: proč iPad večer padal (ne paměť) + lepší telemetrie
 Výsledek: 🟡 PC ✅ (testy níže), příčinu pádu na iPadu ještě NEZNÁM
