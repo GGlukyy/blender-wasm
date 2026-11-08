@@ -8,11 +8,14 @@ Výsledek: 🟡 PC ✅ (každá oprava test Chrome i `webkit_sim`, bez opravy te
 - **Telemetrie (fork aca8319d, P78):** GPU paměť textur se počítala jako 4 B na pixel. Většina textur EEVEE má 8 B, takže čísla byla asi poloviční. Teď počítá správně a posílá i živé MB podle druhu textury (`tlive`).
 - **Měření PC** (prohlídka sim+ipad): textury max 551 MB. Na 1 instanci EEVEE je napevno ~75 MB (stínové textury 32 MB i bez stínů, atlas sond 43 MB). Atlas sond je konstanta v EEVEE, to neměním.
 - Pipeline za celou prohlídku jen ~200. Asi nejsou hlavní příčina (odhad).
-- Pushnuto: `master` P76–P79, fork `ipad` aca8319d.
+- **B3h (jen data):** 6 iPad prohlídek umřelo 222–236 s po načtení stránky, ale na různých krocích. Spíš čas / nahromaděná práce než konkrétní krok. Nový přepínač `&tourwait=240` (P80) to rozliší (viz bod 1 níže).
+- Nové cesty (část D), bez nálezu, Chrome i sim: `knife` (nůž K), `bevel` (Ctrl+B + kolečko, = desktop v56 f54), `dupsnap` (Shift+D + pravé tlačítko, G+Ctrl), `autosmooth` (Shade Auto Smooth z assetu, = desktop), `mergedist` (M ▸ By Distance), `inset` (I myší, proporcionální O).
+- Pushnuto: `master` P76–P80 + cesty, fork `ipad` aca8319d.
 
 **Důkaz**
 - P76: renderer Chrome (sim+ipad, 30 s po startu) 2681/2672 MB → 2442/2448 MB (`b3j_win.sh`). Predikce „≥ 150 MB méně" splněna. Prohlídka Chrome i sim 75/75, `pwa_offline` PASS.
 - P77: `crashsave_win.sh shading|workspace`. Přidá kouli, přepne, za 1 s shodí kartu (`chrome://crash`). Po startu je koule v obnově: PASS Chrome i sim. Bez opravy FAIL (autosave neexistuje). `restore`, `autosave` PASS.
+- `regress_sim` po P80 (18:19–19:53, `out/regress_sim_p80.log`): 61 sad, **0 FAIL**, všechny cesty OK (vč. nových), `fuzz`, `ui_fuzz`, `fuzz_obj` PASS, `seed_verify` 2 překlady mimo seed. Celý regres v Chrome jsem nepouštěl (časově), Chrome ověřeno cíleně (prohlídky 75/75, testy výše).
 - P79: `mplite_reload_win.sh`. Bez opravy po File ▸ New `shadows=True taa=16`. S opravou všude lite, uložený soubor i kopie mají `shadows=True taa=16`, `is_dirty=False`. Prohlídka sim+ipad i Chrome 75/75, `crashsave` sim, `restore` PASS.
 
 **Co nefunguje / není jisté**
@@ -21,7 +24,7 @@ Výsledek: 🟡 PC ✅ (každá oprava test Chrome i `webkit_sim`, bez opravy te
 - Živý test 17:15: iPad nic neposlal (Lukáš nebyl u iPadu), neopakoval jsem.
 
 **Co otestovat na iPadu (podle důležitosti)**
-1. **Prohlídka:** zavři kartu, otevři znovu `?auto=tour&tel=1&pool=4`, nech ~6 min běžet (nezamykej). Čekám: dojde dál než ~20 kroků. Když spadne, pošli Jetsam z času pádu (hodnota WebContent).
+1. **Prohlídka s klidem:** zavři kartu, otevři `?auto=tour&tel=1&pool=4&tourwait=240`, nech ~9 min (nezamykej). Prvních 4 min nic nedělá, pak prohlídka. Predikce: když je příčina čas, spadne v klidu kolem 230 s. Když nahromaděná práce, klid přežije a spadne ~95 s po začátku prohlídky. Když doběhne, pomohly dnešní opravy (odhad). Pošli Jetsam z času pádu.
 2. **Pojistka:** přidej objekt, hned přepni na Material Preview. Když karta spadne, po novém startu dej „Obnovit poslední práci". Čekám: objekt tam je.
 3. **Lite po otevření:** otevři svůj .blend, přepni na Material Preview. Čekám: stejně rychlé jako nový soubor (bez stínů). Ulož, otevři na PC: stíny zapnuté jako dřív.
 4. T2 a F1 z rána (níže).
