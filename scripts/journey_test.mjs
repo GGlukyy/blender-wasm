@@ -791,6 +791,24 @@ const J = {
     await page.keyboard.press("Control+z"); await wait(1200);
     await check("2. Ctrl+Z vrátí rozdělení: 1 objekt, v 16", (s) => s.objs === 3 && s.v === 16);
   },
+  /* 8. 11. večer: běžné zkratky (desktop 5.2.3 výchozí keymap): Ctrl+2 = Subdivision úroveň 2, Ctrl+0 = úroveň 0, Alt+G/R/S = vynulovat
+   * polohu/rotaci/měřítko, Alt+Z = X-ray, / = Local View, Ctrl+Space = maximalizovat oblast (vše znovu = zpět). */
+  keys3: async ({ check, cmd, page, wait, hover, key }) => {
+    const sub = "eval:[(m.type, m.levels) for m in bpy.context.object.modifiers]";
+    await hover(); await key("Control+2", 900); const a = await cmd(sub); await check(`Ctrl+2: Subdivision 2 (${JSON.stringify(a)})`, () => a && a.length === 1 && a[0][0] === "SUBSURF" && a[0][1] === 2);
+    await hover(); await key("Control+0", 900); const b = await cmd(sub); await check(`Ctrl+0: úroveň 0 (${JSON.stringify(b)})`, () => b && b.length === 1 && b[0][1] === 0);
+    await cmd("o = bpy.context.object; o.location = (1, 2, 3); o.rotation_euler = (0.5, 0, 0); o.scale = (2, 2, 2); bpy.ops.ed.undo_push(message='tr')"); await wait(600);
+    await hover(); await key("Alt+g", 600); await key("Alt+r", 600); await key("Alt+s", 800);
+    await check("Alt+G, Alt+R, Alt+S: vše vynulováno", (s) => s.loc.join() === "0,0,0" && s.rot.join() === "0,0,0" && s.scale.join() === "1,1,1");
+    const xr = "eval:[a.spaces[0].shading.show_xray for a in bpy.context.window.screen.areas if a.type == 'VIEW_3D'][0]";
+    await hover(); await key("Alt+z", 800); const x1 = await cmd(xr); await hover(); await key("Alt+z", 800); const x2 = await cmd(xr);
+    await check(`Alt+Z: X-ray zap/vyp (${x1}, ${x2})`, () => x1 === true && x2 === false);
+    const lv = "eval:[a.spaces[0].local_view is not None for a in bpy.context.window.screen.areas if a.type == 'VIEW_3D'][0]";
+    await hover(); await key("Slash", 1200); const l1 = await cmd(lv); await hover(); await key("Slash", 1200); const l2 = await cmd(lv);
+    await check(`/: Local View zap/vyp (${l1}, ${l2})`, () => l1 === true && l2 === false);
+    await hover(); await key("Control+Space", 1200); const f1 = (await cmd("state")).screen_full; await hover(); await key("Control+Space", 1200);
+    await check(`Ctrl+Space: maximalizace a zpět (${f1})`, (s) => f1 === true && s.screen_full === false && s.areas === 4);
+  },
   /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
   undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
     const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };
