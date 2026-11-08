@@ -11,7 +11,6 @@
  * (/opfs/home). The wasm itself ships as blender.wasm.zst, decompressed each
  * visit and fed to emscripten via Module.instantiateWasm.
  */
-import { ZSTDDecoder } from "zstddec";
 import { mcpConfig, mcpPyArgs, startMcp } from "./mcp.js";
 import { installTouch } from "./touch.js";
 import { autoArgs, autoScan, autoStart } from "./autotest.js";
@@ -145,7 +144,12 @@ async function fetchZstOnce(url, key) {
   return out;
 }
 
-const decoder = new ZSTDDecoder();
+/* B3j: zstd rozbalení ve workeru, který se po startu ukončí. zstddec v hlavním vlákně držel svou wasm paměť (~230 MB) navždy. */
+const zstdWorker = new Worker(new URL("./zstd_worker.js", import.meta.url), { type: "module" });
+const zstdWait = new Map(); let zstdSeq = 0;
+zstdWorker.onmessage = (e) => { const { id, out, err } = e.data, p = zstdWait.get(id); zstdWait.delete(id); if (err) p.rej(new Error(err)); else p.res(out); };
+zstdWorker.onerror = (e) => { for (const p of zstdWait.values()) p.rej(new Error("zstd worker: " + (e.message || "error"))); zstdWait.clear(); };
+const zstdDecode = (z, size) => new Promise((res, rej) => { const id = ++zstdSeq; zstdWait.set(id, { res, rej }); zstdWorker.postMessage({ id, buf: z.buffer, size }, [z.buffer]); });
 const manifest = await (await fetch("manifest.json")).json();
 
 /* ---- In-memory tar FsProvider (pattern + code from gecko-wasm chrome-fs.ts).
@@ -342,17 +346,17 @@ probeGpu().then(applyGpuStatus).catch(() => {});
  * progress bar), then zstd-decompress both. `assetProvider` (the zero-copy tar
  * FsProvider) and `wasmBytes` are consumed when the user clicks Launch. ---- */
 setUiPhase("loading");
-await decoder.init();
 let [assetsTar, wasmBytes] = await Promise.all([
   fetchZst("assets.tar.zst", "assets").then((z) => {
     setProgress({ phase: "decompressing", percent: 1, message: "Decompressing assets" });
-    return decoder.decode(z, manifest["assets.tar.zst"]);
+    return zstdDecode(z, manifest["assets.tar.zst"]);
   }),
   fetchZst("blender.wasm.zst", "wasm").then((z) => {
     setProgress({ phase: "decompressing", percent: 1, message: "Decompressing Blender" });
-    return decoder.decode(z, manifest["blender.wasm.zst"]);
+    return zstdDecode(z, manifest["blender.wasm.zst"]);
   }),
 ]);
+zstdWorker.terminate();
 const assetProvider = makeAssetProvider(indexTar(assetsTar));
 log(`assets indexed zero-copy: ${(assetsTar.length / 1048576) | 0} MB · wasm ${(wasmBytes.length / 1048576) | 0} MB`);
 setProgress({ phase: "ready", percent: 1, message: "Ready to launch" });
