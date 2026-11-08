@@ -685,6 +685,21 @@ const J = {
     await check("klik na 1. Move v Undo History: loc [1,0,0]", (s) => s.loc.join() === "1,0,0");
     await hover(); await page.keyboard.press("Control+Shift+z"); await wait(900); await check("pak Ctrl+Shift+Z: loc [1,1,0]", (s) => s.loc.join() === "1,1,0");
   },
+  /* 8. 11.: Outliner myší: přetáhnout Cube na jinou kolekci (přesun), pravé tlačítko ▸ Delete. Desktop: tažení řádku na kolekci = přesun.
+   * Cube začne v kolekci Nabytek (dole), táhne se NAHORU: u spodního okraje malého Outlineru se seznam při tažení sám posouvá (i desktop). */
+  outdrag: async ({ check, cmd, page, wait, box }) => {
+    const st = "eval:(lambda o: [c.name for c in o.users_collection] if o else None)(bpy.data.objects.get('Cube'))";
+    await cmd("c = bpy.data.collections.new('Nabytek'); bpy.context.scene.collection.children.link(c); o = bpy.data.objects['Cube']; c.objects.link(o); bpy.data.collections['Collection'].objects.unlink(o); bpy.ops.ed.undo_push(message='setup')"); await wait(900);
+    const drag = async (x0, y0, x1, y1) => { await page.mouse.move(box.x + x0, box.y + y0, { steps: 3 }); await wait(300); await page.mouse.down(); for (let i = 1; i <= 12; i++) { await page.mouse.move(box.x + x0 + (x1 - x0) * i / 12, box.y + y0 + (y1 - y0) * i / 12); await wait(40); } await wait(500); await page.screenshot({ path: "out/jr_outdrag_drop.png" }); await page.mouse.up(); await wait(1000); };
+    await page.screenshot({ path: "out/jr_outdrag_start.png" }); const a0 = await cmd(st);
+    await drag(1250, 163, 1250, 83); const a = await cmd(st);
+    await check(`Cube přetažen z Nabytek na Collection (${JSON.stringify(a0)} -> ${JSON.stringify(a)})`, () => a && a.length === 1 && a[0] === "Collection");
+    await page.mouse.move(box.x + 500, box.y + 400); await wait(200); await page.keyboard.press("Control+z"); await wait(900); const b = await cmd(st); await check(`Ctrl+Z vrátí (${JSON.stringify(b)})`, () => b && b[0] === "Nabytek");
+    const n0 = (await cmd("state")).objs; await page.mouse.move(box.x + 1250, box.y + 123, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 1250, box.y + 123, { button: "right" }); await wait(900); await page.screenshot({ path: "out/jr_outdrag_ctx.png" });
+    /* menu: Copy, Paste, Delete, … pod sebou po 20 px od kurzoru */
+    await page.mouse.move(box.x + 1140, box.y + 143, { steps: 3 }); await wait(300); await page.mouse.move(box.x + 1140, box.y + 169, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 1140, box.y + 169); await wait(1000);
+    const gone = await cmd("eval:'Light' not in bpy.data.objects"); await check(`pravé tlačítko ▸ Delete smaže Light (objektů ${n0} -> ${n0 - 1}, ${gone})`, (s) => s.objs === n0 - 1 && gone === true);
+  },
   /* 8. 11.: sevření prstů na trackpadu v Safari (Mac, iPad s Magic Keyboard) = jen gesturestart/gesturechange, žádné ctrl+wheel.
    * Chrome nemá GestureEvent, proto Event + scale. Desktop Blender na Macu sevřením zoomuje. */
   pinch: async ({ check, cmd, page, wait, mid }) => {
