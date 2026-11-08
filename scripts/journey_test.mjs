@@ -625,6 +625,16 @@ const J = {
     const alive = await page.evaluate(() => !!(window.Module && window.Module.FS)).catch(() => false);
     await check(`po „Zůstat" stránka s Blenderem zůstala (${alive})`, (s) => alive && s.loc[0] === 2);
   },
+  /* 8. 11.: web má jedno plátno (GHOST createWindow vrací nullptr pro další okna). Window ▸ New Window, okno z oblasti, fullscreen: nesmí spadnout, Blender dál reaguje. */
+  windows: async ({ check, cmd, page, wait, hover, key }) => {
+    const nwin = "eval:len(bpy.context.window_manager.windows)";
+    await cmd("bpy.ops.wm.window_new()"); await wait(1500); const n1 = await cmd(nwin); await page.screenshot({ path: "out/jr_windows_new.png" });
+    await check(`Window ▸ New Window nespadne (oken ${n1})`, (s) => s.objs === 3 && n1 !== null);
+    await hover(); await key("F3", 700); await page.keyboard.type("duplicate area into new window", { delay: 30 }); await wait(700); await key("Enter", 1500);
+    const n2 = await cmd(nwin); await page.screenshot({ path: "out/jr_windows_dup.png" }); await check(`Duplicate Area into New Window nespadne (oken ${n2})`, (s) => s.objs === 3);
+    await hover(); await key("Control+Alt+f", 1200); const n3 = await cmd(nwin); await check(`Toggle Window Fullscreen nespadne (oken ${n3})`, (s) => s.objs === 3);
+    await hover(); await key("g", 300); await key("x", 200); await key("1", 200); await key("Enter", 900); await check("pak G X 1 funguje", (s) => s.loc[0] === 1);
+  },
   /* 8. 11.: sevření prstů na trackpadu v Safari (Mac, iPad s Magic Keyboard) = jen gesturestart/gesturechange, žádné ctrl+wheel.
    * Chrome nemá GestureEvent, proto Event + scale. Desktop Blender na Macu sevřením zoomuje. */
   pinch: async ({ check, cmd, page, wait, mid }) => {
@@ -660,7 +670,7 @@ const J = {
     await fieldAt(); await key("Control+v", 800); await check("Ctrl+V nad polem vloží hodnotu", (s) => s.ob === "Cube" && s.loc[0] === 4.25);
   },
 };
-for (const [n, f] of Object.entries(J)) if ((which === "all" && n !== "j4") || which.split(",").includes(n)) await run(n, f); /* j4 = otevřená chyba, BACKLOG J4: spouštět zvlášť */
+for (const [n, f] of Object.entries(J)) if ((which === "all" && n !== "j4" && n !== "windows") || which.split(",").includes(n)) await run(n, f); /* j4 = otevřená chyba, BACKLOG J4: spouštět zvlášť; windows = ověřit (8. 11.) */
 console.log("TABULKA " + results.map((r) => `${r[0]}:${r[1] || r[2] || r[3] || r[4] ? "CHYBA" : "OK"}`).join(" "));
 await browser.close();
 process.exit(results.some((r) => r[1] || r[2] || r[3] || r[4]) ? 1 : 0);
