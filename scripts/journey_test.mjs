@@ -635,6 +635,16 @@ const J = {
     await hover(); await key("Control+Alt+f", 1200); const n3 = await cmd(nwin); await check(`Toggle Window Fullscreen nespadne (oken ${n3})`, (s) => s.objs === 3);
     await hover(); await key("g", 300); await key("x", 200); await key("1", 200); await key("Enter", 900); await check("pak G X 1 funguje", (s) => s.loc[0] === 1);
   },
+  /* F1 (8. 11.): Window ▸ Toggle Window Fullscreen (výchozí keymap nemá zkratku, jde přes menu / F3). Desktop přepne okno na celou obrazovku,
+   * web = fullscreen stránky (prohlížeč chce aktivaci uživatele: Enter v hledání ji dá); podruhé zpět. */
+  fullscreen: async ({ check, page, wait, hover, key }) => {
+    const fs = () => page.evaluate(() => !!(document.fullscreenElement || document.webkitFullscreenElement));
+    const toggle = async () => { await hover(); await key("F3", 700); await page.keyboard.type("toggle window fullscreen", { delay: 30 }); await wait(700); await key("Enter", 1800); };
+    const f0 = await fs(); await toggle(); const f1 = await fs(); await page.screenshot({ path: "out/jr_fullscreen_on.png" });
+    await check(`Toggle Window Fullscreen zapne celou obrazovku (${f0} -> ${f1})`, () => !f0 && f1);
+    await toggle(); const f2 = await fs(); await check(`podruhé ji vypne (${f2})`, () => !f2);
+    await hover(); await key("g", 300); await key("x", 200); await key("1", 200); await key("Enter", 900); await check("pak G X 1 funguje", (s) => s.loc[0] === 1);
+  },
   /* 8. 11.: sevření prstů na trackpadu v Safari (Mac, iPad s Magic Keyboard) = jen gesturestart/gesturechange, žádné ctrl+wheel.
    * Chrome nemá GestureEvent, proto Event + scale. Desktop Blender na Macu sevřením zoomuje. */
   pinch: async ({ check, cmd, page, wait, mid }) => {
