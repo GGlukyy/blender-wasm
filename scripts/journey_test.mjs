@@ -743,6 +743,28 @@ const J = {
     await hover(); await page.keyboard.press("Control+z"); await wait(1000);
     await check("Ctrl+Z: v 16", (s) => s.v === 16);
   },
+  /* 8. 11. večer: Edit, 3 (plochy), klik na horní plochu, I + tah myší + klik (desktop: inset 1 quadu = v 12, f 10), Ctrl+Z;
+   * pak mřížka 11×11 vrcholů, 1 vrchol uprostřed, O (proporcionální), G Z tah, klik: pohnou se i sousedé (desktop: > 1 vrchol). */
+  inset: async ({ check, cmd, page, wait, hover, key, at, mid }) => {
+    await hover(); await key("Tab", 900); await key("3", 400); await key("Alt+a", 400);
+    const top = at(await cmd("top")); await page.mouse.move(top[0], top[1], { steps: 3 }); await wait(300); await page.mouse.click(top[0], top[1]); await wait(600);
+    await check("klik na horní plochu: 1 vybraná", (s) => s.fsel === 1);
+    const m = mid(); await page.mouse.move(m[0] + 160, m[1] + 60, { steps: 3 }); await wait(250); await key("i", 600);
+    for (let i = 1; i <= 8; i++) { await page.mouse.move(m[0] + 160 - i * 8, m[1] + 60 - i * 3); await wait(50); }
+    await page.mouse.down(); await wait(80); await page.mouse.up(); await wait(1000);
+    await check("I + tah + klik: inset (v 12, f 10)", (s) => s.v === 12 && s.f === 10);
+    await hover(); await page.keyboard.press("Control+z"); await wait(1000); await check("Ctrl+Z: v 8", (s) => s.v === 8);
+    await key("Tab", 800);
+    await cmd("bpy.ops.object.select_all(action='DESELECT'); bpy.ops.mesh.primitive_grid_add(x_subdivisions=10, y_subdivisions=10, size=4); bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_mode(type='VERT'); bpy.ops.mesh.select_all(action='DESELECT'); import bmesh; _bm = bmesh.from_edit_mesh(bpy.context.object.data); _v = min(_bm.verts, key=lambda v: v.co.length); _v.select = True; bmesh.update_edit_mesh(bpy.context.object.data); bpy.ops.ed.undo_push(message='grid')"); await wait(1200);
+    await check("mřížka, 1 vybraný vrchol", (s) => s.vsel === 1 && s.v === 121);
+    const zs = "eval:(lambda o: (o.update_from_editmode(), sum(1 for v in o.data.vertices if abs(v.co.z) > 1e-4))[1])(bpy.context.object)";
+    await hover(); await key("o", 500); await key("g", 500); await key("z", 300);
+    for (let i = 1; i <= 10; i++) { await page.mouse.move(m[0], m[1] - i * 8); await wait(50); }
+    await page.mouse.down(); await wait(80); await page.mouse.up(); await wait(1000);
+    const n = await cmd(zs); const pe = await cmd("eval:bpy.context.scene.tool_settings.use_proportional_edit");
+    await check(`O, G Z tah, klik: pohne se víc vrcholů (${n}, proportional=${pe})`, () => pe === true && n > 1);
+    await key("o", 400);
+  },
   /* 8. 11.: Edit ▸ Undo History: skok o víc kroků zpět jedním klikem, pak Ctrl+Shift+Z. Desktop: seznam kroků, klik na „Move" vrátí stav po tom kroku. */
   undohist: async ({ check, cmd, page, wait, hover, key, box }) => {
     const mv = async (ax) => { await hover(); await key("g", 300); await key(ax, 200); await key("1", 200); await key("Enter", 800); };
