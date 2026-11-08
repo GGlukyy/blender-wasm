@@ -22,6 +22,11 @@ const TAP_MAX_PX = 8;
 const LONG_PRESS_MS = 500;
 const MOVE_START_PX = 6;
 const GESTURE_START_PX = 10;
+/* A drag starts with move+press at the touch-down point and then the current finger position, all in
+ * one JS task. Blender takes the press position from the newest move it has already received, so the
+ * press landed where the finger is now (6+ px off): a 2–4 px area edge or a small button was missed.
+ * Hold the drag moves until Blender has handled the press (60 ms measured OK, journey touchmisc). */
+const PRESS_SETTLE_MS = 60;
 /* Pixels of synthetic Ctrl+MMB drag per e-fold of pinch scale (tuned by feel; sign checked in the
  * test: pinch-out must zoom in). */
 const PINCH_PX_PER_LN_IN = 120;
@@ -90,10 +95,20 @@ export function installTouch(canvas) {
     padPending = { x, y, buttons };
     if (!padTimer) padTimer = setTimeout(flushPad, Math.max(0, MOVE_CAP_MS - (performance.now() - padLast)));
   };
-  const mouse = (type, x, y, button, buttons, extra = {}, fromPad = false) => {
+  let held = null, heldTimer = 0;
+  const flushHeld = () => {
+    clearTimeout(heldTimer); heldTimer = 0;
+    const q = held; held = null;
+    if (q) mouse("mousemove", q.x, q.y, 0, q.buttons, {}, false, true);
+  };
+  const mouse = (type, x, y, button, buttons, extra = {}, fromPad = false, fromHeld = false) => {
     if (padPending && !fromPad) {   /* anything else (press/release/other move) must see the latest pad position first */
       clearTimeout(padTimer); padTimer = 0;
       if (type === "mousemove") padPending = null; else flushPad();
+    }
+    if (heldTimer && !fromHeld) {   /* press still settling: keep only the newest move, send it before anything else */
+      if (type === "mousemove") { held = { x, y, buttons }; return; }
+      flushHeld();
     }
     curX = x; curY = y;
     canvas.dispatchEvent(new MouseEvent(type, {
@@ -251,6 +266,7 @@ export function installTouch(canvas) {
         mode = left ? "uidrag" : "orbit";
         mouse("mousemove", p.x0, p.y0, 0, 0);
         mouse("mousedown", p.x0, p.y0, left ? 0 : 1, left ? 1 : 4);
+        heldTimer = setTimeout(flushHeld, PRESS_SETTLE_MS);
         mouse("mousemove", p.x, p.y, 0, left ? 1 : 4);
       }
     }

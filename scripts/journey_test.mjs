@@ -806,6 +806,20 @@ const J = {
     }
     await page.screenshot({ path: "out/jr_touchcolor_end.png" }); await check(`4 tahy prstem v kolečku změní barvu (${got.join(", ")})`, () => ok === 4);
   },
+  /* 8. 11.: prstem: tah po časové ose = snímek, tah za hranu oblasti = šířka, menu Add ▸ Mesh ▸ Monkey klepáním. */
+  touchmisc: async ({ check, cmd, page, wait, box }) => {
+    const cdp = await page.context().newCDPSession(page);
+    const P = (x, y) => ({ x: box.x + x, y: box.y + y, id: 0, radiusX: 4, radiusY: 4, force: 1 });
+    const touch = (type, pts) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: pts });
+    const tap = async (x, y, ms = 1000) => { await touch("touchStart", [P(x, y)]); await wait(80); await touch("touchEnd", []); await wait(ms); };
+    const drag = async (x0, y0, x1, y1) => { await touch("touchStart", [P(x0, y0)]); for (let i = 1; i <= 12; i++) { await touch("touchMove", [P(x0 + (x1 - x0) * i / 12, y0 + (y1 - y0) * i / 12)]); await wait(30); } await touch("touchEnd", []); await wait(900); };
+    /* časová osa: řádek čísel y=807, snímek 1 x=44, 12 x=92 (4 px/snímek) */
+    await drag(44, 807, 140, 807); const fr = (await cmd("state")).frame; await check(`tah prstem po časové ose změní snímek (1 -> ${fr})`, () => fr >= 20 && fr <= 28);
+    const w = "eval:[a.width for a in bpy.context.window_manager.windows[0].screen.areas if a.type == 'VIEW_3D'][0]"; const w0 = await cmd(w);
+    await drag(1151, 450, 1000, 450); const w1 = await cmd(w); await check(`tah za hranu oblasti zúží 3D pohled (${w0} -> ${w1})`, () => w1 < w0 - 100);
+    await tap(269, 37); await page.screenshot({ path: "out/jr_touchmisc_add.png" }); await tap(300, 64); await page.screenshot({ path: "out/jr_touchmisc_mesh.png" });
+    await tap(475, 247, 1500); await check("Add ▸ Mesh ▸ Monkey jen klepáním", (s) => s.objs === 4 && s.ob.startsWith("Suzanne"));
+  },
   /* 8. 11.: sevření prstů na trackpadu v Safari (Mac, iPad s Magic Keyboard) = jen gesturestart/gesturechange, žádné ctrl+wheel.
    * Chrome nemá GestureEvent, proto Event + scale. Desktop Blender na Macu sevřením zoomuje. */
   pinch: async ({ check, cmd, page, wait, mid }) => {
