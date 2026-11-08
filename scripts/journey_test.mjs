@@ -772,6 +772,25 @@ const J = {
     await page.mouse.move(box.x + 1202, box.y + 287, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 1202, box.y + 287); await wait(900); const ex = await cmd("eval:[m.show_expanded for m in bpy.data.objects['Cube'].modifiers]");
     await check(`klik na šipku sbalí první panel (${JSON.stringify(ex)})`, () => ex && ex[0] === false && ex[1] === true);
   },
+  /* 8. 11.: dotyk mimo 3D pohled (iPad): dlouhé podržení v Outlineru = pravé tlačítko (menu), klepnutí na Delete; dva prsty nad Properties = posun panelu. */
+  touchui: async ({ check, cmd, page, wait, box }) => {
+    const cdp = await page.context().newCDPSession(page);
+    const P = (x, y, id = 0) => ({ x: box.x + x, y: box.y + y, id, radiusX: 4, radiusY: 4, force: 1 });
+    const touch = (type, pts) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: pts });
+    const tap = async (x, y) => { await touch("touchStart", [P(x, y)]); await wait(80); await touch("touchEnd", []); await wait(900); };
+    const n0 = (await cmd("state")).objs;
+    await touch("touchStart", [P(1250, 143)]); await wait(800); await touch("touchEnd", []); await wait(900); await page.screenshot({ path: "out/jr_touchui_long.png" });
+    /* menu se otevře s 1. položkou (Copy) pod prstem: Copy 143, Paste 163, Delete 189 */
+    await tap(1140, 189); const gone = await cmd("eval:'Light' not in bpy.data.objects");
+    await check(`podržení na Light ▸ klepnutí Delete (objektů ${n0} -> ${n0 - 1}, smazán ${gone})`, (s) => gone === true && s.objs === n0 - 1);
+    const pv = "eval:(lambda r: [round(v) for v in r.view2d.region_to_view(0, 0)])([r for a in bpy.context.window_manager.windows[0].screen.areas if a.type == 'PROPERTIES' for r in a.regions if r.type == 'WINDOW'][0])";
+    await cmd("o = bpy.data.objects['Cube']; bpy.context.view_layer.objects.active = o; o.select_set(True)"); await wait(900);
+    await tap(1167, 610); await wait(600); const ctxp = await cmd("eval:[a for a in bpy.context.window_manager.windows[0].screen.areas if a.type == 'PROPERTIES'][0].spaces[0].context");
+    await check(`klepnutí na záložku Material (${ctxp})`, () => ctxp === "MATERIAL");
+    const v0 = await cmd(pv);
+    await touch("touchStart", [P(1280, 600, 0), P(1320, 600, 1)]); for (let i = 1; i <= 15; i++) { await touch("touchMove", [P(1280, 600 - 18 * i, 0), P(1320, 600 - 18 * i, 1)]); await wait(30); } await touch("touchEnd", []); await wait(900);
+    const v1 = await cmd(pv); await page.screenshot({ path: "out/jr_touchui_scroll.png" }); await check(`dva prsty nahoru posunou Properties (${JSON.stringify(v0)} -> ${JSON.stringify(v1)})`, () => v0 && v1 && Math.abs(v1[1] - v0[1]) > 50);
+  },
   /* 8. 11.: sevření prstů na trackpadu v Safari (Mac, iPad s Magic Keyboard) = jen gesturestart/gesturechange, žádné ctrl+wheel.
    * Chrome nemá GestureEvent, proto Event + scale. Desktop Blender na Macu sevřením zoomuje. */
   pinch: async ({ check, cmd, page, wait, mid }) => {
