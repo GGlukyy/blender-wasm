@@ -17,6 +17,8 @@ Výsledek: 🟡 merge hotový a pushnutý, build běží; master a `BLENDER_REF`
 - **ops 95/96** (`out/ops53_r.log`): jediný FAIL `modifier_boolean` = chyba testu, ne portu. Pravidlo 3b: desktop 5.3.0 (Steam) stejným skriptem: EXACT i MANIFOLD vrátí čistou desku 8 vrcholů (x od −1 do −0,2), FLOAT 32 vrcholů. Test chtěl `n > 8`. Teď kontroluje řez (xmax = −0,2) — přísnější, platí i pro 5.2.
 - **parity 12 ✅ / 0 ❌** (`out/parity_53_r_report.md`), stejné jako 5.2.
 
+- **Prohlídka 75/75 na 5.3:** Chrome `TOUR_DONE steps=75 problem=0 errors=0` (274 s, `out/tour53_chrome_result.txt`), `webkit_sim=1` stejně (272 s, `out/tour53_sim_result.txt`). Bez 5.3 seedu (překlady za běhu), přesto bez problémů.
+
 **Co dál (dnes)**
 - Po buildu: `.link53.sh` -> `out/pub53`, vite na :5173 (Lukášův dev server neběží), `ops`, `parity`, `tour` Chrome + sim, pak `regress_all` / `regress_sim`.
 - `BLENDER_REF`/master měnit až při 0 FAIL a 75/75.
