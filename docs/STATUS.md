@@ -19,6 +19,9 @@ Výsledek: 🟡 merge hotový a pushnutý, build běží; master a `BLENDER_REF`
 
 - **Prohlídka 75/75 na 5.3:** Chrome `TOUR_DONE steps=75 problem=0 errors=0` (274 s, `out/tour53_chrome_result.txt`), `webkit_sim=1` stejně (272 s, `out/tour53_sim_result.txt`). Bez 5.3 seedu (překlady za běhu), přesto bez problémů.
 
+- **ops s opraveným testem: 96/96** (`out/ops53_r2.log`, `modifier_boolean` got=(8, 12, 6) = desktop 5.3.0).
+- **5.3 WGSL seed:** vygenerován proti prázdnému seedu (`wgsl_seed_win.mjs seed`): 193 shaderů, 3,1 MB (`out/wgsl-cache-53.json`, nasazen do `out/pub53`). Starý 5.2 seed záloha `out/wgsl-cache-52-backup.json`. Do `demo/public` + `web/` až při přepnutí.
+
 **Co dál (dnes)**
 - Po buildu: `.link53.sh` -> `out/pub53`, vite na :5173 (Lukášův dev server neběží), `ops`, `parity`, `tour` Chrome + sim, pak `regress_all` / `regress_sim`.
 - `BLENDER_REF`/master měnit až při 0 FAIL a 75/75.
