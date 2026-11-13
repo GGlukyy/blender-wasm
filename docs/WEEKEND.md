@@ -5,7 +5,16 @@ session: read `CLAUDE.md`, `docs/STATUS.md`, `docs/PLAN.md` and `docs/BACKLOG.md
 Lukáš cannot test on the iPad until he is back — verify everything yourself in Windows
 Chrome on the real GPU (`scripts/p2_win.sh`, `scripts/parity_win.sh`).
 
-## Mission now (od 4. 11.) — BACKLOG.md shora dolů
+## Mission now (od pá 13. 11., běží na Fable) — R: přechod na Blender 5.3.0
+JEDINÝ úkol tohoto běhu: plán R v `docs/FABLE_TYDEN.md` bod 1 (a `docs/PLAN.md` sekce R). Nic jiného z BACKLOGu nedělej.
+- Pracuj v `./blender/` na větvi `ipad-5.3` z tagu `v5.3.0` (vyjdi z `ipad-5.3-wip`, přenes všechny commity `ipad` od odbočení).
+- Postup v malých krocích, po každém kroku commit na `ipad-5.3` a push do forku (`git push origin ipad-5.3`). Stav piš do `docs/STATUS.md`.
+- `BLENDER_REF` v Makefile a master tohoto repa měň AŽ když: build projde, `regress_all.sh` + `regress_sim.sh` 0 FAIL, prohlídka 75/75 Chrome i sim. Do té doby `ipad` a master zůstávají beze změny (Lukáš musí mít funkční verzi).
+- Konflikty řeš podle Vulkan/Metal backendu v 5.3.0, ne starou verzí. Zasekneš se 2× → `architect`.
+- Až to bude zelené: pravidlo 3b, přetestuj seznam otevřených chyb (H32c, H42, H43, B3…) a zapiš, které po 5.3 zmizely.
+- Záložní fronta níže platí, až když je R hotové nebo `[!] BLOCKED`.
+
+## (dříve) Mission od 4. 11. — BACKLOG.md shora dolů
 Pracuj podle bloků nahoře v `docs/BACKLOG.md` (nejnovější blok = nejvyšší priorita). Starý cíl "iPad crash / IPAD_CRASH.md" (25. 10.) je HOTOVÝ, neplatí.
 Fuzz/`regress_all` jen JEDNOU po změně kódu, nikdy jako výplň času.
 
