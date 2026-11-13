@@ -8,6 +8,10 @@ Výsledek: 🟡 merge hotový a pushnutý, build běží; master a `BLENDER_REF`
 - **Nález (LFS):** „128 B ICC profil" z 4. 11. (`srgb_rec709_display.icc`, oprava PNG na webu) nebyl soubor upstreamu, ale **LFS pointer** v blobless klonu `blender-5.3`. Skutečný soubor má 480 B. Stažen z upstreamu (`git lfs pull --include=release/datafiles/**`), stejně i ikona `ops.gpencil.carver.dat`. Oprava v `colormanagement.cc` (<132 B ignorovat) je neškodná, ale důvod k hlášení Blenderu odpadá.
 - `scripts/check_rna_update_signatures.py` bere `BLENDER_SRC` (pro 5.3: `BLENDER_SRC=blender-5.3`), na 5.3 PASS (0 nesrovnalostí).
 
+- **20:00 (nový běh):** build z 15:06 spadl na `eevee_pipeline.cc:1042` — náš commit H15b používal `use_clamp_direct_`, které 5.3.0 zrušilo. Opraveno na `do_modify_radiance(inst_)` (stejná podmínka, jakou 5.3.0 používá pro konstantu `use_radiance_feedback` o 30 řádků výš). Fork `ipad-5.3` b1251320. `ninja -k 0` běží dál (`out/build53_r2.log`).
+- Desktop Blender ve Steamu je už **5.3.0** (build 10. 11.) → srovnání 3b bude poprvé stejná verze.
+- Testovací server pro 5.3: `out/pub53` (symlinky na `demo/public/*`, vlastní blender.js/wasm/assets/seed), `cd demo && npx vite --config vite.53.config.js --port 5173` (testy mají :5173 natvrdo; Lukášův dev server neběží).
+
 **Co dál (dnes)**
 - Po buildu: `.link53.sh` -> `out/pub53`, vite na :5173 (Lukášův dev server neběží), `ops`, `parity`, `tour` Chrome + sim, pak `regress_all` / `regress_sim`.
 - `BLENDER_REF`/master měnit až při 0 FAIL a 75/75.
