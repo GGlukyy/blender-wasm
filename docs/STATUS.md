@@ -1,3 +1,17 @@
+# 13. 11. (pá, Fable) — R: přechod na Blender 5.3.0 — rozpracováno
+Výsledek: 🟡 merge hotový a pushnutý, build běží; master a `BLENDER_REF` beze změny (Lukáš má dál funkční 5.2)
+
+**Co jsem udělal**
+- Fork: nová větev `ipad-5.3` = `ipad-5.3-wip` (bb81e991) + merge tagu `v5.3.0` (1 konflikt: `render/intern/pipeline.cc`, nový `is_written` z 5.3 proti našemu odloženému zápisu filmu na webu; odložený zápis teď po úspěchu volá i `render_write` handlery jako 5.3) + merge větve `ipad` c9c7cc83 (29 commitů od odbočení: stencil view, telemetrie, D1–D7, GHOST pointer lock, kostní výběr, J1, B3d, F1, B3j, T3; 2 konflikty: `bl_pkg/__init__.py` a `webgpu_texture.cc` signatura `init_internal(src, use_stencil)` podle 5.3 API). Pushnuto: `origin/ipad-5.3` a7230bab.
+- Konflikty řešeny podle 5.3 (`gpu_texture_private.hh`, `vk_texture.hh` mají stejnou signaturu).
+- `build-5.3`: zapnuto `WITH_GMP` + `WITH_MANIFOLD` (H35, dřív v 5.3 buildu vypnuto), nativní `shader_tool_53` přeložen znovu z 5.3.0 zdrojů (změnil se), `ninja -C build-5.3` běží (`out/build53_r.log`).
+- **Nález (LFS):** „128 B ICC profil" z 4. 11. (`srgb_rec709_display.icc`, oprava PNG na webu) nebyl soubor upstreamu, ale **LFS pointer** v blobless klonu `blender-5.3`. Skutečný soubor má 480 B. Stažen z upstreamu (`git lfs pull --include=release/datafiles/**`), stejně i ikona `ops.gpencil.carver.dat`. Oprava v `colormanagement.cc` (<132 B ignorovat) je neškodná, ale důvod k hlášení Blenderu odpadá.
+- `scripts/check_rna_update_signatures.py` bere `BLENDER_SRC` (pro 5.3: `BLENDER_SRC=blender-5.3`), na 5.3 PASS (0 nesrovnalostí).
+
+**Co dál (dnes)**
+- Po buildu: `.link53.sh` -> `out/pub53`, vite na :5173 (Lukášův dev server neběží), `ops`, `parity`, `tour` Chrome + sim, pak `regress_all` / `regress_sim`.
+- `BLENDER_REF`/master měnit až při 0 FAIL a 75/75.
+
 # 8. 11. odpoledne a večer — B3: méně paměti na iPadu, autosave při přepnutí, T3: prstem jde táhnout pole v N-panelu
 Výsledek: 🟡 PC ✅ (každá oprava test Chrome i `webkit_sim`, bez opravy test FAIL), iPad neověřeno
 

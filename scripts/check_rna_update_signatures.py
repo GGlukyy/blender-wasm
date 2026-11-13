@@ -3,7 +3,7 @@
 # PROP_CONTEXT_UPDATE -> (bContext*, PointerRNA*) = 2 parametry; jinak (Main*, Scene*, PointerRNA*) = 3.
 # Na x86 to „nějak funguje“, na WebAssembly je to pád „function signature mismatch“ (indirect call).
 import re, glob, sys, os
-root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'blender', 'source', 'blender', 'makesrna', 'intern')
+root = os.path.join(os.environ.get('BLENDER_SRC') or os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'blender'), 'source', 'blender', 'makesrna', 'intern')  # BLENDER_SRC=blender-5.3 pro větev R
 bad = set()
 for f in glob.glob(os.path.join(root, 'rna_*.cc')):
     s = open(f, errors='ignore').read()
