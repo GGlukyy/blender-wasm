@@ -1,3 +1,9 @@
+## N1 — novinky 5.3 na webu (po R, levný model stačí; Lukáš 13. 11.)
+- [ ] (a) **Gaussian splats**: import PLY/SPZ (malý vzorek CC0), zobrazení Solid + MP, Chrome i `webkit_sim=1&ipad=1` (paměť!). Srovnat s desktopem 5.3.0.
+- [ ] (b) **Remote asset library** (online knihovna): zjistit, jak stahuje (Python `_bpy_internal/assets/remote_library`), proč ve wasm nejde (sockety) → most přes JS `fetch` (sync XHR z workeru). Ověřit CORS + COEP hlavičky oficiální knihovny; když je server nepovolí, zapsat `[!] BLOCKED: CORS` (proxy nezakládat). Návrh = ADR přes architekta.
+- [ ] (c) Rychlé cesty: EEVEE Material Lighting nodes (toon), ruční řazení v Outlineru, hledání v sidebaru, Comment node. Jen ověřit = desktop.
+- DLSS: NE (proprietární NVIDIA SDK jen pro RTX/OptiX, licence i technika mimo prohlížeč).
+
 ## Blender 5.3.0 VYŠEL (tag `v5.3.0`, ověřeno 10. 11.) — přechod R je teď na řadě. Plán a pořadí pro týden s Fable: `docs/FABLE_TYDEN.md`.
 
 ## NOVÉ 9.11. 00:31 (Lukáš)
