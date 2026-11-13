@@ -12,7 +12,15 @@ JEDINÝ úkol tohoto běhu: plán R v `docs/FABLE_TYDEN.md` bod 1 (a `docs/PLAN.
 - `BLENDER_REF` v Makefile a master tohoto repa měň AŽ když: build projde, `regress_all.sh` + `regress_sim.sh` 0 FAIL, prohlídka 75/75 Chrome i sim. Do té doby `ipad` a master zůstávají beze změny (Lukáš musí mít funkční verzi).
 - Konflikty řeš podle Vulkan/Metal backendu v 5.3.0, ne starou verzí. Zasekneš se 2× → `architect`.
 - Až to bude zelené: pravidlo 3b, přetestuj seznam otevřených chyb (H32c, H42, H43, B3…) a zapiš, které po 5.3 zmizely.
-- Záložní fronta níže platí, až když je R hotové nebo `[!] BLOCKED`.
+- Až je R hotové (master + `BLENDER_REF` na 5.3, regrese zelené) → **C1 níže**. Záložní fronta platí až po C1.
+
+## C1 — Cycles (CPU) na PC verzi (Lukáš 13. 11., úkol pro Fable)
+Cíl: v prohlížeči na PC jde vybrat render engine Cycles a udělat F12 render i Rendered náhled ve viewportu. Základ: `docs/CYCLES.md` (standalone Cycles se do wasm přeložil, +~5 MB zst; v nodu OOM).
+- Na 5.3 (`ipad-5.3`), samostatná build složka (`build-cycles53/`), hlavní build nerozbít. `WITH_CYCLES=ON`, bez Embree/OSL/OIDN/OpenVDB/path guiding, CPU vlákna přes pool (TBB nebo náš pthread pool).
+- Jeden build pro PC i iPad, jen pokud to iPadu nepřidá > 50 MB paměti po startu (změř `?webkit_sim=1&ipad=1`). Jinak zvlášť `blender-pc.wasm` a loader vybere podle zařízení. O způsobu rozhodne `architect` (ADR).
+- Na iPadu Cycles v nabídce nechat, ale Rendered s Cycles zatím nepovolovat (paměť), stačí F12 malého rozlišení — nebo skrýt, rozhodne architect.
+- Důkaz: nový test `scripts/cycles_win.sh` — výchozí kostka 64 samples 960×540 F12 v Chrome: obrázek uložen, porovnání s desktopem 5.3.0 (stejná scéna, Cycles CPU) vizuálně podobné, čas a paměť do STATUS. Plus Rendered náhled 10 s bez chyby. Plus `regress_all` 0 FAIL (nic jiného se nerozbilo).
+- Do master až po zeleném důkazu. Zaseknutí 2× → `architect`, 3× → `[!] BLOCKED` s popisem.
 
 ## (dříve) Mission od 4. 11. — BACKLOG.md shora dolů
 Pracuj podle bloků nahoře v `docs/BACKLOG.md` (nejnovější blok = nejvyšší priorita). Starý cíl "iPad crash / IPAD_CRASH.md" (25. 10.) je HOTOVÝ, neplatí.
