@@ -22,9 +22,16 @@ Výsledek: 🟡 merge hotový a pushnutý, build běží; master a `BLENDER_REF`
 - **ops s opraveným testem: 96/96** (`out/ops53_r2.log`, `modifier_boolean` got=(8, 12, 6) = desktop 5.3.0).
 - **5.3 WGSL seed:** vygenerován proti prázdnému seedu (`wgsl_seed_win.mjs seed`): 193 shaderů, 3,1 MB (`out/wgsl-cache-53.json`, nasazen do `out/pub53`). Starý 5.2 seed záloha `out/wgsl-cache-52-backup.json`. Do `demo/public` + `web/` až při přepnutí.
 
-**Co dál (dnes)**
-- Po buildu: `.link53.sh` -> `out/pub53`, vite na :5173 (Lukášův dev server neběží), `ops`, `parity`, `tour` Chrome + sim, pak `regress_all` / `regress_sim`.
-- `BLENDER_REF`/master měnit až při 0 FAIL a 75/75.
+- **seed verify:** 10 překladů mimo seed (shading 4, sculpt 2, wpaint 2, tpaint 2; 5.2 mívalo 2–6). OK.
+- Lukáš mezitím pushnul: po R následuje **C1 Cycles** (`docs/WEEKEND.md`), N1 novinky 5.3 do BACKLOGu. R zatím NENÍ hotové (chybí regrese), C1 nezačínám.
+- `regress_all` na 5.3 běží od 20:43 (`out/regress53_r.log`); do 22:00 doběhne jen část, zbytek + `regress_sim` další běh.
+- LFS kontrola: v `demo/.stage53` (to, co jde do assets.tar) žádný pointer; v `blender-5.3/release` jen darwin/windows balíčky (stejně jako v `blender/`).
+
+**Co dál (příští běh) — přepnutí master na 5.3, až bude regrese zelená**
+1. Dokončit `regress_all` (Chrome) a `regress_sim` na `out/pub53` serveru (`cd demo && npx vite --config vite.53.config.js --port 5173`). 0 FAIL = jde dál. FAIL = nejdřív desktop 5.3.0 (3b), pak oprava na `ipad-5.3`.
+2. Přepnutí bez nového buildu (rule 6, odhad ~15 min): `mv blender blender-5.2 && ln -s blender-5.3 blender && mv build-blender build-5.2 && ln -s build-5.3 build-blender` (CMakeCache v `build-5.3` ukazuje na `/home/lukil/blender-wasm/blender-5.3`, ten zůstává). Pak `link_blender_release.sh` → `demo/public` (zálohu předchozího do `out/bak_52`), seed `out/wgsl-cache-53.json` → `demo/public/wgsl-cache.json` + `web/wgsl-cache.json`, `BLENDER_REF` = commit `ipad-5.3`, `.link53.sh`/`vite.53.config.js` nechat (pro další větve). Ověřit `boot`, `tour` Chrome + sim, `ops`, pak push master.
+3. Pravidlo 3b po přechodu: přetestovat H32c/H32b (`h32_win.sh`, `h30/h31`), H42a/c (operátory se souborovým dialogem – 5.3 může mít nové), H43 (JS, na verzi nezávislé), B3 (iPad, čeká na Lukáše), J4. Zapsat, co po 5.3 zmizelo.
+4. Nový zip pro itch (nahrává Lukáš), pak C1.
 
 # 8. 11. odpoledne a večer — B3: méně paměti na iPadu, autosave při přepnutí, T3: prstem jde táhnout pole v N-panelu
 Výsledek: 🟡 PC ✅ (každá oprava test Chrome i `webkit_sim`, bez opravy test FAIL), iPad neověřeno
