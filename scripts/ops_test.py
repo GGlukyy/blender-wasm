@@ -250,7 +250,10 @@ def _():
 def _():
     a = fresh(); bpy.ops.mesh.primitive_cube_add(location=(0.8, 0, 0)); b = bpy.context.object
     m = a.modifiers.new('Bool', 'BOOLEAN'); m.object = b; m.operation = 'DIFFERENCE'
-    dg = bpy.context.evaluated_depsgraph_get(); ev = a.evaluated_get(dg); n = len(ev.data.vertices); assert n > 8, n
+    dg = bpy.context.evaluated_depsgraph_get(); ev = a.evaluated_get(dg); n = len(ev.data.vertices)
+    # Řez musí proběhnout: zbytek kostky končí v x = -0.2. (Desktop 5.3.0: EXACT i MANIFOLD vrátí čistou desku
+    # s 8 vrcholy, FLOAT 32; dřívější `n > 8` tedy hlásil chybu u správného výsledku.)
+    xmax = max(v.co.x for v in ev.data.vertices); assert n >= 8 and abs(xmax + 0.2) < 1e-3, (n, xmax)
     return (n, len(ev.data.edges), len(ev.data.polygons))
 @test('prim_uvsphere', (482, 992, 512))
 def _():

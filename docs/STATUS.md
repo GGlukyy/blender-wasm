@@ -12,6 +12,11 @@ Výsledek: 🟡 merge hotový a pushnutý, build běží; master a `BLENDER_REF`
 - Desktop Blender ve Steamu je už **5.3.0** (build 10. 11.) → srovnání 3b bude poprvé stejná verze.
 - Testovací server pro 5.3: `out/pub53` (symlinky na `demo/public/*`, vlastní blender.js/wasm/assets/seed), `cd demo && npx vite --config vite.53.config.js --port 5173` (testy mají :5173 natvrdo; Lukášův dev server neběží).
 
+- **20:30 build hotový, 5.3.0 běží na webu:** `boot53` WINDOW true, splash 5.3.0 (`out/win/boot53.png`). Link `out/pub53` (wasm 228 MB rozbalený, dřív 209).
+- Druhá past: vite `abortStackPlugin` četl natvrdo `demo/public/blender.js` (5.2 glue) → `invoke_viiiiijii requires a callable` (stejná záhada jako 4. 11. na :5174). Teď bere `server.config.publicDir`. Master a9cbf48.
+- **ops 95/96** (`out/ops53_r.log`): jediný FAIL `modifier_boolean` = chyba testu, ne portu. Pravidlo 3b: desktop 5.3.0 (Steam) stejným skriptem: EXACT i MANIFOLD vrátí čistou desku 8 vrcholů (x od −1 do −0,2), FLOAT 32 vrcholů. Test chtěl `n > 8`. Teď kontroluje řez (xmax = −0,2) — přísnější, platí i pro 5.2.
+- **parity 12 ✅ / 0 ❌** (`out/parity_53_r_report.md`), stejné jako 5.2.
+
 **Co dál (dnes)**
 - Po buildu: `.link53.sh` -> `out/pub53`, vite na :5173 (Lukášův dev server neběží), `ops`, `parity`, `tour` Chrome + sim, pak `regress_all` / `regress_sim`.
 - `BLENDER_REF`/master měnit až při 0 FAIL a 75/75.
