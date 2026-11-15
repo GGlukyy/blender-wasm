@@ -1,3 +1,4 @@
+- [x] (15. 11.) R: master na Blender 5.3.0; C1: Cycles (CPU) v PC buildu `blender-pc.wasm` (F12 = desktop, Rendered běží; regress 0 FAIL). Zbývá C1b: pozadí světa v Rendered je černé, jeden společný wasm (+25 MB paměti po startu, pod limitem), náhledy materiálů s Cycles synchronní.
 ## C1b — dva buildy (PC s Cycles / iPad bez) — hlídat (Lukáš 15. 11.)
 - [ ] Regrese i prohlídku pouštět na OBOU buildech: PC (`blender-pc`) i iPad (`?cycles=0` nebo `ipad=1`). Cesty `journey`/`touch*` mají souřadnice podle layoutu s Cycles → pro build bez Cycles je potřeba druhá sada (nebo hledat záložky podle jména, ne pixelů — lepší). Bez toho test iPad buildu neověří nic.
 - [ ] Každá další C++ oprava = přebuild obou stromů (`build-5.3` / `build-5.3-ipad`) + `BLENDER_REF` musí odpovídat oběma. Zvaž jeden společný wasm (+25 MB paměti je pod limitem) — rozhodne architect, až Lukáš potvrdí 5.3 na iPadu.

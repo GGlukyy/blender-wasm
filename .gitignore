@@ -21,6 +21,7 @@
 /build-blender/
 /build-5.2/
 /build-5.3/
+/build-5.3-ipad/
 /build-cycles/
 
 # npm
@@ -46,6 +47,8 @@
 /demo/.stage/
 /demo/public/blender.js
 /demo/public/blender.wasm.zst
+/demo/public/blender-pc.js
+/demo/public/blender-pc.wasm.zst
 /demo/public/assets.tar.zst
 /demo/public/manifest.json
 /demo/public/wgsl-cache.json
