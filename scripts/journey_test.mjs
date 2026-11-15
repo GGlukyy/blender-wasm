@@ -373,7 +373,7 @@ const J = {
     const c0 = await cmd("eval:len(bpy.data.collections)");
     await hover(); await key("m", 600);
     /* menu se otevře u kurzoru, New Collection je pod ním (Search je první řádek): pozice ze screenshotu 1400×850 */
-    await page.mouse.move(box.x + 501, box.y + 423, { steps: 3 }); await wait(400); await page.screenshot({ path: "out/jr_objops_m.png" }); await page.mouse.down(); await wait(80); await page.mouse.up(); await wait(800); await page.screenshot({ path: "out/jr_objops_m2.png" }); await key("Enter", 500); await page.mouse.move(box.x + 472, box.y + 423, { steps: 3 }); await wait(400); await page.mouse.down(); await wait(80); await page.mouse.up(); await wait(900);
+    await page.mouse.move(box.x + 501, box.y + 423, { steps: 3 }); await wait(400); await page.screenshot({ path: "out/jr_objops_m.png" }); await page.mouse.down(); await wait(80); await page.mouse.up(); await wait(800); await page.screenshot({ path: "out/jr_objops_m2.png" }); await key("Enter", 500); await page.mouse.move(box.x + 473, box.y + 463, { steps: 3 }); await wait(400); await page.mouse.down(); await wait(80); await page.mouse.up(); await wait(900);
     const c1 = await cmd("eval:len(bpy.data.collections)"); await check(`M nová kolekce ${c0} -> ${c1}`, () => c1 === c0 + 1);
     await page.keyboard.press("Control+z"); await wait(900); const c2 = await cmd("eval:len(bpy.data.collections)"); await check(`Ctrl+Z kolekce ${c2}`, () => c2 === c0);
   },
@@ -416,11 +416,11 @@ const J = {
     const c = async (x, y, ms = 700) => { await page.mouse.move(box.x + x, box.y + y, { steps: 3 }); await wait(300); await page.mouse.click(box.x + x, box.y + y); await wait(ms); };
     const m = mid(); await page.mouse.move(m[0], m[1] + 10, { steps: 2 }); await wait(300); await page.mouse.click(m[0], m[1] + 10, { button: "right" }); await wait(800); await page.mouse.click(m[0], m[1] + 10); await wait(800);
     const sm = await cmd("eval:bpy.context.object.data.polygons[0].use_smooth"); await check(`kontextové menu: první položka Shade Smooth (${sm})`, () => sm === true);
-    await c(1167, 470, 900); const fld = [1304, 318];
+    await c(1167, 442, 900); const fld = [1304, 318];
     await page.mouse.move(box.x + fld[0], box.y + fld[1], { steps: 3 }); await wait(300); await page.mouse.dblclick(box.x + fld[0], box.y + fld[1]); await wait(600); await page.keyboard.press("Control+a"); await type("2.5"); await key("Enter", 700); await check("Location X dvojklik + 2.5", (s) => s.loc[0] === 2.5);
     await page.mouse.move(box.x + fld[0], box.y + fld[1]); await wait(300); await page.mouse.down(); await page.mouse.move(box.x + fld[0] + 60, box.y + fld[1], { steps: 8 }); await wait(200); await page.mouse.up(); await wait(700); const s1 = await check("tažení hodnoty změní X", (s) => s.loc[0] !== 2.5 && s.loc[0] > 2.5); await page.screenshot({ path: "out/jr_modui_drag.png" });
     await page.keyboard.press("Control+z"); await wait(700); await check("Ctrl+Z vrátí tažení", (s) => s.loc[0] === 2.5);
-    await c(1167, 498, 900); await c(1290, 255, 800); await type("bevel"); await wait(500); await page.screenshot({ path: "out/jr_modui_search.png" }); await key("Enter", 900); await check("Add Modifier, hledání bevel", (s) => s.mods.includes("BEVEL"));
+    await c(1167, 470, 900); await c(1290, 255, 800); await type("bevel"); await wait(500); await page.screenshot({ path: "out/jr_modui_search.png" }); await key("Enter", 900); await check("Add Modifier, hledání bevel", (s) => s.mods.includes("BEVEL"));
     const n = await cmd("eval:len(bpy.context.object.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.vertices)"); await check(`bevel vyhodnocen: ${n} v (desktop 24)`, () => n === 24); await page.screenshot({ path: "out/jr_modui_panel.png" });
     await page.mouse.move(box.x + 1290, box.y + 330, { steps: 3 }); await wait(400); await page.keyboard.press("Control+a"); await wait(900); await check("Ctrl+A nad panelem = apply: 24 v", (s) => s.mods.length === 0 && s.v === 24);
     await page.keyboard.press("Control+z"); await wait(900); await check("Ctrl+Z vrátí apply", (s) => s.mods.length === 1 && s.v === 8);
@@ -433,7 +433,7 @@ const J = {
     const a1 = await cmd(areas), nw1 = await cmd("eval:len(bpy.context.window_manager.windows)"); console.log("PREFS " + JSON.stringify([a0, a1, nw0, nw1]));
     await page.keyboard.press("Escape"); await wait(1200); await page.screenshot({ path: "out/jr_prefs_esc.png" });
     await check("Preferences přes celé okno, jedno okno", () => a1.length === 1 && a1[0] === "PREFERENCES" && nw1 === 1);
-    await page.mouse.move(box.x + 40, box.y + 297, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 40, box.y + 297); await wait(900); const sec = await cmd("eval:bpy.context.preferences.active_section"); await check(`klik na Themes (${sec})`, () => sec === "THEMES");
+    await page.mouse.move(box.x + 40, box.y + 271, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 40, box.y + 271); await wait(900); const sec = await cmd("eval:bpy.context.preferences.active_section"); await check(`klik na Themes (${sec})`, () => sec === "THEMES");
     await page.mouse.move(box.x + 320, box.y + 13, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 320, box.y + 13); await wait(1500); const a3 = await cmd(areas); await check(`Back to Previous vrátí rozložení ${JSON.stringify(a3)}`, () => JSON.stringify(a3) === JSON.stringify(a0));
     await hover(); await key("Tab", 700); await check("pohled dál reaguje: Tab = edit", (s) => s.mode === "EDIT_MESH"); await key("Tab", 700);
   },
@@ -1045,7 +1045,7 @@ const J = {
   color: async ({ check, cmd, page, wait, box, key }) => {
     const col = "eval:[round(v, 3) for v in bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value]";
     const click = async (x, y, ms = 900) => { await page.mouse.move(box.x + x, box.y + y, { steps: 3 }); await wait(300); await page.mouse.click(box.x + x, box.y + y); await wait(ms); };
-    await click(1167, 638, 1200); const c0 = await cmd(col);
+    await click(1167, 610, 1200); const c0 = await cmd(col);
     await click(1323, 466, 1200); await page.screenshot({ path: "out/jr_color_picker.png" });
     /* kolečko: střed (1251,196), poloměr ~78 */
     await page.mouse.move(box.x + 1251, box.y + 196, { steps: 3 }); await wait(400); await page.mouse.down(); await wait(150); for (let i = 1; i <= 8; i++) { await page.mouse.move(box.x + 1251 + 6 * i, box.y + 196 + 4 * i); await wait(60); } await wait(200); await page.mouse.up(); await wait(900);
@@ -1067,7 +1067,7 @@ const J = {
   moddrag: async ({ check, cmd, page, wait, box }) => {
     const ord = "eval:[m.type for m in bpy.data.objects['Cube'].modifiers]";
     await cmd("o = bpy.data.objects['Cube']; o.modifiers.new('Bevel', 'BEVEL'); o.modifiers.new('Subdivision', 'SUBSURF'); bpy.ops.ed.undo_push(message='setup')"); await wait(800);
-    await page.mouse.move(box.x + 1167, box.y + 498, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 1167, box.y + 498); await wait(1200);
+    await page.mouse.move(box.x + 1167, box.y + 470, { steps: 3 }); await wait(300); await page.mouse.click(box.x + 1167, box.y + 470); await wait(1200);
     const o0 = await cmd(ord);
     /* úchyt ⠿ Subdivision (1375,555) nahoru nad hlavičku Bevel (287) */
     await page.mouse.move(box.x + 1375, box.y + 555, { steps: 3 }); await wait(400); await page.mouse.down(); await wait(150);
@@ -1091,7 +1091,7 @@ const J = {
     await check(`podržení na Light ▸ klepnutí Delete (objektů ${n0} -> ${n0 - 1}, smazán ${gone})`, (s) => gone === true && s.objs === n0 - 1);
     const pv = "eval:(lambda r: [round(v) for v in r.view2d.region_to_view(0, 0)])([r for a in bpy.context.window_manager.windows[0].screen.areas if a.type == 'PROPERTIES' for r in a.regions if r.type == 'WINDOW'][0])";
     await cmd("o = bpy.data.objects['Cube']; bpy.context.view_layer.objects.active = o; o.select_set(True)"); await wait(900);
-    await tap(1167, 638); await wait(600); const ctxp = await cmd("eval:[a for a in bpy.context.window_manager.windows[0].screen.areas if a.type == 'PROPERTIES'][0].spaces[0].context");
+    await tap(1167, 610); await wait(600); const ctxp = await cmd("eval:[a for a in bpy.context.window_manager.windows[0].screen.areas if a.type == 'PROPERTIES'][0].spaces[0].context");
     await check(`klepnutí na záložku Material (${ctxp})`, () => ctxp === "MATERIAL");
     const v0 = await cmd(pv);
     await touch("touchStart", [P(1280, 600, 0), P(1320, 600, 1)]); for (let i = 1; i <= 15; i++) { await touch("touchMove", [P(1280, 600 - 18 * i, 0), P(1320, 600 - 18 * i, 1)]); await wait(30); } await touch("touchEnd", []); await wait(900);
@@ -1104,7 +1104,7 @@ const J = {
     const touch = (type, pts) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: pts });
     const tap = async (x, y) => { await touch("touchStart", [P(x, y)]); await wait(80); await touch("touchEnd", []); await wait(1000); };
     const col = "eval:[round(v, 3) for v in bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value]";
-    await tap(1167, 638); await tap(1323, 466); await page.screenshot({ path: "out/jr_touchcolor_open.png" });
+    await tap(1167, 610); await tap(1323, 466); await page.screenshot({ path: "out/jr_touchcolor_open.png" });
     const starts = [[1251, 196, 5, 3], [1230, 170, -4, 4], [1270, 220, 4, -5], [1240, 210, -5, -3]]; let ok = 0, prev = await cmd(col); const got = [];
     for (const [x, y, dx, dy] of starts) {
       await touch("touchStart", [P(x, y)]); for (let i = 1; i <= 8; i++) { await touch("touchMove", [P(x + dx * i, y + dy * i)]); await wait(30); } await touch("touchEnd", []); await wait(900);
@@ -1124,7 +1124,7 @@ const J = {
     const w = "eval:[a.width for a in bpy.context.window_manager.windows[0].screen.areas if a.type == 'VIEW_3D'][0]"; const w0 = await cmd(w);
     await drag(1151, 450, 1000, 450); const w1 = await cmd(w); await check(`tah za hranu oblasti zúží 3D pohled (${w0} -> ${w1})`, () => w1 < w0 - 100);
     await tap(269, 37); await page.screenshot({ path: "out/jr_touchmisc_add.png" }); await tap(300, 64); await page.screenshot({ path: "out/jr_touchmisc_mesh.png" });
-    await tap(475, 267, 1500); await check("Add ▸ Mesh ▸ Monkey jen klepáním", (s) => s.objs === 4 && s.ob.startsWith("Suzanne"));
+    await tap(475, 247, 1500); await check("Add ▸ Mesh ▸ Monkey jen klepáním", (s) => s.objs === 4 && s.ob.startsWith("Suzanne"));
   },
   /* 8. 11.: sevření prstů na trackpadu v Safari (Mac, iPad s Magic Keyboard) = jen gesturestart/gesturechange, žádné ctrl+wheel.
    * Chrome nemá GestureEvent, proto Event + scale. Desktop Blender na Macu sevřením zoomuje. */
