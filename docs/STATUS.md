@@ -19,6 +19,8 @@ Výsledek: ✅ PC (iPad čeká na Lukáše)
 - **`regress_sim` na 5.3: 0 FAIL** (14:53–16:25, `out/regress_sim_r53.log`, journey bez CHYBA).
 - **MASTER PŘEPNUT NA 5.3 (16:30, odhad času 15 min potvrzen):** `blender` → symlink na `blender-5.3`, `build-blender` → `build-5.3`; staré v `blender-5.2/`, `build-5.2/`. `BLENDER_REF` = `62cb95c4` (větev `ipad-5.3`, pushnuto). `demo/public` = build z `out/pub53` + seed 193 shaderů (záloha 5.2 buildu a seedu: `out/bak_52/`). Ověřeno na master konfiguraci (`vite` bez `--config`): boot, **prohlídka 75/75 Chrome i sim** (`out/tour53_master_*.log`), **ops 96/96** (`out/ops53_master.log`).
 - **Co otestovat na iPadu (R):** otevřít stránku (nejlépe soukromá karta, ať se nenačte starý seed/cache), zkontrolovat v levém dolním rohu „5.3.0", udělat kostku → Edit mode → výběr, Material Preview, uložit/otevřít .blend. Nový zip pro itch nahraješ ty (`link_blender_release.sh` výstup je v `demo/public`).
+- **3b retest po 5.3 (PC Chrome, master konfigurace):** `h30` PASS, `h31` PASS (fail=0), `h32` PASS (fails=0) — H32/H32b/H32c se na PC testem nereprodukují ani na 5.2, takže „zmizelo po 5.3" z toho vyvodit nejde (odhad: jde o časování při kompilaci shaderů na Lukášově PC, ne o verzi). Zbytek seznamu (H42, H43, B3, J4) je JS/iPad a na verzi Blenderu nezávisí nebo čeká na iPad.
+- **C1 Cycles:** začínám — `architect` píše ADR (jeden/dva wasm, jak zapnout `WITH_CYCLES` bez celého rebuildu).
 
 # 13. 11. (pá, Fable) — R: přechod na Blender 5.3.0 — rozpracováno
 Výsledek: 🟡 merge hotový a pushnutý, build běží; master a `BLENDER_REF` beze změny (Lukáš má dál funkční 5.2)
