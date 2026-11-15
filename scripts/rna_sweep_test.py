@@ -41,10 +41,24 @@ def collect(label, st, depth):
         elif p.type == 'ENUM' and not p.is_enum_flag:
             for it in p.enum_items: steps.append((label, st, pid, it.identifier))
         elif p.type in ('INT', 'FLOAT') and not p.is_array: steps.append((label, st, pid, 'same'))
+ROOTS = globals().get('RNA_ROOTS')   # zúžení (OPS_PRE): čárkou oddělené labely kořenů, např. 'view_layer,world'
+if ROOTS: roots = [r for r in roots if r[0] in ROOTS.split(',')]
+SKIPSUB = [x for x in globals().get('RNA_SKIP', '').split(',') if x]   # podřetězce labelů k vynechání, např. 'depsgraph'
 for label, st in roots: collect(label, st, 0)
+if SKIPSUB: steps = [s for s in steps if not any(x in s[0] for x in SKIPSUB)]
+ONLYSUB = [x for x in globals().get('RNA_ONLY', '').split(',') if x]   # jen labely s podřetězcem, např. 'depsgraph' (zápisy do vyhodnocených kopií)
+if ONLYSUB: steps = [s for s in steps if any(x in s[0] for x in ONLYSUB)]
 BAD = {('render', 'engine'), ('scene', 'frame_current')}
 steps = [s for s in steps if (s[0], s[2]) not in BAD and not (s[3] == 'toggle' and s[2] in ('use_nodes',))]
 out('OPS_INFO rna steps', len(steps))
+def fresh(label, st):
+    # vyhodnocené kopie (view_layer.depsgraph.*) se po každém přepočtu depsgraphu uvolní; držet starý pointer = use-after-free (pád jen na wasm 5.3)
+    if '.depsgraph' not in label: return st
+    try:
+        o = bpy.context.view_layer
+        for part in label.split('.')[1:]: o = getattr(o, part)
+        return o
+    except Exception: return st
 state = {'i': 0}
 def tick():
     for _ in range(25):   # dávka kroků na tick (rychlejší sweep)
@@ -55,6 +69,7 @@ def tick():
             return None
         label, st, pid, how = steps[i]; state['i'] += 1
         out('OPS rna set', label, pid, how)
+        st = fresh(label, st)
         try:
             cur = getattr(st, pid)
             if how == 'toggle': setattr(st, pid, not cur)
