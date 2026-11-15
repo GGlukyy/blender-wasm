@@ -1,5 +1,5 @@
-# 15. 11. (ne, Fable) — R: 5.3 regrese, oprava shader ICE, souřadnice testů pro layout 5.3 — rozpracováno
-Výsledek: 🟡 (běží; master a `BLENDER_REF` zatím beze změny)
+# 15. 11. (ne) — R: Blender 5.3.0 je v masteru (regrese Chrome + sim 0 FAIL, prohlídka 75/75, ops 96/96)
+Výsledek: ✅ PC (iPad čeká na Lukáše)
 
 **Co jsem udělal (zatím)**
 - Noc 02:00–06:50: 10 běhů smyčky skončilo hned na limitu (weekly/session limit), práce z 1. běhu (02:00–02:07) zůstala necommitnutá: úprava `eevee_light_iter.bsl.hh` (viz níže) a `out/rna53_repro.log`.
@@ -16,6 +16,9 @@ Výsledek: 🟡 (běží; master a `BLENDER_REF` zatím beze změny)
 - **`regress_all` Chrome na 5.3 (14:40, `out/regress53_r2.log`): 0 FAIL kromě journey** (objops, modui, prefs, color, moddrag, touchui, touchcolor, touchmisc). Příčina: commit 7780560 přepsal souřadnice podle desktopu 5.3.0, ale **web 5.3 má stejné rozložení jako 5.2** (Properties: Object 442, Modifiers 470, Material 610; desktop má o záložku víc). Souřadnice vráceny (commit „journey souřadnice zpět"), těchto 8 cest znovu OK. Tvrzení z rána „ověřeno desktopem" tedy platí jen pro desktop, ne pro web. Proč desktop má o záložku víc, nevím (nejspíš jiné nastavení Steam verze).
 - Pushnuto na master: ba111f9, 1bc0198 a commit s journey souřadnicemi.
 - `regress_sim` na 5.3 běží od 14:53 (`out/regress_sim_r53.log`).
+- **`regress_sim` na 5.3: 0 FAIL** (14:53–16:25, `out/regress_sim_r53.log`, journey bez CHYBA).
+- **MASTER PŘEPNUT NA 5.3 (16:30, odhad času 15 min potvrzen):** `blender` → symlink na `blender-5.3`, `build-blender` → `build-5.3`; staré v `blender-5.2/`, `build-5.2/`. `BLENDER_REF` = `62cb95c4` (větev `ipad-5.3`, pushnuto). `demo/public` = build z `out/pub53` + seed 193 shaderů (záloha 5.2 buildu a seedu: `out/bak_52/`). Ověřeno na master konfiguraci (`vite` bez `--config`): boot, **prohlídka 75/75 Chrome i sim** (`out/tour53_master_*.log`), **ops 96/96** (`out/ops53_master.log`).
+- **Co otestovat na iPadu (R):** otevřít stránku (nejlépe soukromá karta, ať se nenačte starý seed/cache), zkontrolovat v levém dolním rohu „5.3.0", udělat kostku → Edit mode → výběr, Material Preview, uložit/otevřít .blend. Nový zip pro itch nahraješ ty (`link_blender_release.sh` výstup je v `demo/public`).
 
 # 13. 11. (pá, Fable) — R: přechod na Blender 5.3.0 — rozpracováno
 Výsledek: 🟡 merge hotový a pushnutý, build běží; master a `BLENDER_REF` beze změny (Lukáš má dál funkční 5.2)
