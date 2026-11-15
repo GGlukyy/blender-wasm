@@ -13,6 +13,9 @@ Výsledek: 🟡 (běží; master a `BLENDER_REF` zatím beze změny)
 - **12:20–13:10 rna_sweep VYŘEŠEN (příčina = test, ne port).** A/B: 5.2 web celý sweep PASS; 5.3 web jednotlivé kořeny PASS, celek padá → zúženo na zápisy do `view_layer.depsgraph.view_layer_eval` (jen tyto kroky: 5.3 ~30 % pádů, 5.2 0/6). Test držel starý pointer na vyhodnocenou kopii view layeru, která se po přepočtu depsgraphu uvolní = use-after-free (stack pokaždé jinde: `BLI_findindex`, `strlen`, `OperationNode::~`). Predikce „při opětovném načtení pointeru v každém kroku pád zmizí“ splněna: depsgraph-only 8/8 PASS, celý sweep 3/3 PASS (dřív 3/3 pád). Oprava `fresh()` v `scripts/rna_sweep_test.py` (+ volba `RNA_ONLY`), commit ba111f9. Není to oslabení testu (stejné kroky, jen platný pointer).
 - Proč na webu 5.3 padá a na desktopu ne: odhad — jiná alokace paměti (uvolněná paměť se na wasm přepíše dřív). Dopad na uživatele nulový (UI nezapisuje do vyhodnocených kopií).
 - `regress_all` na 5.3 znovu běží (`out/regress53_r2.log`, server `vite.53.config.js` :5173).
+- **`regress_all` Chrome na 5.3 (14:40, `out/regress53_r2.log`): 0 FAIL kromě journey** (objops, modui, prefs, color, moddrag, touchui, touchcolor, touchmisc). Příčina: commit 7780560 přepsal souřadnice podle desktopu 5.3.0, ale **web 5.3 má stejné rozložení jako 5.2** (Properties: Object 442, Modifiers 470, Material 610; desktop má o záložku víc). Souřadnice vráceny (commit „journey souřadnice zpět"), těchto 8 cest znovu OK. Tvrzení z rána „ověřeno desktopem" tedy platí jen pro desktop, ne pro web. Proč desktop má o záložku víc, nevím (nejspíš jiné nastavení Steam verze).
+- Pushnuto na master: ba111f9, 1bc0198 a commit s journey souřadnicemi.
+- `regress_sim` na 5.3 běží od 14:53 (`out/regress_sim_r53.log`).
 
 # 13. 11. (pá, Fable) — R: přechod na Blender 5.3.0 — rozpracováno
 Výsledek: 🟡 merge hotový a pushnutý, build běží; master a `BLENDER_REF` beze změny (Lukáš má dál funkční 5.2)
