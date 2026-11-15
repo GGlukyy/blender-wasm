@@ -33,6 +33,7 @@ Výsledek: ✅ PC (iPad čeká na Lukáše)
   - `BLENDER_REF` v Makefile = fork `ipad-5.3` HEAD (Cycles). Pozor: `build-5.3` je teď strom s Cycles; pro nový iPad build bez Cycles viz `docs/CYCLES.md` (`build-5.3-ipad`).
   - **Co otestovat na iPadu:** NIC nového by se nemělo změnit — iPad (`?ipad=1` nebo skutečný iPad) načte `blender.wasm` bez Cycles, stejný jako dnes. Zkontroluj jen, že startuje a funguje jako dřív. Cycles na PC v Chrome: Render ▸ Render Engine ▸ Cycles, F12; nebo viewport Rendered.
   - Zip pro itch: `demo/public` má teď 2 wasm (+30 MB); nahrává Lukáš.
+  - 21:25 `pwa_offline` na PC buildu: test hledal v cache jen `blender.wasm.zst`, PC varianta cachuje `blender-pc.wasm.zst` → test přijímá obě jména (kontrola, že wasm je v cache, zůstává), PASS online i offline.
 
 # 13. 11. (pá, Fable) — R: přechod na Blender 5.3.0 — rozpracováno
 Výsledek: 🟡 merge hotový a pushnutý, build běží; master a `BLENDER_REF` beze změny (Lukáš má dál funkční 5.2)

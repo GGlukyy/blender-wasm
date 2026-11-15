@@ -21,7 +21,7 @@ await wait(5000);
 const info = await page.evaluate(async () => {
   const c = await caches.open("blender-web-offline"); const ks = (await c.keys()).map((r) => new URL(r.url).pathname);
   const est = navigator.storage && navigator.storage.estimate ? await navigator.storage.estimate() : {};
-  return { cached: ks.length, hasWasm: ks.some((k) => k.endsWith("blender.wasm.zst")), hasAssets: ks.some((k) => k.endsWith("assets.tar.zst")), hasIndex: ks.some((k) => k.endsWith("/")), usageMB: Math.round((est.usage || 0) / 1048576), quotaMB: Math.round((est.quota || 0) / 1048576) };
+  return { cached: ks.length, hasWasm: ks.some((k) => k.endsWith("blender-pc.wasm.zst") || k.endsWith("blender.wasm.zst")), hasAssets: ks.some((k) => k.endsWith("assets.tar.zst")), hasIndex: ks.some((k) => k.endsWith("/")), usageMB: Math.round((est.usage || 0) / 1048576), quotaMB: Math.round((est.quota || 0) / 1048576) };
 });
 console.log(phase, "blender up:", up, JSON.stringify(info), "pageerrors:", errs.length, errs[0] || "");
 await page.screenshot({ path: `out/pwa_${phase}.png` });
