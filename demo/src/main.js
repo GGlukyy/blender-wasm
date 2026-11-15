@@ -151,6 +151,12 @@ zstdWorker.onmessage = (e) => { const { id, out, err } = e.data, p = zstdWait.ge
 zstdWorker.onerror = (e) => { for (const p of zstdWait.values()) p.rej(new Error("zstd worker: " + (e.message || "error"))); zstdWait.clear(); };
 const zstdDecode = (z, size) => new Promise((res, rej) => { const id = ++zstdSeq; zstdWait.set(id, { res, rej }); zstdWorker.postMessage({ id, buf: z.buffer, size }, [z.buffer]); });
 const manifest = await (await fetch("manifest.json")).json();
+/* C1: PC (Chrome, Mac Safari) gets blender-pc.{js,wasm.zst} built with Cycles (CPU); iPad keeps the lean blender.* (memory). ?cycles=1/0 overrides. */
+const wasmName = () => {
+  const q = new URLSearchParams(location.search);
+  const ipad = q.get("ipad") === "1" || (q.get("ipad") !== "0" && navigator.maxTouchPoints > 1 && /Macintosh|iPad/.test(navigator.userAgent));
+  return ((q.get("cycles") ?? (ipad ? "0" : "1")) === "1" && manifest["blender-pc.wasm.zst"]) ? "blender-pc" : "blender";
+};
 
 /* ---- In-memory tar FsProvider (pattern + code from gecko-wasm chrome-fs.ts).
  * The tar is indexed as path -> Uint8Array VIEWS into the one decompressed
@@ -351,9 +357,9 @@ let [assetsTar, wasmBytes] = await Promise.all([
     setProgress({ phase: "decompressing", percent: 1, message: "Decompressing assets" });
     return zstdDecode(z, manifest["assets.tar.zst"]);
   }),
-  fetchZst("blender.wasm.zst", "wasm").then((z) => {
+  fetchZst(wasmName() + ".wasm.zst", "wasm").then((z) => {
     setProgress({ phase: "decompressing", percent: 1, message: "Decompressing Blender" });
-    return zstdDecode(z, manifest["blender.wasm.zst"]);
+    return zstdDecode(z, manifest[wasmName() + ".wasm.zst"]);
   }),
 ]);
 zstdWorker.terminate();
@@ -1669,6 +1675,11 @@ const POOL_N = parseInt(_qp.get("pool") || (_isIpadUA ? "8" : "32"), 10) || 32;
  * opens it; /tmp/dirty.txt tells JS whether the current scene has unsaved changes (JS asks before discarding). */
 const OPEN_REQ_PY = `import bpy, os
 _dirty = [None]
+try:
+    # C1: uložené uživatelské nastavení z doby před Cycles nemá add-on zapnutý
+    if bpy.app.build_options.cycles and 'cycles' not in bpy.context.preferences.addons:
+        import addon_utils; addon_utils.enable('cycles', default_set=True)
+except Exception: pass
 def _drop_one(fp):
     # H38: soubor přetažený na plátno (main.js): import jako FileHandlery desktopu, obrázky načíst
     ext = os.path.splitext(fp)[1].lower()
@@ -2074,7 +2085,7 @@ try {
 
   log("loading Blender…");
   const s = document.createElement("script");
-  s.src = "blender.js";
+  s.src = wasmName() + ".js";
   document.body.appendChild(s);
 }
 

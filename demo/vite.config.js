@@ -37,11 +37,11 @@ const abortStackPlugin = () => ({
   name: "blender-abort-stack",
   configureServer(server) {
     server.middlewares.use((req, res, next) => {
-      if (!/^\/blender\.js(\?|$)/.test(req.url || "")) return next();
+      const m = /^\/(blender(?:-pc)?)\.js(\?|$)/.exec(req.url || ""); if (!m) return next();
       try {
         /* publicDir z konfigurace (vite.53.config.js servíruje out/pub53, ne public/) — jinak by 5.3 wasm dostal 5.2 glue
          * ("invoke_viiiiijii: function import requires a callable"). */
-        const src = fs.readFileSync(path.join(server.config.publicDir, "blender.js"), "utf8")
+        const src = fs.readFileSync(path.join(server.config.publicDir, m[1] + ".js"), "utf8")
           .replace('gst.wgpu_live = Object.keys(WebGPU.Internals.jsObjects).length;', '{ const _jo = WebGPU.Internals.jsObjects; gst.wgpu_live = Object.keys(_jo).length; const _h = {}; for (const k in _jo) { const o = _jo[k]; let n = o && o.constructor ? o.constructor.name : typeof o; if (n === "GPUBuffer") n += ":" + (o.label || "") + "/" + o.size + "/" + o.usage; _h[n] = (_h[n] || 0) + 1; } gst.live_types = _h; }')
           .replace('Module["onAbort"]?.(what);', 'try { Module["onAbort"]?.(String(what) + " @@STACK@@ " + (ENVIRONMENT_IS_PTHREAD ? "[pthread " + (typeof _pthread_self === "function" ? _pthread_self() : "?") + "] " : "[main] ") + new Error().stack); } catch (e) { Module["onAbort"]?.(what); }');
         res.setHeader("Content-Type", "text/javascript");
