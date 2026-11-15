@@ -35,6 +35,7 @@ Výsledek: ✅ PC (iPad čeká na Lukáše)
   - Zip pro itch: `demo/public` má teď 2 wasm (+30 MB); nahrává Lukáš.
   - 22:00 kontrola iPad profilu na finálním `demo/public`: `?webkit_sim=1&ipad=1` bez `cycles=` se načte jako lean `blender.wasm` (js_used 306 MB jako dřív, s Cycles by bylo 315), start OK.
   - 22:10 nová cesta `cyclesf12` (journey): klávesa F12 s Cycles → Render Result, `save_render` 1,19 MB, obraz není černý, Esc vrátí rozložení. OK v Chrome i `webkit_sim=1`.
+  - 22:15 Cycles F12 s **zapnutým denoisingem** (výchozí v Blenderu; `cycles_denoise_test.py`): nespadne, render 16 samples za 1,1 s, ale denoise se neprovede (OIDN není v buildu; průměr pixelů stejný jako bez něj). UI přitom checkbox Denoise nabízí — do BACKLOGu C1b (skrýt/varovat).
   - **Úklid (21:50):** `pgrep -af "regress|fuzz|_win.sh|_test|vite"` = prázdné, žádný test ani dev server nezůstal běžet. Lukášův dev server/tunel neběžel.
   - 21:40 zátěž: `CYC_PY=cycles_monkey_test.py scripts/cycles_win.sh` (Suzanne subsurf 3 + podlaha, 64 samples 960×540): F12 doběhl za 7,7 s, PNG uložen, bez OOM/pádu (porovnání s desktopem pro tuto scénu neděláno).
   - 21:25 `pwa_offline` na PC buildu: test hledal v cache jen `blender.wasm.zst`, PC varianta cachuje `blender-pc.wasm.zst` → test přijímá obě jména (kontrola, že wasm je v cache, zůstává), PASS online i offline.
