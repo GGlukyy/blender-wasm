@@ -29,6 +29,10 @@ Výsledek: ✅ PC (iPad čeká na Lukáše)
   - `regress_all` Chrome na PC buildu (`out/regress_c1.log`): 0 FAIL kromě 8 cest `journey`. Příčina: **build s Cycles má v Properties o záložku víc (layout jako desktop 5.3.0), build bez Cycles ne** — proto se ráno souřadnice podle desktopu a odpoledne podle webu „překlápěly“. Souřadnice jsou teď pro PC build s Cycles (7780560); iPad build má starší layout.
   - `regress_sim` na PC buildu běží od 19:05 (`out/regress_sim_c1.log`); po něm znovu 8 cest journey v Chrome.
   - **Nenasazeno do `demo/public` pro Lukáše jako výchozí?** Nasazeno: `demo/public` má blender-pc.* i blender.* (záloha předchozího: `out/bak_pre_c1/`). BLENDER_REF v Makefile zatím na 62cb95c4 (změním po zelené regresi).
+  - **21:15 HOTOVO (PC): regress_all Chrome 0 FAIL, regress_sim 0 FAIL, prohlídka 75/75 Chrome i sim na PC buildu s Cycles** (`out/regress_c1.log`, `out/regress_sim_c1.log`, `out/tour_c1_*.log`). Výjimky: journey 8 cest v Chrome bylo CHYBA kvůli souřadnicím (layout s Cycles, opraveno, pak všech 9 cest OK v Chrome); cesta `ui` v sim jednou CHYBA při regresi, samostatně 2× OK v sim (souběh příkazů v kanálu testu, jako 15. 11. ráno — odhad, nic nezmírněno).
+  - `BLENDER_REF` v Makefile = fork `ipad-5.3` HEAD (Cycles). Pozor: `build-5.3` je teď strom s Cycles; pro nový iPad build bez Cycles viz `docs/CYCLES.md` (`build-5.3-ipad`).
+  - **Co otestovat na iPadu:** NIC nového by se nemělo změnit — iPad (`?ipad=1` nebo skutečný iPad) načte `blender.wasm` bez Cycles, stejný jako dnes. Zkontroluj jen, že startuje a funguje jako dřív. Cycles na PC v Chrome: Render ▸ Render Engine ▸ Cycles, F12; nebo viewport Rendered.
+  - Zip pro itch: `demo/public` má teď 2 wasm (+30 MB); nahrává Lukáš.
 
 # 13. 11. (pá, Fable) — R: přechod na Blender 5.3.0 — rozpracováno
 Výsledek: 🟡 merge hotový a pushnutý, build běží; master a `BLENDER_REF` beze změny (Lukáš má dál funkční 5.2)
