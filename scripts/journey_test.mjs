@@ -319,6 +319,15 @@ const J = {
     const nz = await cmd("eval:(lambda p: sum(1 for i in range(0, len(p), 400) if p[i] > 0.02))(list(bpy.data.images.load('/opfs/home/jr_f12.png').pixels))"); await check(`obraz není černý (${JSON.stringify(nz)})`, () => nz > 10);
     await key("Escape", 1200); const a2 = await cmd(areas); await check(`Esc vrátí rozložení ${JSON.stringify(a2)}`, () => JSON.stringify(a2) === JSON.stringify(a0));
   },
+  /* C1: totéž s Cycles (jen PC build blender-pc): klávesa F12 → Render Result, obraz není černý. */
+  cyclesf12: async ({ hover, key, check, cmd, page, wait }) => {
+    await cmd("bpy.context.scene.render.engine='CYCLES'; bpy.context.scene.cycles.samples=16; bpy.context.scene.cycles.use_denoising=False"); const eng = await cmd("eval:bpy.context.scene.render.engine"); await check(`engine ${eng}`, () => eng === "CYCLES"); const areas = "eval:[a.type for a in bpy.context.window_manager.windows[0].screen.areas]", a0 = await cmd(areas);
+    await hover(); await page.keyboard.press("F12"); for (let i = 0; i < 120; i++) { await wait(1000); const r = await cmd("eval:bpy.data.images['Render Result'].has_data if 'Render Result' in bpy.data.images else False"); if (r) break; } await wait(3000);
+    await page.screenshot({ path: "out/jr_cyclesf12.png" }); const a1 = await cmd(areas); console.log("F12 oblasti " + JSON.stringify(a1)); await check("F12: výsledek existuje", () => a1 && a1.includes("IMAGE_EDITOR"));
+    await cmd("bpy.data.images['Render Result'].save_render('/opfs/home/jr_cyclesf12.png')"); await wait(1500); const sz = await cmd("eval:__import__('os').path.getsize('/opfs/home/jr_cyclesf12.png')"); await check(`save_render ${sz} B`, () => sz > 1000);
+    const nz = await cmd("eval:(lambda p: sum(1 for i in range(0, len(p), 400) if p[i] > 0.02))(list(bpy.data.images.load('/opfs/home/jr_cyclesf12.png').pixels))"); await check(`obraz není černý (${JSON.stringify(nz)})`, () => nz > 10);
+    await key("Escape", 1200); const a2 = await cmd(areas); await check(`Esc vrátí rozložení ${JSON.stringify(a2)}`, () => JSON.stringify(a2) === JSON.stringify(a0));
+  },
   /* Scripting: psaní skriptu v Text Editoru, Alt+P, Python Console: příkaz + Enter, šipka nahoru (historie). */
   script: async ({ tab, check, cmd, page, wait }) => {
     await cmd("bpy.context.window.workspace=bpy.data.workspaces['Scripting']"); await wait(5000); await check("workspace Scripting", (s) => s.ws === "Scripting");
