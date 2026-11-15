@@ -1547,3 +1547,4 @@ Výsledek P0: ✅ P0 hotové (build na PC + demo běží na iPadu)
 - **Krok A**: automatický parity test web vs desktop (nejdřív depth range + readback, pak body/velikost bodů v edit modu). Podle `docs/PLAN.md`.
 
 - **21:50 C1b-2 (Denoise bez OIDN):** `show_denoise_active` a `show_preview_denoise_active` v Cycles `ui.py` teď čtou `_cycles.with_openimagedenoise` (web = False → Denoise v UI neaktivní). Fork `ipad-5.3` a75b7f31 (pushnuto), `BLENDER_REF` v Makefile na něj. Důkaz: `CYC_PY=cycles_denoise_ui_test.py scripts/cycles_win.sh` → `denoise_ui_inactive PASS` (na kopii assetů `out/pubdn`, vite :5173 s `demo/vite.dn.config.js`). **Nenasazeno do `demo/public`**, sim ani regress nespuštěny (odhad rizika nízké: jen Python UI).
+  - 21:58 C1b-2 v `webkit_sim=1` (`sim1.sh cycles_win.sh`, kopie `out/pubdn`): `denoise_ui_inactive PASS`. Stále nenasazeno do `demo/public` (chybí přebalení assets + regress_sim/journey) — další běh.
