@@ -8,6 +8,7 @@ Výsledek: 🟡 (běží; master a `BLENDER_REF` zatím beze změny)
 - **journey (9 cest):** příčina = layout 5.3, ne port. Ověřeno v desktopu 5.3.0 (`scripts/desktop_shot.py`, `out/win/desk53_layout.png`): záložky Properties jsou o 28 px níž (Object 470, Modifiers 498, Material 638; dřív 442/470/610), menu Mesh má nový **Quad Sphere** (Monkey 267 místo 247), Preferences mají novou sekci **Asset Libraries** nad Themes (297 místo 271), dialog „Move to New Collection" má tlačítko Create na 423. Testy upraveny (master 7780560), ověření čeká.
   - `ui`: `NameError 'viewstate'` = slepený příkaz `view`+`state` v kanálu testu (souběh), ne Blender. Pustím znovu.
 - **rna_sweep (pád):** 13. 11. `Aborted()` po `v3d.shading xray_alpha_wireframe`; repro 02:09 `memory access out of bounds` v `deg_task_run_func` po `world use_sun_shadow_jitter`. Dvě různá místa → nedeterministické. Běží 3. opakování s plnými stacky (`OPS_LINE=3000`, `out/rna53_repro2.log`).
+- **rna_sweep 3b:** desktop 5.3.0 (`scripts/rna_sweep_desktop.sh`, GUI, stejný skript) projde celý sweep (5152 kroků, OPS_DONE, 0 chyb). Web 5.3: 3/3 běhy pád, pokaždé jinde (`v3d.shading xray_alpha_wireframe` abort; `world use_sun_shadow_jitter` OOB v `deg_task_run_func` na worker vlákně; `view_layer.depsgraph…active_aov_index` OOB na hlavním vlákně). = chyba jen na webu, nedeterministická, bez stacku. Předáno `architect` (jen fakta) k návrhu měření.
 - Nové: `scripts/sim1.sh <test>` = jeden test ve `webkit_sim` (stejný hook jako `regress_sim.sh`).
 
 # 13. 11. (pá, Fable) — R: přechod na Blender 5.3.0 — rozpracováno

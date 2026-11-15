@@ -1,6 +1,6 @@
 # Lov chyb kolo 66: obecný RNA sweep — pro vybrané struktury každou skalární vlastnost znovu přiřadit (spustí update funkce),
 # booleany přepnout, enumy projít. Pád = nedoběhne (poslední „OPS rna set“ je viník). Rekurze do vnořených struktur (hloubka 2).
-import bpy, sys
+import bpy, sys, os
 def out(*a):
     print(*a); sys.stdout.flush()
 sc = bpy.context.scene
@@ -50,7 +50,9 @@ def tick():
     for _ in range(25):   # dávka kroků na tick (rychlejší sweep)
         i = state['i']
         if i >= len(steps):
-            out('OPS_DONE'); return None
+            out('OPS_DONE')
+            if os.environ.get('RNA_QUIT'): bpy.ops.wm.quit_blender()   # desktop 3b běh (rna_sweep_desktop.sh)
+            return None
         label, st, pid, how = steps[i]; state['i'] += 1
         out('OPS rna set', label, pid, how)
         try:
