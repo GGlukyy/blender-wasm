@@ -1,3 +1,15 @@
+# 15. 11. (ne, Fable) — R: 5.3 regrese, oprava shader ICE, souřadnice testů pro layout 5.3 — rozpracováno
+Výsledek: 🟡 (běží; master a `BLENDER_REF` zatím beze změny)
+
+**Co jsem udělal (zatím)**
+- Noc 02:00–06:50: 10 běhů smyčky skončilo hned na limitu (weekly/session limit), práce z 1. běhu (02:00–02:07) zůstala necommitnutá: úprava `eevee_light_iter.bsl.hh` (viz níže) a `out/rna53_repro.log`.
+- `regress_all` na 5.3 (13. 11., `out/regress53_r.log`) dopadl: **node_sweep FAIL** (1 shader ICE), **rna_sweep FAIL** (pád), **journey 9 cest CHYBA** (objops, modui, prefs, ui, color, moddrag, touchui, touchcolor, touchmisc); zbytek PASS, fuzz/ui_fuzz/fuzz_obj PASS, seed_verify 2 překlady.
+- **node_sweep (shader ICE):** `MAM_ShaderNodeLightAccumulation_deferred_hybrid_mesh` (nový uzel Light Accumulation v 5.3) padá v Tint SPIR-V readeru (`parser.cc:3428 TINT_ASSERT(switch_blocks...)`) = známý problém `switch` + `[[fallthrough]]` s neprázdným tělem (stejný workaround už máme v `eevee_light_culling.bsl.hh`). Oprava: `eevee_light_iter.bsl.hh` `next()` přepsán na postupné `if (phase == …)`, sémantika stejná. Fork `ipad-5.3` 62cb95c4, pushnuto. Přebuild 88 kroků + `.link53.sh` → nasazeno do `out/pub53` (záloha `out/bak_pub53_r2`). Ověření node_sweep: čeká (běží rna_sweep).
+- **journey (9 cest):** příčina = layout 5.3, ne port. Ověřeno v desktopu 5.3.0 (`scripts/desktop_shot.py`, `out/win/desk53_layout.png`): záložky Properties jsou o 28 px níž (Object 470, Modifiers 498, Material 638; dřív 442/470/610), menu Mesh má nový **Quad Sphere** (Monkey 267 místo 247), Preferences mají novou sekci **Asset Libraries** nad Themes (297 místo 271), dialog „Move to New Collection" má tlačítko Create na 423. Testy upraveny (master 7780560), ověření čeká.
+  - `ui`: `NameError 'viewstate'` = slepený příkaz `view`+`state` v kanálu testu (souběh), ne Blender. Pustím znovu.
+- **rna_sweep (pád):** 13. 11. `Aborted()` po `v3d.shading xray_alpha_wireframe`; repro 02:09 `memory access out of bounds` v `deg_task_run_func` po `world use_sun_shadow_jitter`. Dvě různá místa → nedeterministické. Běží 3. opakování s plnými stacky (`OPS_LINE=3000`, `out/rna53_repro2.log`).
+- Nové: `scripts/sim1.sh <test>` = jeden test ve `webkit_sim` (stejný hook jako `regress_sim.sh`).
+
 # 13. 11. (pá, Fable) — R: přechod na Blender 5.3.0 — rozpracováno
 Výsledek: 🟡 merge hotový a pushnutý, build běží; master a `BLENDER_REF` beze změny (Lukáš má dál funkční 5.2)
 
