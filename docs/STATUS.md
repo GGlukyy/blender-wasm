@@ -21,6 +21,14 @@ Výsledek: ✅ PC (iPad čeká na Lukáše)
 - **Co otestovat na iPadu (R):** otevřít stránku (nejlépe soukromá karta, ať se nenačte starý seed/cache), zkontrolovat v levém dolním rohu „5.3.0", udělat kostku → Edit mode → výběr, Material Preview, uložit/otevřít .blend. Nový zip pro itch nahraješ ty (`link_blender_release.sh` výstup je v `demo/public`).
 - **3b retest po 5.3 (PC Chrome, master konfigurace):** `h30` PASS, `h31` PASS (fail=0), `h32` PASS (fails=0) — H32/H32b/H32c se na PC testem nereprodukují ani na 5.2, takže „zmizelo po 5.3" z toho vyvodit nejde (odhad: jde o časování při kompilaci shaderů na Lukášově PC, ne o verzi). Zbytek seznamu (H42, H43, B3, J4) je JS/iPad a na verzi Blenderu nezávisí nebo čeká na iPad.
 - **C1 Cycles:** začínám — `architect` píše ADR (jeden/dva wasm, jak zapnout `WITH_CYCLES` bez celého rebuildu).
+- **C1 Cycles (CPU) na PC — F12 i Rendered fungují (Chrome), 19:05; regrese běží.** Podrobně `docs/CYCLES.md` (ADR od `architect`: zvlášť `blender-pc.wasm` jen pro PC, iPad beze změny a bez Cycles; loader `wasmName()`, `?cycles=1|0`).
+  - Build: `build-5.3` přenastaven na `WITH_CYCLES=ON` (jen 917 kroků, ~15 min; záloha stromu bez Cycles `build-5.3-ipad`), link `scripts/cycles_pc_build.sh` → `out/pubcyc`. Fork `ipad-5.3` f28e6325 (3 změny: F12 bez display driveru, WebGPU CPU pixel buffer + fence, display driver pro Rendered přes hlavní vlákno).
+  - **Důkaz F12:** `scripts/cycles_win.sh`: kostka 64 samples 960×540 → PNG, průměr pixelů **0.2662/0.2662/0.2663 = desktop 5.3.0** (`cycles_desktop.sh`), mřížka 16×9 shodná (max rozdíl 0.0). Čas web 2,1 s / desktop 1,1 s.
+  - **Důkaz Rendered:** `CYC_PY=cycles_rendered_test.py scripts/cycles_win.sh` 12 s bez chyby, `out/win/cyc_rendered.png` („Rendering Done“, osvětlená kostka). Rozdíl: pozadí světa je černé (F12 správně).
+  - Velikost: wasm.zst +1,5 MB (29,8), rozbalený +9 MB. Paměť po startu v `?webkit_sim=1&ipad=1`: +25 MB (2527→2552 MB renderer) = pod limitem 50 MB ze zadání, jeden společný wasm by tedy šel; nechávám dva (iPad neotestovatelný).
+  - `regress_all` Chrome na PC buildu (`out/regress_c1.log`): 0 FAIL kromě 8 cest `journey`. Příčina: **build s Cycles má v Properties o záložku víc (layout jako desktop 5.3.0), build bez Cycles ne** — proto se ráno souřadnice podle desktopu a odpoledne podle webu „překlápěly“. Souřadnice jsou teď pro PC build s Cycles (7780560); iPad build má starší layout.
+  - `regress_sim` na PC buildu běží od 19:05 (`out/regress_sim_c1.log`); po něm znovu 8 cest journey v Chrome.
+  - **Nenasazeno do `demo/public` pro Lukáše jako výchozí?** Nasazeno: `demo/public` má blender-pc.* i blender.* (záloha předchozího: `out/bak_pre_c1/`). BLENDER_REF v Makefile zatím na 62cb95c4 (změním po zelené regresi).
 
 # 13. 11. (pá, Fable) — R: přechod na Blender 5.3.0 — rozpracováno
 Výsledek: 🟡 merge hotový a pushnutý, build běží; master a `BLENDER_REF` beze změny (Lukáš má dál funkční 5.2)
