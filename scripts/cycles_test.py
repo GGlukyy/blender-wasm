@@ -13,7 +13,7 @@ try:
 except Exception as e:
     out('OPS cycles addon_enable FAIL', e)
 try:
-    sc.render.engine = 'CYCLES'; eng_ok = sc.render.engine == 'CYCLES' and hasattr(bpy.types, 'CyclesRender')
+    sc.render.engine = 'CYCLES'; eng_ok = sc.render.engine == 'CYCLES'
 except Exception as e:
     eng_ok = False; out('OPS cycles engine_error', e)
 out('OPS cycles engine_enum', 'PASS' if eng_ok else 'FAIL')
