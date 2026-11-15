@@ -1,3 +1,7 @@
+## C1b — dva buildy (PC s Cycles / iPad bez) — hlídat (Lukáš 15. 11.)
+- [ ] Regrese i prohlídku pouštět na OBOU buildech: PC (`blender-pc`) i iPad (`?cycles=0` nebo `ipad=1`). Cesty `journey`/`touch*` mají souřadnice podle layoutu s Cycles → pro build bez Cycles je potřeba druhá sada (nebo hledat záložky podle jména, ne pixelů — lepší). Bez toho test iPad buildu neověří nic.
+- [ ] Každá další C++ oprava = přebuild obou stromů (`build-5.3` / `build-5.3-ipad`) + `BLENDER_REF` musí odpovídat oběma. Zvaž jeden společný wasm (+25 MB paměti je pod limitem) — rozhodne architect, až Lukáš potvrdí 5.3 na iPadu.
+
 ## N1 — novinky 5.3 na webu (po R, levný model stačí; Lukáš 13. 11.)
 - [ ] (a) **Gaussian splats**: import PLY/SPZ (malý vzorek CC0), zobrazení Solid + MP, Chrome i `webkit_sim=1&ipad=1` (paměť!). Srovnat s desktopem 5.3.0.
 - [ ] (b) **Remote asset library** (online knihovna): zjistit, jak stahuje (Python `_bpy_internal/assets/remote_library`), proč ve wasm nejde (sockety) → most přes JS `fetch` (sync XHR z workeru). Ověřit CORS + COEP hlavičky oficiální knihovny; když je server nepovolí, zapsat `[!] BLOCKED: CORS` (proxy nezakládat). Návrh = ADR přes architekta.
