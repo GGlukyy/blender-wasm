@@ -23,6 +23,8 @@ echo ">> staging assets -> $STAGE"
 rm -rf "$STAGE"; mkdir -p "$STAGE/5.3" "$STAGE/lib"
 cp -r "$ROOT/blender-5.3/scripts"           "$STAGE/5.3/scripts"
 cp -r "$ROOT/blender-5.3/release/datafiles" "$STAGE/5.3/datafiles"
+# C1: Cycles add-on is installed by CMake from intern/cycles/blender/addon (not part of scripts/)
+[ -d "$ROOT/blender-5.3/intern/cycles/blender/addon" ] && cp -r "$ROOT/blender-5.3/intern/cycles/blender/addon" "$STAGE/5.3/scripts/addons_core/cycles"
 # Python under lib/python3.13 so PYTHONHOME=/opfs/assets resolves the stdlib.
 cp -r "$SYSROOT/lib/python3.13" "$STAGE/lib/python3.13"
 ( cd "$STAGE/lib/python3.13" && rm -rf test tests idlelib lib2to3 turtledemo tkinter \
