@@ -1,3 +1,12 @@
+# 16. 11. 23:00 — H44: Principled Volume (a průhledné materiály) na iPadu — příčina a oprava
+Výsledek: 🟡 PC ✅ (Chrome + webkit_sim), lean/iPad build a regrese běží, iPad čeká
+- **Příčina (změřeno):** `scripts/volume_win.sh`: kostka jen s Principled Volume je v Chrome šedá mlha, ale s `?webkit_sim=1` (Safari bez featur) **prázdná**. Bisect přes nový `&sim_keep=<feature>`: jediná feature, která to opraví, je `dual-source-blending`. EEVEE volume resolve i forward-transparent resolve používají dual-source blend (`@blend_src`), který Safari/iPad neumí → pipeline se nevytvoří → nic se nevykreslí. **Totéž platí pro každý materiál s Render Method „Blended“** (`transp_test.py.in`: průhledná červená kostka v sim neviděna) — to Lukáš nehlásil, ale na iPadu bylo rozbité také.
+- **Oprava (fork `ipad-5.3` 2ee08b93):** když je `WGPU_NO_DUALSRC` (JS ho nastaví pro WebKit/iPad), obě resolve passy jdou dvěma draw: `dst *= transmittance` (BLEND_MUL), pak `dst += radiance` (ADD_FULL); nové shadery `eevee_volume_resolve_nodual`, `eevee_forward_resolve_nodual`. Stejný vzor jako gpencil AA (H26-B). Chrome (dual) beze změny.
+- **Důkaz:** `MODE=MATERIAL|RENDERED Q=webkit_sim=1[&ipad=1] scripts/volume_win.sh` → mlha viditelná (png 562–578 kB místo 552 kB, screenshoty `out/win/vol_*_fix*.png`); `TPL=transp_test.py.in` → červená průhledná kostka v sim OK.
+- Nový dev přepínač: `?webkit_sim=1&sim_keep=feat,…&sim_nocap=limit,…` (bisect featur/limitů simulace).
+- Nasazeno `scripts/deploy_pc.sh` → `demo/public/blender-pc.*` (záloha `out/bak_pre_deploy`). Lean `blender.wasm` (iPad) se staví (`out/build_h44_ipad.log`).
+- **Na iPadu otestovat až bude lean hotový:** kostka + Principled Volume v Material Preview / Rendered → šedá mlha; kostka s průhledným materiálem (Render Method Blended, Alpha 0.4).
+
 # 16. 11. 22:50 — R1a: autosave se po znovunačtení otevře sám
 Výsledek: ✅ PC (iPad čeká)
 - Při startu bez souboru, když existuje `_autosave_prev.blend`, Python ho po 5 s sám otevře a JS ukáže pruh „Obnoveno z HH:MM · Zahodit · OK“ (`Zahodit` = znovunačtení s `?restore=no`). `?restore=ask` = starý popup, `?restore=no` = nic. S `?auto=`/`__BARGS` (testy) zůstává popup.

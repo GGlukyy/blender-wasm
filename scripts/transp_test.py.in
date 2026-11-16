@@ -1,0 +1,19 @@
+# Dual-source ověření mimo objemy: kostka s průhledným materiálem (Blended, alpha 0.4) → %MODE% — screenshot po OPS_DONE.
+import bpy, sys, time
+def out(*a):
+    print(*a); sys.stdout.flush()
+ob = bpy.data.objects['Cube']
+m = bpy.data.materials.new('Tr'); m.use_nodes = True
+b = [n for n in m.node_tree.nodes if n.type == 'BSDF_PRINCIPLED'][0]
+b.inputs['Alpha'].default_value = 0.4; b.inputs['Base Color'].default_value = (1, 0.1, 0.1, 1)
+try: m.surface_render_method = 'BLENDED'
+except Exception as e: out('OPS info render_method', e)
+ob.data.materials.clear(); ob.data.materials.append(m)
+win = bpy.context.window_manager.windows[0]
+v3d = [a for a in win.screen.areas if a.type == 'VIEW_3D'][0].spaces.active
+v3d.shading.type = '%MODE%'
+st = {'t0': time.time()}
+def tick():
+    if time.time() - st['t0'] < 14: return 1.0
+    out('OPS transp %MODE% shown'); out('OPS_DONE'); return None
+bpy.app.timers.register(tick, first_interval=2.0)

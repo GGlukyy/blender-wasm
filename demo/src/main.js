@@ -1990,6 +1990,10 @@ try {
                           "texture-component-swizzle", "texture-compression-unaligned", "texture-formats-tier2"]);
       const CAP = { maxBufferSize: 1073741824, maxStorageBufferBindingSize: 1073741824, maxColorAttachmentBytesPerSample: 64, maxSampledTexturesPerShaderStage: 44 };
       if (simNoS1) CAP.maxStorageBuffersPerShaderStage = 8; /* Dawn In*Stage nevynucuje, chyba S1 jde vyvolat jen přes limit na stage */
+      /* H44 bisect switches: &sim_keep=feat1,feat2 keeps those features; &sim_nocap=limit1,limit2 drops those caps. */
+      const _sk = (/[?&]sim_keep=([^&]*)/.exec(simQ) || [])[1], _sc = (/[?&]sim_nocap=([^&]*)/.exec(simQ) || [])[1];
+      if (_sk) for (const f of _sk.split(",")) NO.delete(f);
+      if (_sc) for (const k of _sc.split(",")) delete CAP[k];
       const fd = Object.getOwnPropertyDescriptor(A, "features"), ld = Object.getOwnPropertyDescriptor(A, "limits");
       Object.defineProperty(A, "features", { get() { return new Set([...fd.get.call(this)].filter((f) => !NO.has(f) && !f.startsWith("chromium-"))); } });
       Object.defineProperty(A, "limits", { get() { const l = ld.get.call(this), o = {}; for (const k in l) o[k] = k in CAP ? Math.min(l[k], CAP[k]) : l[k]; return o; } });

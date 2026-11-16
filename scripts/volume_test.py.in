@@ -1,0 +1,21 @@
+# H44: kostka jen s Principled Volume (hustota 1) → %MODE% — ops_test.mjs udělá screenshot po OPS_DONE.
+import bpy, sys, time
+def out(*a):
+    print(*a); sys.stdout.flush()
+ob = bpy.data.objects['Cube']
+m = bpy.data.materials.new('Vol'); m.use_nodes = True
+nt = m.node_tree
+for n in list(nt.nodes):
+    if n.type == 'BSDF_PRINCIPLED': nt.nodes.remove(n)
+vol = nt.nodes.new('ShaderNodeVolumePrincipled'); vol.inputs['Density'].default_value = 1.0
+outn = [n for n in nt.nodes if n.type == 'OUTPUT_MATERIAL'][0]
+nt.links.new(vol.outputs['Volume'], outn.inputs['Volume'])
+ob.data.materials.clear(); ob.data.materials.append(m)
+win = bpy.context.window_manager.windows[0]
+v3d = [a for a in win.screen.areas if a.type == 'VIEW_3D'][0].spaces.active
+v3d.shading.type = '%MODE%'
+st = {'t0': time.time()}
+def tick():
+    if time.time() - st['t0'] < 14: return 1.0
+    out('OPS volume %MODE% shown engine=%s' % bpy.context.scene.render.engine); out('OPS_DONE'); return None
+bpy.app.timers.register(tick, first_interval=2.0)
