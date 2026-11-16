@@ -1,3 +1,12 @@
+## A2 — add-ony a MCP na 5.3 znovu ověřit + přidat do regrese (Lukáš 16. 11.)
+- [ ] `addons_win.sh`, `addon_custom_win.sh`, `addon_persist_win.sh`, `mcp_addon_win.sh`, `mcp_win.sh` na 5.3 (PC build s Cycles i `?cycles=0`). Přidat je do `regress_all.sh` (teď tam nejsou → po 5.3 neověřeno).
+- [ ] Velký čistě Pythonový add-on z internetu, zdarma s GPL licencí (např. Rigify je přibalený; zkus i `Bool Tool`, `LoopTools`, `Node Wrangler`) — Install from Disk → zapnout → použít hlavní operátor. Zapsat, co jde.
+## X1 — internet z Blenderu (Get Extensions + online knihovna assetů), navazuje na N1(b)
+- [ ] Nejdřív jen zjistit: posílá `extensions.blender.org` (a server oficiální remote asset library) hlavičky CORS + CORP (kvůli COEP)? `curl -sI` + test `fetch()` ze stránky. Výsledek do STATUS.
+- [ ] Když ano: most Python `urllib`/`requests` → JS `fetch` (sync XHR z workeru), pak „Get Extensions" → nainstalovat 1 rozšíření; online knihovna → stáhnout 1 asset. Návrh přes architekta (ADR).
+- [ ] Když ne: `[!] BLOCKED: CORS` + do „Potřebuju od tebe": varianta malý proxy (Cloudflare Worker zdarma, Lukášův účet). Proxy sám nezakládej.
+- BlenderKit: NE (od v3.12 spouští vlastní program `blenderkit-client` jako proces + lokální server — ve wasm nejde spustit žádný proces).
+
 ## H44 — Principled Volume se na iPadu nevykreslí (Lukáš 16. 11., iPad 5.3; jinak vše OK)
 - [ ] Pravidlo 3b + PC: kostka, materiál jen Principled Volume (výchozí hustota 1) → Material Preview a Rendered (EEVEE). Porovnat: desktop 5.3.0, PC Chrome, `?webkit_sim=1`, `?webkit_sim=1&ipad=1` (MP lite!). Screenshot každé varianty.
 - Podezření (odhad): EEVEE na desktopu objemy kreslí, takže spíš náš problém — (a) MP lite profil na iPadu (vypíná `use_volumetric_shadows`, menší buffery; zkontrolovat i volume froxel 3D textury / storage limity ve webkit_sim), (b) shader objemu ve WGSL (překlad / 3D textury / storage textury), (c) chyba v konzoli `WGPU_*`.
