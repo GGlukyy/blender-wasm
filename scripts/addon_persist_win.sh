@@ -1,4 +1,5 @@
 #!/bin/bash
+export Q WSLENV="Q${WSLENV:+:$WSLENV}"  # URL parametry, např. Q=cycles=0
 U=${WINUSER:-$(ls /mnt/c/Users | grep -v -i -E 'public|default|all users|desktop.ini' | head -1)}
 W=/mnt/c/Users/$U/p2win; ROOT=$(cd "$(dirname "$0")/.." && pwd)
 cp "$ROOT/scripts/addon_persist_test.mjs" "$W/"; mkdir -p "$W/out"

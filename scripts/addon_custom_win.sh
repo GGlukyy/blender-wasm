@@ -1,4 +1,5 @@
 #!/bin/bash
+export Q WSLENV="Q${WSLENV:+:$WSLENV}"  # URL parametry, např. Q=cycles=0
 # File ▸ New ▸ šablony (Windows Chrome). Vyžaduje běžící vite na :5173.
 U=${WINUSER:-$(ls /mnt/c/Users | grep -v -i -E 'public|default|all users|desktop.ini' | head -1)}
 W=/mnt/c/Users/$U/p2win; ROOT=$(cd "$(dirname "$0")/.." && pwd)

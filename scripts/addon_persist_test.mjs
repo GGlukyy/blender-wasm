@@ -24,7 +24,7 @@ async function run(expr, marker) {
   const page = ctx.pages()[0] || await ctx.newPage(); let res = "";
   page.on("console", (m) => { const t = m.text(); if (t.includes(marker)) res += t + "\n"; });
   await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
-  await page.goto("http://localhost:5173/", { waitUntil: "load" });
+  await page.goto("http://localhost:5173/" + (process.env.Q ? "?" + process.env.Q : ""), { waitUntil: "load" });
   await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
   await page.getByRole("button", { name: /Launch Blender/ }).click();
   for (let i = 0; i < 90 && !res.includes(marker === "PERSIST1" ? "PERSIST1_DONE" : "PERSIST2 "); i++) await new Promise(r => setTimeout(r, 1000));

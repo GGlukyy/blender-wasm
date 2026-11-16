@@ -1,3 +1,13 @@
+# 16. 11. (po) — A2: add-ony a MCP na 5.3
+Výsledek: ✅ PC (iPad netřeba)
+
+**Co jsem udělal**
+- Server `vite` na :5173 (master konfigurace), testy v Chrome. PC build (Cycles): `addons_win` 13/14 (`ui_translate` = `_ctypes`, známé), `addon_custom` 2/2, `addon_persist` PASS, `mcp` PASS, `mcp_addon` PASS.
+- `Q=cycles=0` (lean build jako iPad): stejné + navíc `cycles` add-on nejde zapnout (`No module named '_cycles'`) — očekávané, iPad Cycles nemá. Testy teď berou `Q=` (ops_test.mjs, addon_persist, mcp_page).
+- Přidáno do `regress_all.sh`: addons, addon_custom, addon_persist, mcp, mcp_addon.
+- Nový test `scripts/addon_ext_win.sh`: Bool Tool, LoopTools, Extra Mesh Objects (stažené z extensions.blender.org) → enable + hlavní operátor, 3/3 PASS.
+- **Nález:** LoopTools zip je komprimovaný LZMA; `zipfile` v wasm nemá `_lzma` → Install from Disk takového zipu selže (test přebalil na deflate). Odloženo (oprava = `_lzma` do libpython).
+
 # 15. 11. (ne) — R: Blender 5.3.0 je v masteru (regrese Chrome + sim 0 FAIL, prohlídka 75/75, ops 96/96)
 Výsledek: ✅ PC (iPad čeká na Lukáše)
 

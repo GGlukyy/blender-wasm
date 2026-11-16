@@ -1,0 +1,53 @@
+# A2: velké čistě Pythonové add-ony z extensions.blender.org (looptools, bool_tool, extra_mesh_objects), instalované jako rozšíření
+# do repozitáře user_default (bez subprocessu). ZIPY = base64 doplní addon_ext_win.sh.
+import bpy, sys, os, zipfile, io, base64, traceback, addon_utils
+def out(*a):
+    print(*a); sys.stdout.flush()
+ZIPS = %ZIPS%
+def use(name):
+    # hlavní operátor každého add-onu; vrací True při úspěchu
+    o = bpy.ops
+    if name == 'extra_mesh_objects':
+        n = len(bpy.data.objects); r = o.mesh.primitive_twisted_torus_add()
+        return 'FINISHED' in r and len(bpy.data.objects) == n + 1
+    if name == 'looptools':
+        o.mesh.primitive_monkey_add(); ob = bpy.context.object
+        o.object.mode_set(mode='EDIT'); o.mesh.select_all(action='SELECT')
+        r = o.mesh.looptools_circle(); o.object.mode_set(mode='OBJECT')
+        return 'FINISHED' in r
+    if name == 'bool_tool':
+        o.mesh.primitive_cube_add(size=2); a = bpy.context.object
+        o.mesh.primitive_cube_add(size=2, location=(1, 0, 0)); b = bpy.context.object
+        a.select_set(True); b.select_set(True); bpy.context.view_layer.objects.active = b
+        r = o.object.boolean_auto_difference()
+        return 'FINISHED' in r
+    return True
+def tick():
+    ok = True
+    try:
+        repos = [(r.module, r.directory, r.use_remote_url) for r in bpy.context.preferences.extensions.repos]
+        out('OPS info repos', repos)
+        user = [r for r in bpy.context.preferences.extensions.repos if r.module == 'user_default']
+        base = user[0].directory if user else None
+        out('OPS info user_default dir', base)
+        if base is None: raise RuntimeError('no user_default repo')
+        os.makedirs(base, exist_ok=True)
+        for name, b64 in ZIPS.items():
+            try:
+                d = os.path.join(base, name)
+                zipfile.ZipFile(io.BytesIO(base64.b64decode(b64))).extractall(d)
+                addon_utils.modules_refresh()
+                mod = 'bl_ext.user_default.' + name
+                r = bpy.ops.preferences.addon_enable(module=mod)
+                en = mod in bpy.context.preferences.addons
+                if en:
+                    en = use(name); out('OPS used', name, en)
+                out('OPS addon', name, 'PASS' if en else 'FAIL', r, os.listdir(d)[:8])
+                ok = ok and en
+            except BaseException as e:
+                ok = False; out('OPS addon', name, 'FAIL', type(e).__name__, str(e).replace('\n', ' ')[:200], traceback.format_exc().replace('\n', ' | ')[-300:])
+    except BaseException as e:
+        ok = False; out('OPS EXC', type(e).__name__, str(e).replace('\n', ' ')[:200])
+    out('OPS_DONE failed=%d total=%d' % (0 if ok else 1, len(ZIPS)))
+    return None
+bpy.app.timers.register(tick, first_interval=6.0)

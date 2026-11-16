@@ -1,4 +1,5 @@
 #!/bin/bash
+export Q WSLENV="Q${WSLENV:+:$WSLENV}"  # URL parametry, např. Q=cycles=0
 # M1b test (add-on, bez ?mcp=): relay + MCP klient ve WSL, Blender ve Windows Chrome (potřebuje běžící vite na :5173).
 U=${WINUSER:-$(ls /mnt/c/Users | grep -v -i -E 'public|default|all users|desktop.ini' | head -1)}
 W=/mnt/c/Users/$U/p2win; ROOT=$(cd "$(dirname "$0")/.." && pwd); cd "$ROOT"

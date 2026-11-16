@@ -21,7 +21,7 @@ if (existsSync("capenv.json")) { const env = JSON.parse(readFileSync("capenv.jso
 page.on("pageerror", (e) => lines.push("PAGEERR " + (e.stack || e.message)));
 /* OPS_BARGS: další argumenty Blenderu před --python-expr (např. "--debug-memory", "--threads 1"); OPS_MAXS: strop čekání v s (výchozí 280). */
 await page.addInitScript((a) => { window.__BARGS = [...a.extra, "--python-expr", a.expr]; }, { extra: (process.env.OPS_BARGS || "").split(" ").filter(Boolean), expr });
-await page.goto("http://localhost:5173/", { waitUntil: "load" });
+await page.goto("http://localhost:5173/" + (process.env.Q ? "?" + process.env.Q : ""), { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
 await page.getByRole("button", { name: /Launch Blender/ }).click();
 for (let i = 0; i < +(process.env.OPS_MAXS || 280) && !done; i++) await new Promise(r => setTimeout(r, 1000));

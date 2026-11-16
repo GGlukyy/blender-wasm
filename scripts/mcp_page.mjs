@@ -5,7 +5,7 @@ const browser = await chromium.launch({ headless: false, executablePath: process
   args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
 const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
 page.on("console", (m) => { if (/MCP/.test(m.text())) console.log(m.text().slice(0, 200)); });
-await page.goto(`http://localhost:5173/?mp=0&mcp=${encodeURIComponent("ws://127.0.0.1:" + port)}&mcptoken=${token}`, { waitUntil: "load" });
+await page.goto(`http://localhost:5173/?mp=0&${process.env.Q ? process.env.Q + "&" : ""}mcp=${encodeURIComponent("ws://127.0.0.1:" + port)}&mcptoken=${token}`, { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
 await page.getByRole("button", { name: /Launch Blender/ }).click();
 await new Promise((r) => setTimeout(r, sec * 1000));

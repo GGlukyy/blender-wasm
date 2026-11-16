@@ -19,6 +19,11 @@ run files scripts/files_win.sh
 run utf8 scripts/utf8_win.sh
 run utf8_outliner scripts/utf8_outliner_win.sh
 run templates scripts/templates_win.sh
+run addons scripts/addons_win.sh
+run addon_custom scripts/addon_custom_win.sh
+run addon_persist scripts/addon_persist_win.sh
+run mcp scripts/mcp_win.sh
+run mcp_addon scripts/mcp_addon_win.sh
 run bar scripts/bar_win.sh
 run touch_modal scripts/touch_modal_win.sh
 run touch_loopcut scripts/touch_loopcut_win.sh
