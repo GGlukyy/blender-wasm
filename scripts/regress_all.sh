@@ -24,6 +24,7 @@ run addon_custom scripts/addon_custom_win.sh
 run addon_persist scripts/addon_persist_win.sh
 run mcp scripts/mcp_win.sh
 run bincache scripts/bincache_win.sh
+run restore_auto scripts/restore_auto_win.sh
 run mcp_addon scripts/mcp_addon_win.sh
 run bar scripts/bar_win.sh
 run touch_modal scripts/touch_modal_win.sh

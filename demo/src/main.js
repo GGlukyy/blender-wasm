@@ -525,6 +525,18 @@ const checkMem = (mb) => {
 /* The render pthread reports heap_mb with its perf sample (WGPU_PERF is always on, see preRun). */
 new BroadcastChannel("blender-perf").addEventListener("message", (e) => { if (e.data && e.data.heap_mb) checkMem(e.data.heap_mb); });
 /* "Where did my file go?": when Blender reports a written file, say where and offer the file manager. */
+/* R1a: Python opened the previous session's autosave; tell the user and let them throw it away (reload without restore). */
+const showRestored = (epoch) => {
+  const d = new Date(Number(epoch) * 1000), hm = d.toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" });
+  const n = document.createElement("div"); n.id = "restored-note";
+  n.style.cssText = "position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:99997;background:rgba(20,50,80,.94);color:#fff;font:15px system-ui,sans-serif;padding:8px 14px;border-radius:8px;max-width:92vw";
+  n.append("↩️ Obnoveno z " + hm + " (rozdělaná práce) ");
+  const b = document.createElement("button"); b.textContent = "Zahodit"; b.style.cssText = "margin-left:8px;font-size:15px";
+  b.onclick = () => { const u = new URL(location.href); u.searchParams.set("restore", "no"); location.href = u.toString(); };
+  const k = document.createElement("button"); k.textContent = "OK"; k.style.cssText = "margin-left:6px;font-size:15px"; k.onclick = () => n.remove();
+  n.append(b, k); document.body.appendChild(n);
+  window.__RESTORED_AT__ = Number(epoch);
+};
 const showSaved = (path) => {
   let n = document.getElementById("saved-note");
   if (!n) {
@@ -616,6 +628,7 @@ const scan = (t) => {
   const sv = /Writing to (\/\S+)|^Saved "([^"]+)"/.exec(t.trim());
   if (sv) showSaved(sv[1] || sv[2]);
   if (/^Blender quit\b/.test(t.trim())) showQuit();
+  { const m = /^WEB_RESTORED (\d+)/.exec(t.trim()); if (m) showRestored(m[1]); }
   if (t.includes("WEB_MP_BLOCKED")) showMpBlocked();
   if (t.startsWith("WEB_EXPORT /")) noteExport(t.slice(11).trim());
   if (t.includes("WEB_FILE_IMPORT_END")) hideImportBar();
@@ -1385,6 +1398,9 @@ async function start() {
 // iPad Safari má malý limit na tab → pro nové soubory / startup scénu 128 MB (-380 MB). Přepsat: ?shadowpool=512 (hodnoty enumu v MB).
 const SHADOW_POOL = (new URLSearchParams(location.search).get("shadowpool") || "128").replace(/[^0-9]/g, "") || "128";
 const AUTOSAVE_S = (new URLSearchParams(location.search).get("autosave") || "30").replace(/[^0-9]/g, "") || "30";
+/* R1a: after a killed tab the autosave of the last session opens by itself (banner "Obnoveno z HH:MM · Zahodit"). ?restore=ask = old popup,
+ * ?restore=no = nothing. Automation (?auto=, __BARGS) keeps the popup so tests stay deterministic. */
+const RESTORE_MODE = (() => { const q = new URLSearchParams(location.search).get("restore"); return q === "no" || q === "ask" || q === "auto" ? q : (new URLSearchParams(location.search).get("auto") || window.__BARGS ? "ask" : "auto"); })();
 const UNDO_MB = (new URLSearchParams(location.search).get("undomem") || "300").replace(/[^0-9]/g, "") || "300"; // ?undomem=N limit paměti undo v MB (0 = bez limitu)
 const RESET_PREFS = new URLSearchParams(location.search).get("resetprefs") === "1" ? "1" : "0"; // ?resetprefs=1 smaže uložené Preferences
 const UI_SCALE = (new URLSearchParams(location.search).get("uiscale") || "").replace(/[^0-9.]/g, ""); // ?uiscale=1.3 → větší UI pro prsty (uloží se do Preferences)
@@ -1656,6 +1672,7 @@ try:
     if os.path.exists(_AS): os.replace(_AS, '/opfs/home/_autosave_prev.blend'); print('AUTOSAVE previous session kept as /opfs/home/_autosave_prev.blend')
 except Exception as e: print('AUTOSAVE rotate ERR', e)
 _PREV = '/opfs/home/_autosave_prev.blend'
+_RESTORE = '${RESTORE_MODE}'
 _offer = {'tries': 0}
 def _offer_restore():
     # Po pádu/zavření tabu nabídnout poslední autosave (popup v Blenderu, funguje i prstem).
@@ -1665,6 +1682,11 @@ def _offer_restore():
         if not wm.windows:
             return 2.0 if _offer['tries'] < 30 else None
         if bpy.data.filepath or not os.path.exists(_PREV) or os.path.getsize(_PREV) < 1000: return None
+        if _RESTORE == 'no': return None
+        if _RESTORE == 'auto':
+            mt = int(os.path.getmtime(_PREV)); print('RESTORE_AUTO', os.path.getsize(_PREV), flush=True)
+            bpy.ops.wm.open_mainfile(filepath=_PREV)
+            print('WEB_RESTORED', mt, flush=True); return None
         def _draw(self, ctx):
             op = self.layout.operator('wm.open_mainfile', text='Obnovit poslední práci', icon='FILE_REFRESH')
             op.filepath = _PREV

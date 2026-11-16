@@ -7,9 +7,9 @@ const run = async (expr, until, label, shot, extra = 0) => {
   const ctx = await chromium.launchPersistentContext(dir, { headless: false, executablePath: process.env.CHROME, viewport: { width: 1400, height: 850 }, args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
   const page = ctx.pages()[0] || await ctx.newPage();
   let done = false, out = [];
-  page.on("console", m => { const t = m.text(); if (/RST|AUTOSAVE|RESTORE/.test(t)) { console.log(label, t.slice(0, 160)); out.push(t); if (until.test(t)) done = true; if (shot && /RESTORE_OFFER \d+/.test(t)) setTimeout(() => page.screenshot({ path: shot }).catch(() => {}), 1000); } });
+  page.on("console", m => { const t = m.text(); if (/RST|AUTOSAVE|RESTORE|WEB_RESTORED/.test(t)) { console.log(label, t.slice(0, 160)); out.push(t); if (until.test(t)) done = true; if (shot && /RESTORE_OFFER \d+/.test(t)) setTimeout(() => page.screenshot({ path: shot }).catch(() => {}), 1000); } });
   await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
-  await page.goto("http://localhost:5173/?autosave=5&tel=0", { waitUntil: "load" });
+  await page.goto("http://localhost:5173/?autosave=5&tel=0" + (label === "run2" && process.env.R2Q ? "&" + process.env.R2Q : ""), { waitUntil: "load" });
   await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
   await page.getByRole("button", { name: /Launch Blender/ }).click();
   for (let i = 0; i < 150 && !done; i++) await new Promise(r => setTimeout(r, 1000));

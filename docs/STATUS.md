@@ -1,3 +1,9 @@
+# 16. 11. 22:50 — R1a: autosave se po znovunačtení otevře sám
+Výsledek: ✅ PC (iPad čeká)
+- Při startu bez souboru, když existuje `_autosave_prev.blend`, Python ho po 5 s sám otevře a JS ukáže pruh „Obnoveno z HH:MM · Zahodit · OK“ (`Zahodit` = znovunačtení s `?restore=no`). `?restore=ask` = starý popup, `?restore=no` = nic. S `?auto=`/`__BARGS` (testy) zůstává popup.
+- Test `scripts/restore_auto_win.sh` PASS (koule `RestSph` je zpět, screenshot `out/win/…/restore_auto.png` s pruhem); `restore_win`, `crashsave`, `autosave`, `addon_persist`, `saveload_all` dál PASS.
+- **iPadu:** udělej kostku+kouli, počkej 30 s, zabij kartu Safari, otevři znovu → mělo by se samo obnovit s pruhem. Pozor: po obnově je otevřený soubor `_autosave_prev.blend` — ulož přes Save As.
+
 # 16. 11. 22:30 — R2a: cache wasm/assets bez service workeru
 Výsledek: ✅ PC (iPad/itch čeká na Lukáše)
 - `demo/src/main.js`: `fetchZst` ukládá `*.zst` do Cache API `blender-bin-v1`; při startu HEAD (ETag/Last-Modified/size, timeout 4 s): shoduje se nebo server nedostupný → z cache bez stahování, jiná verze → smaž a stáhni. `manifest.json` záloha v localStorage. `storage.persist()` best-effort.
