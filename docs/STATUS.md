@@ -1,3 +1,6 @@
+# 16. 11. 23:05 — X1: oficiální online knihovna assetů bez CORS
+- `cdn.extensions.blender.org/asset-libraries/essentials/` (a Extensions API) neposílá `Access-Control-Allow-Origin` → přímo z prohlížeče (ani na itch) nejde; stejné jako Get Extensions. **Potřebuju od tebe:** rozhodnutí, jestli zřídit malou proxy (Cloudflare Worker zdarma, tvůj účet) — vyřešila by obojí. Sám ji nezakládám.
+
 # 16. 11. 23:00 — H44: Principled Volume (a průhledné materiály) na iPadu — příčina a oprava
 Výsledek: 🟡 PC ✅ (Chrome + webkit_sim), lean/iPad build a regrese běží, iPad čeká
 - **Příčina (změřeno):** `scripts/volume_win.sh`: kostka jen s Principled Volume je v Chrome šedá mlha, ale s `?webkit_sim=1` (Safari bez featur) **prázdná**. Bisect přes nový `&sim_keep=<feature>`: jediná feature, která to opraví, je `dual-source-blending`. EEVEE volume resolve i forward-transparent resolve používají dual-source blend (`@blend_src`), který Safari/iPad neumí → pipeline se nevytvoří → nic se nevykreslí. **Totéž platí pro každý materiál s Render Method „Blended“** (`transp_test.py.in`: průhledná červená kostka v sim neviděna) — to Lukáš nehlásil, ale na iPadu bylo rozbité také.
