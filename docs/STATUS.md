@@ -1,3 +1,10 @@
+# 16. 11. 22:30 — R2a: cache wasm/assets bez service workeru
+Výsledek: ✅ PC (iPad/itch čeká na Lukáše)
+- `demo/src/main.js`: `fetchZst` ukládá `*.zst` do Cache API `blender-bin-v1`; při startu HEAD (ETag/Last-Modified/size, timeout 4 s): shoduje se nebo server nedostupný → z cache bez stahování, jiná verze → smaž a stáhni. `manifest.json` záloha v localStorage. `storage.persist()` best-effort.
+- Test `scripts/bincache_win.sh` (Chrome + `Q=webkit_sim=1`): online start naplní cache; s `.zst`→404 Launch připraven za 0,9 s, Blender nahoře za 6 s, 2× „bin cache hit“, 0 stažení; totéž v iframe z jiného originu (127.0.0.1:5175 → localhost:5173, crossOriginIsolated).
+- **Co otestovat na iPadu (itch):** načíst, počkat na Launch, zavřít kartu/zabít Safari, vypnout wifi nebo hotspot, otevřít znovu → mělo by naběhnout bez stahování. Odhad rizika: Safari v itch iframe může odepřít Cache API (3rd-party storage) → pak spadne na normální stahování (try/catch).
+- Nezkoušeno: invalidace staré verze po novém buildu (logika: HEAD token ≠ uložený → smaž).
+
 # 16. 11. (po) — A2: add-ony a MCP na 5.3
 Výsledek: ✅ PC (iPad netřeba)
 

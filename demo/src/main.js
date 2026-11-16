@@ -109,7 +109,47 @@ function renderDownloads() {
   });
 }
 /* Stream `url` with progress into `dl[key]`, return the compressed bytes. */
+/* R2a: own cache WITHOUT a service worker (works in the itch iframe, where the SW is off). The compressed wasm/assets go into
+ * Cache API under their URL; a cheap HEAD request tells whether the server copy changed (ETag/Last-Modified/size). HEAD fails
+ * (offline, 404, slow wifi timeout) → the cached copy is used as is, so after a killed tab nothing is downloaded again. */
+const BIN_CACHE = "blender-bin-v1";
+const binToken = (r) => [r.headers.get("etag"), r.headers.get("last-modified"), r.headers.get("content-length")].join("|");
+async function headToken(url) {
+  try {
+    const ac = new AbortController(); const t = setTimeout(() => ac.abort(), 4000);
+    const h = await fetch(url, { method: "HEAD", cache: "no-store", signal: ac.signal }); clearTimeout(t);
+    return h.ok ? binToken(h) : null;
+  } catch { return null; }
+}
 async function fetchZst(url, key) {
+  let cache = null;
+  try { cache = await caches.open(BIN_CACHE); } catch { /* no Cache API (private mode / blocked storage) */ }
+  if (cache) {
+    try {
+      const hit = await cache.match(url);
+      if (hit) {
+        const tok = await headToken(url);
+        if (tok === null || tok === hit.headers.get("x-bin-token")) {
+          const out = new Uint8Array(await hit.arrayBuffer());
+          dl[key].loaded = dl[key].total = out.length; renderDownloads();
+          console.log("bin cache hit", url, out.length, tok === null ? "(server unreachable)" : "");
+          return out;
+        }
+        await cache.delete(url);  /* server has a different version: drop the stale copy */
+      }
+    } catch (e) { console.warn("bin cache read failed", url, String(e)); }
+  }
+  const tok = cache ? await headToken(url) : null;
+  const out = await fetchZstNet(url, key);
+  if (cache) {
+    try {
+      navigator.storage && navigator.storage.persist && navigator.storage.persist().catch(() => {});
+      await cache.put(url, new Response(out, { headers: { "x-bin-token": tok ?? "", "content-length": String(out.length) } }));
+    } catch (e) { console.warn("bin cache write failed (quota?)", url, String(e)); try { await cache.delete(url); } catch {} }
+  }
+  return out;
+}
+async function fetchZstNet(url, key) {
   /* iOS suspends/kills fetches when the tab goes to the background ("TypeError: Load failed", seen in iPad telemetry
    * 23. 10.): wait until visible again and retry the whole download (up to 3×). */
   for (let attempt = 1; ; attempt++) {
@@ -150,7 +190,11 @@ const zstdWait = new Map(); let zstdSeq = 0;
 zstdWorker.onmessage = (e) => { const { id, out, err } = e.data, p = zstdWait.get(id); zstdWait.delete(id); if (err) p.rej(new Error(err)); else p.res(out); };
 zstdWorker.onerror = (e) => { for (const p of zstdWait.values()) p.rej(new Error("zstd worker: " + (e.message || "error"))); zstdWait.clear(); };
 const zstdDecode = (z, size) => new Promise((res, rej) => { const id = ++zstdSeq; zstdWait.set(id, { res, rej }); zstdWorker.postMessage({ id, buf: z.buffer, size }, [z.buffer]); });
-const manifest = await (await fetch("manifest.json")).json();
+/* R2a: manifest.json is tiny but offline/killed-tab start needs it too → keep the last good copy in localStorage. */
+const manifest = await (async () => {
+  try { const t = await (await fetch("manifest.json")).text(); const m = JSON.parse(t); try { localStorage.setItem("manifest.json", t); } catch {} return m; }
+  catch (e) { const t = localStorage.getItem("manifest.json"); if (t) return JSON.parse(t); throw e; }
+})();
 /* C1: PC (Chrome, Mac Safari) gets blender-pc.{js,wasm.zst} built with Cycles (CPU); iPad keeps the lean blender.* (memory). ?cycles=1/0 overrides. */
 const wasmName = () => {
   const q = new URLSearchParams(location.search);
