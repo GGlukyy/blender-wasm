@@ -5,7 +5,15 @@ session: read `CLAUDE.md`, `docs/STATUS.md`, `docs/PLAN.md` and `docs/BACKLOG.md
 Lukáš cannot test on the iPad until he is back — verify everything yourself in Windows
 Chrome on the real GPU (`scripts/p2_win.sh`, `scripts/parity_win.sh`).
 
-## Mission now (od pá 13. 11., běží na Fable) — R: přechod na Blender 5.3.0
+## Mission now (od út 17. 11. noc) — R i C1 HOTOVO; teď v tomto pořadí:
+1. **H44 dokončit:** lean (iPad) build s opravou dual-source → `regress_all` + `regress_sim` na OBOU buildech (PC `blender-pc`, lean `?cycles=0`) → nasadit oba do `demo/public` → `bash scripts/package_itch.sh` a nechat zip v `out/` (Lukáš ho ráno vezme na iPad test). Do STATUS napiš přesný název zipu.
+2. **C1b:** journey/touch cesty pro lean build (záložky hledat podle jména, ne pixelů); černé pozadí světa v Cycles Rendered.
+3. **N1c** rychlé cesty novinek 5.3 (Material Lighting nodes, řazení Outlineru, hledání v sidebaru, Comment node) — jen ověřit = desktop 5.3.0.
+4. Otevřené chyby z BACKLOGu: **H42** (filebrowser operátory), **H43** (kolečko v itch iframe), **H32c** (ztracené puštění myši při kompilaci shaderů).
+5. Pak záložní fronta níže.
+X1 (proxy) NEDĚLAT — čeká na rozhodnutí Lukáše.
+
+## (hotovo 15. 11.) Mission od pá 13. 11. — R: přechod na Blender 5.3.0
 JEDINÝ úkol tohoto běhu: plán R v `docs/FABLE_TYDEN.md` bod 1 (a `docs/PLAN.md` sekce R). Nic jiného z BACKLOGu nedělej.
 - Pracuj v `./blender/` na větvi `ipad-5.3` z tagu `v5.3.0` (vyjdi z `ipad-5.3-wip`, přenes všechny commity `ipad` od odbočení).
 - Postup v malých krocích, po každém kroku commit na `ipad-5.3` a push do forku (`git push origin ipad-5.3`). Stav piš do `docs/STATUS.md`.
