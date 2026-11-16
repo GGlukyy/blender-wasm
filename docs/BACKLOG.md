@@ -28,7 +28,7 @@ Problém: na itch je service worker vypnutý (iframe + release), takže po zabit
 - [ ] Každá další C++ oprava = přebuild obou stromů (`build-5.3` / `build-5.3-ipad`) + `BLENDER_REF` musí odpovídat oběma. Zvaž jeden společný wasm (+25 MB paměti je pod limitem) — rozhodne architect, až Lukáš potvrdí 5.3 na iPadu.
 
 ## N1 — novinky 5.3 na webu (po R, levný model stačí; Lukáš 13. 11.)
-- [ ] (a) **Gaussian splats**: import PLY/SPZ (malý vzorek CC0), zobrazení Solid + MP, Chrome i `webkit_sim=1&ipad=1` (paměť!). Srovnat s desktopem 5.3.0.
+- [~] (16. 11. 23:20: `scripts/gsplat_win.sh` (MODE=SOLID|MATERIAL) + `gsplat_desktop.py`: syntetický PLY 30 000 splatů → `wm.ply_import` FINISHED, PointCloud se 30 000 body, atributy position/radiance:base/scale/rotation — na webu i na desktopu 5.3.0; ALE viewport (Solid, MP, Rendered) je prázdný i na DESKTOPU → moje syntetická data/scéna nejsou vidět (3b: nejde o chybu portu); chybí skutečný vzorek splatu (CC0) nebo správná scéna (světlo/materiál?). Další krok: najít reálný .ply/.spz a opakovat) (a) **Gaussian splats**: import PLY/SPZ (malý vzorek CC0), zobrazení Solid + MP, Chrome i `webkit_sim=1&ipad=1` (paměť!). Srovnat s desktopem 5.3.0.
 - [ ] (b) **Remote asset library** (online knihovna): zjistit, jak stahuje (Python `_bpy_internal/assets/remote_library`), proč ve wasm nejde (sockety) → most přes JS `fetch` (sync XHR z workeru). Ověřit CORS + COEP hlavičky oficiální knihovny; když je server nepovolí, zapsat `[!] BLOCKED: CORS` (proxy nezakládat). Návrh = ADR přes architekta.
 - [ ] (c) Rychlé cesty: EEVEE Material Lighting nodes (toon), ruční řazení v Outlineru, hledání v sidebaru, Comment node. Jen ověřit = desktop.
 - DLSS: NE (proprietární NVIDIA SDK jen pro RTX/OptiX, licence i technika mimo prohlížeč).
