@@ -1,8 +1,14 @@
 ## A2 — add-ony a MCP na 5.3 znovu ověřit + přidat do regrese (Lukáš 16. 11.)
 - [ ] `addons_win.sh`, `addon_custom_win.sh`, `addon_persist_win.sh`, `mcp_addon_win.sh`, `mcp_win.sh` na 5.3 (PC build s Cycles i `?cycles=0`). Přidat je do `regress_all.sh` (teď tam nejsou → po 5.3 neověřeno).
 - [ ] Velký čistě Pythonový add-on z internetu, zdarma s GPL licencí (např. Rigify je přibalený; zkus i `Bool Tool`, `LoopTools`, `Node Wrangler`) — Install from Disk → zapnout → použít hlavní operátor. Zapsat, co jde.
+## R2 — po pádu / zabití karty na iPadu nestahovat Blender znovu (Lukáš 16. 11., pomalá wifi ve škole, hotspot jen na start)
+Problém: na itch je service worker vypnutý (iframe + release), takže po zabití karty (iOS ji při přepnutí okna kvůli paměti zahodí) nebo pádu se ~30 MB wasm + assets stahuje znovu přes síť.
+- [ ] R2a: vlastní cache BEZ service workeru (funguje i v itch iframe): `blender*.wasm.zst`, `assets.tar.zst`, `blender*.js` uložit do Cache API (`caches.open`) nebo OPFS s klíčem = verze z `version.json`/manifest hash; při startu nejdřív cache, síť jen když chybí/nesedí verze. Stará verze se smaže. Pozor kvóta Safari (zkontrolovat `navigator.storage.estimate()`, `persist()`).
+- [ ] Důkaz: test Chrome i `webkit_sim=1`: 1. start online, pak server vrací 404 na .zst → 2. start z cache naběhne. Plus test v iframe (jiný origin, jako itch). Zapiš čas 2. startu.
+- [ ] R1a (níže) posunout hned za R2: po znovunačtení rovnou otevřít autosave (Lukáš ztrácí práci při zabití karty).
+
 ## X1 — internet z Blenderu (Get Extensions + online knihovna assetů), navazuje na N1(b)
-- [ ] Nejdřív jen zjistit: posílá `extensions.blender.org` (a server oficiální remote asset library) hlavičky CORS + CORP (kvůli COEP)? `curl -sI` + test `fetch()` ze stránky. Výsledek do STATUS.
+- [ ] Nejdřív jen zjistit (z Lukášova PC, můj kontejner tyhle domény nemá povolené): posílá `extensions.blender.org` (a server oficiální remote asset library) hlavičky CORS + CORP (kvůli COEP)? `curl -sI -H 'Origin: https://html-classic.itch.zone'` + test `fetch()` ze stránky běžící z itch (iframe `html-classic.itch.zone`, crossOriginIsolated — `fetch` v režimu cors projde COEP, jen když server pošle `Access-Control-Allow-Origin`). Testovat API i samotné stažení `.zip` rozšíření (může přesměrovat na jinou doménu). Výsledek do STATUS.
 - [ ] Když ano: most Python `urllib`/`requests` → JS `fetch` (sync XHR z workeru), pak „Get Extensions" → nainstalovat 1 rozšíření; online knihovna → stáhnout 1 asset. Návrh přes architekta (ADR).
 - [ ] Když ne: `[!] BLOCKED: CORS` + do „Potřebuju od tebe": varianta malý proxy (Cloudflare Worker zdarma, Lukášův účet). Proxy sám nezakládej.
 - BlenderKit: NE (od v3.12 spouští vlastní program `blenderkit-client` jako proces + lokální server — ve wasm nejde spustit žádný proces).
