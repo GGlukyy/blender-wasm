@@ -7,7 +7,9 @@ Problém: na itch je service worker vypnutý (iframe + release), takže po zabit
 - [ ] Důkaz: test Chrome i `webkit_sim=1`: 1. start online, pak server vrací 404 na .zst → 2. start z cache naběhne. Plus test v iframe (jiný origin, jako itch). Zapiš čas 2. startu.
 - [ ] R1a (níže) posunout hned za R2: po znovunačtení rovnou otevřít autosave (Lukáš ztrácí práci při zabití karty).
 
-## X1 — internet z Blenderu (Get Extensions + online knihovna assetů), navazuje na N1(b)
+## X1 — internet z Blenderu
+- [x] (16. 11. 20:30, ověřeno v Lukášově Chrome) `extensions.blender.org/api/v1/extensions/` je dosažitelný (`no-cors` → opaque), ale **CORS fetch selže („Failed to fetch") = server neposílá `Access-Control-Allow-Origin`** → Get Extensions přímo z prohlížeče NEJDE (ani na itch). Kontrola: `api.github.com` ze stejné stránky 200 (CORS OK). Bez proxy dál nepokračovat; rozhodnutí o proxy (Cloudflare Worker, Lukášův účet) je na Lukášovi.
+- [ ] Online knihovna assetů: stejně ověřit server oficiální remote library (URL najít v 5.3 zdrojích `_bpy_internal/assets/remote_library*` / výchozí preference). Pokud taky bez CORS → stejný proxy by vyřešil obojí. (Get Extensions + online knihovna assetů), navazuje na N1(b)
 - [ ] Nejdřív jen zjistit (z Lukášova PC, můj kontejner tyhle domény nemá povolené): posílá `extensions.blender.org` (a server oficiální remote asset library) hlavičky CORS + CORP (kvůli COEP)? `curl -sI -H 'Origin: https://html-classic.itch.zone'` + test `fetch()` ze stránky běžící z itch (iframe `html-classic.itch.zone`, crossOriginIsolated — `fetch` v režimu cors projde COEP, jen když server pošle `Access-Control-Allow-Origin`). Testovat API i samotné stažení `.zip` rozšíření (může přesměrovat na jinou doménu). Výsledek do STATUS.
 - [ ] Když ano: most Python `urllib`/`requests` → JS `fetch` (sync XHR z workeru), pak „Get Extensions" → nainstalovat 1 rozšíření; online knihovna → stáhnout 1 asset. Návrh přes architekta (ADR).
 - [ ] Když ne: `[!] BLOCKED: CORS` + do „Potřebuju od tebe": varianta malý proxy (Cloudflare Worker zdarma, Lukášův účet). Proxy sám nezakládej.
