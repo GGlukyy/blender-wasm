@@ -1,0 +1,15 @@
+# Workbench Depth of Field (dual-source resolve): Solid + kamera s DoF → %MODE% — screenshot po OPS_DONE.
+import bpy, sys, time
+def out(*a):
+    print(*a); sys.stdout.flush()
+cam = bpy.data.objects['Camera']; cam.data.dof.use_dof = True; cam.data.dof.focus_distance = 3.0; cam.data.dof.aperture_fstop = 0.8
+win = bpy.context.window_manager.windows[0]
+area = [a for a in win.screen.areas if a.type == 'VIEW_3D'][0]
+v3d = area.spaces.active
+v3d.shading.type = 'SOLID'; v3d.shading.use_dof = True
+v3d.region_3d.view_perspective = 'CAMERA'
+st = {'t0': time.time()}
+def tick():
+    if time.time() - st['t0'] < 12: return 1.0
+    out('OPS wbdof shown dof=%s' % v3d.shading.use_dof); out('OPS_DONE'); return None
+bpy.app.timers.register(tick, first_interval=2.0)
