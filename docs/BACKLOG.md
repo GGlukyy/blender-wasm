@@ -1,3 +1,6 @@
+## H48 — Edit mode overlays web vs desktop 5.3.0 (17. 11. 06:55, jen PC; 5 z 8 variant doběhlo, zbytek zabit limitem)
+- [x] Face orientation, sharp+crease hrany, normály vertexů/ploch, extra info (délka/plocha/úhel), wireframe opacity: pixelově identické web = desktop. Nezkoušeno: subdivide+statistiky, sculpt mask overlay, automerge.
+
 ## H47 — EEVEE Rendered web vs desktop 5.3.0 (17. 11. 06:40, jen PC, průměr okna kolem kostky; hotovo, bez nálezu)
 - [x] Metallic, Emission, Coat+Sheen+SSS, Sun, Spot, barva světa, Alpha dithered: shodné (±0.5). Drobné odchylky: Transmission (web 60.1/59.3/59.0 vs desktop 58.7/57.9/57.6, ~2 %), Raytracing zapnutý (77.4 vs 76.9). Pravděpodobně šum/TAA nebo jiné vzorkování, ne chyba. Skript: šablony `scripts/wbopt_*.py.in` s `sh.type='RENDERED'`.
 
