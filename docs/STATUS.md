@@ -4,7 +4,7 @@ Výsledek: 🟡 PC ✅, iPad čeká
 - Lean `?webkit_sim=1&ipad=1`: Principled Volume i průhledná kostka viditelné.
 - `regress_all` Chrome (`out/regress_h44.log`): **0 FAIL**; journey 1 CHYBA = `ui` (souběh příkazů v kanálu testu jako dřív; samostatně `journey_win.sh ui` OK). Přidané testy A2/R2/R1a (addons, mcp, bincache, restore_auto) PASS. `addons_test.py`: `ui_translate` (`_ctypes`) a `cycles` v lean buildu (`_cycles`) jsou teď XFAIL (přesná výjimka, jinak FAIL).
 - Seed WGSL: nové `*_nodual` shadery nebyly v seedu (26 překladů při startu) → `wgsl_seed_win.sh seed` s `Q=webkit_sim=1&ipad=1`: 193 → **215** shaderů (`demo/public/wgsl-cache.json`, záloha `out/wgsl-cache-pre-h44.json`); verify: 6 překladů Chrome / 8 sim.
-- `regress_sim` běží (`out/regress_sim_h44.log`).
+- **`regress_sim` (webkit_sim=1) 02:50: 0 FAIL**, journey všech cest OK (`out/regress_sim_h44.log`); jediné 2 pády byly `mcp`/`mcp_addon` = chyba skriptu (WSL node dostal Windows `NODE_OPTIONS`), opraveno, samostatně v sim PASS.
 
 # 16. 11. 23:05 — X1: oficiální online knihovna assetů bez CORS
 - `cdn.extensions.blender.org/asset-libraries/essentials/` (a Extensions API) neposílá `Access-Control-Allow-Origin` → přímo z prohlížeče (ani na itch) nejde; stejné jako Get Extensions. **Potřebuju od tebe:** rozhodnutí, jestli zřídit malou proxy (Cloudflare Worker zdarma, tvůj účet) — vyřešila by obojí. Sám ji nezakládám.
