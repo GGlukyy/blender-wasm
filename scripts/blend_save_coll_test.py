@@ -29,4 +29,9 @@ while p + 20 <= len(d):
     seen.setdefault(old, 1)
     p += ln
 out('OPS blendsave N=%d blocks=%d unique=%d dups=%d (desktop obj1000 = 5991 identische, legitimní) bh=%d' % (N, blocks, len(seen), coll, bh))
+# zpětné otevření: všechny objekty, každý s vlastní mesh a materiálem?
+bpy.ops.wm.open_mainfile(filepath='/tmp/big.blend')
+bad = [o.name for o in bpy.data.objects if o.data is None or len(o.data.vertices) != 8 or len(o.data.materials) != 1 or o.data.materials[0] is None or o.data.materials[0].name != 'M' + o.name[2:]]
+out('OPS blendsave reopen objects=%d meshes=%d materials=%d bad=%d %s' % (len(bpy.data.objects), len(bpy.data.meshes), len(bpy.data.materials), len(bad), bad[:3]))
+out('OPS blendsave %s' % ('PASS' if not bad and len(bpy.data.objects) == N else 'FAIL'))
 out('OPS_DONE')
