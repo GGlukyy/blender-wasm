@@ -1,3 +1,7 @@
+# 17. 11. 05:10 — H43 (kolečko v itch iframe) obranná oprava + prohlídka lean 75/75
+- Prohlídka `?webkit_sim=1&ipad=1` (lean build): 75/75, problem=0 (`out/win/tour_result.txt`).
+- H43: `demo/src/styles.css` (`html` overflow hidden) + `main.js` (wheel listener na `document`, `passive:false`, mimo vlastní scrollovací panely). Test `wheel_iframe_win.sh` PASS Chrome i sim. **Odhad:** chybu z iPadu (Safari + myš v itch) v Chrome nelze reprodukovat → oprava je obranná. **Na iPadu (itch):** myší kolečko nad Blenderem → stránka itch se nesmí posunout dolů.
+
 # 17. 11. 04:50 — iPad (lean) build prošel regresí v sim
 Výsledek: ✅ PC
 - `regress_sim.sh "webkit_sim=1&ipad=1" lean` = lean `blender.wasm` (bez Cycles, MP lite, nodual) — `out/regress_sim_lean.log`: 0 FAIL, journey všechny cesty OK kromě `cyclesf12` (lean nemá Cycles → cesta se teď přeskočí `SKIP`, na PC buildu dál běží). Souřadnice journey tedy sedí i pro lean (ne tak jak jsem se bál v C1b).

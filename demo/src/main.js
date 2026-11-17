@@ -680,6 +680,14 @@ window.addEventListener("contextmenu", (e) => e.preventDefault());
 installTouch(canvas);
 const eatGesture = (e) => e.preventDefault();
 canvas.addEventListener("wheel", eatGesture, { passive: false });
+/* H43: wheel anywhere on the page (overlays, bars, gaps around the canvas) must not scroll the host page of an iframe (itch.io): eat it unless
+ * the target sits inside one of our own scrollable panels. The canvas listener above still lets Blender see the event. */
+document.addEventListener("wheel", (e) => {
+  for (let n = e.target; n && n !== document.documentElement; n = n.parentElement) {
+    if (n.scrollHeight > n.clientHeight + 1 && /auto|scroll/.test(getComputedStyle(n).overflowY)) return;
+  }
+  e.preventDefault();
+}, { passive: false });
 /* Safari sends a trackpad pinch (Mac, iPad + Magic Keyboard) ONLY as gesture* events, no ctrl+wheel like
  * Chrome, so after eating them nothing zoomed. Turn each 1.2x scale step into one wheel notch (= one Blender zoom step, so the view follows the fingers; desktop
  * Blender zooms on pinch too). */

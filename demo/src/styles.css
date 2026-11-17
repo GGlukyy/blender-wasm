@@ -14,6 +14,12 @@ body {
   overscroll-behavior: none;
 }
 
+/* H43: in the itch iframe on iPad the mouse wheel also scrolled the host page; the document itself must never scroll. */
+html {
+  overflow: hidden;
+  height: 100%;
+}
+
 body {
   margin: 0;
   min-width: 320px;
