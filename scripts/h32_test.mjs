@@ -34,6 +34,7 @@ let last = null, hdr = null, errors = 0, fails = 0; const rel = [];
 page.on("console", (m) => { const t = m.text(); let i;
   if ((i = t.indexOf("H32S ")) >= 0) last = JSON.parse(t.slice(i + 5));
   if ((i = t.indexOf("H32H ")) >= 0) hdr = JSON.parse(t.slice(i + 5));
+  if (t.includes("H32_STALL")) console.log(t.slice(0, 60));
   if ((i = t.indexOf("H32_RELEASE")) >= 0) { rel.push(t.slice(i)); console.log(t.slice(i)); }
   if (/RuntimeError|abort\(|unreachable|memory access/i.test(t)) { errors++; console.log("ERR " + t.slice(0, 160)); } });
 page.on("pageerror", (e) => { errors++; console.log("PAGEERROR " + e.message.slice(0, 160)); });

@@ -1,3 +1,52 @@
+# 17. 11. 19:00 — Víkend (odpoledne): Cycles Rendered, B3 data, D1 měření, O1b Pages
+Výsledek: ✅ PC (Chrome; sim jen tour + Pages), iPad čeká na Lukáše
+
+**Pushnuto na master:** C1b oprava (`BLENDER_REF` = fork `ipad-5.3` c1d4aa55846), O1b (Pages build + SW), testy `cycles_bg_win.sh`, `pages_win.sh`, `blend_addr_scan.py`, `blend_corpus_gen.py`, `jsheap_test.mjs`, ADR-D1, ADR-O1b. Lean i PC build nasazeny v `demo/public` (zálohy `out/bak_srgb`, `out/bak_pre_deploy`) — **pro itch je potřeba nový zip (nahraješ ty)**.
+
+## 1. Cycles Rendered „černé pozadí“ = OPRAVENO (PC)
+- Příčina (změřeno): WebGPU `FrameBuffer::bind` posílal shaderům `srgbTarget=true` pro KAŽDÝ framebuffer; GL/Vulkan to dělají jen když je připojená sRGB příloha. Cycles kreslí svůj float výsledek shaderem `3D_IMAGE` do half-float viewport bufferu → navíc sRGB dekódování → tmavé (výchozí svět 0,05 = 8/255 místo 58/255; Standard = lineární průběh, Raw = x^2,2).
+- Oprava: `webgpu_framebuffer.cc` — `srgbTarget` jen s `SRGBA_8_8_8_8` přílohou.
+- Důkaz: výchozí svět web 58,6 (desktop 5.3.0 viewport 57,7; F12 58,6); oranžový svět 201/150/94 (desktop viewport 186/140/89, F12 205/153/95). `scripts/cycles_bg_win.sh` PASS. `regress_all` PC build: 0 FAIL (jen známý XFAIL `_ctypes`), parity 0 ❌, journey OK. Lean build přebuilděn + prohlídka sim+ipad 169 kroků, 0 problémů. `regress_sim` celý NEPUŠTĚN (1,5 h) — jen tour sim.
+- Pozn.: tohle byla chyba webu (desktop 58 vs web 8) → naše.
+
+## 2. B3 stabilita — co jde na PC
+- Soak `?webkit_sim=1&ipad=1&auto=tour&tel=1&pool=4&tourrep=3&cycles=0` (lean build, 169 kroků, 0 problémů, 550 s): tři průchody všech workspace × MP/Rendered/Wire/Solid:
+  | | po startu | průchod 1 | průchod 2 | průchod 3 |
+  |---|---|---|---|---|
+  | špička `tex_mb` | 76 | 266 | 266 | 272 |
+  | špička `acct_mb` | 1432 | 1708 | 1709 | 1718 |
+  | `rt_malloc_mb` na konci | 292 | 372 | 368 | 403* |
+  | `js_used_mb` | 309 | 309 | 310 | 308 |
+  | `imm_bufs` (konec) | 37 | 31 | 28 | 18 |
+  *průchod 3 končí GP šablonou (víc paměti), ne únik. **Závěr: žádný únik mezi koly** (textury, JS, buffery ploché).
+- `js_used_mb` 309 v telemetrii NENÍ JS heap hlavního vlákna: CDP `Runtime.getHeapUsage` ukazuje 14 MB (`jsheap_test.mjs`). Telemetrie to nejspíš sčítá i jiné věci (odhad) → nehnat.
+- Snížení paměti po startu: dnes nic dalšího bezpečného nenašlo (zbývá B3l: EEVEE sondy 3×43 MB, C++ EEVEE, bez měření na iPadu nejde posoudit přínos) → neděláno. Čísla výše = baseline pro iPad.
+- **iPad sezení (pro tebe):** viz BACKLOG „B3 iPad sezení“.
+
+## 3. D1 .blend z desktopu — měření + ADR
+- `blend_addr_scan.py` počítá kolize `(addr>>3)&0xffffffff` (to, co dnes web odmítne). Desktop 5.3.0 ukládá „stabilní“ adresy (hash jména).
+- Měření (soubory z desktopu 5.3.0, `blend_corpus_gen.py`): 20 souborů dodaných s Blenderem (assety, šablony) a menší scény (50 obj, 500 obj, 5000 obj bez materiálů, 2000 kolekcí, monkey subdiv 5/7, shape keys, hair, obrázky, geonodes) = **0 kolizí**. 1000 a 2000 objektů s materiály = **60 kolizí** (web odmítne). → **Pro malé assety vzácné, pro velké scény (≥1000 objektů s materiály) reálné.**
+- ADR-D1 (architekt): interning adres per FileData (sekvenční klíč `n<<4`) na všech 6 místech zkracování; odhad 6–8 h. NEIMPLEMENTOVÁNO (neprošlo časem; nízká priorita pro malé assety). Test pro implementaci popsán v ADR.
+- Nález architekta (neověřeno): soubor ULOŽENÝ z webu (wasm32) může mít kolize adres (prostor 2^28). Test `blend_save_coll_test.py` připraven, zatím nepuštěn.
+
+## 4. O1b offline mimo itch = připraveno
+- Rozhodnuto GitHub Pages (ADR-O1b): soubory ≤ 40 MB (limit 100 MB), Cloudflare má 25 MiB.
+- `scripts/package_pages.sh` → `out/pages/` (102 MB, 19 souborů), `scripts/publish_pages.sh <git-url>` (jeden commit do větve `gh-pages`).
+- Oprava: SW se registroval až po stažení wasm (top-level await) → registrace přesunuta na začátek `main.js`; stránka bez COOP/COEP se po zaregistrování SW sama jednou znovu načte.
+- Test `scripts/pages_win.sh` (server BEZ COOP/COEP pod `/blender-wasm/`): 1. start se sám izoluje, Blender naběhne, server vypnut, 2. start offline: **PASS online + offline (Chrome)**. Sim varianta netestována (odhad: stejné, JS-only).
+- **Potřebuju od tebe:** založ prázdné repo na GitHubu (např. `GGlukyy/blender-pages`), pak já (nebo ty) `bash scripts/publish_pages.sh git@github.com:GGlukyy/blender-pages.git`, v repu Settings → Pages → Deploy from branch → `gh-pages` / root. Adresa pak `https://gglukyy.github.io/blender-pages/`.
+
+## 5. Denoise (OIDN → wasm) — jen průzkum
+- OIDN potřebuje ISPC (kompilátor + cílové kernely), oneDNN (CPU backend s JIT pro x86/ARM, pro wasm žádný → pomalá generická cesta nebo vlastní port) a TBB (TBB už do wasm máme). Žádný známý wasm port OIDN ani u gessa (`WITH_OPENIMAGEDENOISE=OFF`) neexistuje.
+- Odhad práce: 3–5 dní (ISPC wasm-simd128 cíl, oneDNN generic build bez JIT, váhy sítě ~30–90 MB do assets, paměť U-Net pro 960×540 ~1 GB+ → na iPadu nereálné). Doporučení: neimplementovat; pro PC lze zvážit jednoduchý vlastní bilaterální/à-trous denoise v Cycles (menší práce) nebo ruční vzorky. Bez souhlasu neděláno.
+
+## H32c
+- Nový případ `h32_test.mjs stall` (Python timer uspí Blender na 3 s hned po stisku, mouseup přijde uprostřed zamrznutí): **PASS** — zamrznutí hlavního vlákna samo mouseup neztratí (fronta událostí se zpracuje v pořadí). Predikce „příčina = zamrznutí“ NEPLATÍ. Příčina u tebe zůstává neznámá; telemetrie `h32_release` ukáže, kdyby se JS pojistka spustila.
+
+## Co otestovat na iPadu
+1. Nic nového na iPadu z dnešních oprav nehrozí kromě sRGB změny (lean build): Material Preview/Solid vypadá stejně jako včera (hlavně barvy UI, náhledy, Image editor).
+2. Až budeš chtít: itch zip nový (`bash scripts/package_itch.sh`).
+
 # 17. 11. 05:30 — SOUHRN noci (po–út 16.–17. 11.)
 Výsledek: ✅ PC (vše níže ověřeno v Chrome i `webkit_sim`), iPad čeká na Lukáše
 
