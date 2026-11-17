@@ -1,3 +1,6 @@
+# 17. 11. 06:00 — stráž H44 v regresi
+- `scripts/vol_blend_win.sh` (v regress_all, tedy i v regress_sim): kostka s Principled Volume (MP + Rendered) a průhledná červená kostka (Blended) — průměr pixelů uvnitř kostky (`png_mean.py`, jen stdlib) musí být nad prahem; PASS v Chrome i `webkit_sim=1&ipad=1`. Starý build bez opravy by v sim FAILoval (průměr ~60–70 = pozadí).
+
 # 17. 11. 05:50 — H42a/c: test všech souborových operátorů
 - `scripts/h42_win.sh` (v regress_all): projde `bpy.ops`, najde 104 operátorů s filepath/directory a ověří klasifikaci lišty „Vybrat soubory ze zařízení“ (deny-list se čte z `main.js`) proti zlatému seznamu `h42_golden.json`. Nový operátor v další verzi Blenderu = FAIL s jeho jménem. Opraveno: `wm.recover_auto_save` (čte soubor) nemělo lištu, `sound.mixdown` (zapisuje) ji mělo. **iPad:** File ▸ Recover ▸ Auto Save… teď nabídne „Vybrat soubory“.
 
