@@ -1,0 +1,37 @@
+# H42a/c: každý operátor s výběrem souboru/složky (filepath/directory/files) musí mít správnou lištu: čtecí (bez check_existing) → lišta
+# „Vybrat soubory ze zařízení“, ukládací (s check_existing) → bez ní. `_is_import_op` v main.js = deny-list %DENY%; tady stejné pravidlo.
+import bpy, sys
+def out(*a):
+    print(*a); sys.stdout.flush()
+DENY = %DENY%
+def is_import(idn):
+    idn = idn.lower().replace('_ot_', '.')
+    if 'recover' in idn: return True  # zrcadlo main.js _is_import_op
+    return not any(w in idn for w in DENY)
+def tick():
+    rows = []; bad = []
+    for mod in dir(bpy.ops):
+        if mod.startswith('_'): continue
+        for name in dir(getattr(bpy.ops, mod)):
+            if name.startswith('_'): continue
+            try:
+                rna = getattr(getattr(bpy.ops, mod), name).get_rna_type()
+                props = rna.properties
+            except Exception: continue
+            fp = [p for p in props if p.identifier in ('filepath', 'directory', 'files', 'filename') or p.subtype in ('FILE_PATH', 'DIR_PATH')]
+            if not fp: continue
+            idn = mod + '.' + name
+            save = 'check_existing' in props
+            rows.append((idn, 'save' if save else 'read', is_import(idn)))
+    out('OPS h42 file operators: %d, read: %d, save: %d' % (len(rows), sum(1 for r in rows if r[1] == 'read'), sum(1 for r in rows if r[1] == 'save')))
+    out('OPS h42 LIST ' + ' '.join('%s:%s' % (r[0], 'bar' if r[2] else 'nobar') for r in sorted(rows)))
+    GOLD = %GOLD%
+    cur = {r[0]: ('bar' if r[2] else 'nobar') for r in rows}
+    new = sorted(k for k in cur if k not in GOLD); gone = sorted(k for k in GOLD if k not in cur); chg = sorted(k for k in cur if k in GOLD and GOLD[k] != cur[k])
+    for k in new: out('OPS h42 NEW operator (zkontroluj: čtecí → lišta, ukládací → bez lišty):', k, cur[k])
+    for k in gone: out('OPS h42 GONE operator', k)
+    for k in chg: out('OPS h42 CHANGED', k, GOLD[k], '->', cur[k])
+    bad = new + gone + chg
+    out('OPS h42 %s new=%d gone=%d changed=%d' % ('PASS' if not bad else 'FAIL', len(new), len(gone), len(chg)))
+    out('OPS_DONE'); return None
+bpy.app.timers.register(tick, first_interval=6.0)

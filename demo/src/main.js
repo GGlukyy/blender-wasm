@@ -1564,7 +1564,9 @@ def _is_import_op(idn):
     # H42 (Lukáš 9.11.): seznam povolených operátorů pořád něco vynechal (Add ▸ Image ▸ Reference, ikonka složky u cesty
     # v poli = buttons.file_browse, sequencer strip_add, node.add_file…). Obráceně: KAŽDÝ souborový prohlížeč je "čtecí"
     # (ukáže lištu „Vybrat soubory ze zařízení“), KROMĚ těch, co ukládají. Zbytečná lišta nevadí, chybějící zablokuje uživatele.
-    if any(w in idn for w in ('export', 'save', 'render.', 'bake', 'write', 'screenshot', 'directory_browse')):
+    # H42a (17. 11., h42_win.sh): wm.recover_auto_save ČTE soubor (název obsahuje 'save'), sound.mixdown ZAPISUJE zvuk.
+    if 'recover' in idn: return True
+    if any(w in idn for w in ('export', 'save', 'render.', 'bake', 'write', 'screenshot', 'directory_browse', 'mixdown')):
         return False
     return True
 def _import_assist():

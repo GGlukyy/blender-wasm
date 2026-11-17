@@ -1,3 +1,6 @@
+# 17. 11. 05:50 — H42a/c: test všech souborových operátorů
+- `scripts/h42_win.sh` (v regress_all): projde `bpy.ops`, najde 104 operátorů s filepath/directory a ověří klasifikaci lišty „Vybrat soubory ze zařízení“ (deny-list se čte z `main.js`) proti zlatému seznamu `h42_golden.json`. Nový operátor v další verzi Blenderu = FAIL s jeho jménem. Opraveno: `wm.recover_auto_save` (čte soubor) nemělo lištu, `sound.mixdown` (zapisuje) ji mělo. **iPad:** File ▸ Recover ▸ Auto Save… teď nabídne „Vybrat soubory“.
+
 # 17. 11. 05:10 — H43 (kolečko v itch iframe) obranná oprava + prohlídka lean 75/75
 - Prohlídka `?webkit_sim=1&ipad=1` (lean build): 75/75, problem=0 (`out/win/tour_result.txt`).
 - H43: `demo/src/styles.css` (`html` overflow hidden) + `main.js` (wheel listener na `document`, `passive:false`, mimo vlastní scrollovací panely). Test `wheel_iframe_win.sh` PASS Chrome i sim. **Odhad:** chybu z iPadu (Safari + myš v itch) v Chrome nelze reprodukovat → oprava je obranná. **Na iPadu (itch):** myší kolečko nad Blenderem → stránka itch se nesmí posunout dolů.

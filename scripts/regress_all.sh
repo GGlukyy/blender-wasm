@@ -26,6 +26,7 @@ run mcp scripts/mcp_win.sh
 run bincache scripts/bincache_win.sh
 run restore_auto scripts/restore_auto_win.sh
 run wheel_iframe scripts/wheel_iframe_win.sh
+run h42 scripts/h42_win.sh
 run mcp_addon scripts/mcp_addon_win.sh
 run bar scripts/bar_win.sh
 run touch_modal scripts/touch_modal_win.sh
