@@ -1857,6 +1857,7 @@ window.Module = {
       if (new URLSearchParams(location.search).get("compilelog") === "1") ENV.WGPU_LOG_COMPILE = "1";
       if (new URLSearchParams(location.search).get("drawlog") === "1") ENV.WGPU_LOG_DRAWS = "1";
       if (new URLSearchParams(location.search).get("iconprev") === "1") ENV.BLENDER_WEB_ICON_PREVIEWS = "1";
+      { const _env = new URLSearchParams(location.search).get("env"); if (_env) for (const kv of _env.split(",")) { const [k, v] = kv.split("="); if (/^[A-Z0-9_]+$/.test(k)) ENV[k] = v ?? "1"; } } /* dev: ?env=WGPU_LOG_STENCIL=1,WGPU_LOG_DRAWS=1 */
     } catch (e) { log("preRun ENV: " + e); }
 
     /* Register the in-memory tar FsProvider for the WasmFS ProviderBackend
