@@ -5,7 +5,15 @@ session: read `CLAUDE.md`, `docs/STATUS.md`, `docs/PLAN.md` and `docs/BACKLOG.md
 Lukáš cannot test on the iPad until he is back — verify everything yourself in Windows
 Chrome on the real GPU (`scripts/p2_win.sh`, `scripts/parity_win.sh`).
 
-## Mission now (od út 17. 11. noc) — R i C1 HOTOVO; teď v tomto pořadí:
+## Mission now (od út 17. 11. odpoledne, Lukáš) — pořadí:
+1. **Známé chyby:** H32c (ztracené puštění myši při kompilaci shaderů → mění shading/snap), Cycles Rendered černé pozadí, H46 (Solid+Shadows ztmavuje objekt), H45 (Workbench DoF, nízká priorita).
+2. **B3 stabilita iPadu — co jde na PC:** dlouhý soak v `?webkit_sim=1&ipad=1` (prohlídka 3× za sebou, `tour_report.py`): roste `js_used`/`tex_mb`/počet bufferů mezi koly? Najít a opravit úniky; snížit paměť po startu a po přepnutí workspace (cíl: měřitelně méně než dnes, čísla do STATUS). Pak připravit iPad sezení pro Lukáše (přesný URL + co poslat).
+3. **D1 .blend z desktopu** (P2b dnes jen nahlas odmítne soubor s kolizí adres): (a) změřit, jak často — sada reálných souborů z desktopu 5.3.0 (demo soubory Blenderu, velké scény, Lukášovy soubory pokud dodá) → kolik se odmítne; (b) když to není vzácné: skutečná oprava = interning 64bit starých adres na unikátní 32bit klíče konzistentně v BHead i v DNA převodu ukazatelů (`readfile`, `dna_genfile.cc`) — NÁVRH přes architekta (ADR), pak implementace, test `blend_open_win.sh` s kolizním souborem = otevře se správně.
+4. **O1b offline verze mimo itch:** připrav vše tak, aby Lukáš jen zapnul GitHub Pages: architekt rozhodne (ADR) GitHub Pages (vlastní `sw.js` přidá COOP/COEP hlavičky + offline cache, soubory < 100 MB) vs Cloudflare Pages (limit 25 MiB/soubor → dělit wasm). Výstup: skript, který z `demo/public` udělá složku pro Pages, test lokálně bez COOP/COEP hlaviček serveru (jen přes sw.js) v Chrome + sim, návod pro Lukáše do STATUS („Potřebuju od tebe: založ repo X, zapni Pages“).
+5. **Denoise:** jen zjistit (max 1 h), jestli jde OIDN přeložit do wasm (ISPC/TBB problém) → zapsat odhad práce; neimplementovat bez souhlasu.
+NEDĚLAT: proxy/online knihovna (X1), UI úpravy bez Lukáše.
+
+## (hotovo 17. 11. ráno) Mission od út 17. 11. noc
 1. **H44 dokončit:** lean (iPad) build s opravou dual-source → `regress_all` + `regress_sim` na OBOU buildech (PC `blender-pc`, lean `?cycles=0`) → nasadit oba do `demo/public` → `bash scripts/package_itch.sh` a nechat zip v `out/` (Lukáš ho ráno vezme na iPad test). Do STATUS napiš přesný název zipu.
 2. **C1b:** journey/touch cesty pro lean build (záložky hledat podle jména, ne pixelů); černé pozadí světa v Cycles Rendered.
 3. **N1c** rychlé cesty novinek 5.3 (Material Lighting nodes, řazení Outlineru, hledání v sidebaru, Comment node) — jen ověřit = desktop 5.3.0.
