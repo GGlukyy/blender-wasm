@@ -6,5 +6,5 @@ W=/mnt/c/Users/$U/p2win; ROOT=$(cd "$(dirname "$0")/.." && pwd); cd "$ROOT"
 cp scripts/mcp_addon_page.mjs "$W/"
 ( cd "$W" && CHROME='C:\Program Files\Google\Chrome\Application\chrome.exe' PW=playwright-core \
   cmd.exe /c "set CHROME=C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe&& set PW=playwright-core&& node mcp_addon_page.mjs 8765 testtoken123 150" > out/mcp_addon_page.log 2>&1 & )
-timeout 200 node scripts/mcp_test.mjs; rc=$?
+NODE_OPTIONS= timeout 200 node scripts/mcp_test.mjs; rc=$?
 pkill -f "mcp/relay.mjs" 2>/dev/null; exit $rc
