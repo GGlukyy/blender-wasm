@@ -1,4 +1,5 @@
 #!/bin/bash
+export Q WSLENV="Q${WSLENV:+:$WSLENV}"
 # Spustí scripts/wgsl_seed_win.mjs ve Windows Chrome. $1 = seed|verify. seed -> demo/public/wgsl-cache.json
 U=${WINUSER:-$(ls /mnt/c/Users | grep -v -i -E 'public|default|all users|desktop.ini' | head -1)}
 W=/mnt/c/Users/$U/p2win; ROOT=$(cd "$(dirname "$0")/.." && pwd)

@@ -11,7 +11,7 @@
 set -euo pipefail
 ROOT="${ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 export PATH="$ROOT/emsdk/upstream/emscripten:$PATH"
-BUILD="$ROOT/build-5.3"
+BUILD="${BUILD:-$ROOT/build-5.3}"
 OUT="${OUT:-$ROOT/demo/public}"
 SYSROOT="$ROOT/wasm-sysroot"
 STAGE="$ROOT/demo/.stage53"

@@ -17,6 +17,11 @@ def tick():
         if not ok: st['bad'] += 1
         else: addon_utils.disable(n, default_set=True)
     except BaseException as e:
-        st['bad'] += 1; out('OPS addon', n, 'FAIL', type(e).__name__, str(e).replace('\n', ' ')[:160])
+        msg = str(e).replace('\n', ' ')[:160]
+        # známé, zdokumentované (BACKLOG): ui_translate chce `_ctypes`; add-on cycles chce `_cycles` (v iPad/lean buildu není)
+        if (n, type(e).__name__, msg) in (('ui_translate', 'ModuleNotFoundError', "No module named '_ctypes'"), ('cycles', 'ModuleNotFoundError', "No module named '_cycles'")):
+            out('OPS addon', n, 'XFAIL', type(e).__name__, msg)
+        else:
+            st['bad'] += 1; out('OPS addon', n, 'FAIL', type(e).__name__, msg)
     return 0.5
 bpy.app.timers.register(tick, first_interval=6.0)

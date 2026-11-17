@@ -45,7 +45,7 @@ def _c():
     return 0.5
 bpy.app.timers.register(_c, first_interval=2.0)`;
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, PYCMD);
-await page.goto("http://localhost:5173/", { waitUntil: "load" });
+await page.goto("http://localhost:5173/" + (process.env.Q ? "?" + process.env.Q : ""), { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
 await page.getByRole("button", { name: /Launch Blender/ }).click();
 for (let i = 0; i < 300; i++) {
