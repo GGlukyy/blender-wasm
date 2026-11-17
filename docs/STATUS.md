@@ -1,3 +1,16 @@
+# 17. 11. 05:30 — SOUHRN noci (po–út 16.–17. 11.)
+Výsledek: ✅ PC (vše níže ověřeno v Chrome i `webkit_sim`), iPad čeká na Lukáše
+
+**Pushnuto na master:** A2 (add-ony/MCP testy, +regress_all), R2a (cache wasm bez service workeru), R1a (autosave se sám otevře), H44 (Principled Volume + průhledné materiály na iPadu: dual-source blending; fork `ipad-5.3` 2ee08b93 = `BLENDER_REF`), H43 (kolečko v itch iframe, obranná oprava), H42a/c (test souborových operátorů), X1 (BLOCKED: CORS), N1a (gsplat), C1b (lean regress), nové stráže `vol_blend_win`, `bincache_win`, `restore_auto_win`, `wheel_iframe_win`, `h42_win`. Fork pushnut: `ipad-5.3`. Nové buildy nasazeny v `demo/public` (`blender-pc.*` i `blender.*`, seed 215 shaderů) — **pro itch je potřeba nový zip (nahraješ ty)**.
+**Co otestovat na iPadu (podle důležitosti):**
+1. H44: kostka + Principled Volume (MP i Rendered) → šedá mlha; kostka s průhledným materiálem (Render Method Blended) → vidět.
+2. R2a: načíst, zavřít/zabít kartu, vypnout wifi, otevřít → bez stahování.
+3. R1a: po zabití karty se práce obnoví sama s pruhem „Obnoveno z HH:MM · Zahodit“.
+4. H43: myší kolečko v itch → stránka se neposouvá.
+5. Obecně: start, kostka, Edit mode, MP, uložit/otevřít.
+**Nalezeno, neopraveno (BACKLOG):** H45 Workbench DoF kostka prázdná na webu (desktop OK); H46 Solid + Shadows ztmavuje celý objekt (stencil; 3 hypotézy vyvráceny, zbývá `stencil_view`); LoopTools zip s LZMA nejde (`_lzma`).
+**Potřebuju od tebe:** rozhodnutí o proxy pro Extensions/online knihovnu (Cloudflare Worker).
+
 # 17. 11. 06:00 — stráž H44 v regresi
 - `scripts/vol_blend_win.sh` (v regress_all, tedy i v regress_sim): kostka s Principled Volume (MP + Rendered) a průhledná červená kostka (Blended) — průměr pixelů uvnitř kostky (`png_mean.py`, jen stdlib) musí být nad prahem; PASS v Chrome i `webkit_sim=1&ipad=1`. Starý build bez opravy by v sim FAILoval (průměr ~60–70 = pozadí).
 
