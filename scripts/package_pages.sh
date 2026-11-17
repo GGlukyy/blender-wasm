@@ -6,7 +6,7 @@ ROOT=$(cd "$(dirname "$0")/.." && pwd); cd "$ROOT/demo"
 rm -rf "$ROOT/out/pages"
 RELEASE=1 PAGES=1 npx vite build --outDir ../out/pages --emptyOutDir >/dev/null
 cd "$ROOT/out/pages"
-touch .nojekyll                      # Pages nesmí nic zpracovávat Jekyllem
+rm -f ask.txt; touch .nojekyll             # ask.txt je jen dev; .nojekyll: Pages nesmí nic zpracovávat Jekyllem
 cp index.html 404.html               # neexistující adresa → aplikace
 if grep -rEil "plausible|developer\.puter\.com|Brought to you by" index.html assets/*.js 2>/dev/null | grep -q .; then echo "CHYBA: Puter analytika/branding v buildu"; exit 1; fi
 BIG=$(find . -type f -size +95M | head); [ -n "$BIG" ] && { echo "CHYBA: soubor > 95 MB (limit Pages 100 MB): $BIG"; exit 1; }

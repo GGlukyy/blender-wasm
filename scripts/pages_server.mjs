@@ -2,7 +2,7 @@
 import http from "node:http"; import fs from "node:fs"; import path from "node:path";
 const [dir, port, prefix] = [process.argv[2], +process.argv[3], process.argv[4] || "/"];
 const types = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".css": "text/css", ".wasm": "application/wasm", ".png": "image/png", ".svg": "image/svg+xml", ".webmanifest": "application/manifest+json" };
-http.createServer((req, res) => {
+http.createServer((req, res) => { if (process.env.LOG) console.log(req.url);
   let p = decodeURIComponent(new URL(req.url, "http://x").pathname);
   if (!p.startsWith(prefix)) { res.writeHead(404); return res.end("not under prefix"); }
   p = p.slice(prefix.length); if (p === "" || p.endsWith("/")) p += "index.html";

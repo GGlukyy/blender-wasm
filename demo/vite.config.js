@@ -62,6 +62,7 @@ const isolationHeaders = {
 
 /* R0: RELEASE=1 (scripts/package_itch.sh) builds the itch.io page: no Puter analytics/branding (credit + source links are in Blender: status bar, Help menu; main.js CREDIT_PY), telemetry code disabled (__RELEASE__). */
 const RELEASE = !!process.env.RELEASE;
+const PAGES = !!process.env.PAGES; /* O1b: GitHub Pages build (RELEASE + service worker) */
 const releasePlugin = () => ({
   name: "blender-release-html",
   transformIndexHtml(html) {
@@ -84,7 +85,7 @@ const versionPlugin = () => ({
 });
 
 export default defineConfig({
-  define: { __RELEASE__: JSON.stringify(RELEASE) },
+  define: { __RELEASE__: JSON.stringify(RELEASE), __PAGES__: JSON.stringify(PAGES) },
   plugins: [telemetryPlugin(), abortStackPlugin(), releasePlugin(), versionPlugin()],
   /* Emit relative asset URLs (./assets/...) so the built site works when served
    * from any subpath, not just the domain root. The runtime fetches
