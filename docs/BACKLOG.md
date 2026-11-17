@@ -1,3 +1,7 @@
+## H46 — Workbench volby web vs desktop 5.3.0 (17. 11. 05:25, jen PC; šablony `scripts/wbopt_web.py.in` / `wbopt_desk.py.in`)
+- Průměr pixelů v kostce, Solid: **identický** (na desetinu) web = desktop pro: Cavity (Both), X-Ray, Color Random, Light Flat, Matcap + specular bez outline. **Rozdíl jen u Shadows:** web 83.0 vs desktop 97.6 (kostka na webu tmavší, vzhled viz `out/win/vol_SOLID_wbo2.png` vs `/mnt/c/Users/lukil/p2win/out/wbo_d2.png`). Odhad: jiná síla/odstín stínu nebo jiný počet TAA vzorků po 8 s; nevíme, jestli je to chyba. [ ] Změřit s delším čekáním a `shadow_intensity`, pak rozhodnout.
+- [ ] H45 (výše) Workbench DoF.
+
 ## H45 — Workbench Depth of Field (Solid + kamera s DoF): kostka se na webu nevykreslí (nalezeno 17. 11. 05:15, jen PC)
 - [ ] Repro: `TPL=wbdof_test.py.in MODE=SOLID scripts/volume_win.sh` (Solid, `shading.use_dof`, kamera `dof.use_dof`, pohled z kamery) → `out/win/vol_SOLID_dof_cycles.png`: **v Chrome (dual-source funguje) i v sim je kostka PRÁZDNÁ (jen outline)**, desktop 5.3.0 (`/mnt/c/Users/lukil/p2win/wbdof_desktop.py`, `show_splash=False`) kostku vykreslí rozmazanou → web-only (pravidlo 3b: naše chyba). Podezření (odhad): `workbench_effect_dof.cc:211` resolve s `DRW_STATE_BLEND_CUSTOM` + `workbench_fx_dof.bsl.hh:377` `index(1) color_mul`, ve WebGPU backendu něco z dof passů (MRT `frag_color(1)` cocs/normalized_coc, 2-kanálové RG textury?) nefunguje. Na iPadu by navíc chybělo dual-source (stejný vzor jako H44: dvě kresby). Nízká priorita (málo používané), ale levný test v `wbdof_test.py.in` už je.
 

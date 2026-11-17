@@ -1,0 +1,20 @@
+# Workbench volba %OPT% → screenshot po OPS_DONE (web) nebo --python (desktop, přiloženo s -- cesta). Srovnání průměru kostky web vs desktop.
+import bpy, sys, time
+bpy.context.preferences.view.show_splash = False
+def out(*a):
+    print(*a); sys.stdout.flush()
+win = bpy.context.window_manager.windows[0]
+area = [a for a in win.screen.areas if a.type == 'VIEW_3D'][0]
+v3d = area.spaces.active; sh = v3d.shading
+bpy.ops.object.select_all(action='DESELECT')
+sh.type = 'SOLID'
+%OPT%
+st = {'t0': time.time()}
+def tick():
+    if time.time() - st['t0'] < 8: return 1.0
+    out_path = sys.argv[sys.argv.index('--') + 1]
+    with bpy.context.temp_override(window=win, area=win.screen.areas[0]):
+        bpy.ops.screen.screenshot(filepath=out_path)
+    out('SHOT_DONE'); bpy.ops.wm.quit_blender()
+    return None
+bpy.app.timers.register(tick, first_interval=2.0)
