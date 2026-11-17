@@ -1,3 +1,7 @@
+# 17. 11. 04:50 — iPad (lean) build prošel regresí v sim
+Výsledek: ✅ PC
+- `regress_sim.sh "webkit_sim=1&ipad=1" lean` = lean `blender.wasm` (bez Cycles, MP lite, nodual) — `out/regress_sim_lean.log`: 0 FAIL, journey všechny cesty OK kromě `cyclesf12` (lean nemá Cycles → cesta se teď přeskočí `SKIP`, na PC buildu dál běží). Souřadnice journey tedy sedí i pro lean (ne tak jak jsem se bál v C1b).
+
 # 17. 11. 01:00 — H44 hotov na PC: regrese Chrome zelená, lean build nasazen, seed 215 shaderů
 Výsledek: 🟡 PC ✅, iPad čeká
 - Fork `ipad-5.3` 2ee08b93 (=`BLENDER_REF`). Oba stromy přebudované (`build-5.3` PC s Cycles, `build-5.3-ipad` lean), nasazeno `demo/public` (`blender-pc.*` i `blender.*`; zálohy `out/bak_pre_deploy`). `.link53.sh` bere `BUILD=` (lean: `BUILD=$PWD/build-5.3-ipad OUT=$PWD/out/pubipad bash scripts/.link53.sh`).

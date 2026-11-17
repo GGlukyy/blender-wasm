@@ -321,6 +321,7 @@ const J = {
   },
   /* C1: totéž s Cycles (jen PC build blender-pc): klávesa F12 → Render Result, obraz není černý. */
   cyclesf12: async ({ hover, key, check, cmd, page, wait }) => {
+    if (!(await cmd("eval:bpy.app.build_options.cycles"))) { console.log("SKIP cyclesf12: build bez Cycles (iPad/lean blender.wasm)"); return; }
     await cmd("bpy.context.scene.render.engine='CYCLES'; bpy.context.scene.cycles.samples=16; bpy.context.scene.cycles.use_denoising=False"); const eng = await cmd("eval:bpy.context.scene.render.engine"); await check(`engine ${eng}`, () => eng === "CYCLES"); const areas = "eval:[a.type for a in bpy.context.window_manager.windows[0].screen.areas]", a0 = await cmd(areas);
     await hover(); await page.keyboard.press("F12"); for (let i = 0; i < 120; i++) { await wait(1000); const r = await cmd("eval:bpy.data.images['Render Result'].has_data if 'Render Result' in bpy.data.images else False"); if (r) break; } await wait(3000);
     await page.screenshot({ path: "out/jr_cyclesf12.png" }); const a1 = await cmd(areas); console.log("F12 oblasti " + JSON.stringify(a1)); await check("F12: výsledek existuje", () => a1 && a1.includes("IMAGE_EDITOR"));
