@@ -20,3 +20,6 @@ Base: HeyPuter/blender-wasm + HeyPuter/blender (GPL-2.0).
 - Názvy nástrojů (`get_scene_info`, `get_object_info`, `get_viewport_screenshot`, `execute_blender_code`) převzaty z ahujasid/blender-mcp (MIT) kvůli kompatibilitě promptů; kód je vlastní. Závislosti: `@modelcontextprotocol/sdk` (MIT), `ws` (MIT), `zod` (MIT).
 - GMP 6.3.0 (LGPL-3.0-or-later / GPL-2.0-or-later), https://gmplib.org, stejná verze jako Blender, přeloženo do wasm `scripts/build_gmp.sh`, bez úprav.
 - Manifold v3.4.1 (Apache-2.0), https://github.com/elalish/manifold, stejná verze jako Blender, přeloženo do wasm `scripts/build_manifold.sh` (`MANIFOLD_PAR=OFF`), bez úprav.
+
+## coi-serviceworker (vzor pro `demo/public/sw.js`)
+- Autor: Guido Zuidhof, MIT, https://github.com/gzuidhof/coi-serviceworker. Převzat jen princip (service worker přidá COOP/COEP/CORP hlavičky, stránka se po registraci jednou znovu načte); kód `sw.js` je vlastní (+ offline cache). Použito v `demo/public/sw.js`, `demo/src/main.js` (O1a/O1b, 15.–17. 11. 2026).

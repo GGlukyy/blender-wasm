@@ -3,8 +3,10 @@
 const { chromium } = await import(process.env.PW || "playwright");
 const Q = (process.env.Q || "").replace(/"/g, "");
 const CASES = (process.env.CASES || "overlay,nomouseup,blur,hold").split(",");
-const expr = `import bpy, sys, json
+const STALL = (process.env.CASES || "").split(",").includes("stall") ? 1 : 0;
+const expr = `import bpy, sys, json, time
 st = {'v': None}
+STALL = ${STALL}; stalled = [0]
 def snap():
     ts = bpy.context.scene.tool_settings
     v = dict(snap=ts.use_snap, prop=ts.use_proportional_edit, prop_obj=ts.use_proportional_edit_objects)
@@ -12,7 +14,11 @@ def snap():
         if a.type == 'VIEW_3D':
             v['shade'] = a.spaces[0].shading.type; v['xray'] = a.spaces[0].shading.show_xray; v['ovl'] = a.spaces[0].overlay.show_overlays; v['giz'] = a.spaces[0].show_gizmo
     if v != st['v']:
-        st['v'] = v; print('H32S ' + json.dumps(v)); sys.stdout.flush()
+        st['prev'] = st['v']; st['v'] = v; print('H32S ' + json.dumps(v)); sys.stdout.flush()
+        if STALL and v.get('shade') == 'WIREFRAME' and v.get('shade') != (st.get('prev') or {}).get('shade'):
+            stalled[0] += 1
+        if STALL and stalled[0] == 2 and not st.get('done'):
+            st['done'] = 1; print('H32_STALL begin'); sys.stdout.flush(); time.sleep(3.0)  # jako kompilace shaderů: Blender nezpracovává události
     return 0.1
 def hdr():
     for a in bpy.context.window_manager.windows[0].screen.areas:
@@ -72,6 +78,9 @@ for (const c of CASES) {
     await cdp.send("Input.dispatchMouseEvent", { type: "mousePressed", x: xWire, y: hy, button: "left", buttons: 1, clickCount: 1 }); await wait(150);
     await page.evaluate(() => window.dispatchEvent(new Event("blur"))); await wait(100);
     if (!rel.some((r) => r.includes("why=blur"))) { fails++; console.log("FAIL blur: po blur žádné uvolnění"); }
+  }
+  if (c === "stall") { /* H32c: Blender zamrzne hned po stisku (kompilace shaderů), mouseup přijde během zamrznutí */
+    await page.mouse.down(); await wait(900); await page.mouse.up(); await wait(5000);
   }
   if (c === "hold") { /* záměrný drag-toggle: držet a táhnout přes shading řádek */
     await page.mouse.down(); await wait(120); await page.mouse.move(xSolid + 18, hy, { steps: 10 }); await wait(1200);

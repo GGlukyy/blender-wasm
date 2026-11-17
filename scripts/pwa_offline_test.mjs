@@ -8,7 +8,12 @@ const page = ctx.pages()[0] || await ctx.newPage();
 const errs = []; page.on("pageerror", (e) => errs.push(e.message.slice(0, 150)));
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 await page.goto(url + "?mp=0", { waitUntil: "load" });
-if (phase === "online") {
+if (phase === "online" && process.env.SELF_RELOAD) { /* O1b: hosting bez COOP/COEP (GitHub Pages) — stránka se po zaregistrování SW musí sama znovu načíst a být izolovaná; test ji NErestartuje */
+  for (let i = 0; i < 80 && !(await page.evaluate(() => crossOriginIsolated).catch(() => false)); i++) await wait(500);
+  console.log("self-reload: crossOriginIsolated", await page.evaluate(() => crossOriginIsolated));
+  if (!(await page.evaluate(() => crossOriginIsolated))) { console.log("FAIL online: stránka se sama neizolovala"); await ctx.close(); process.exit(1); }
+}
+if (phase === "online" && !process.env.SELF_RELOAD) {
   for (let i = 0; i < 60; i++) { if (await page.evaluate(() => !!navigator.serviceWorker.controller)) break; await wait(500); if (i === 10) await page.reload({ waitUntil: "load" }); }
   console.log("sw controller:", await page.evaluate(() => !!navigator.serviceWorker.controller));
 }
