@@ -1,7 +1,9 @@
 ## H50 — iPad (offline Pages verze) spadne po ~5 min: 1 světlo + kostka s Principled Volume (Lukáš 18. 11.) — PRIORITA spolu s H49
 - [ ] Přesný repro pro B3: volumetrika je paměťově nejdražší věc v EEVEE (froxel 3D textury, světla × objem) + naše `_nodual` cesta kreslí 2×. Na PC `?webkit_sim=1&ipad=1&tel=1`: kostka+Volume+světlo v MP (a Rendered) nechat 10 min, pohybovat světlem/kamerou skriptem; sledovat `tex_mb`, `acct_mb`, `rt_malloc_mb`, počet bufferů/textur, q_depth. Roste něco s časem nebo při každém přepočtu (pohyb světla = reset TAA/volume)? Porovnat s Chrome (dual-source) a bez volume.
 - [ ] Když na PC nic neroste: připravit iPad sezení s telemetrií právě na tuhle scénu (soubor `out/h50_scene.blend` + URL s `tel=1` přes tunel) — Lukáš jen otevře a nechá běžet.
-- Lukáš: upřesnit MP nebo Rendered, a jestli něčím hýbal.
+- Lukáš 19. 11. (offline Pages, iPad): padá často, ale NE podle času — náhodně při různých akcích: otevření Asset Library, posun světla, v 2D animaci změna štětce (kreslení samo OK). Nejčastěji: volumetrická mlha + objekt + 4 barevná světla v Rendered. Někdy vše OK.
+- Dvě hypotézy, rozhodnout DATY: (A) paměť těsně pod limitem → spadne jakákoli akce, která alokuje (kompilace shaderu, nové textury, ikony štětců/assetů). (B) **poškození heapu (H49: `subdiv_mesh_tls_free` v TBB, `operator delete(..., align_val_t)`) → pád se projeví později na náhodném místě.** H49 opravit PRVNÍ: hledat nesoulad aligned new/delete nebo TLS ze `enumerable_thread_specific` uvolněné jiným vláknem; po opravě zkusit Emscripten `-sASSERTIONS`/`SAFE_HEAP` build jen pro test (ne release) a pustit prohlídku + šablony → najde další poškození.
+- Rozlišení A/B na iPadu: Jetsam log ve chvíli pádu = paměť (A); bez Jetsamu (jen „Na stránce se opakovaně vyskytl problém" / GPU chyba) = spíš B nebo GPU.
 
 ## O1b — HOTOVO (Lukáš 17. 11. 22:55): `https://gglukyy.github.io/blender-pages/` publikováno (`publish_pages.sh` přes https), na iPadu „Přidat na plochu" běží jako aplikace. Zbývá: Lukáš ověří start v režimu letadlo. Každý nový build = znovu `publish_pages.sh` (Lukáš nebo loop po zelené regresi; řekni v STATUS).
 
