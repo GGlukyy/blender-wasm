@@ -1,3 +1,12 @@
+# 21. 11. 03:50 — Víkend (noc): H49 OPRAVENO
+Výsledek: ✅ PC (Chrome + sim), iPad neověřen
+
+**Co jsem udělal:** File ▸ New ▸ Sculpting padal. Příčina (změřeno): NE poškození heapu, ale paměť — vendorovaný `startup.blend` pro Sculpting byl z 5.2 (už obsahuje Quad Sphere + Subsurf level 6), ale 5.3 `__init__.py` šablony přidá další Quad Sphere (64 segmentů) → obě se slijí do jednoho meshe (24582 ploch) → Subsurf 6 chce 100 milionů ploch → `Malloc returns null` (1,6 GB) → abort. Oprava: `demo/app-templates/Sculpting` a `Video_Editing` nahrazeny verzemi z desktopu 5.3.0 (ostatní tři byly shodné). Žádná změna C++.
+**Důkaz:** `scripts/templates_win.sh` 7/7 PASS v Chrome i `webkit_sim=1` (předtím OPS_TIMEOUT). Test už OPS_TIMEOUT bere jako FAIL.
+**Nasazeno:** `demo/public/assets.tar.zst` + `manifest.json` (záloha `out/bak_h49`). Pro Pages/itch je potřeba nový balík assetů (publish_pages.sh).
+**Důsledek pro H50:** hlavní důkaz pro hypotézu „heap corruption" odpadl; pády iPadu zůstávají paměť (Jetsam data). Další krok H50: měřit velikost wasm paměti a strojový kód.
+**Co otestovat na iPadu:** po novém publish: File ▸ New ▸ Sculpting (mělo by se načíst bez pádu), pak ▸ General.
+
 # 17. 11. 19:00 — Víkend (odpoledne): Cycles Rendered, B3 data, D1 měření, O1b Pages
 Výsledek: ✅ PC (Chrome; sim jen tour + Pages), iPad čeká na Lukáše
 
