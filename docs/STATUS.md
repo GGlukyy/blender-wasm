@@ -1,9 +1,19 @@
+# 21. 11. 10:50 — SOUHRN víkendové noci (pro Lukáše)
+Výsledek: ✅ H49, H46, H45 opraveno + wasm −168 MB; iPad NEOVĚŘEN, nic nepublikováno na Pages
+
+- **H49** File ▸ New ▸ Sculpting padalo: ne heap corruption, ale špatná vendorovaná šablona (5.2 + 5.3 `__init__`) → OOM. Opraveno výměnou šablon. `templates_win` 7/7.
+- **H50 krok 1:** wasm bez sekce `name` = **−168 MB** v Chrome rendereru (working set 1701 → 1536 MB); `?memstage=1` panel pro měření na Macu.
+- **H46** Solid + Shadows (stencil clear) a **H45** DoF (velikost fb pro mip) opraveno; testy `wb_shadow_win.sh`, `wb_dof_win.sh` PASS Chrome/sim/lean.
+- Fork `ipad-5.3` 9f1b8b9856dd (= `BLENDER_REF`), master pushnut. Nasazeno v `demo/public` (PC i lean wasm + assets + manifest, zálohy `out/bak_h49`).
+- **Potřebuju od tebe:** spustit `publish_pages.sh` (nový build na iPad) a na iPadu vyzkoušet: Sculpting šablona, Shadows v Solidu, DoF, a porovnat paměť (Jetsam). Itch zip také nový (`package_itch.sh`).
+- Úklid: regress/testy zastaveny; vite z `out/vite_h49.log` (spustil jsem já) zastaven.
+
 # 21. 11. 08:55 — Víkend (noc): H45 OPRAVENO (Workbench Depth of Field)
 Výsledek: ✅ PC (Chrome, sim, lean), iPad neověřen
 
 **Co jsem udělal:** Solid + DoF (kamera s DoF) na webu nevykreslil kostku. Příčina: `WebGPUFrameBuffer::bind` bral velikost framebufferu z celé textury, ne z mip attachmentu (GL: `GPU_texture_get_mipmap_size`). DoF kreslí do mip 1 a 2 poloviční textury → viewport pro mip 0 byl větší než cíl → WebGPU celý pass zahodí. Oprava v `webgpu_framebuffer.cc` (fork `ipad-5.3` 9f1b8b9856dd, `BLENDER_REF` aktualizován). Navíc DoF resolve měl dual-source blending → pro Safari/iPad přidán dvoukresbový tvar (MUL + ADD_FULL, spínač `WGPU_NO_DUALSRC` jako u H44): `workbench_fx_dof.bsl.hh`, `workbench_effect_dof.cc`.
 **Důkaz:** `scripts/wb_dof_win.sh` PASS v Chrome, `webkit_sim=1` i lean (`cycles=0&ipad=1`): kostka 140/87, pozadí 68 — v sim identické hodnoty jako Chrome (dvoukresba = stejné pixely). Vzhled shodný s desktopem 5.3.0 (`out/win/vol_SOLID_dof.png` vs `h45_desk.png`).
-**Pozor (odhad):** oprava velikosti fb se týká každého passu s attachmentem na mip > 0 (i EEVEE/overlay) — Chrome `regress_all` po této změně NEBĚŽEL (běžel před ní, 0 FAIL); běží `regress_sim` (viz níže). Nový shader `workbench_effect_dof_resolve_nodual` není v WGSL seedu → při prvním použití DoF na iPadu se přeloží za běhu (jednou).
+**Regrese po H45 (10:35–10:47):** `regress_sim` celý 0 FAIL (jen XFAIL `_ctypes`), Chrome prohlídka 75/75, parity 0 ❌. Chrome `regress_all` po H45 NEBĚŽEL celý (běžel po H46, před H45: 0 FAIL) — oprava velikosti fb se týká každého passu s attachmentem na mip > 0. Nový shader `workbench_effect_dof_resolve_nodual` není v WGSL seedu → při prvním použití DoF na iPadu se přeloží za běhu (jednou).
 **Co otestovat na iPadu:** po `publish_pages.sh`: Solid → Viewport Shading ▸ Depth of Field zapnout, kamera s DoF (Camera ▸ Depth of Field): kostka musí být vidět, rozmazaná mimo ohnisko.
 
 # 21. 11. 08:40 — Víkend (noc): H46 OPRAVENO (Workbench Solid + Shadows)
