@@ -5,7 +5,8 @@ session: read `CLAUDE.md`, `docs/STATUS.md`, `docs/PLAN.md` and `docs/BACKLOG.md
 Lukáš cannot test on the iPad until he is back — verify everything yourself in Windows
 Chrome on the real GPU (`scripts/p2_win.sh`, `scripts/parity_win.sh`).
 
-## PRIORITA 0 (Lukáš 19. 11.): H49 (heap corruption, File>New>Sculpting) → pak H50 (náhodné pády iPadu). Podrobnosti v BACKLOG H50. Až pak mise níže.
+## PRIORITA 0 (Lukáš 21. 11.): O1c (auto-update aplikace z plochy + ochrana smyčky autosave + verze na splash) → pak publish_pages.sh (Lukáš). Dál:
+## (19. 11.): H49 (heap corruption, File>New>Sculpting) → pak H50 (náhodné pády iPadu). Podrobnosti v BACKLOG H50. Až pak mise níže.
 
 ## Mission now (od út 17. 11. odpoledne, Lukáš) — pořadí:
 1. **Známé chyby:** H32c (ztracené puštění myši při kompilaci shaderů → mění shading/snap), Cycles Rendered černé pozadí, H46 (Solid+Shadows ztmavuje objekt), H45 (Workbench DoF, nízká priorita).

@@ -1,3 +1,10 @@
+## O1c — aplikace z plochy se neaktualizuje sama + smyčka pádů (Lukáš 21. 11. 22:35) — PRIORITA
+- Stav: Pages má nový build (22:32, `blender.wasm.zst` 25,1 MB), ale iPad dál padá na File ▸ New ▸ Sculpting „opakovaně se vyskytl problém". Příčina (odhad): `sw.js` servíruje starou verzi z cache a nabídne aktualizaci jen lištou — když Blender spadne dřív, než Lukáš klikne, zůstane navždy stará verze.
+- [ ] (a) Při startu (před stažením/spuštěním wasm): když je síť a `version.json` se liší → aktualizovat hned automaticky (smazat cache, reload), bez lišty. Blender ještě neběží, nic se neztratí. Offline = stará verze dál.
+- [ ] (b) Ochrana proti smyčce R1: před automatickým otevřením autosave zapsat do localStorage `restoring=1`, smazat po 60 s běhu. Když při startu `restoring=1` zůstalo → minulý start s obnovou spadl → autosave neotevírat automaticky, jen nabídnout lištou „Minule to spadlo — otevřít autosave?".
+- [ ] (c) Viditelná verze: v rohu splash/Launch obrazovky malým písmem datum buildu (z `version.json`), ať Lukáš pozná, co mu běží.
+- Test: `pages_win.sh` rozšířit: publikovat verzi A, načíst, publikovat B → další start běží B bez kliknutí; smyčka: autosave, který spadne → 2. start ho neotevře.
+
 ## H50 — iPad (offline Pages verze) spadne po ~5 min: 1 světlo + kostka s Principled Volume (Lukáš 18. 11.) — PRIORITA spolu s H49
 - [ ] Přesný repro pro B3: volumetrika je paměťově nejdražší věc v EEVEE (froxel 3D textury, světla × objem) + naše `_nodual` cesta kreslí 2×. Na PC `?webkit_sim=1&ipad=1&tel=1`: kostka+Volume+světlo v MP (a Rendered) nechat 10 min, pohybovat světlem/kamerou skriptem; sledovat `tex_mb`, `acct_mb`, `rt_malloc_mb`, počet bufferů/textur, q_depth. Roste něco s časem nebo při každém přepočtu (pohyb světla = reset TAA/volume)? Porovnat s Chrome (dual-source) a bez volume.
 - [ ] Když na PC nic neroste: připravit iPad sezení s telemetrií právě na tuhle scénu (soubor `out/h50_scene.blend` + URL s `tel=1` přes tunel) — Lukáš jen otevře a nechá běžet.
