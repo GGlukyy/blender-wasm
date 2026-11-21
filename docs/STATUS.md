@@ -1,3 +1,13 @@
+# 21. 11. 08:40 — Víkend (noc): H46 OPRAVENO (Workbench Solid + Shadows)
+Výsledek: ✅ PC (Chrome i sim), iPad neověřen
+
+**Co jsem udělal:** Solid + Shadows na webu zčernalo celý objekt. Příčina (změřeno stencil capture + porovnání s desktopem): `WebGPUFrameBuffer::clear()` ignorovala `GPU_STENCIL_BIT`, takže `GPU_framebuffer_clear_stencil(shadow_depth_stencil, 0)` ve Workbenchi neproběhl a bit OBJECT ze zkopírované hloubky z prepassu zůstal → composite viděl `stencil != 0` všude na objektech. Oprava: samostatný stencil clear (`webgpu_framebuffer.cc/.hh`, fork `ipad-5.3` 282c8ddb060, `BLENDER_REF` aktualizován).
+**Důkaz:** `scripts/wb_shadow_win.sh` (kostka+plane, Shadows 1.0, pixely vs desktop 5.3.0): přední stěna 91 (desktop 95), horní 107 = 107, plane 95 = 94, stín vedle kostky 18 (desktop 5) — PASS v Chrome, `webkit_sim=1` i lean (`cycles=0&ipad=1`). Vizuálně totožný tvar stínu (`out/win/h46_clear.png` vs `h46_desk.png`). `regress_all` PC 0 FAIL (XFAIL `_ctypes`), prohlídka 75/75.
+**Nasazeno do `demo/public`:** PC i lean build (nová wasm, bez sekce `name`), manifest. Lean build přebuilděn (`build-5.3-ipad`).
+**Co nefunguje:** vržený stín je o něco světlejší než desktop (18 vs 5) — odhad: okno měření zahrnuje okraj stínu / TAA; nesrovnával jsem pixel po pixelu. H45 (DoF) nezměněno.
+**Co otestovat na iPadu:** po `publish_pages.sh`: Solid → Viewport Shading ▸ Shadows zapnout (kostka + podlaha): kostka nesmí být černá, stín jen vedle kostky.
+**Debug nástroje** (stencil capture, dump bufferů z render vlákna) jsou v `docs/patches/h46_debug_tools.patch` (ne ve forku).
+
 # 21. 11. 05:40 — Víkend (noc): H50 krok 1 — menší wasm v paměti
 Výsledek: ✅ PC (Chrome + sim), iPad neověřen
 

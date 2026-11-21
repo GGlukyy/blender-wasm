@@ -1,0 +1,277 @@
+diff --git a/source/blender/gpu/webgpu/webgpu_batch.cc b/source/blender/gpu/webgpu/webgpu_batch.cc
+index 3ad34ff1075..227a40fb7a1 100644
+--- a/source/blender/gpu/webgpu/webgpu_batch.cc
++++ b/source/blender/gpu/webgpu/webgpu_batch.cc
+@@ -1115,7 +1115,13 @@ void WebGPUBatch::record_draw(int vertex_first,
+    * attachment's STENCIL aspect right before that shader's first draw. */
+   if (const char *cap_pat = getenv("WGPU_CAP_STENCIL")) {
+     static int s_st_cap = 0;
+-    if (s_st_cap == 0 && strstr(shader->name_get().c_str(), cap_pat) != nullptr) {
++    static const bool cap_end = getenv("WGPU_CAP_STENCIL_END") != nullptr;
++    if (cap_end && strstr(shader->name_get().c_str(), cap_pat) != nullptr && fb->depth_tex() != nullptr) {
++      WebGPUTexture *wdt = static_cast<WebGPUTexture *>(fb->depth_tex());
++      ctx->debug_stencil_cap_at_pass_end(
++          wdt->wgpu_texture(), uint32_t(wdt->width_get()), uint32_t(wdt->height_get()));
++    }
++    else if (!cap_end && s_st_cap == 0 && strstr(shader->name_get().c_str(), cap_pat) != nullptr) {
+       Texture *dt = fb->depth_tex();
+       if (dt != nullptr) {
+         s_st_cap = 1;
+@@ -1159,6 +1165,35 @@ void WebGPUBatch::record_draw(int vertex_first,
+     }
+   }
+ 
++  /* DEBUG (H46): WGPU_DBG_BUF=<shader substr> prints indirect args + index/pos SSBO heads on the 40th matching draw. */
++  if (const char *dbg_pat = getenv("WGPU_DBG_BUF")) {
++    static int s_dbg_n = 0;
++    if (strstr(shader->name_get().c_str(), dbg_pat) != nullptr && ++s_dbg_n == 6) {
++      char lbl[96];
++      if (indirect_buf != nullptr) {
++        snprintf(lbl, sizeof(lbl), "%s indirect@%lld", shader->name_get().c_str(), (long long)indirect_offset);
++        ctx->debug_print_buffer(static_cast<WebGPUStorageBuf *>(indirect_buf)->buffer(), uint64_t(indirect_offset), 32, lbl);
++      }
++      {
++        WGPUBuffer pcb = nullptr;
++        uint64_t pco = 0, pcs = 0;
++        fprintf(stderr, "DBGBUF shader=%p\n", (void *)shader);
++        if (shader->push_const_slice(pcb, pco, pcs) && pcb) {
++          snprintf(lbl, sizeof(lbl), "%s pushconst@%llu", shader->name_get().c_str(), (unsigned long long)pco);
++          ctx->debug_print_buffer(pcb, pco, size_t(pcs), lbl);
++        }
++      }
++      if (WGPUBuffer ib = ctx->ssbo_at(7)) {
++        snprintf(lbl, sizeof(lbl), "%s ssbo7(index) size=%llu", shader->name_get().c_str(), (unsigned long long)wgpuBufferGetSize(ib));
++        ctx->debug_print_buffer(ib, 0, 64, lbl);
++      }
++      if (WGPUBuffer pb = ctx->ssbo_at(3)) {
++        snprintf(lbl, sizeof(lbl), "%s ssbo3(pos) size=%llu", shader->name_get().c_str(), (unsigned long long)wgpuBufferGetSize(pb));
++        ctx->debug_print_buffer(pb, 0, 96, lbl);
++      }
++    }
++  }
++
+   /* --- Begin render pass + record draw. --- */
+   if (ctx->pending_draw_conflicts()) {
+     /* This draw binds a buffer the open pass already used with different
+@@ -1303,6 +1338,10 @@ void WebGPUBatch::record_draw(int vertex_first,
+      * command. Non-zero firstInstance in the commands needs the
+      * `indirect-first-instance` device feature (requested by the harness). */
+     WGPUBuffer ind = static_cast<WebGPUStorageBuf *>(indirect_buf)->buffer();
++    if (getenv("WGPU_LOG_SHDRAW") && strstr(shader->name_get().c_str(), getenv("WGPU_LOG_SHDRAW")) != nullptr) {
++      fprintf(stderr, "WGPU_SHDRAW_IND '%s' fb='%s' count=%d ofs=%lld stride=%lld elem=%d ind=%p\n", shader->name_get().c_str(), fb->name_get(), indirect_count, (long long)indirect_offset, (long long)indirect_stride, int(elem_() != nullptr), (void *)ind);
++      fflush(stderr);
++    }
+     if (ind != nullptr) {
+       const intptr_t stride = (indirect_stride > 0) ?
+                                   indirect_stride :
+@@ -1348,6 +1387,18 @@ void WebGPUBatch::record_draw(int vertex_first,
+   else {
+     uint32_t v_count = (vertex_count > 0) ? uint32_t(vertex_count) :
+                                             (verts_(0) ? verts_(0)->vertex_len : 0);
++    if (getenv("WGPU_LOG_SHDRAW")) {
++      static bool once = false;
++      if (!once) {
++        once = true;
++        fprintf(stderr, "WGPU_FEATURES indirect_first_instance=%d dual_source=%d\n", int(wgpuDeviceHasFeature(ctx->device(), WGPUFeatureName_IndirectFirstInstance)), int(wgpuDeviceHasFeature(ctx->device(), WGPUFeatureName_DualSourceBlending)));
++        fflush(stderr);
++      }
++    }
++    if (getenv("WGPU_LOG_SHDRAW") && strstr(shader->name_get().c_str(), getenv("WGPU_LOG_SHDRAW")) != nullptr) {
++      fprintf(stderr, "WGPU_SHDRAW '%s' fb='%s' v_count=%u inst=%d first_v=%d first_i=%d\n", shader->name_get().c_str(), fb->name_get(), v_count, int(instance_count), vertex_first, int(instance_first));
++      fflush(stderr);
++    }
+     if (v_count > 0) {
+       if (expand_points) {
+         /* One 4-vertex strip quad per point; per-instance vertex stepping
+diff --git a/source/blender/gpu/webgpu/webgpu_context.cc b/source/blender/gpu/webgpu/webgpu_context.cc
+index de3895dad98..c032465fabb 100644
+--- a/source/blender/gpu/webgpu/webgpu_context.cc
++++ b/source/blender/gpu/webgpu/webgpu_context.cc
+@@ -519,6 +519,112 @@ void WebGPUContext::debug_capture_buffer(WGPUBuffer buf, size_t size)
+   flush_encoder();
+ }
+ 
++#ifdef __EMSCRIPTEN__
++/* DEBUG (H46): print stencil histogram + 64x32 grid from the capture buffer on the render thread
++ * (the buffer handle only exists in this thread's JS context, so JS on the main thread cannot map it). */
++static void webgpu_stencil_print_cb(WGPUMapAsyncStatus status, WGPUStringView, void *, void *)
++{
++  if (status != WGPUMapAsyncStatus_Success || g_capture_buf == nullptr) {
++    fprintf(stderr, "STENCIL_GRID map failed %d\n", int(status));
++    fflush(stderr);
++    return;
++  }
++  const uint32_t w = g_capture_w, h = g_capture_h, bpr = g_capture_bpr;
++  const uint8_t *p = static_cast<const uint8_t *>(
++      wgpuBufferGetConstMappedRange(g_capture_buf, 0, size_t(bpr) * h));
++  if (p == nullptr) {
++    fprintf(stderr, "STENCIL_GRID no range\n");
++    fflush(stderr);
++    return;
++  }
++  uint32_t hist[256] = {};
++  for (uint32_t y = 0; y < h; y += 2) {
++    for (uint32_t x = 0; x < w; x += 2) {
++      hist[p[size_t(y) * bpr + x]]++;
++    }
++  }
++  fprintf(stderr, "STENCIL_GRID %ux%u hist:", w, h);
++  for (int v = 0; v < 256; v++) {
++    if (hist[v]) {
++      fprintf(stderr, " %d=%u", v, hist[v]);
++    }
++  }
++  fprintf(stderr, "\n");
++  for (int gy = 0; gy < 32; gy++) {
++    char row[65];
++    for (int gx = 0; gx < 64; gx++) {
++      const uint8_t v = p[size_t((gy * 2 + 1) * h / 64) * bpr + size_t((gx * 2 + 1) * w / 128)];
++      row[gx] = v == 0 ? '.' : (v < 10 ? char('0' + v) : '#');
++    }
++    row[64] = 0;
++    fprintf(stderr, "STENCIL_ROW %s\n", row);
++  }
++  fflush(stderr);
++  wgpuBufferUnmap(g_capture_buf);
++}
++#endif
++
++#ifdef __EMSCRIPTEN__
++struct DbgPrint {
++  WGPUBuffer buf;
++  size_t n;
++  char label[96];
++};
++static void webgpu_dbg_print_cb(WGPUMapAsyncStatus status, WGPUStringView, void *u1, void *)
++{
++  DbgPrint *d = static_cast<DbgPrint *>(u1);
++  if (status != WGPUMapAsyncStatus_Success) {
++    fprintf(stderr, "DBGBUF %s map failed %d\n", d->label, int(status));
++    fflush(stderr);
++    return;
++  }
++  const uint32_t *u = static_cast<const uint32_t *>(wgpuBufferGetConstMappedRange(d->buf, 0, d->n));
++  const float *f = reinterpret_cast<const float *>(u);
++  fprintf(stderr, "DBGBUF %s u32:", d->label);
++  for (size_t i = 0; i < d->n / 4; i++) {
++    fprintf(stderr, " %u", u[i]);
++  }
++  fprintf(stderr, "\nDBGBUF %s f32:", d->label);
++  for (size_t i = 0; i < d->n / 4; i++) {
++    fprintf(stderr, " %g", f[i]);
++  }
++  fprintf(stderr, "\n");
++  fflush(stderr);
++  wgpuBufferUnmap(d->buf);
++}
++#endif
++
++/* DEBUG (H46): copy `n` bytes at `offset` of `src` into a staging buffer and print them (u32 + f32) from the render thread. */
++void WebGPUContext::debug_print_buffer(WGPUBuffer src, uint64_t offset, size_t n, const char *label)
++{
++#ifdef __EMSCRIPTEN__
++  if (src == nullptr || device_ == nullptr) {
++    return;
++  }
++  n = (n + 3) & ~size_t(3);
++  WGPUBufferDescriptor bd = {};
++  bd.size = (n + 3) & ~size_t(3);
++  bd.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_MapRead;
++  WGPUBuffer st = wgpuDeviceCreateBuffer(device_, &bd);
++  render_pass_end();
++  WGPUCommandEncoder enc = ensure_encoder();
++  if (enc == nullptr || st == nullptr) {
++    return;
++  }
++  wgpuCommandEncoderCopyBufferToBuffer(enc, src, offset, st, 0, n);
++  flush_encoder();
++  DbgPrint *d = new DbgPrint();
++  d->buf = st;
++  d->n = n;
++  snprintf(d->label, sizeof(d->label), "%s", label);
++  WGPUBufferMapCallbackInfo ci = {};
++  ci.mode = WGPUCallbackMode_AllowSpontaneous;
++  ci.callback = webgpu_dbg_print_cb;
++  ci.userdata1 = d;
++  wgpuBufferMapAsync(st, WGPUMapMode_Read, 0, n, ci);
++#endif
++}
++
+ void WebGPUContext::debug_capture_stencil(WGPUTexture tex, uint32_t w, uint32_t h)
+ {
+   if (tex == nullptr || device_ == nullptr) {
+@@ -556,6 +662,14 @@ void WebGPUContext::debug_capture_stencil(WGPUTexture tex, uint32_t w, uint32_t
+   g_capture_bpp = 1;
+   g_capture_ready = 0;
+   flush_encoder();
++#ifdef __EMSCRIPTEN__
++  if (getenv("WGPU_CAP_STENCIL_PRINT")) {
++    WGPUBufferMapCallbackInfo ci = {};
++    ci.mode = WGPUCallbackMode_AllowSpontaneous;
++    ci.callback = webgpu_stencil_print_cb;
++    wgpuBufferMapAsync(g_capture_buf, WGPUMapMode_Read, 0, size_t(bpr) * h, ci);
++  }
++#endif
+ }
+ 
+ WGPUCommandEncoder WebGPUContext::ensure_encoder()
+@@ -607,6 +721,14 @@ void WebGPUContext::render_pass_end()
+     render_pass_ = nullptr;
+     render_pass_fb_ = nullptr;
+     pass_buffer_usage_.clear();
++    if (stencil_cap_tex_ != nullptr) {
++      WGPUTexture t = stencil_cap_tex_;
++      stencil_cap_tex_ = nullptr;
++      static int s_n = 0;
++      if (++s_n == 12) { /* one capture only: the buffer must stay untouched until JS maps it */
++        debug_capture_stencil(t, stencil_cap_w_, stencil_cap_h_);
++      }
++    }
+ 
+     /* Debug capture: copy the captured framebuffer's color into the persistent
+      * readback buffer NOW, right after its render pass ends — the texture is
+diff --git a/source/blender/gpu/webgpu/webgpu_context.hh b/source/blender/gpu/webgpu/webgpu_context.hh
+index d063157c820..81121f90d5f 100644
+--- a/source/blender/gpu/webgpu/webgpu_context.hh
++++ b/source/blender/gpu/webgpu/webgpu_context.hh
+@@ -172,6 +172,9 @@ class WebGPUContext : public Context {
+    * texture once the active pass ends, then clears this. Lets later draws to the
+    * final combined framebuffer overwrite earlier captures (last-wins). */
+   bool capture_pending_ = false;
++  /* DEBUG (H46): WGPU_CAP_STENCIL_END — stencil aspect captured after the LAST pass that drew with the matching shader. */
++  WGPUTexture stencil_cap_tex_ = nullptr;
++  uint32_t stencil_cap_w_ = 0, stencil_cap_h_ = 0;
+ 
+  public:
+   WebGPUContext(GHOST_IWindow *ghost_window, GHOST_IContext *ghost_context);
+@@ -326,6 +329,13 @@ class WebGPUContext : public Context {
+    * from JS after the render; h==1 marks it as a raw uint32 dump). */
+   void debug_capture_buffer(WGPUBuffer buf, size_t size);
+   void debug_capture_stencil(WGPUTexture tex, uint32_t w, uint32_t h);
++  void debug_print_buffer(WGPUBuffer src, uint64_t offset, size_t n, const char *label);
++  void debug_stencil_cap_at_pass_end(WGPUTexture tex, uint32_t w, uint32_t h)
++  {
++    stencil_cap_tex_ = tex;
++    stencil_cap_w_ = w;
++    stencil_cap_h_ = h;
++  }
+   WGPUBuffer bound_ssbo_get(int slot) const
+   {
+     return (slot >= 0 && slot < WEBGPU_MAX_SSBO) ? bound_ssbo_[slot] : nullptr;
+diff --git a/source/blender/gpu/webgpu/webgpu_shader.cc b/source/blender/gpu/webgpu/webgpu_shader.cc
+index d2991a984dc..be53d447834 100644
+--- a/source/blender/gpu/webgpu/webgpu_shader.cc
++++ b/source/blender/gpu/webgpu/webgpu_shader.cc
+@@ -1436,6 +1436,12 @@ void WebGPUShader::uniform_float(int location, int comp_len, int array_size, con
+ 
+ void WebGPUShader::uniform_int(int location, int comp_len, int array_size, const int *data)
+ {
++  if (const char *lp = getenv("WGPU_LOG_UNI")) {
++    if (strstr(name_get().c_str(), lp) != nullptr) {
++      fprintf(stderr, "WGPU_UNI_INT '%s' this=%p loc=%d comp=%d arr=%d v0=%d data=%p cap=%zu\n", name_get().c_str(), (void *)this, location, comp_len, array_size, data ? data[0] : -1, (void *)push_const_data_, push_const_size_);
++      fflush(stderr);
++    }
++  }
+   if (push_const_data_ == nullptr || location < 0 || data == nullptr) {
+     return;
+   }
