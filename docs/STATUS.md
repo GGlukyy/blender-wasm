@@ -1,3 +1,11 @@
+# 21. 11. 08:55 — Víkend (noc): H45 OPRAVENO (Workbench Depth of Field)
+Výsledek: ✅ PC (Chrome, sim, lean), iPad neověřen
+
+**Co jsem udělal:** Solid + DoF (kamera s DoF) na webu nevykreslil kostku. Příčina: `WebGPUFrameBuffer::bind` bral velikost framebufferu z celé textury, ne z mip attachmentu (GL: `GPU_texture_get_mipmap_size`). DoF kreslí do mip 1 a 2 poloviční textury → viewport pro mip 0 byl větší než cíl → WebGPU celý pass zahodí. Oprava v `webgpu_framebuffer.cc` (fork `ipad-5.3` 9f1b8b9856dd, `BLENDER_REF` aktualizován). Navíc DoF resolve měl dual-source blending → pro Safari/iPad přidán dvoukresbový tvar (MUL + ADD_FULL, spínač `WGPU_NO_DUALSRC` jako u H44): `workbench_fx_dof.bsl.hh`, `workbench_effect_dof.cc`.
+**Důkaz:** `scripts/wb_dof_win.sh` PASS v Chrome, `webkit_sim=1` i lean (`cycles=0&ipad=1`): kostka 140/87, pozadí 68 — v sim identické hodnoty jako Chrome (dvoukresba = stejné pixely). Vzhled shodný s desktopem 5.3.0 (`out/win/vol_SOLID_dof.png` vs `h45_desk.png`).
+**Pozor (odhad):** oprava velikosti fb se týká každého passu s attachmentem na mip > 0 (i EEVEE/overlay) — Chrome `regress_all` po této změně NEBĚŽEL (běžel před ní, 0 FAIL); běží `regress_sim` (viz níže). Nový shader `workbench_effect_dof_resolve_nodual` není v WGSL seedu → při prvním použití DoF na iPadu se přeloží za běhu (jednou).
+**Co otestovat na iPadu:** po `publish_pages.sh`: Solid → Viewport Shading ▸ Depth of Field zapnout, kamera s DoF (Camera ▸ Depth of Field): kostka musí být vidět, rozmazaná mimo ohnisko.
+
 # 21. 11. 08:40 — Víkend (noc): H46 OPRAVENO (Workbench Solid + Shadows)
 Výsledek: ✅ PC (Chrome i sim), iPad neověřen
 
