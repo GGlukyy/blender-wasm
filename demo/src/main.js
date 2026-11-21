@@ -438,6 +438,19 @@ setUiPhase("ready");
 assetsReady = true;
 refreshStartGate();
 
+/* H50: ?memstage=1 — ruční měření paměti po krocích (Mac Safari: Monitor aktivity → „Safari Web Content“ / WebContent této karty).
+ * Kroky: A po stažení a rozbalení (assets + wasm bajty), B po WebAssembly.compile (strojový kód JSC), C po zahození bajtů + gc. */
+if (new URLSearchParams(location.search).has("memstage")) {
+  const box = document.createElement("div");
+  box.style.cssText = "position:fixed;left:8px;bottom:8px;z-index:99999;background:#000c;color:#fff;font:13px monospace;padding:8px;max-width:520px;white-space:pre-wrap";
+  const out = document.createElement("div"); out.textContent = `KROK A: stránka načtena, drží se assets ${(assetsTar.length / 1048576) | 0} MB + wasm bajty ${(wasmBytes.length / 1048576) | 0} MB.\nZapiš paměť procesu této karty (Monitor aktivity), pak klikni B.`;
+  let mod = null;
+  const btn = (t, fn) => { const b = document.createElement("button"); b.textContent = t; b.style.margin = "4px 4px 0 0"; b.onclick = async () => { try { await fn(); } catch (e) { out.textContent += "\nCHYBA " + e; } }; box.appendChild(b); };
+  btn("B: compile", async () => { const t = performance.now(); mod = await WebAssembly.compile(wasmBytes); out.textContent += `\nKROK B: compile hotov za ${Math.round(performance.now() - t)} ms. Zapiš paměť, pak klikni C.`; });
+  btn("C: zahodit bajty", async () => { wasmBytes = new Uint8Array(0); await new Promise((r) => setTimeout(r, 3000)); out.textContent += `\nKROK C: bajty zahozeny (modul ${mod ? "drží" : "nemá"}). Zapiš paměť. Pak obnov stránku bez ?memstage a spusť Blender normálně (Launch).`; });
+  box.appendChild(out); document.body.appendChild(box);
+}
+
 /* ---- WGSL translation cache (IndexedDB + shipped seed) ---- */
 const idbOpen = () => new Promise((res, rej) => {
   const rq = indexedDB.open("blender-fs", 2);
