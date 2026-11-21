@@ -1,4 +1,9 @@
-## O1c — aplikace z plochy se neaktualizuje sama + smyčka pádů (Lukáš 21. 11. 22:35) — PRIORITA
+## T6 — oficiální tabletové rozhraní Blenderu (Android) — průzkum (Lukáš 21. 11.)
+- [ ] Zjistit, jestli je kód Android/tablet UI z projektu „Android Platform Support" (BCON 2026 APK demo, vydání cíleno na 1. pol. 2027) veřejně na projects.blender.org (větev / PR / `intern/ghost` Android, touch gesta, tablet keymap, UI pro dotyk). Je to GPL → smíme přenést. Výstup: seznam kusů (gesta, keymap, panely, pie menu) + odhad práce, co by šlo převzít do `demo/src/touch.js` nebo do forku. Nic neimplementovat bez Lukáše.
+## T4 — sculpt/paint prstem bez Pencilu (Lukáš 21. 11., nízká priorita)
+- [ ] V Sculpt / Texture Paint / Weight Paint / Grease Pencil Draw: jeden prst = tah štětce (jako Pencil), dva prsty = orbit/pan/zoom. Dnes prstem sculpt nejde (jen Pencil/klávesnice). Inspirace Nomad Sculpt. Přepínatelné v nastavení touch.
+
+## O1c — (Lukáš 21. 11. 22:48: po smazání a znovupřidání aplikace z plochy Sculpting, DoF i Shadows na iPadu FUNGUJÍ → H49/H45/H46 potvrzeny; příčina byla stará cache) aplikace z plochy se neaktualizuje sama + smyčka pádů (Lukáš 21. 11. 22:35) — PRIORITA
 - Stav: Pages má nový build (22:32, `blender.wasm.zst` 25,1 MB), ale iPad dál padá na File ▸ New ▸ Sculpting „opakovaně se vyskytl problém". Příčina (odhad): `sw.js` servíruje starou verzi z cache a nabídne aktualizaci jen lištou — když Blender spadne dřív, než Lukáš klikne, zůstane navždy stará verze.
 - [ ] (a) Při startu (před stažením/spuštěním wasm): když je síť a `version.json` se liší → aktualizovat hned automaticky (smazat cache, reload), bez lišty. Blender ještě neběží, nic se neztratí. Offline = stará verze dál.
 - [ ] (b) Ochrana proti smyčce R1: před automatickým otevřením autosave zapsat do localStorage `restoring=1`, smazat po 60 s běhu. Když při startu `restoring=1` zůstalo → minulý start s obnovou spadl → autosave neotevírat automaticky, jen nabídnout lištou „Minule to spadlo — otevřít autosave?".
