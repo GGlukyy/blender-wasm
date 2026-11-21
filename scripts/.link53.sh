@@ -158,6 +158,14 @@ WEB_FLAGS="-pthread \
 echo ">> relinking blender → $OUT/blender.js (release, no preload)"
 ( cd "$BUILD" && eval "$cmd $WEB_FLAGS" )
 
+# Jména funkcí (custom sekce `name`, ~76 MB) jsou jen pro stack trace, ale prohlížeč drží bajty modulu v paměti
+# (Chrome renderer −170 MB, H50). Plná verze se uloží bokem do out/wasm_full/ (poslední 2) pro ladění. WASM_KEEP_NAMES=1 = nechat.
+if [ "${WASM_KEEP_NAMES:-0}" != 1 ]; then
+  mkdir -p "$ROOT/out/wasm_full"
+  zstd -f -3 -T0 -q "$OUT/blender.wasm" -o "$ROOT/out/wasm_full/blender-$(date +%m%d-%H%M).wasm.zst"
+  ls -t "$ROOT"/out/wasm_full/*.zst | tail -n +3 | xargs -r rm -f
+  python3 -I "$ROOT/scripts/wasm_strip_names.py" "$OUT/blender.wasm" "$OUT/blender.wasm.stripped" && mv -f "$OUT/blender.wasm.stripped" "$OUT/blender.wasm"
+fi
 echo ">> blender.wasm.zst (zstd --ultra -21 -T0)"
 zstd -f --ultra -21 -T0 "$OUT/blender.wasm" -o "$OUT/blender.wasm.zst"
 rm -f "$OUT/blender.wasm"

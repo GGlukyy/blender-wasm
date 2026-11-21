@@ -1,3 +1,13 @@
+# 21. 11. 05:40 — Víkend (noc): H50 krok 1 — menší wasm v paměti
+Výsledek: ✅ PC (Chrome + sim), iPad neověřen
+
+**Co jsem udělal:** wasm obsahuje sekci `name` (jména funkcí, 76–79 MB ze 228/237 MB, jen pro stack trace). Prohlížeč drží bajty modulu v paměti. Nový `scripts/wasm_strip_names.py`, volaný z `scripts/.link53.sh` (plná verze se uloží do `out/wasm_full/`, `WASM_KEEP_NAMES=1` = nestripovat).
+**Důkaz (změřeno, `t1_procmem_win.sh solid 40`, Chrome renderer privátní paměť):** před 2603 / 2596 MB, po 2428 MB = **−168 MB**. Download: lean zst 28,3 → 25,9 MB (-19), PC 29,8 → 27,3 MB. Prohlídka 75/75 Chrome i `webkit_sim=1` 0 problémů, parity 0 ❌, `regress_all` (před stripem, po H49 assetech) 0 FAIL (jen XFAIL `_ctypes`).
+**Nasazeno do `demo/public`:** `blender.wasm.zst` (lean), `blender-pc.wasm.zst`, `assets.tar.zst`, `manifest.json` (zálohy `out/bak_h49`). Komprese -19 (ne -21), při dalším linku bude -21.
+**Co nefunguje / odhad:** na Safari/iPadu zisk neměřen (odhad: podobný nebo větší; JSC drží zdrojové bajty pro lazy kompilaci). Stack trace z iPadu bude mít jen `wasm-function[N]` — jména doplním z `out/wasm_full/`.
+**Co otestovat na iPadu:** po novém `publish_pages.sh` (spustí Lukáš): spustit Blender, v Safari/Jetsam porovnat paměť s dřívějškem; File ▸ New ▸ Sculpting.
+**Co dál:** `?env=` měření dalších položek paměti, Safari na Macu (čtvrtek) — viz BACKLOG H50.
+
 # 21. 11. 03:50 — Víkend (noc): H49 OPRAVENO
 Výsledek: ✅ PC (Chrome + sim), iPad neověřen
 

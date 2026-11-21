@@ -11,6 +11,7 @@
 
 - Další kandidát na neviditelných ~2,5 GB (odhad Opus 21. 11.): **strojový kód wasm v Safari**. JavaScriptCore kompiluje `blender.wasm` (desítky–stovky MB) ve dvou úrovních (BBQ rychlá + OMG optimalizovaná) a může držet obě → stovky MB až GB kódu, který naše telemetrie nevidí. Ověření: na Macu v Safari (Lukáš má Mac ve škole ve čtvrtek) Monitor aktivity → paměť procesu „Safari Web Content" hned po startu Blenderu vs. naše `acct_mb`; a velikost nekomprimovaného `blender.wasm` (lean). Když se potvrdí → zmenšit wasm (odstranit nepoužité moduly v lean buildu, `-Oz` pro studené části) a/nebo zjistit WebKit volby.
 
+- (21. 11. 05:40) **Krok 1 hotov:** strip sekce `name` z wasm = −168 MB v Chrome rendereru (viz STATUS). Zbývá: kolik drží JSC strojový kód (Mac), velikost code sekce 118 MB (lean).
 - Rozlišení A/B na iPadu: Jetsam log ve chvíli pádu = paměť (A); bez Jetsamu (jen „Na stránce se opakovaně vyskytl problém" / GPU chyba) = spíš B nebo GPU.
 
 ## O1b — HOTOVO (Lukáš 17. 11. 22:55): `https://gglukyy.github.io/blender-pages/` publikováno (`publish_pages.sh` přes https), na iPadu „Přidat na plochu" běží jako aplikace. Zbývá: Lukáš ověří start v režimu letadlo. Každý nový build = znovu `publish_pages.sh` (Lukáš nebo loop po zelené regresi; řekni v STATUS).
