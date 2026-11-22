@@ -1135,3 +1135,6 @@ Běžící Blender (paměť wasm) po zavření Safari / uspání karty iOS NEJDE
 
 ## V1 — video výstup (nález API parity 22. 11.): FFmpeg ve wasm chybí
 - [x] (22. 11. `fmt_probe_test.py`: web File Format enum NEobsahuje FFMPEG (ani JPEG2000, WEBP) → žádná past, uživatel vidí jen obrazové formáty. Zbývá jen nápad: PNG sekvence → MP4 přes WebCodecs, pouze s Lukášem) Ověřit v UI: Output Properties ▸ File Format — nabízí „FFmpeg Video“? Co udělá F12 animace (Ctrl+F12) s ním? Cíl: žádná past (skrýt nebo jasná hláška „video nejde, použij PNG sekvenci“). Případně: sekvence PNG → složit do MP4 v prohlížeči (WebCodecs) jako JS nástroj v `demo/`. Jen návrh, bez Lukáše neimplementovat.
+
+## J-VSE — cesta Video Sequencer klávesnicí (22. 11., NEDOKONČENO)
+- Pokus: area → SEQUENCE_EDITOR, barevný pásek 1–60, snímek 30, A + K (řez). Na webu K pásek neřízne a `bpy.ops.sequencer.split(...)` s `temp_override` hlásí „poll() failed, context is incorrect“ — **stejně i v desktop 5.3.0 s UI** (3b: ne chyba portu, ale chybný můj test: poll chce asi jiný kontext/kanálový region). Další krok: zjistit správný kontext (`sequencer_edit_poll`) nebo kliknout na pásek skutečnou myší a řezat přes menu Strip ▸ Split; až pak přidat cestu `vse` do `journey_test.mjs`.
