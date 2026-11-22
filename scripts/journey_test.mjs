@@ -517,6 +517,15 @@ const J = {
     const bad = Object.entries(want).filter(([k, w]) => !r || JSON.stringify(r[k]) !== JSON.stringify(w)).map(([k, w]) => `${k}: web ${JSON.stringify(r && r[k])} vs ${JSON.stringify(w)}`);
     await check(`5 dalších sítí Geometry Nodes (sada 3) = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
   },
+  /* Geometry Nodes sada 4: mesh primitiva proti desktopu 5.3.0 (`gn_nodes4.py`). */
+  gnnodes4: async ({ check, cmd, wait }) => {
+    const code = (await import("node:fs")).readFileSync(new URL("./gn_nodes4.py", import.meta.url), "utf8");
+    await cmd(code); await wait(4000);
+    const r = await cmd("eval:_GN");
+    const want = { grid: [35, 24], uv: [62, 72], ico: [42, 80], cone: [11, 11], cyl: [20, 12], line: [8, 0] };
+    const bad = Object.entries(want).filter(([k, w]) => !r || JSON.stringify(r[k]) !== JSON.stringify(w)).map(([k, w]) => `${k}: web ${JSON.stringify(r && r[k])} vs ${JSON.stringify(w)}`);
+    await check(`6 mesh primitiv Geometry Nodes = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
+  },
   /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };

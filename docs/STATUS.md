@@ -1,3 +1,6 @@
+# 22. 11. 10:40 — cesta `gnnodes4` (Geometry Nodes: 6 mesh primitiv)
+Výsledek: ✅ Grid 35/24, UV Sphere 62/72, Ico Sphere 42/80, Cone 11/11, Cylinder 20/12, Line 8/0 = desktop 5.3.0, Chrome i sim. Úklid: vite zastaven.
+
 # 22. 11. 10:45 — cesta `gnnodes3` (Geometry Nodes sada 3: Duplicate Elements, Scale Elements, Mesh Circle, Flip Faces, Subdivide+Dual)
 Výsledek: ✅ všech 5 = desktop 5.3.0 (dup 72/18, scale 8/6, circ 9/0, flip 8/6, dualsub 96/98), Chrome i sim. Nový `scripts/gn_nodes3.py`. Úklid: vite zastaven. Nepushnuto (jen commit).
 
