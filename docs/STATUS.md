@@ -1,3 +1,6 @@
+# 22. 11. 05:10 — V1: výstupní formáty
+- Web nenabízí FFmpeg Video, JPEG2000 ani WebP (desktop ano) — žádná past, jen chybí. Animace = PNG/JPEG sekvence. Nápad na později: složení sekvence do MP4 přes WebCodecs (jen s tebou).
+
 # 22. 11. 05:00 — Parita vlastností (RNA) web vs desktop 5.3.0 (`scripts/api_props_test.py`)
 Výsledek: ✅ 4101 typů shodných až na 3
 

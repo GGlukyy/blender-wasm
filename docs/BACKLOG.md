@@ -1134,4 +1134,4 @@ Běžící Blender (paměť wasm) po zavření Safari / uspání karty iOS NEJDE
 - [ ] R1c: upozornit: iOS smaže data webu po 7 dnech nepoužívání (mimo "Přidat na plochu") -> v README/itch textu doporučit uložit .blend.
 
 ## V1 — video výstup (nález API parity 22. 11.): FFmpeg ve wasm chybí
-- [ ] Ověřit v UI: Output Properties ▸ File Format — nabízí „FFmpeg Video“? Co udělá F12 animace (Ctrl+F12) s ním? Cíl: žádná past (skrýt nebo jasná hláška „video nejde, použij PNG sekvenci“). Případně: sekvence PNG → složit do MP4 v prohlížeči (WebCodecs) jako JS nástroj v `demo/`. Jen návrh, bez Lukáše neimplementovat.
+- [x] (22. 11. `fmt_probe_test.py`: web File Format enum NEobsahuje FFMPEG (ani JPEG2000, WEBP) → žádná past, uživatel vidí jen obrazové formáty. Zbývá jen nápad: PNG sekvence → MP4 přes WebCodecs, pouze s Lukášem) Ověřit v UI: Output Properties ▸ File Format — nabízí „FFmpeg Video“? Co udělá F12 animace (Ctrl+F12) s ním? Cíl: žádná past (skrýt nebo jasná hláška „video nejde, použij PNG sekvenci“). Případně: sekvence PNG → složit do MP4 v prohlížeči (WebCodecs) jako JS nástroj v `demo/`. Jen návrh, bez Lukáše neimplementovat.
