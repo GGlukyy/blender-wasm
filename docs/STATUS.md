@@ -1,3 +1,11 @@
+# 22. 11. 04:30 — API parita web vs desktop 5.3.0 (`scripts/api_diff_win.sh`)
+Výsledek: ✅ nic nechybí kromě vědomě vypnutých částí buildu
+
+- Typy: web 4112 / desktop 4113 (chybí jen `USDHook`). Operátory: web 2537 / desktop 2560. Enumy (shading, snap, engine) shodné.
+- Chybí na webu (23 operátorů): NDOF (6D myš) a XR/VR (irelevantní), **USD import/export, Alembic import/export, OTIO import/export, export GP do PDF, `grease_pencil.trace_image`**, `wm.console_toggle`.
+- Co z toho může chybět Lukášovi: USD/Alembic (výměna scén), trace image (obrázek → GP). Zapsat jako případný úkol, nepřidávám bez tvého souhlasu (USD/Alembic = velké knihovny do wasm).
+- Úklid: můj dev server zastaven.
+
 # 22. 11. 03:50 — Lov chyb: `journey_win.sh all` v `?webkit_sim=1`
 Výsledek: ✅ 359 PASS, 0 FAIL (stejně jako Chrome)
 
