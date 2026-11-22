@@ -1,3 +1,10 @@
+# 22. 11. 23:10 — cesta `lines` (Workbench F12, Freestyle, Line Art) + F3
+Výsledek: 🟡 9/10 renderů = desktop 5.3.0 (Chrome, lean sim); Freestyle na webu nejde → BACKLOG F3
+
+- Workbench F12: základ, outline, cavity, spekulár, stíny, X-ray, flat, matcap = desktop (±0.03). Line Art objekt se vytvoří (modifikátor LINEART).
+- **Freestyle**: web nevykreslí čáry (desktop 0.82/0.44/0.48, web 0.68/0.74/0.79 = bez čar). Stejná třída příčin jako V3 (film z GPU přichází později a přepíše CPU složení). Udělal jsem jen malou úpravu: web zobrazí varování a nepočítá tahy zbytečně (fork `ipad-5.3` 0fac874bb981, PC + lean přebuilděno a nasazeno do `demo/public`; zálohy `out/bak_pre_fs`). Odhad: varování uvidíš v Info/stavovém řádku po F12 s Freestyle (neověřeno).
+- Co otestovat na iPadu: View Layer ▸ Freestyle zapnout, F12: obrázek bez čar + hláška „Freestyle is not supported…“.
+
 # 22. 11. 22:40 — `regress_sim` po H51 + FFTW + nových cestách
 Výsledek: ✅ 0 FAIL (jen XFAIL `_ctypes`), journey 22. 11. 20:25–22:30 doběhla celá (limit 6000 s stačil), `webkit_sim=1` na PC buildu. Chrome `regress_all` po H51 (před FFTW): 0 FAIL + 14 zbylých cest a nové `vse`, `vse2`, `eevee` zvlášť OK.
 Pozn.: emulace `navigator.hardwareConcurrency=8` v `h50e_win.sh` (env `HC=8`) počet workerů NEzmění (workery vidí skutečných 16 jader) → počet workerů na iPadu zjistí až Lukáš (Mac Safari čtvrtek / iPad `?tel=1`).

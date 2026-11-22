@@ -613,6 +613,16 @@ const J = {
     const want = { base: [0.52, 0.46, 0.49, 1.0], metal: [0.38, 0.42, 0.46, 1.0], glass: [0.36, 0.41, 0.5, 1.0], emit: [0.59, 0.62, 0.58, 1.0], sss: [0.52, 0.52, 0.56, 1.0], coat: [0.39, 0.48, 0.61, 1.0], noshadow: [0.55, 0.48, 0.51, 1.0], raytrace: [0.52, 0.46, 0.48, 1.0], dof: [0.53, 0.46, 0.49, 1.0], worldvol: [0.28, 0.26, 0.26, 1.0], transparent: [0.44, 0.35, 0.33, 0.58], lightsout: [0.18, 0.14, 0.12, 1.0] };
     for (const [k, w] of Object.entries(want)) { const a = r && r[k]; const ok = Array.isArray(a) && a.every((x, i) => Math.abs(x - w[i]) < 0.03); await check(`EEVEE ${k}: web ${JSON.stringify(a)}, desktop ${JSON.stringify(w)}`, () => ok); }
   },
+  /* Workbench F12 volby, Freestyle a Line Art proti desktopu 5.3.0 (`lines_api.py`): střední RGB snímku 96×54. */
+  lines: async ({ check, cmd, wait }) => {
+    const code = (await import("node:fs")).readFileSync(new URL("./lines_api.py", import.meta.url), "utf8");
+    await cmd(code); let r = null;
+    for (let i = 0; i < 300; i++) { await wait(1500); r = await cmd("eval:_LN"); if (r && r.done) break; }
+    const want = { wb_base: [0.46, 0.46, 0.47], wb_outline: [0.48, 0.46, 0.46], wb_cavity: [0.46, 0.46, 0.47], wb_spec: [0.45, 0.45, 0.45], wb_shadow: [0.34, 0.35, 0.35], wb_xray: [0.37, 0.37, 0.37], wb_flat: [0.77, 0.77, 0.77], wb_matcap: [0.42, 0.42, 0.42], freestyle_off: [0.68, 0.74, 0.79] };
+    for (const [k, w] of Object.entries(want)) { const a = r && r[k]; const ok = Array.isArray(a) && a.every((x, i) => Math.abs(x - w[i]) < 0.03); await check(`Render ${k}: web ${JSON.stringify(a)}, desktop ${JSON.stringify(w)}`, () => ok); }
+    await check(`ZNÁMÉ OMEZENÍ (BACKLOG F3): Freestyle na webu se nevykreslí (varování „not supported in the web build“): web ${JSON.stringify(r && r.freestyle)} = bez Freestyle, desktop 5.3.0 [0.82,0.44,0.48]`, () => r && Array.isArray(r.freestyle) && Math.abs(r.freestyle[0] - 0.68) < 0.03 && Math.abs(r.freestyle[2] - 0.79) < 0.03);
+    await check(`Line Art objekt: modifikátory ${JSON.stringify(r && r.lineart_mods)}`, () => r && JSON.stringify(r.lineart_mods) === JSON.stringify(["LINEART"]));
+  },
   /* Video Sequence Editor bez filmů proti desktopu 5.3.0 (`vse_api.py`): Color/Cross/Text/Wipe pásy + render snímku (střední RGB). */
   vse: async ({ check, cmd, wait }) => {
     const code = (await import("node:fs")).readFileSync(new URL("./vse_api.py", import.meta.url), "utf8");
