@@ -1,3 +1,10 @@
+# 22. 11. 05:00 — Parita vlastností (RNA) web vs desktop 5.3.0 (`scripts/api_props_test.py`)
+Výsledek: ✅ 4101 typů shodných až na 3
+
+- Rozdíl jen: **FFmpegSettings** (celé video kódování: formát/kodek/bitrate → render animace do MP4/MOV na webu nejde, jen sekvence obrázků), ImageFormatSettings JPEG2000 (4 vlastnosti), PreferencesInput NDOF (6D myš).
+- Ostatní UI/nástroje/modifikátory/uzly/EEVEE/Cycles mají na webu stejné vlastnosti jako desktop.
+- Pro animátora relevantní: výstup videa → ověřit, že UI nabídka File Format nenabízí FFmpeg Video (aby to nebyla past); případně export snímků + složení mimo Blender. Zapsat do BACKLOG jako nápad, neřešeno.
+
 # 22. 11. 04:30 — API parita web vs desktop 5.3.0 (`scripts/api_diff_win.sh`)
 Výsledek: ✅ nic nechybí kromě vědomě vypnutých částí buildu
 
