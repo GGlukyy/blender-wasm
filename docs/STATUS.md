@@ -1,3 +1,6 @@
+# 22. 11. 16:10 — nové cesty v `webkit_sim=1`
+Výsledek: ✅ multires, packimg, heavymods, glare, compnodes, compo, comppass, collinst, physics všechny OK i v sim (Chrome už dřív). Úklid: vite zastaven.
+
 # 22. 11. 15:50 — cesta `multires` (Multires, Quadriflow)
 Výsledek: 🟡 Multires = desktop (7936 ploch); Quadriflow web 271 vs desktop 221 ploch (oba FINISHED) → BACKLOG Q1, nízká priorita. Úklid: vite zastaven.
 
