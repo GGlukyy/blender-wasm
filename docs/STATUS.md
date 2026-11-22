@@ -1,3 +1,6 @@
+# 22. 11. 10:45 — cesta `gnnodes3` (Geometry Nodes sada 3: Duplicate Elements, Scale Elements, Mesh Circle, Flip Faces, Subdivide+Dual)
+Výsledek: ✅ všech 5 = desktop 5.3.0 (dup 72/18, scale 8/6, circ 9/0, flip 8/6, dualsub 96/98), Chrome i sim. Nový `scripts/gn_nodes3.py`. Úklid: vite zastaven. Nepushnuto (jen commit).
+
 # 22. 11. 19:50 — cesta `gnnodes2` (Geometry Nodes sada 2: Curve to Mesh, Mesh to Volume to Mesh, Merge by Distance, Split Edges, Transform)
 Výsledek: ✅ všech 5 = desktop 5.3.0 (Chrome). Úklid: vite zastaven.
 
