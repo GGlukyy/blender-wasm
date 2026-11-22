@@ -1,3 +1,5 @@
+## Q1 — Quadriflow remesh na webu dává jiný výsledek než desktop (nález 22. 11., journey `multires`)
+- [ ] Opička, target_faces=300, seed=1, bez symetrie: desktop 5.3.0 3× stejně 221 ploch / 228 vrcholů, web 271 ploch. Oba FINISHED a použitelné; zřejmě jiné pořadí vláken / přesnost (odhad, neověřeno). Nízká priorita; ověřit `--threads 1` a seed, zda je web deterministický.
 ## C3 — F12 EEVEE se zapnutým Z/Normal passem ukládal Normal místo Combined — OPRAVENO (22. 11., `comppass`)
 - [x] Příčina: každé 4kanálové čtení filmu spustilo `film_capture_async`, poslední přepsalo výsledek (EEVEE čte passy po Combined). Oprava: zachytit jen první čtení po startu `RE_RenderFrame` (`wgpu_film_capture_arm`). Důkaz: `journey comppass` Chrome + lean sim: Combined 0.267 = desktop (před opravou 0.067/0.031/0.044 barevné stěny); `regress_all` 0 FAIL.
 ## C2b — compositor: Depth/Normal/ostatní passy jsou na webu nuly

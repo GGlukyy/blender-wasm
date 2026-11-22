@@ -404,6 +404,13 @@ const J = {
     }
     await check(`F12 EEVEE s zapnutými passy Z+Normal: Combined = desktop (dřív se místo něj uložil Normal pass); odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
   },
+  /* Multires + Quadriflow: počty z desktopu 5.3.0 (`qf_desk.py`): Multires 2 úrovně UV sféry = 7936 ploch; Quadriflow opičky (300 cílových) = 221 ploch. */
+  multires: async ({ check, cmd, wait }) => {
+    await cmd("bpy.ops.mesh.primitive_uv_sphere_add(); s = bpy.context.object; bpy.ops.object.modifier_add(type='MULTIRES'); bpy.ops.object.multires_subdivide(modifier='Multires', mode='CATMULL_CLARK'); bpy.ops.object.multires_subdivide(modifier='Multires', mode='CATMULL_CLARK')"); await wait(1500);
+    const m = await cmd("eval:[bpy.context.object.modifiers['Multires'].total_levels, len(bpy.context.object.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.polygons)]"); await check(`Multires: ${JSON.stringify(m)} = [2, 7936]`, () => m && m[0] === 2 && m[1] === 7936);
+    await cmd("bpy.ops.mesh.primitive_monkey_add(); o = bpy.context.object; globals()['_qf'] = list(bpy.ops.object.quadriflow_remesh(target_faces=300, use_mesh_symmetry=False, seed=1))"); await wait(6000);
+    const q = await cmd("eval:[_qf, len(bpy.context.object.data.polygons)]"); await check(`Quadriflow dokončí s rozumným počtem ploch (web ${JSON.stringify(q)}; desktop 5.3.0 dává vždy 221, web 271 — odchylka v BACKLOG Q1)`, () => q && q[0][0] === "FINISHED" && q[1] > 150 && q[1] < 400);
+  },
   /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };

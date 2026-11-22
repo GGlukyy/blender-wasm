@@ -1,3 +1,6 @@
+# 22. 11. 15:50 — cesta `multires` (Multires, Quadriflow)
+Výsledek: 🟡 Multires = desktop (7936 ploch); Quadriflow web 271 vs desktop 221 ploch (oba FINISHED) → BACKLOG Q1, nízká priorita. Úklid: vite zastaven.
+
 # 22. 11. 14:40 — C3: F12 EEVEE se zapnutými passy (Z/Normal) ukládal špatný obraz — OPRAVENO (PC)
 Výsledek: ✅ PC (Chrome + lean sim), 🟡 iPad neověřen
 
