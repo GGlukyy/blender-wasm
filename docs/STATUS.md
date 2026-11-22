@@ -1,3 +1,6 @@
+# 22. 11. 19:25 — cesta `gnnodes` (Geometry Nodes: 8 sítí uzlů)
+Výsledek: ✅ všech 8 počtů vrcholů/ploch = desktop 5.3.0 (Subdivision, Distribute+Instance+Realize 38400/28800, Extrude, Dual, Boolean, Convex Hull, Triangulate, Mesh to Points), Chrome i sim. Nový soubor `scripts/gn_nodes.py` (kopíruje ho journey_win.sh). Úklid: vite zastaven.
+
 # 22. 11. 19:00 — cesta `mixblend` (Cycles Mix RGBA, 19 blend módů)
 Výsledek: ✅ všech 19 = desktop 5.3.0 (±0.01), Chrome PC build. Úklid: vite zastaven, nic nezůstalo na pozadí.
 
