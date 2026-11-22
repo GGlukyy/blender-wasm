@@ -1,4 +1,13 @@
-# 22. 11. 01:45 — O1c (priorita 0): auto-update PWA + ochrana smyčky autosave + verze na splash
+# 22. 11. 01:55 — H50 krok PC: soak MP + Principled Volume + 4 barevná světla (sim+ipad)
+Výsledek: 🟡 na PC paměť NEROSTE; iPad neověřen
+
+- **Predikce:** „je-li příčina únik při opakovaném přepočtu volumetriky / pohybu světla, `acct_mb` poroste s časem". **Výsledek: neplatí.** `?auto=soak&soaksec=300&soakmode=lof&soakscene=vol&webkit_sim=1&ipad=1&tel=1` (Chrome, RTX): po zapnutí MP skok 1354 → 1602 MB (volumetrika + světla, `tex_alloc` 93 → 398 MB), pak ~270 s s pohybem světla (~4 Hz): `acct_mb` 1602 → 1608 (+6 MB), `js_used` 232 → 237, `rt_malloc` 415 stabilní. Žádný únik v GPU/JS účtu.
+- Závěr: pády na iPadu = hypotéza A (hladina těsně pod limitem, ne únik); volumetrická scéna stojí cca +250 MB GPU. Neviditelné ~2,5 GB (kód JSC, režie Safari) se na PC změřit nedá → měření na Macu (`?memstage=1`).
+- Oprava testu: `soak` z timeru nepřekreslil viewport (`rt_frame` stál); přidán `tag_redraw`, režim `f` (4 Hz), scéna `soakscene=vol` (`demo/src/autotest.js`), `scripts/soak_report.py` (tabulka paměti v čase).
+- **Potřebuju od tebe (iPad):** po `publish_pages.sh` otevřít `<Pages URL>?auto=soak&soaksec=300&soakmode=lof&soakscene=vol&tel=1` (jen tahle jedna karta/appka) a poslat Jetsam log, kdyby spadlo.
+- Úklid: můj dev server zastaven, testy dojely.
+
+# 22. 11. 01:35 — O1c (priorita 0): auto-update PWA + ochrana smyčky autosave + verze na splash
 Výsledek: 🟡 PC ✅ (Chrome), iPad neověřen, NEPUBLIKOVÁNO na Pages (to děláš ty: `publish_pages.sh`)
 
 - **Co jsem udělal:** (a) po Launch, před stažením wasm, se `sw.js` zeptá sítě na `version.json`; liší-li se, smaže cache a stránka se sama reloadne (bez lišty; max 1× za relaci; offline = stará verze). (b) při automatické obnově autosave se do localStorage zapíše `restoring=1` (smaže se po 60 s běhu); zůstane-li, další start autosave neotevře, ale ukáže lištu „Minule to spadlo — otevřít autosave? [Otevřít][Ne]". (c) na splash pod Launch malým písmem „build D. M. HH:MM".

@@ -80,9 +80,21 @@ def _soak():
         ob.data.materials[0].node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = (abs(math.sin(k / 7.0)), abs(math.cos(k / 11.0)), 0.3, 1.0)
     a = _v3d()
     if a and 'o' in 'SOAK_MODE': a.spaces[0].region_3d.view_rotation.rotate(__import__('mathutils').Euler((0, 0, 0.05)))
+    if a:
+        for r in a.regions: r.tag_redraw()          # H50: bez toho z timeru nevznikne překreslení (rt_frame stál na 18)
     if k % 30 == 0: _say('AUTO_STEP soak_%ds' % int(el))
-    return 1.0
-_gated(lambda: (_mp(), bpy.app.timers.register(_soak, first_interval=4.0)))`.replace('SOAK_SEC', String(+_q.get("soaksec") || 600)).replace('SOAK_MODE', _q.get("soakmode") || "lmo"),
+    return 0.25 if 'f' in 'SOAK_MODE' else 1.0
+if 'SOAK_SCENE' == 'vol':      # H50: kostka s Principled Volume + 4 barevná světla (scéna z hlášení Lukáše)
+    ob = bpy.data.objects['Cube']; m = bpy.data.materials.new('Vol'); m.use_nodes = True; nt = m.node_tree
+    for n in list(nt.nodes):
+        if n.type == 'BSDF_PRINCIPLED': nt.nodes.remove(n)
+    vol = nt.nodes.new('ShaderNodeVolumePrincipled'); vol.inputs['Density'].default_value = 1.0
+    nt.links.new(vol.outputs['Volume'], [n for n in nt.nodes if n.type == 'OUTPUT_MATERIAL'][0].inputs['Volume'])
+    ob.data.materials.clear(); ob.data.materials.append(m)
+    for i, c in enumerate([(1, 0, 0), (0, 1, 0), (0, 0, 1)]):
+        ld = bpy.data.lights.new('VL%d' % i, 'POINT'); ld.color = c; ld.energy = 800
+        lo = bpy.data.objects.new('VL%d' % i, ld); lo.location = (3 * (i - 1), -3, 3); bpy.context.scene.collection.objects.link(lo)
+_gated(lambda: (_mp(), bpy.app.timers.register(_soak, first_interval=4.0)))`.replace('SOAK_SEC', String(+_q.get("soaksec") || 600)).replace('SOAK_MODE', _q.get("soakmode") || "lmo").replace('SOAK_SCENE', _q.get("soakscene") || ""),
   ws: PY_HEAD + `
 _ws = [None, 0]
 def _next():
