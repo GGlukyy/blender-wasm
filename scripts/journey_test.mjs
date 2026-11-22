@@ -328,7 +328,7 @@ const J = {
     await cmd("bpy.ops.object.join()"); await wait(500);
     await check("Ctrl+J spojí vybrané", (s) => s.type === "MESH");
   },
-  /* Compositor (5.3: `scene.compositing_node_group`): web ho při F12 záměrně přeskakuje (pipeline.cc web_skip_compositor); test hlídá, že to nespadne. Workbench render přes uzly (Blur + Color Balance), výsledek z Render Result / Viewer; porovnání s desktopem 5.3.0 = nenulové pixely a rozdíl proti rendru bez uzlů. */
+  /* Compositor (5.3: `scene.compositing_node_group`): web ho při F12 počítá až po příchodu readbacku filmu (C2, pipeline.cc RE_web_run_pending_compositor); hodnota z desktopu 5.3.0. Workbench render přes uzly (Blur + Color Balance), výsledek z Render Result / Viewer; porovnání s desktopem 5.3.0 = nenulové pixely a rozdíl proti rendru bez uzlů. */
   compo: async ({ hover, key, check, cmd, page, wait }) => {
     const render = async () => { await cmd("globals()['_rr'] = globals().get('_rr', 0) + 1"); await hover(); await page.keyboard.press("F12"); for (let i = 0; i < 60; i++) { await wait(1000); if (await cmd("eval:'Render Result' in bpy.data.images and bpy.data.images['Render Result'].has_data")) break; } await wait(3000);
       await cmd("bpy.data.images['Render Result'].save_render('/opfs/home/jr_compo.png')"); await wait(1500);
@@ -336,7 +336,11 @@ const J = {
     await cmd("sc = bpy.context.scene; sc.render.engine = 'BLENDER_WORKBENCH'; sc.render.resolution_x = 160; sc.render.resolution_y = 90; sc.render.resolution_percentage = 100"); await wait(400);
     const a = await render(); await check(`render bez uzlů: ${JSON.stringify(a)}`, () => a && a[0] > 0 && a[1][0] === 160);
     await cmd("sc = bpy.context.scene; t = bpy.data.node_groups.new('C', 'CompositorNodeTree'); sc.compositing_node_group = t; r = t.nodes.new('CompositorNodeRLayers'); b = t.nodes.new('CompositorNodeBlur'); b.inputs['Size'].default_value = (8.0, 8.0) if b.inputs['Size'].type == 'VECTOR' else 8.0; o = t.nodes.new('NodeGroupOutput'); t.interface.new_socket('Image', in_out='OUTPUT', socket_type='NodeSocketColor'); g = t.nodes.new('CompositorNodeInvert'); t.links.new(r.outputs['Image'], g.inputs['Color']); t.links.new(g.outputs['Color'], b.inputs['Image']); t.links.new(b.outputs['Image'], o.inputs['Image'])"); await wait(600);
-    const b = await render(); await check(`ZNÁMÉ OMEZENÍ (BACKLOG C2): web přeskočí compositor, render zůstane bez uzlů, bez pádu; desktop 5.3.0 dá 0.7592, web ${JSON.stringify(b)}`, () => b && Math.abs(b[0] - a[0]) < 1e-4 && b[1][0] === 160 && b[1][1] === 90);
+    const b = await render(); await check(`compositor Invert+Blur = desktop 5.3.0 (0.7592): web ${JSON.stringify(b)}`, () => b && Math.abs(b[0] - 0.7592) < 0.002 && b[1][0] === 160 && b[1][1] === 90);
+    await cmd("bpy.context.scene.render.compositor_device = 'GPU'"); await wait(300);
+    const c = await render(); await check(`stejné s compositor_device=GPU (web ho vždy počítá na CPU): ${JSON.stringify(c)}`, () => c && Math.abs(c[0] - 0.7592) < 0.002);
+    await hover(); await page.keyboard.press("F12"); await wait(300); await page.keyboard.press("F12"); await wait(8000); await key("Escape", 1200);
+    const d = await cmd("eval:'Render Result' in bpy.data.images"); await check(`dvě F12 hned za sebou bez pádu (${d})`, () => d === true);
   },
   /* Zabalené (packed) textury, uložení, znovuotevření, Make Local/Relative Paths; shoda s desktopem = data zůstanou. */
   packimg: async ({ check, cmd, wait }) => {

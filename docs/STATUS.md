@@ -1,3 +1,13 @@
+# 22. 11. 11:00 — C2 OPRAVENO: compositor při F12 na webu (PC Chrome + sim, iPad neověřen)
+Výsledek: ✅ PC, 🟡 iPad neověřen
+
+- **Co:** F12 s uzly v Compositing (5.3: `compositing_node_group`) dřív uzly ignoroval. Teď se compositor odloží do příchodu readbacku filmu a běží na CPU (`RE_web_run_pending_compositor`, `compositor.cc use_gpu()` na webu false). Fork `ipad-5.3` **6f67a1c50767**, `BLENDER_REF` v Makefile aktualizován, pushnuto. Návrh architekta (ADR v BACKLOGu C2).
+- **Důkaz:** `journey_win.sh compo`: Invert+Blur = **0.7593** (desktop 5.3.0 0.7592), i s `compositor_device=GPU`, dvě F12 za sebou bez pádu; Chrome i `webkit_sim=1`. `regress_all` (Chrome) 0 FAIL (jen XFAIL `_ctypes`) až na timeout journey 2400 s (sada je delší o nové cesty → timeout 3600); zbytek cest od `touchnode` po `clip` spuštěn zvlášť, všechny OK.
+- **Nasazeno:** `demo/public` PC (`blender-pc.*`) i lean (`blender.*`) + manifest; zálohy `out/bak_c2`. Lean build jsem otestoval jen compo/regress na PC buildu; sim běží na PC buildu s `webkit_sim=1` (lean `?cycles=0` jsem po C2 nespustil).
+- **Omezení:** compositor jen pro Combined pass a jednu scénu; animace (Ctrl+F12) a více scén dál přeskočí s varováním. Nody používající Normal/Mist/AO dostanou nuly.
+- **Co otestovat na iPadu (po `publish_pages.sh`):** vlož scénu, Compositing workspace → Use Nodes / Blur+Invert, F12: výsledek musí být rozmazaný a invertovaný. F12 dvakrát rychle za sebou nesmí spadnout.
+- Úklid: regress doběhl; vite zastavím.
+
 # 22. 11. 08:40 — Lov chyb: cesta `heavymods` (Remesh, Decimate, Ocean, Fluid)
 Výsledek: 🟡 nález F2: Ocean modifier na webu nic negeneruje
 
