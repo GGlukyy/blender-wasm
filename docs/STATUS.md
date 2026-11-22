@@ -1,3 +1,8 @@
+# 22. 11. 03:50 — Lov chyb: `journey_win.sh all` v `?webkit_sim=1`
+Výsledek: ✅ 359 PASS, 0 FAIL (stejně jako Chrome)
+
+- Žádný nový nález. Úklid: můj dev server zastaven.
+
 # 22. 11. 02:50 — Lov chyb: `journey_win.sh all` (Chrome, PC)
 Výsledek: ✅ 359 PASS, 0 FAIL
 
