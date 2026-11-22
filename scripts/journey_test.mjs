@@ -314,6 +314,20 @@ const J = {
     await cmd("bpy.context.view_layer.objects.active = bpy.data.objects['Floor']; bpy.ops.object.particle_system_add(); ps = bpy.data.objects['Floor'].particle_systems[0]; ps.settings.type = 'HAIR'; ps.settings.count = 200"); await wait(800);
     const hc = await cmd("eval:len(bpy.data.objects['Floor'].evaluated_get(bpy.context.evaluated_depsgraph_get()).particle_systems[0].particles)"); await check(`hair: 200 částic (${hc})`, () => hc === 200);
   },
+  /* Kolekce, instance, rodiče, constraints, linked duplicate, Alt+D, Ctrl+J; výsledky se čtou z Pythonu (shoda s desktopem 5.3.0, `phys_desk`-styl). */
+  collinst: async ({ check, cmd, wait }) => {
+    await cmd("c = bpy.data.collections.new('Grp'); bpy.context.scene.collection.children.link(c); c.objects.link(bpy.data.objects['Cube']); bpy.ops.object.collection_instance_add(collection='Grp', location=(4,0,0)); bpy.context.object.name = 'Inst'"); await wait(600);
+    await check("collection instance přidána", (s) => s.objs === 4 && s.ob === "Inst");
+    const n = await cmd("eval:len([i for i in bpy.context.evaluated_depsgraph_get().object_instances if i.is_instance])"); await check(`depsgraph vidí instanci (${n})`, () => n >= 1);
+    await cmd("o = bpy.data.objects['Cube']; bpy.context.view_layer.objects.active = o; [x.select_set(x == o) for x in bpy.data.objects]; bpy.ops.object.duplicate(linked=True); d = bpy.context.object; d.location.x = -4"); await wait(500);
+    const same = await cmd("eval:bpy.data.objects['Cube.001'].data is bpy.data.objects['Cube'].data"); await check("linked duplicate sdílí mesh", () => same === true);
+    await cmd("e = bpy.data.objects.new('E', None); bpy.context.scene.collection.objects.link(e); k = bpy.data.objects['Cube.001']; k.parent = e; cn = k.constraints.new('COPY_LOCATION'); cn.target = bpy.data.objects['Inst']; e.location.y = 3"); await wait(400);
+    const wx = await cmd("eval:round(bpy.data.objects['Cube.001'].evaluated_get(bpy.context.evaluated_depsgraph_get()).matrix_world.translation.x, 3)"); await check(`constraint Copy Location (x=${wx})`, () => Math.abs(wx - 4) < 1e-3);
+    await cmd("[x.select_set(x.name in ('Cube','Cube.001')) for x in bpy.data.objects]; bpy.context.view_layer.objects.active = bpy.data.objects['Cube']; bpy.ops.object.modifier_add(type='ARRAY'); bpy.context.object.modifiers['Array'].count = 5; bpy.ops.object.convert(target='MESH')"); await wait(800);
+    const v = await cmd("eval:len(bpy.data.objects['Cube'].data.vertices)"); await check(`Array ×5 + Apply (v=${v})`, () => v === 40);
+    await cmd("bpy.ops.object.join()"); await wait(500);
+    await check("Ctrl+J spojí vybrané", (s) => s.type === "MESH");
+  },
   /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };

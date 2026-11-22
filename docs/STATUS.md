@@ -1,3 +1,7 @@
+# 22. 11. 06:40 — Lov chyb: nová cesta `collinst` (kolekce, instance, linked duplicate, constraint, Array+Apply, Ctrl+J)
+Výsledek: ✅ 6/6 PASS Chrome i `webkit_sim=1`, žádný nález
+- Hodnoty jsou ty, které Blender dává z definice (instance v depsgraphu, sdílený mesh, Copy Location x=4, Array 5× = 40 vrcholů). Úklid: vite zastaven.
+
 # 22. 11. 06:10 — Lov chyb: nová cesta `physics` (rigid body, cloth, soft body, driver, shape key, hair)
 Výsledek: ✅ web = desktop 5.3.0, žádný nový nález
 
