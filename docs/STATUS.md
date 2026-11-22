@@ -1,3 +1,6 @@
+# 22. 11. 10:40 — cesta `gnnodes7` (Geometry Nodes: pole Index < N pro Delete/Separate Geometry)
+Výsledek: ✅ 80/66 a 6/2 = desktop 5.3.0, Chrome i sim (doplňuje vynechané z `gnnodes6`). Úklid: vite zastaven.
+
 # 22. 11. 10:30 — cesta `gnnodes6` (Geometry Nodes: Set Position, Extrude Mesh, Instance on Points + Realize)
 Výsledek: ✅ 8/6, 32/30, 96/160 = desktop 5.3.0, Chrome i sim. Úklid: vite zastaven.
 
