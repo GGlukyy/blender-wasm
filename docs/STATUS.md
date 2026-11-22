@@ -1,3 +1,9 @@
+# 22. 11. 05:30 — B3o: `map_mb` 196 MB není držená paměť
+Výsledek: ✅ rozbor, bez změny kódu
+
+- `map_mb` v telemetrii je součet všech `mapAsync` za relaci (nikdy neklesá). Buffery se po čtení uvolní. Nejde o únik ani o část „neviditelných 2,5 GB“. B3o zavřeno v BACKLOGu.
+- Úklid: nic jsem nespouštěl.
+
 # 22. 11. 08:55 — regress_all (Chrome) po dnešních změnách (O1c, autotest soak)
 Výsledek: ✅ 0 FAIL (499 řádků logu `out/regress.log`; jediný XFAIL = add-on `ui_translate`, chybí `_ctypes`, známé)
 - `journey all` Chrome i sim: 359/359 PASS. `regress_sim` jako celek jsem nepouštěl (sim pokrývá journey).
