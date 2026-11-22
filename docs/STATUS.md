@@ -1,3 +1,6 @@
+# 22. 11. 18:15 — cesta `proctex` (Cycles procedurální textury: Noise, Voronoi, Wave, Gradient, Checker, Brick, Magic, White Noise, Gabor)
+Výsledek: ✅ všech 9 = desktop 5.3.0 (±0.02), Chrome PC build. Úklid: vite zastaven.
+
 # 22. 11. 17:55 — cesta `bake4` (Cycles: světla point/sun/spot/area + svět)
 Výsledek: ✅ všech 5 = desktop 5.3.0 (±0.03), Chrome PC build. Úklid: vite zastaven.
 

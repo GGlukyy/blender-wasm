@@ -454,6 +454,18 @@ const J = {
     }
     await check(`4 světla + svět bake = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
   },
+  /* Cycles procedurální textury (Base Color → bake Diffuse Color) proti desktopu 5.3.0 (`tex_desk.py`). */
+  proctex: async ({ check, cmd, wait }) => {
+    await cmd("sc = bpy.context.scene; sc.render.engine = 'CYCLES'; sc.cycles.device = 'CPU'; sc.cycles.samples = 1; sc.cycles.use_denoising = False; o = bpy.data.objects['Cube']; bpy.context.view_layer.objects.active = o; bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.uv.smart_project(); bpy.ops.object.mode_set(mode='OBJECT'); img = bpy.data.images.new('B', 32, 32); m = bpy.data.materials.new('M'); m.use_nodes = True; nt = m.node_tree; n = nt.nodes.new('ShaderNodeTexImage'); n.image = img; nt.nodes.active = n; o.data.materials.clear(); o.data.materials.append(m)"); await wait(800);
+    const want = { Noise: [0.564, 0.563, 0.56], Voronoi: [0.523, 0.494, 0.532], Wave: [0.42, 0.42, 0.42], Gradient: [0.481, 0.481, 0.481], Checker: [0.528, 0.528, 0.528], Brick: [0.178, 0.178, 0.178], Magic: [0.348, 0.617, 0.5], WhiteNoise: [0.619, 0.273, 0.72], Gabor: [0.564, 0.564, 0.564] };
+    const bad = [];
+    for (const [t, w] of Object.entries(want)) {
+      await cmd(`nt = bpy.data.materials['M'].node_tree; b = nt.nodes['Principled BSDF']; t = nt.nodes.new('ShaderNodeTex${t}'); c = [s for s in t.outputs if s.type == 'RGBA'] or [t.outputs[0]]; nt.links.new(c[0], b.inputs['Base Color']); img = bpy.data.images['B']; img.pixels = [0.0, 0.0, 0.0, 1.0] * (32 * 32); globals()['_bk'] = list(bpy.ops.object.bake(type='DIFFUSE', pass_filter={'COLOR'}, margin=2)); nt.nodes.remove(t)`); await wait(5000);
+      const r = await cmd("eval:[_bk, (lambda P: [round(sum(P[c::4]) / (32 * 32), 3) for c in range(3)])(list(bpy.data.images['B'].pixels))]");
+      if (!(r && r[0][0] === "FINISHED" && r[1].every((v, i) => Math.abs(v - w[i]) < 0.02))) bad.push(`${t}: web ${JSON.stringify(r)} vs ${JSON.stringify(w)}`);
+    }
+    await check(`9 procedurálních textur = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
+  },
   /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };
