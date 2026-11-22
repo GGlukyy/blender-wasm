@@ -562,6 +562,15 @@ const J = {
     const bad = Object.entries(want).filter(([k, w]) => !r || JSON.stringify(r[k]) !== JSON.stringify(w)).map(([k, w]) => `${k}: web ${JSON.stringify(r && r[k])} vs ${JSON.stringify(w)}`);
     await check(`15 edit operátorů meshe = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
   },
+  /* Objektové operátory (apply modifikátorů, voxel remesh, join, convert) proti desktopu 5.3.0 (`obj_ops2.py`). */
+  objops2: async ({ check, cmd, wait }) => {
+    const code = (await import("node:fs")).readFileSync(new URL("./obj_ops2.py", import.meta.url), "utf8");
+    await cmd(code); await wait(8000);
+    const r = await cmd("eval:_OO");
+    const want = { apply_subsurf: [98, 192, 96], apply_bevel: [56, 108, 54], apply_array: [32, 48, 24], apply_mirror: [16, 24, 12], apply_decimate: [164, 399, 237], apply_remesh: [1612, 3212, 1606], apply_solidify: [8, 12, 6], apply_triangulate: [8, 18, 12], voxel_remesh: [2728, 5452, 2726], join: [490, 1004, 518], separate_loose: [8, 12, 6], convert_curve: [48, 48, 0], text_mesh: [177, 345, 171], shade_flat: [482, 992, 512] };
+    const bad = Object.entries(want).filter(([k, w]) => !r || JSON.stringify(r[k]) !== JSON.stringify(w)).map(([k, w]) => `${k}: web ${JSON.stringify(r && r[k])} vs ${JSON.stringify(w)}`);
+    await check(`14 objektových operátorů = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
+  },
   /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };

@@ -1,3 +1,6 @@
+# 22. 11. 10:50 — cesta `objops2` (14 objektových operátorů)
+Výsledek: ✅ apply Subsurf/Bevel/Array/Mirror/Decimate/Remesh/Solidify/Triangulate, voxel remesh (2728 v), join, separate loose, convert curve→mesh, text→mesh (177 v), shade flat = desktop 5.3.0 (v/e/f), Chrome i sim. Úklid: vite zastaven.
+
 # 22. 11. 10:55 — cesta `meshops` (15 operátorů meshe v Edit Mode)
 Výsledek: ✅ poke, tris, tris→quads, subdivide, bevel, inset, wireframe, solidify, spin, dissolve limited, unsubdivide, separate, edge→face, flip normals, split = desktop 5.3.0 (počty v/e/f), Chrome i sim. Pozn.: `loopcut_slide` přes bpy shodí i desktop (EXCEPTION_ACCESS_VIOLATION, modální operátor bez okna) → vynechán. Úklid: vite zastaven.
 
