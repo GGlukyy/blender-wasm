@@ -1,3 +1,29 @@
+# 22. 11. 19:30 — PRIORITA 0: H51 ✅, F2b ✅, H50e 🟡 (rozklad hotový, nic nezměněno), V2 odhad
+Výsledek: ✅ H51 + F2b na PC (Chrome, sim, lean sim); iPad neověřen
+
+**H51 záporné měřítko — OPRAVENO.** Příčina: `invert_facing` (záporný determinant matice) chyběl v klíči cache pipeline ve WebGPU backendu (`webgpu_batch.cc`, 2 místa), takže se po kostce s +1 znovu použila pipeline se špatným `frontFace`. Fork `ipad-5.3` 9f623f19f81 (= `BLENDER_REF`, pushnuto). Důkaz: nový `scripts/negscale_win.sh` (Solid, kostka X=−1 vs +1, pixely): před opravou 54,6 vs 120,5 (tmavé), po opravě 120,5 = 120,5 ve všech 3 oknech — Chrome, `webkit_sim=1` i lean (`cycles=0&webkit_sim=1&ipad=1`). `regress_all` (po H51): 0 FAIL, jen XFAIL `_ctypes` + `journey` doběhla do časového limitu 3600 s (cest je dnes tolik, že se nevejdou; poslední: touchnode, žádná cesta nespadla). Nasazeno PC i lean do `demo/public`.
+
+**F2b Ocean/FFTW3 — HOTOVO.** `scripts/build_fftw3.sh` (FFTW 3.3.10, float + double + threads), `WITH_FFTW3=ON` v obou cache souborech, PC i lean přebuilděno. Ocean = **2500 vrcholů = desktop 5.3.0** (journey `heavymods`, test změněn z „známé omezení 81“ na 2500), Glare všech 6 typů beze změny (= desktop). Chrome + sim + lean sim. Velikost: PC zst 26,5 → 26,9 MB, lean 25,15 → 25,5 MB (+0,35 MB). Licence do `THIRD_PARTY.md`. POZOR: **`build-5.3` je teď lean strom, Cycles strom je `build-cycles53`** (prohozeno, viz CYCLES.md).
+
+**H50e rozklad paměti PC (Chrome, prázdná scéna, `scripts/h50e_win.sh`, renderer privátní/commit; working set v závorce):**
+| položka | MB |
+|---|---|
+| základ stránky před Launch | 327 |
+| wasm lineární paměť (INITIAL_MEMORY 1 GB, z toho `malloc` použito jen ~290) | 1024 |
+| JS heap hlavního vlákna (assets tar apod.) | ~240 |
+| pthread workery: 48 kusů × ~15 MB (nejde o `?pool`, vlákna si Blender vytváří sám podle 16 jader) | ~720 |
+| zbytek (strojový kód wasm, GC…) | ~100 |
+| celkem renderer | 2416 (WS 1544) |
+GPU proces zvlášť ~490 MB (Dawn, tex 69 MB).
+Pokusy: `?pool=8/2` nic (workerů pořád 48). `-t 4` (Blender vlákna) → 17 workerů, **2416 → 1948 MB (WS 1544 → 1154, −390 MB)**; cena: Subsurf lv6 na opici 0,13 → 0,25 s (`-t 2`: 0,49 s). `INITIAL_MEMORY` 1 GB → 384 MB: commit −665 MB, ale **working set beze změny** (1522) → pro iPad (Jetsam počítá dotčené stránky) zřejmě bez zisku a hrozí riziko při růstu → neberu (odhad). Přidán JS parametr **`?threads=N`** (předá `-t N`; výchozí chování beze změny, v `main.js`).
+**Co dál / pro Lukáše (Mac Safari čtvrtek):** porovnat `?memstage=1` a Jetsam/Activity Monitor pro `?threads=4&pool=8` vs. výchozí; pokud je zisk velký a ruční práce neutrpí, nastavit na iPadu výchozí `threads=4` (rozhodnutí tvé, odhad: iPad má 8 jader → méně workerů, každý v Safari dražší než 15 MB).
+
+**V2 export videa — jen odhad (neimplementováno).**
+- *In-wasm FFmpeg (`WITH_CODEC_FFMPEG`)*: nutné libavcodec/format/util/swscale/swresample + x264 (GPL) pro wasm32 s pthreads, `--disable-asm`. Odhad velikosti: +25–35 MB wasm (ffmpeg.wasm jádro s x264 ≈ 31 MB nezkomprimované, ~10 MB zst; Blender + VSE čtení videa přidá víc kodeků) → **+8–12 MB ke stažení, +30–40 MB paměti**, 1080p H.264 kódování ~250–350 MB RAM navíc. Práce: 3–5 dní (build knih, Blender 5.3 vyžaduje FFmpeg ≥ 7, patche FindFFmpeg, testy; H.264 má patentové otázky, jen PC build).
+- *Levnější alternativa (doporučení)*: Blender vyrenderuje PNG sekvenci/zip a **JS složí MP4 přes WebCodecs (`VideoEncoder`, hardwarový H.264 i na iPadu Safari 16.4+) + mp4muxer** — 0 MB navíc v wasm, ~1 den práce, ale bez VSE importu videa. Rozhodne Lukáš.
+
+**Úklid:** vite jsem spustil já (`out/vite.log`), na konci zastavím; testy nic nezůstalo.
+
 # 22. 11. 10:45 — cesta `animapi` (animace, drivery, constraints, shape key, armature)
 Výsledek: ✅ 8 hodnot = desktop 5.3.0, Chrome i sim: keyframe interpolace (1.562/8.438, bezier 4.0), Action layers (1), driver `frame*0.5+sqrt(16)` = 9.0, Copy Location + Track To, shape key (max z 1.0), armature pose, NLA/poslední klíč. Nový `scripts/anim_api.py`. Úklid: vite zastaven. Pushnuto: master.
 

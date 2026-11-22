@@ -1882,7 +1882,7 @@ bpy.types.TOPBAR_MT_help.append(_web_help)`;
 const _mcp = mcpConfig(_qp);
 window.Module = {
   poolSize: POOL_N,
-  arguments: ["--factory-startup", "--python-expr", SHADOW_POOL_PY, "--python-expr", OPEN_REQ_PY, "--python-expr", CREDIT_PY, ...autoArgs(), ...mcpPyArgs(_mcp), ...(telEnabled ? ["--python-expr", H30_PROBE_PY] : []), ...(window.__BARGS || [])],
+  arguments: ["--factory-startup", ...(parseInt(_qp.get("threads"), 10) > 0 ? ["-t", String(parseInt(_qp.get("threads"), 10))] : []) /* H50e: ?threads=N omezí vlákna Blenderu (−15 MB/worker) */, "--python-expr", SHADOW_POOL_PY, "--python-expr", OPEN_REQ_PY, "--python-expr", CREDIT_PY, ...autoArgs(), ...mcpPyArgs(_mcp), ...(telEnabled ? ["--python-expr", H30_PROBE_PY] : []), ...(window.__BARGS || [])],
   canvas,
   print: (t) => { log(t); scan(t); },
   printErr: (t) => { log("[err] " + t); scan(t); },
