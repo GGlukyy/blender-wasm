@@ -1,3 +1,6 @@
+# 22. 11. 17:05 — cesta `bake2` (Cycles bake: Normal, AO, Emit, Roughness, UV, Position, Combined)
+Výsledek: ✅ všech 7 typů = desktop 5.3.0 (±0.03), Chrome PC build. Úklid: vite zastaven.
+
 # 22. 11. 16:35 — cesta `bake` (Cycles bake Diffuse Color)
 Výsledek: ✅ střední 0.695 = desktop 5.3.0 (PC build s Cycles, Chrome). Pozn.: jen PC build, lean (`cycles=0`) Cycles nemá. Úklid: vite zastaven.
 
