@@ -338,6 +338,16 @@ const J = {
     await cmd("sc = bpy.context.scene; t = bpy.data.node_groups.new('C', 'CompositorNodeTree'); sc.compositing_node_group = t; r = t.nodes.new('CompositorNodeRLayers'); b = t.nodes.new('CompositorNodeBlur'); b.inputs['Size'].default_value = (8.0, 8.0) if b.inputs['Size'].type == 'VECTOR' else 8.0; o = t.nodes.new('NodeGroupOutput'); t.interface.new_socket('Image', in_out='OUTPUT', socket_type='NodeSocketColor'); g = t.nodes.new('CompositorNodeInvert'); t.links.new(r.outputs['Image'], g.inputs['Color']); t.links.new(g.outputs['Color'], b.inputs['Image']); t.links.new(b.outputs['Image'], o.inputs['Image'])"); await wait(600);
     const b = await render(); await check(`ZNÁMÉ OMEZENÍ (BACKLOG C2): web přeskočí compositor, render zůstane bez uzlů, bez pádu; desktop 5.3.0 dá 0.7592, web ${JSON.stringify(b)}`, () => b && Math.abs(b[0] - a[0]) < 1e-4 && b[1][0] === 160 && b[1][1] === 90);
   },
+  /* Zabalené (packed) textury, uložení, znovuotevření, Make Local/Relative Paths; shoda s desktopem = data zůstanou. */
+  packimg: async ({ check, cmd, wait }) => {
+    await cmd("img = bpy.data.images.new('PK', 64, 64); img.pixels = [0.25, 0.5, 0.75, 1.0] * (64 * 64); img.pack(); m = bpy.data.materials.new('PKM'); m.use_nodes = True; n = m.node_tree.nodes.new('ShaderNodeTexImage'); n.image = img; bpy.data.objects['Cube'].data.materials.append(m)"); await wait(600);
+    await cmd("bpy.ops.wm.save_as_mainfile(filepath='/opfs/home/jr_pack.blend')"); await wait(2500);
+    await cmd("bpy.ops.wm.open_mainfile(filepath='/opfs/home/jr_pack.blend')"); await wait(4000);
+    const r = await cmd("eval:(lambda i: [i.packed_file is not None, list(i.size), [round(x, 2) for x in i.pixels[:4]]])(bpy.data.images['PK'])");
+    await check(`po znovuotevření: packed, 64×64, pixely ${JSON.stringify(r)}`, () => r && r[0] === true && r[1][0] === 64 && Math.abs(r[2][0] - 0.25) < 0.01 && Math.abs(r[2][2] - 0.75) < 0.01);
+    await cmd("bpy.ops.file.unpack_all(method='USE_LOCAL')"); await wait(1500);
+    const u = await cmd("eval:bpy.data.images['PK'].packed_file is None"); await check(`unpack_all vyjme data (${u})`, () => u === true);
+  },
   /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };

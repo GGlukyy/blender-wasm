@@ -1,3 +1,6 @@
+# 22. 11. 08:10 — Lov chyb: cesta `packimg` (zabalená textura, uložit, znovu otevřít, unpack)
+Výsledek: ✅ 3/3 PASS Chrome i sim, žádný nález. Úklid: vite zastaven.
+
 # 22. 11. 07:30 — Lov chyb: cesta `compo` (compositor při F12)
 Výsledek: 🟡 potvrzena známá mezera, web = bez compositingu
 
