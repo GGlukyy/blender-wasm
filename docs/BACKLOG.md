@@ -1,3 +1,7 @@
+## C3 — F12 EEVEE se zapnutým Z/Normal passem ukládal Normal místo Combined — OPRAVENO (22. 11., `comppass`)
+- [x] Příčina: každé 4kanálové čtení filmu spustilo `film_capture_async`, poslední přepsalo výsledek (EEVEE čte passy po Combined). Oprava: zachytit jen první čtení po startu `RE_RenderFrame` (`wgpu_film_capture_arm`). Důkaz: `journey comppass` Chrome + lean sim: Combined 0.267 = desktop (před opravou 0.067/0.031/0.044 barevné stěny); `regress_all` 0 FAIL.
+## C2b — compositor: Depth/Normal/ostatní passy jsou na webu nuly
+- [ ] Web zachytí jen Combined (jedna slot `g_film_result`). Desktop: Depth/20 → 0.94, Normal → 0.068/0.032/0.046; web nuly. Oprava = zachytit film pro každý pass (mapa jméno→pixely) a vložit do `RenderPass` ibuf před compositorem. `journey comppass` vypíše ZNÁMÉ OMEZENÍ.
 ## F2 — Ocean modifier na webu nic nedělá (nález 22. 11., journey `heavymods`)
 - [ ] Build má `WITH_FFTW3=OFF` (`cmake/blender-wasm-cache.cmake:65`) → `WITH_MOD_OCEANSIM` se vypne. Ocean Generate na mřížce 8×8: desktop 5.3.0 2500 vrcholů, web 81 (vstup beze změny, žádná chyba). Stejná závislost: Glare/Convolve v compositoru (zatím stejně přeskakován, C2) a audio efekty. Oprava = přeložit FFTW3 do wasm (malá knihovna, podobně jako `scripts/build_gmp.sh`), zapnout `WITH_FFTW3`; cena ~ +1 MB wasm. Zeptat se Lukáše, jestli Ocean potřebuje (animace moře); jinak jen nechat jako mezeru. Remesh/Decimate/Fluid domain = shoda s desktopem.
 ## C2 — Compositor při F12 na webu (nález 22. 11., journey `compo`)

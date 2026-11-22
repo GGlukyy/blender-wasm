@@ -387,6 +387,23 @@ const J = {
     }
     await check(`23 uzlů = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
   },
+  /* Compositor s extra passy (Depth, Normal) z EEVEE: hodnoty desktopu 5.3.0 (`pass_desk.py`). C2 plán: pro jiné passy než Combined web dává nuly → tohle to změří. */
+  comppass: async ({ hover, key, check, cmd, page, wait }) => {
+    let shots = 0, bad0 = "";
+    const render = async () => { await hover(); await page.keyboard.press("F12"); for (let i = 0; i < 90; i++) { await wait(1000); if (await cmd("eval:'Render Result' in bpy.data.images and bpy.data.images['Render Result'].has_data")) break; } await wait(4000);
+      await cmd("bpy.data.images['Render Result'].save_render('/opfs/home/jr_cp.png')"); await wait(1200);
+      const r = await cmd("eval:(lambda im: (lambda P: [round(sum(P[c::4]) / (im.size[0] * im.size[1]), 3) for c in (0, 1, 2)])(list(im.pixels)))(bpy.data.images.load('/opfs/home/jr_cp.png', check_existing=False))"); await cmd("bpy.data.images.remove(bpy.data.images['jr_cp.png'])"); { const b = await page.evaluate(() => Array.from(Module.FS.readFile("/opfs/home/jr_cp.png"))); (await import("node:fs")).writeFileSync(`out/jr_comppass_img${shots++}.png`, Buffer.from(b)); } await key("Escape", 900); return r; };
+    await cmd("sc = bpy.context.scene; sc.render.engine = 'BLENDER_EEVEE'; sc.render.resolution_x = 96; sc.render.resolution_y = 54; vl = bpy.context.view_layer; vl.use_pass_z = True; vl.use_pass_normal = True"); await wait(500);
+        { const pl = await render(); if (!(pl[0] > 0.25 && pl[0] < 0.28 && Math.abs(pl[0] - pl[1]) < 0.01)) bad0 = `plain ${JSON.stringify(pl)} vs 0.267 šedá`; }
+    const want = { Depth: [0.94, 0.94, 0.94], Normal: [0.068, 0.032, 0.046], Image: [0.267, 0.267, 0.267] };
+    const bad = bad0 ? [bad0] : [];
+    for (const [name, w] of Object.entries(want)) {
+      const link = name === "Depth" ? "m = t.nodes.new('ShaderNodeMath'); m.operation = 'DIVIDE'; m.inputs[1].default_value = 20.0; t.links.new(r.outputs['Depth'], m.inputs[0]); t.links.new(m.outputs[0], o.inputs['Image'])" : `t.links.new(r.outputs['${name}'], o.inputs['Image'])`;
+      await cmd(`sc = bpy.context.scene; t = bpy.data.node_groups.new('C', 'CompositorNodeTree'); sc.compositing_node_group = t; r = t.nodes.new('CompositorNodeRLayers'); o = t.nodes.new('NodeGroupOutput'); t.interface.new_socket('Image', in_out='OUTPUT', socket_type='NodeSocketColor'); ${link}`); await wait(500);
+      const m = await render(); if (!(Array.isArray(m) && m.every((v, i) => Math.abs(v - w[i]) < 0.02))) { if (name === "Image") bad.push(`${name}: web ${JSON.stringify(m)} vs ${JSON.stringify(w)}`); else console.log(`ZNÁMÉ OMEZENÍ (BACKLOG C2b): pass ${name} v compositoru = nuly na webu (${JSON.stringify(m)}), desktop ${JSON.stringify(w)}`); }
+    }
+    await check(`F12 EEVEE s zapnutými passy Z+Normal: Combined = desktop (dřív se místo něj uložil Normal pass); odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
+  },
   /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };
