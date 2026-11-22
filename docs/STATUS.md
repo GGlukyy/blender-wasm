@@ -1,3 +1,6 @@
+# 22. 11. 10:55 — cesta `meshops` (15 operátorů meshe v Edit Mode)
+Výsledek: ✅ poke, tris, tris→quads, subdivide, bevel, inset, wireframe, solidify, spin, dissolve limited, unsubdivide, separate, edge→face, flip normals, split = desktop 5.3.0 (počty v/e/f), Chrome i sim. Pozn.: `loopcut_slide` přes bpy shodí i desktop (EXCEPTION_ACCESS_VIOLATION, modální operátor bez okna) → vynechán. Úklid: vite zastaven.
+
 # 22. 11. 10:40 — cesta `gnnodes7` (Geometry Nodes: pole Index < N pro Delete/Separate Geometry)
 Výsledek: ✅ 80/66 a 6/2 = desktop 5.3.0, Chrome i sim (doplňuje vynechané z `gnnodes6`). Úklid: vite zastaven.
 
