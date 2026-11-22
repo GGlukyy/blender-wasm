@@ -1,3 +1,6 @@
+# 22. 11. 10:55 — cesta `bmeshops` (15 bmesh.ops)
+Výsledek: ✅ subdivide, bevel, inset_region, extrude, dissolve, triangulate, poke, remove_doubles, convex hull (507 v), delete, spin, solidify, wireframe, mirror, recalc normals = desktop 5.3.0, Chrome i sim. `bridge_loops` vynechán (chyba mého skriptu). Přidán `scripts/mk.py` (diagnostika U1). Úklid: vite zastaven.
+
 # 22. 11. 10:55 — cesta `uvops` (UV operátory)
 Výsledek: 🟡 6/7 = desktop 5.3.0 (smart na kostce, cube/sphere/cylinder projekce, reset, unwrap se seams), 1 rozdíl: Smart UV Project na opici = jiné rozložení ostrovů (BACKLOG U1, platná UV, nízká priorita). Test drží jen těch 6 (rozdíl nezakrývám tolerancí, opice v testu není). Úklid: vite zastaven.
 

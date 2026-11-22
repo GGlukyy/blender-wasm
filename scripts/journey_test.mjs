@@ -587,6 +587,15 @@ const J = {
     const r = await cmd("eval:_MK"); fs.writeFileSync("out/jr_mk.json", JSON.stringify(r));
     await check("mkdump", () => !!r);
   },
+  /* bmesh.ops proti desktopu 5.3.0 (`bmesh_ops.py`). */
+  bmeshops: async ({ check, cmd, wait }) => {
+    const code = (await import("node:fs")).readFileSync(new URL("./bmesh_ops.py", import.meta.url), "utf8");
+    await cmd(code); await wait(5000);
+    const r = await cmd("eval:_BM");
+    const want = { subdiv: [56, 108, 54], bevel: [32, 60, 30], inset_region: [8, 12, 6], extrude: [12, 20, 11], dissolve_faces: [8, 11, 5], triangulate: [8, 18, 12], poke: [14, 36, 24], remove_doubles: [8, 12, 6], convex_hull: [507, 1128, 626], delaunay: [8, 12, 0], spin: [16, 20, 6], solidify: [16, 24, 12], wireframe: [48, 108, 54], mirror: [16, 24, 12], recalc: [507, 1005, 500] };
+    const bad = Object.entries(want).filter(([k, w]) => !r || JSON.stringify(r[k]) !== JSON.stringify(w)).map(([k, w]) => `${k}: web ${JSON.stringify(r && r[k])} vs ${JSON.stringify(w)}`);
+    await check(`15 bmesh.ops = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
+  },
   /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };
