@@ -328,6 +328,16 @@ const J = {
     await cmd("bpy.ops.object.join()"); await wait(500);
     await check("Ctrl+J spojí vybrané", (s) => s.type === "MESH");
   },
+  /* Compositor (5.3: `scene.compositing_node_group`): web ho při F12 záměrně přeskakuje (pipeline.cc web_skip_compositor); test hlídá, že to nespadne. Workbench render přes uzly (Blur + Color Balance), výsledek z Render Result / Viewer; porovnání s desktopem 5.3.0 = nenulové pixely a rozdíl proti rendru bez uzlů. */
+  compo: async ({ hover, key, check, cmd, page, wait }) => {
+    const render = async () => { await cmd("globals()['_rr'] = globals().get('_rr', 0) + 1"); await hover(); await page.keyboard.press("F12"); for (let i = 0; i < 60; i++) { await wait(1000); if (await cmd("eval:'Render Result' in bpy.data.images and bpy.data.images['Render Result'].has_data")) break; } await wait(3000);
+      await cmd("bpy.data.images['Render Result'].save_render('/opfs/home/jr_compo.png')"); await wait(1500);
+      const r = await cmd("eval:(lambda im: [round(sum(list(im.pixels)[0::4]) / (im.size[0] * im.size[1]), 4), list(im.size)])(bpy.data.images.load('/opfs/home/jr_compo.png'))"); await cmd("bpy.data.images.remove(bpy.data.images['jr_compo.png'])"); await key("Escape", 1200); return r; };
+    await cmd("sc = bpy.context.scene; sc.render.engine = 'BLENDER_WORKBENCH'; sc.render.resolution_x = 160; sc.render.resolution_y = 90; sc.render.resolution_percentage = 100"); await wait(400);
+    const a = await render(); await check(`render bez uzlů: ${JSON.stringify(a)}`, () => a && a[0] > 0 && a[1][0] === 160);
+    await cmd("sc = bpy.context.scene; t = bpy.data.node_groups.new('C', 'CompositorNodeTree'); sc.compositing_node_group = t; r = t.nodes.new('CompositorNodeRLayers'); b = t.nodes.new('CompositorNodeBlur'); b.inputs['Size'].default_value = (8.0, 8.0) if b.inputs['Size'].type == 'VECTOR' else 8.0; o = t.nodes.new('NodeGroupOutput'); t.interface.new_socket('Image', in_out='OUTPUT', socket_type='NodeSocketColor'); g = t.nodes.new('CompositorNodeInvert'); t.links.new(r.outputs['Image'], g.inputs['Color']); t.links.new(g.outputs['Color'], b.inputs['Image']); t.links.new(b.outputs['Image'], o.inputs['Image'])"); await wait(600);
+    const b = await render(); await check(`ZNÁMÉ OMEZENÍ (BACKLOG C2): web přeskočí compositor, render zůstane bez uzlů, bez pádu; desktop 5.3.0 dá 0.7592, web ${JSON.stringify(b)}`, () => b && Math.abs(b[0] - a[0]) < 1e-4 && b[1][0] === 160 && b[1][1] === 90);
+  },
   /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };

@@ -1,3 +1,12 @@
+# 22. 11. 07:30 — Lov chyb: cesta `compo` (compositor při F12)
+Výsledek: 🟡 potvrzena známá mezera, web = bez compositingu
+
+- Desktop 5.3.0 (Workbench 160×90, uzly Invert → Blur): střední červená **0.7592**; bez uzlů 0.2722 (web = desktop). Web s uzly: **0.2722** — compositor se při F12 přeskakuje (`web_skip_compositor`, hláška ve warningu). Nezhroutí se.
+- Zapsáno do BACKLOGu jako C2 (oprava = počkat na readback filmu před compositorem; zásah do pipeline, nedělám bez tebe).
+- Pozn. 5.3: `scene.use_nodes`/`node_tree` už neexistují, je `scene.compositing_node_group`.
+- Test `journey_win.sh compo` PASS (hlídá „bez pádu a bez uzlů").
+- Úklid: vite zastaven.
+
 # 22. 11. 06:40 — Lov chyb: nová cesta `collinst` (kolekce, instance, linked duplicate, constraint, Array+Apply, Ctrl+J)
 Výsledek: ✅ 6/6 PASS Chrome i `webkit_sim=1`, žádný nález
 - Hodnoty jsou ty, které Blender dává z definice (instance v depsgraphu, sdílený mesh, Copy Location x=4, Array 5× = 40 vrcholů). Úklid: vite zastaven.
