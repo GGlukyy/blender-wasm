@@ -1,3 +1,10 @@
+# 22. 11. 02:50 — Lov chyb: `journey_win.sh all` (Chrome, PC)
+Výsledek: ✅ 359 PASS, 0 FAIL
+
+- Všechny cesty (addons … clip, ~70 scénářů) prošly bez selhání; žádný nový nález.
+- Nepouštěl jsem sim režim ani touch cesty zvlášť (jsou součástí `all`, ale jen v Chrome).
+- Úklid: můj dev server zastaven.
+
 # 22. 11. 02:30 — B3n měření q_depth (jen PC)
 Výsledek: 🟡 měření hotové, oprava nenavržena
 
