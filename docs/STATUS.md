@@ -1,3 +1,13 @@
+# 22. 11. 14:40 — C3: F12 EEVEE se zapnutými passy (Z/Normal) ukládal špatný obraz — OPRAVENO (PC)
+Výsledek: ✅ PC (Chrome + lean sim), 🟡 iPad neověřen
+
+- **Nález (cesta `comppass`):** s Z/Normal passem F12 v EEVEE ukázal místo výsledku Normal pass (modrá/oranžová kostka na černé). Příčina: poslední 4kanálové čtení filmu přepsalo zachycený Combined. Oprava: zachytit jen první čtení po startu renderu (fork `ipad-5.3` 0f53a2e3d466, `BLENDER_REF` aktualizován, pushnuto).
+- **Důkaz:** `journey_win.sh comppass` (Chrome i `cycles=0&webkit_sim=1&ipad=1`): Combined 0.267 = desktop 5.3.0; `regress_all` 0 FAIL (jen XFAIL `_ctypes`; journey doběhla v limitu 3600 s).
+- **Zbývá (C2b):** Depth/Normal v compositoru jsou na webu nuly (BACKLOG).
+- **Nasazeno:** `demo/public` PC i lean nový build.
+- **Co otestovat na iPadu:** View Layer ▸ zapni Z a Normal passy, EEVEE, F12: Render Result musí být normální obraz kostky.
+- Úklid: regress doběhl; vite zastaven.
+
 # 22. 11. 13:00 — cesta `compnodes` (23 uzlů Compositingu vs desktop 5.3.0)
 Výsledek: ✅ všech 23 shodných (±0.01), Chrome i sim. Posterize 0.06 a Tonemap 0.602 (neidentické) sedí taky. Denoise sedí (výchozí nastavení; neověřeno, zda jde o skutečný OIDN). Úklid: vite zastaven.
 
