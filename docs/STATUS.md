@@ -1,3 +1,6 @@
+# 22. 11. 12:20 — cesta `glare` (compositor Glare, 6 typů) po C2
+Výsledek: ✅ 6/6 = desktop 5.3.0 (±0.01), Chrome i sim. Fog Glow funguje i bez FFTW3 (FFTW chybí jen Ocean modifier, F2). Úklid: vite zastaven.
+
 # 22. 11. 11:45 — C2 dotažení: lean build + animace s compositorem
 Výsledek: ✅ PC
 - `journey compo` v lean (`cycles=0&ipad=1&webkit_sim=1`) PASS (0.7593). Nový `render_anim_compo_win.sh` (Ctrl+F12 se 3 snímky a uzly v Compositing, Workbench/EEVEE/INVOKE): 3/3 PASS, snímky mají pixely, žádný pád; přidán do `regress_all`. Úklid: vite zastaven.

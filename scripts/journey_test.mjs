@@ -361,6 +361,18 @@ const J = {
     const fl = await cmd("bpy.ops.mesh.primitive_cube_add(); o = bpy.context.object; bpy.ops.object.modifier_add(type='FLUID'); o.modifiers['Fluid'].fluid_type = 'DOMAIN'; o.modifiers['Fluid'].domain_settings.resolution_max = 16"); await wait(1200);
     const ft = await cmd("eval:bpy.context.object.modifiers['Fluid'].fluid_type"); await check(`Fluid domain nastaven (${ft})`, () => ft === "DOMAIN");
   },
+  /* Compositor Glare (všechny typy) po C2: střední červená = desktop 5.3.0 (`glare_desk.py`); Fog Glow funguje i bez FFTW3. */
+  glare: async ({ hover, key, check, cmd, page, wait }) => {
+    const render = async () => { await hover(); await page.keyboard.press("F12"); for (let i = 0; i < 60; i++) { await wait(1000); if (await cmd("eval:'Render Result' in bpy.data.images and bpy.data.images['Render Result'].has_data")) break; } await wait(3000);
+      await cmd("bpy.data.images['Render Result'].save_render('/opfs/home/jr_gl.png')"); await wait(1500);
+      const r = await cmd("eval:(lambda im: round(sum(list(im.pixels)[0::4]) / (im.size[0] * im.size[1]), 4))(bpy.data.images.load('/opfs/home/jr_gl.png', check_existing=False))"); await key("Escape", 1200); return r; };
+    await cmd("sc = bpy.context.scene; sc.render.engine = 'BLENDER_WORKBENCH'; sc.render.resolution_x = 160; sc.render.resolution_y = 90"); await wait(400);
+    const want = { "Fog Glow": 0.391, "Bloom": 0.3978, "Streaks": 0.4243, "Ghosts": 0.3447, "Simple Star": 0.4552, "Sun Beams": 0.4294 };
+    for (const [mode, w] of Object.entries(want)) {
+      await cmd(`sc = bpy.context.scene; t = bpy.data.node_groups.new('C', 'CompositorNodeTree'); sc.compositing_node_group = t; r = t.nodes.new('CompositorNodeRLayers'); g = t.nodes.new('CompositorNodeGlare'); g.inputs['Type'].default_value = '${mode}'; g.inputs['Threshold'].default_value = 0.0; o = t.nodes.new('NodeGroupOutput'); t.interface.new_socket('Image', in_out='OUTPUT', socket_type='NodeSocketColor'); t.links.new(r.outputs['Image'], g.inputs['Image']); t.links.new(g.outputs['Image'], o.inputs['Image'])`); await wait(500);
+      const m = await render(); await check(`Glare ${mode}: web ${m}, desktop ${w}`, () => typeof m === "number" && Math.abs(m - w) < 0.01);
+    }
+  },
   /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };
