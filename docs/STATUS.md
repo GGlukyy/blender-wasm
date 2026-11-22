@@ -1,3 +1,12 @@
+# 22. 11. 21:00 — nové cesty `vse` a `vse2` (Video Sequence Editor) + zbytek journey po FFTW
+Výsledek: 🟡 18/19 hodnot = desktop 5.3.0, Chrome i sim; 1 rozdíl → BACKLOG V3 (nízká priorita)
+
+- `vse`: Color/Cross/Text/Wipe pásy (frame range, typ) + render snímku (střední RGB) + mute = desktop (10 hodnot).
+- `vse2`: Scene strip (Workbench), obrázkový pás, Transform pásu, Gaussian Blur, Multiply, Speed = desktop (8 hodnot).
+- **Nález V3:** Scene strip + další pás → web ukáže jen scénu (film z GPU přepíše složený obraz sekvenceru). Test ho drží jako ZNÁMÉ OMEZENÍ (nezakrývá tolerancí, je to samostatný check na chybný stav), příčina + návrh opravy v BACKLOG V3.
+- Zbytek journey (touchtool … clip, 14 cest, které se nevešly do limitu 3600 s) po FFTW buildu: všech 14 OK v Chrome. `regress_all.sh`: limit journey zvýšen na 6000 s (cest je ~150).
+- Úklid: vite z `out/vite.log` (spustil jsem já) ještě běží, zastavím na konci práce.
+
 # 22. 11. 19:30 — PRIORITA 0: H51 ✅, F2b ✅, H50e 🟡 (rozklad hotový, nic nezměněno), V2 odhad
 Výsledek: ✅ H51 + F2b na PC (Chrome, sim, lean sim); iPad neověřen
 

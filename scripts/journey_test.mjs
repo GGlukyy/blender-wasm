@@ -605,6 +605,28 @@ const J = {
     const bad = Object.entries(want).filter(([k, w]) => !r || JSON.stringify(r[k]) !== JSON.stringify(w)).map(([k, w]) => `${k}: web ${JSON.stringify(r && r[k])} vs ${JSON.stringify(w)}`);
     await check(`${Object.keys(want).length} matematických API = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
   },
+  /* Video Sequence Editor bez filmů proti desktopu 5.3.0 (`vse_api.py`): Color/Cross/Text/Wipe pásy + render snímku (střední RGB). */
+  vse: async ({ check, cmd, wait }) => {
+    const code = (await import("node:fs")).readFileSync(new URL("./vse_api.py", import.meta.url), "utf8");
+    await cmd(code); await wait(6000);
+    const r = await cmd("eval:_VS");
+    const want = { colors: [1, 21, 15, 41], cross: [15, 21, "CROSS"], text: ["Hi", 10, "TEXT"], wipe: [15, 21, "SINGLE"], nstrips: 5, render3: [0.86, 0.22, 0.13], render10: [0.86, 0.24, 0.14], render18: [0.47, 0.28, 0.48], render30: [0.08, 0.34, 0.82], mute: [0.0, 0.0, 0.0] };
+    const near = (k, a, b) => /^(render|mute)/.test(k) ? Array.isArray(a) && a.every((x, i) => Math.abs(x - b[i]) < 0.02) : JSON.stringify(a) === JSON.stringify(b);
+    const bad = Object.entries(want).filter(([k, w]) => !r || !near(k, r[k], w)).map(([k, w]) => `${k}: web ${JSON.stringify(r && r[k])} vs ${JSON.stringify(w)}`);
+    await check(`${Object.keys(want).length} hodnot VSE = desktop 5.3.0; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
+  },
+  /* VSE 2 proti desktopu 5.3.0 (`vse2_api.py`): scene strip (Workbench přes sekvencer), obrázkový pás, Transform pásu, Gaussian Blur, Multiply, Speed. */
+  vse2: async ({ check, cmd, wait }) => {
+    const code = (await import("node:fs")).readFileSync(new URL("./vse2_api.py", import.meta.url), "utf8");
+    await cmd(code); let r = null;
+    for (let i = 0; i < 120; i++) { await wait(1500); r = await cmd("eval:_V2"); if (r && r.done) break; }
+    if (r && r.grid) for (const [k, v] of Object.entries(r.grid)) console.log("VSE2GRID " + k + " " + JSON.stringify(v));
+    const want = { scene_strip: ["SCENE", 10], scene_render: [0.12, 0.16, 0.12], image_strip: ["IMAGE", 10, "vse2_img.png"], image_render: [0.16, 0.1, 0.04], transform_render: [0.14, 0.1, 0.07], blur_render: [0.17, 0.1, 0.03], multiply_render: [0.04, 0.03, 0.0], speed: ["SPEED", 10] };
+    const near = (k, a, b) => /_render$/.test(k) ? Array.isArray(a) && a.every((x, i) => Math.abs(x - b[i]) < 0.02) : JSON.stringify(a) === JSON.stringify(b);
+    const bad = Object.entries(want).filter(([k, w]) => !r || !near(k, r[k], w)).map(([k, w]) => `${k}: web ${JSON.stringify(r && r[k])} vs ${JSON.stringify(w)}`);
+    await check(`${Object.keys(want).length} hodnot VSE2 = desktop 5.3.0; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
+    await check(`ZNÁMÉ OMEZENÍ (BACKLOG V3): scene strip + další pás — web ${JSON.stringify(r && r.scene_effect_render)} = jen scéna (film z GPU přepíše sekvencer), desktop 5.3.0 [0.13,0.14,0.1]`, () => r && Array.isArray(r.scene_effect_render) && Math.abs(r.scene_effect_render[0] - 0.12) < 0.02 && Math.abs(r.scene_effect_render[1] - 0.16) < 0.02);
+  },
   /* Mesh/Object data API proti desktopu 5.3.0 (`data_api.py`). */
   dataapi: async ({ check, cmd, wait }) => {
     const code = (await import("node:fs")).readFileSync(new URL("./data_api.py", import.meta.url), "utf8");
