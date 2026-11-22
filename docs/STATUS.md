@@ -1,3 +1,8 @@
+# 22. 11. 22:15 — cesta `eevee` (EEVEE F12, 12 variant materiálů/nastavení)
+Výsledek: ✅ všech 12 = desktop 5.3.0 (±0.03), Chrome i lean sim (`cycles=0&webkit_sim=1&ipad=1`)
+
+Difuzní, kov, sklo (transmission), emise, SSS, coat, bez stínů, ray tracing, DoF, objem ve světě, průhledné pozadí (alfa 0.58), světla vypnutá — střední RGBA snímku 96×54. Nový `scripts/eevee_api.py` (kopíruje ho `journey_win.sh`). Pozn.: skript na webu nesmí volat `read_factory_settings` (shodí kontext), maže objekty. Úklid: vite zastaven na konci.
+
 # 22. 11. 21:00 — nové cesty `vse` a `vse2` (Video Sequence Editor) + zbytek journey po FFTW
 Výsledek: 🟡 18/19 hodnot = desktop 5.3.0, Chrome i sim; 1 rozdíl → BACKLOG V3 (nízká priorita)
 

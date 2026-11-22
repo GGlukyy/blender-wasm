@@ -605,6 +605,14 @@ const J = {
     const bad = Object.entries(want).filter(([k, w]) => !r || JSON.stringify(r[k]) !== JSON.stringify(w)).map(([k, w]) => `${k}: web ${JSON.stringify(r && r[k])} vs ${JSON.stringify(w)}`);
     await check(`${Object.keys(want).length} matematických API = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
   },
+  /* EEVEE F12 matice proti desktopu 5.3.0 (`eevee_api.py`): 12 variant materiálů/nastavení, střední RGBA snímku 96×54. */
+  eevee: async ({ check, cmd, wait }) => {
+    const code = (await import("node:fs")).readFileSync(new URL("./eevee_api.py", import.meta.url), "utf8");
+    await cmd(code); let r = null;
+    for (let i = 0; i < 400; i++) { await wait(1500); r = await cmd("eval:_EV"); if (r && r.done) break; }
+    const want = { base: [0.52, 0.46, 0.49, 1.0], metal: [0.38, 0.42, 0.46, 1.0], glass: [0.36, 0.41, 0.5, 1.0], emit: [0.59, 0.62, 0.58, 1.0], sss: [0.52, 0.52, 0.56, 1.0], coat: [0.39, 0.48, 0.61, 1.0], noshadow: [0.55, 0.48, 0.51, 1.0], raytrace: [0.52, 0.46, 0.48, 1.0], dof: [0.53, 0.46, 0.49, 1.0], worldvol: [0.28, 0.26, 0.26, 1.0], transparent: [0.44, 0.35, 0.33, 0.58], lightsout: [0.18, 0.14, 0.12, 1.0] };
+    for (const [k, w] of Object.entries(want)) { const a = r && r[k]; const ok = Array.isArray(a) && a.every((x, i) => Math.abs(x - w[i]) < 0.03); await check(`EEVEE ${k}: web ${JSON.stringify(a)}, desktop ${JSON.stringify(w)}`, () => ok); }
+  },
   /* Video Sequence Editor bez filmů proti desktopu 5.3.0 (`vse_api.py`): Color/Cross/Text/Wipe pásy + render snímku (střední RGB). */
   vse: async ({ check, cmd, wait }) => {
     const code = (await import("node:fs")).readFileSync(new URL("./vse_api.py", import.meta.url), "utf8");
