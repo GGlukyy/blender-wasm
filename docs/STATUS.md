@@ -1,3 +1,6 @@
+# 22. 11. 10:55 — cesta `dataapi` (Mesh/Object data API)
+Výsledek: ✅ 11 hodnot = desktop 5.3.0, Chrome i sim: loop triangles, `ray_cast`, `closest_point_on_mesh`, tangenty, plochy polygonů, atributy, Subsurf eval, shape key, vertex group, křivka (Bezier), bmesh objem. Úklid: vite zastaven.
+
 # 22. 11. 10:55 — cesta `mathapi` (mathutils, noise, geometry, KDTree, BVHTree, libm)
 Výsledek: ✅ 15 výpočtů (noise/turbulence/fractal/cell, voronoi, Euler↔Quaternion, slerp, inverze matice, decompose, delaunay_2d_cdt, convex_hull_2d, kd-strom, BVH ray_cast, pow/sin/atan2/exp, barevný převod) = desktop 5.3.0 na 4 desetinná místa, Chrome i sim → žádný rozdíl v matematice/FP mezi webem a desktopem. (Pozn.: položka `isect_tri` je v testu pevně 0 = vynechána.) Úklid: vite zastaven.
 

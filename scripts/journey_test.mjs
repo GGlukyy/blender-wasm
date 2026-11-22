@@ -605,6 +605,15 @@ const J = {
     const bad = Object.entries(want).filter(([k, w]) => !r || JSON.stringify(r[k]) !== JSON.stringify(w)).map(([k, w]) => `${k}: web ${JSON.stringify(r && r[k])} vs ${JSON.stringify(w)}`);
     await check(`${Object.keys(want).length} matematických API = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
   },
+  /* Mesh/Object data API proti desktopu 5.3.0 (`data_api.py`). */
+  dataapi: async ({ check, cmd, wait }) => {
+    const code = (await import("node:fs")).readFileSync(new URL("./data_api.py", import.meta.url), "utf8");
+    await cmd(code); await wait(4000);
+    const r = await cmd("eval:_DA");
+    const want = {"looptris": 968, "raycast": [true, [0.0, -0.7305, 0.0], [-0.5059, -0.8596, 0.0716], 160], "closest": [[1.25, 0.5469, 0.4688], 482], "tangents": [-0.0, 1984.0], "polyarea": [12.3042, 30.6888, 0.0], "attrs": [8, 24, 14.0], "subsurf_eval": [386, 384, 94.3534], "shapekey": 1.0, "vgroup": [0.75, 3], "curve": [4, 6.2793], "bmvol": [8.0, 12]};
+    const bad = Object.entries(want).filter(([k, w]) => !r || JSON.stringify(r[k]) !== JSON.stringify(w)).map(([k, w]) => `${k}: web ${JSON.stringify(r && r[k])} vs ${JSON.stringify(w)}`);
+    await check(`${Object.keys(want).length} datových API = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
+  },
   /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };
