@@ -1,3 +1,8 @@
+# 22. 11. 08:55 — regress_all (Chrome) po dnešních změnách (O1c, autotest soak)
+Výsledek: ✅ 0 FAIL (499 řádků logu `out/regress.log`; jediný XFAIL = add-on `ui_translate`, chybí `_ctypes`, známé)
+- `journey all` Chrome i sim: 359/359 PASS. `regress_sim` jako celek jsem nepouštěl (sim pokrývá journey).
+- Úklid: regress i můj dev server zastaveny.
+
 # 22. 11. 05:10 — V1: výstupní formáty
 - Web nenabízí FFmpeg Video, JPEG2000 ani WebP (desktop ano) — žádná past, jen chybí. Animace = PNG/JPEG sekvence. Nápad na později: složení sekvence do MP4 přes WebCodecs (jen s tebou).
 
