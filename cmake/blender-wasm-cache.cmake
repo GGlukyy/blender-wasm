@@ -62,7 +62,8 @@ set(WITH_SDL                 OFF CACHE BOOL "")
 set(WITH_JACK                OFF CACHE BOOL "")
 set(WITH_PULSEAUDIO          OFF CACHE BOOL "")
 set(WITH_OPENAL              OFF CACHE BOOL "")
-set(WITH_FFTW3               OFF CACHE BOOL "")
+set(WITH_FFTW3               ON  CACHE BOOL "")   # F2b: Ocean + Glare FFT, scripts/build_fftw3.sh
+set(FFTW3_ROOT_DIR           "${CMAKE_SOURCE_DIR}/../wasm-sysroot" CACHE PATH "")
 set(WITH_IMAGE_OPENJPEG      OFF CACHE BOOL "")
 set(WITH_GMP                 ON  CACHE BOOL "") # H35: Exact boolean, scripts/build_gmp.sh
 set(WITH_POTRACE             OFF CACHE BOOL "")

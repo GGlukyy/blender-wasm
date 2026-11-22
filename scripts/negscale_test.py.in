@@ -1,0 +1,17 @@
+# H51: kostka se záporným měřítkem X (Solid) — má vypadat jako kostka s +1 (desktop: stejně).
+import bpy, sys, time
+def out(*a):
+    print(*a); sys.stdout.flush()
+bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete()
+bpy.ops.mesh.primitive_cube_add(location=(0, 0, 0.0))
+bpy.context.object.scale = (%SX%, 1, 1)
+bpy.ops.object.select_all(action='DESELECT')
+for a in bpy.context.window_manager.windows[0].screen.areas:
+    if a.type == 'VIEW_3D':
+        sh = a.spaces.active.shading; sh.type = 'SOLID'; sh.show_shadows = False
+st = {'t0': time.time()}
+def tick():
+    if time.time() - st['t0'] < 8: return 1.0
+    out('OPS volume shown'); out('OPS_DONE')
+    return None
+bpy.app.timers.register(tick, first_interval=2.0)
