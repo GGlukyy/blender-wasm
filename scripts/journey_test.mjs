@@ -478,6 +478,18 @@ const J = {
     }
     await check(`12 Math operací = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
   },
+  /* Cycles Mix (RGBA) všechny blend módy proti desktopu 5.3.0 (`mix_desk.py`). */
+  mixblend: async ({ check, cmd, wait }) => {
+    await cmd("sc = bpy.context.scene; sc.render.engine = 'CYCLES'; sc.cycles.device = 'CPU'; sc.cycles.samples = 1; sc.cycles.use_denoising = False; o = bpy.data.objects['Cube']; bpy.context.view_layer.objects.active = o; bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.uv.smart_project(); bpy.ops.object.mode_set(mode='OBJECT'); img = bpy.data.images.new('B', 32, 32); m = bpy.data.materials.new('M'); m.use_nodes = True; nt = m.node_tree; n = nt.nodes.new('ShaderNodeTexImage'); n.image = img; nt.nodes.active = n; o.data.materials.clear(); o.data.materials.append(m)"); await wait(800);
+    const want = { MIX: [0.612, 0.394, 0.496], DARKEN: [0.394, 0.356, 0], MULTIPLY: [0.355, 0.268, 0], BURN: [0.263, 0.14, 0], LIGHTEN: [0.612, 0.504, 0.496], SCREEN: [0.635, 0.551, 0.496], DODGE: [0.617, 0.53, 0], ADD: [0.675, 0.592, 0.496], OVERLAY: [0.477, 0.41, 0], SOFT_LIGHT: [0.452, 0.429, 0], LINEAR_LIGHT: [0.643, 0.222, 0], DIFFERENCE: [0.464, 0.357, 0.496], EXCLUSION: [0.534, 0.493, 0.496], SUBTRACT: [0, 0.277, 0], DIVIDE: [0.435, 0.622, 0], HUE: [0.517, 0, 0.341], SATURATION: [0.453, 0.491, 0.331], COLOR: [0.517, 0.331, 0.418], VALUE: [0.476, 0.547, 0] };
+    const bad = [];
+    for (const [bt, w] of Object.entries(want)) {
+      await cmd(`nt = bpy.data.materials['M'].node_tree; b = nt.nodes['Principled BSDF']; uv = nt.nodes.new('ShaderNodeTexCoord'); mx = nt.nodes.new('ShaderNodeMix'); mx.data_type = 'RGBA'; mx.blend_type = '${bt}'; mx.inputs[0].default_value = 1.0; nt.links.new(uv.outputs['UV'], mx.inputs[6]); mx.inputs[7].default_value = (0.8, 0.3, 0.5, 1); nt.links.new(mx.outputs[2], b.inputs['Base Color']); img = bpy.data.images['B']; img.pixels = [0.0, 0.0, 0.0, 1.0] * (32 * 32); globals()['_bk'] = list(bpy.ops.object.bake(type='DIFFUSE', pass_filter={'COLOR'}, margin=0)); [nt.nodes.remove(x) for x in (uv, mx)]`); await wait(3500);
+      const r = await cmd("eval:[_bk, (lambda P: [round(sum(P[c::4]) / (32 * 32), 3) for c in range(3)])(list(bpy.data.images['B'].pixels))]");
+      if (!(r && r[0][0] === "FINISHED" && r[1].every((v, i) => Math.abs(v - w[i]) < 0.01))) bad.push(`${bt}: web ${JSON.stringify(r)} vs ${JSON.stringify(w)}`);
+    }
+    await check(`19 blend módů Mix = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
+  },
   /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };

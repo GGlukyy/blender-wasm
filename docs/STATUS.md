@@ -1,3 +1,6 @@
+# 22. 11. 19:00 — cesta `mixblend` (Cycles Mix RGBA, 19 blend módů)
+Výsledek: ✅ všech 19 = desktop 5.3.0 (±0.01), Chrome PC build. Úklid: vite zastaven, nic nezůstalo na pozadí.
+
 # 22. 11. 18:40 — cesta `mathnodes` (Cycles Math uzel, 12 operací)
 Výsledek: ✅ všech 12 = desktop 5.3.0 (±0.01), Chrome PC build. Úklid: vite zastaven.
 
