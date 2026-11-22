@@ -1,3 +1,12 @@
+# 22. 11. 01:45 — O1c (priorita 0): auto-update PWA + ochrana smyčky autosave + verze na splash
+Výsledek: 🟡 PC ✅ (Chrome), iPad neověřen, NEPUBLIKOVÁNO na Pages (to děláš ty: `publish_pages.sh`)
+
+- **Co jsem udělal:** (a) po Launch, před stažením wasm, se `sw.js` zeptá sítě na `version.json`; liší-li se, smaže cache a stránka se sama reloadne (bez lišty; max 1× za relaci; offline = stará verze). (b) při automatické obnově autosave se do localStorage zapíše `restoring=1` (smaže se po 60 s běhu); zůstane-li, další start autosave neotevře, ale ukáže lištu „Minule to spadlo — otevřít autosave? [Otevřít][Ne]". (c) na splash pod Launch malým písmem „build D. M. HH:MM".
+- **Důkaz:** `scripts/pwa_update_win.sh` PASS (verze A → B bez kliknutí, bez lišty); `restore_auto_win.sh` PASS (run3: po „pádu" jen lišta, žádný RESTORE_AUTO); `pages_win.sh` PASS online + offline. Změny: `demo/public/sw.js`, `demo/src/main.js`, `demo/index.html`.
+- **Co nefunguje / omezení:** první update na iPadu musíš ještě jednou udělat ručně (stará verze nemá auto-update kód) — smazat appku z plochy a znovu přidat. Test sim režimu jsem u O1c nepouštěl (čistě JS, bez vlivu na renderer).
+- **Co otestovat na iPadu:** po `publish_pages.sh` a přidání z plochy: 1) pod Launch je „build …". 2) Příště po dalším publish: otevři appku → sama se přepne na novou verzi (splash napíše „Aktualizuji…"). 3) Smyčka: stačí pozorovat, že po pádu při obnově se autosave neotevře sám, ale nabídne.
+- **Co dál:** zbytek PRIORITY 0 = tvůj `publish_pages.sh`; pak H50.
+
 # 21. 11. 10:50 — SOUHRN víkendové noci (pro Lukáše)
 Výsledek: ✅ H49, H46, H45 opraveno + wasm −168 MB; iPad NEOVĚŘEN, nic nepublikováno na Pages
 

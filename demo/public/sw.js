@@ -5,6 +5,7 @@
  *   may not send them). Pattern: coi-serviceworker (MIT, gzuidhof).
  * - version.json (written by the build) is checked on each navigation; when it differs from the cached copy the page
  *   is told (message {type:"update-available"}) and the user decides ({type:"update"} wipes the cache, then reload).
+ * - O1c: before Blender starts the page sends {type:"check"}; on a difference it updates by itself (no banner, nothing to lose yet).
  * - The page posts {type:"precache", urls} with the resources it already loaded before the SW took control. */
 const CACHE = "blender-web-offline";
 const SKIP = /\/(ask\.txt|__telemetry|sw\.js)(\?|$)|^\/@|^\/node_modules\//;
@@ -28,12 +29,13 @@ async function checkVersion() {
   try {
     const cache = await caches.open(CACHE);
     const net = await fetch("version.json", { cache: "no-store" });
-    if (!net.ok) return;
+    if (!net.ok) return "unknown";
     const fresh = await net.clone().text();
     const old = await cache.match("version.json");
-    if (!old) { await cache.put("version.json", net); return; }
-    if ((await old.text()) !== fresh) await notify({ type: "update-available" });
-  } catch { /* offline: nothing to check */ }
+    if (!old) { await cache.put("version.json", net); return "same"; }
+    if ((await old.text()) !== fresh) { await notify({ type: "update-available" }); return "update"; }
+    return "same";
+  } catch { return "unknown"; /* offline: nothing to check */ }
 }
 
 self.addEventListener("fetch", (e) => {
@@ -66,6 +68,9 @@ self.addEventListener("message", (e) => {
       }
       await checkVersion();
     })());
+  } else if (m.type === "check") {
+    /* O1c: the page asks before it starts Blender; answer is update-available (from checkVersion) or {type:"version-ok"}. */
+    e.waitUntil(checkVersion().then((r) => r !== "update" && notify({ type: "version-ok", state: r })));
   } else if (m.type === "update") {
     e.waitUntil(caches.delete(CACHE).then(() => notify({ type: "updated" })));
   }

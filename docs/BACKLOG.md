@@ -5,9 +5,10 @@
 
 ## O1c — (Lukáš 21. 11. 22:48: po smazání a znovupřidání aplikace z plochy Sculpting, DoF i Shadows na iPadu FUNGUJÍ → H49/H45/H46 potvrzeny; příčina byla stará cache) aplikace z plochy se neaktualizuje sama + smyčka pádů (Lukáš 21. 11. 22:35) — PRIORITA
 - Stav: Pages má nový build (22:32, `blender.wasm.zst` 25,1 MB), ale iPad dál padá na File ▸ New ▸ Sculpting „opakovaně se vyskytl problém". Příčina (odhad): `sw.js` servíruje starou verzi z cache a nabídne aktualizaci jen lištou — když Blender spadne dřív, než Lukáš klikne, zůstane navždy stará verze.
-- [ ] (a) Při startu (před stažením/spuštěním wasm): když je síť a `version.json` se liší → aktualizovat hned automaticky (smazat cache, reload), bez lišty. Blender ještě neběží, nic se neztratí. Offline = stará verze dál.
-- [ ] (b) Ochrana proti smyčce R1: před automatickým otevřením autosave zapsat do localStorage `restoring=1`, smazat po 60 s běhu. Když při startu `restoring=1` zůstalo → minulý start s obnovou spadl → autosave neotevírat automaticky, jen nabídnout lištou „Minule to spadlo — otevřít autosave?".
-- [ ] (c) Viditelná verze: v rohu splash/Launch obrazovky malým písmem datum buildu (z `version.json`), ať Lukáš pozná, co mu běží.
+- [x] (a) Při startu (před stažením/spuštěním wasm): když je síť a `version.json` se liší → aktualizovat hned automaticky (smazat cache, reload), bez lišty. Blender ještě neběží, nic se neztratí. Offline = stará verze dál.
+- [x] (b) Ochrana proti smyčce R1: před automatickým otevřením autosave zapsat do localStorage `restoring=1`, smazat po 60 s běhu. Když při startu `restoring=1` zůstalo → minulý start s obnovou spadl → autosave neotevírat automaticky, jen nabídnout lištou „Minule to spadlo — otevřít autosave?".
+- [x] (c) Viditelná verze: v rohu splash/Launch obrazovky malým písmem datum buildu (z `version.json`), ať Lukáš pozná, co mu běží.
+- HOTOVO 22. 11. 01:40 (PC): `pwa_update_win.sh` PASS, `restore_auto_win.sh` (run3 = smyčka) PASS, `pages_win.sh` PASS. iPad neověřen.
 - Test: `pages_win.sh` rozšířit: publikovat verzi A, načíst, publikovat B → další start běží B bez kliknutí; smyčka: autosave, který spadne → 2. start ho neotevře.
 
 ## H50 — iPad (offline Pages verze) spadne po ~5 min: 1 světlo + kostka s Principled Volume (Lukáš 18. 11.) — PRIORITA spolu s H49

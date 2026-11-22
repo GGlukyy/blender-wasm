@@ -18,7 +18,24 @@ import { installTelemetry, telEnabled, telLog, telEvent, telAdapterLimits } from
 /* O1b: registered at the very top — later top-level awaits (wasm download) would delay it for minutes on the first visit. */
 /* O1a: offline PWA. Not in the itch release (iframe on another origin), not in the vite dev server (?sw=1 forces, ?sw=0 disables). */
 const _swWanted = new URLSearchParams(location.search).get("sw") ? new URLSearchParams(location.search).get("sw") === "1" : (import.meta.env.PROD && (!__RELEASE__ || __PAGES__));
+/* O1c: start() waits for this (max 4 s): the SW compares version.json with the cached one and, if they differ, wipes the cache and reloads
+ * BEFORE Blender runs (old build can't trap the user in a crash loop). Offline / no SW = resolves at once. Loop guard: one auto-update per session. */
+window.__swCheck = Promise.resolve();
 if (_swWanted && "serviceWorker" in navigator && window.self === window.top) {
+  window.__swCheck = new Promise((res) => {
+    const done = () => res();
+    setTimeout(done, 4000);
+    navigator.serviceWorker.addEventListener("message", (e) => {
+      const t = e.data && e.data.type;
+      if (t === "version-ok") done();
+      else if (t === "update-available" && !window.__blenderStarted && !sessionStorage.getItem("auto_upd")) {
+        sessionStorage.setItem("auto_upd", "1");
+        const s = document.getElementById("splash-status"); if (s) s.textContent = "Aktualizuji na novou verzi…";
+        navigator.serviceWorker.controller && navigator.serviceWorker.controller.postMessage({ type: "update" });
+      }
+    });
+    navigator.serviceWorker.ready.then((reg) => reg.active && reg.active.postMessage({ type: "check" })).catch(done);
+  });
   navigator.serviceWorker.register("./sw.js").then(async () => {
     const reg = await navigator.serviceWorker.ready;
     /* O1b: static hosts without COOP/COEP (GitHub Pages): the first load is not cross-origin isolated; once the SW controls the page, reload once so threads work. */
@@ -28,6 +45,7 @@ if (_swWanted && "serviceWorker" in navigator && window.self === window.top) {
     navigator.storage && navigator.storage.persist && navigator.storage.persist().catch(() => {});
   }).catch((e) => console.warn("sw register failed", e));
   navigator.serviceWorker.addEventListener("message", (e) => {
+    if (e.data && e.data.type === "update-available" && !window.__blenderStarted && !sessionStorage.getItem("auto_upd")) return; /* O1c: handled above */
     if (e.data && e.data.type === "update-available" && !document.getElementById("sw-update")) {
       const b = document.createElement("div");
       b.id = "sw-update";
@@ -40,6 +58,11 @@ if (_swWanted && "serviceWorker" in navigator && window.self === window.top) {
 }
 
 installTelemetry();
+/* O1c: build date on the splash (version.json of the running build; the SW serves the cached copy, so it matches what runs). */
+fetch("version.json").then((r) => r.json()).then((j) => {
+  const el = document.getElementById("build-version");
+  if (el && j && j.v) el.textContent = "build " + new Date(j.v).toLocaleString("cs-CZ", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" });
+}).catch(() => {});
 
 /* ---- Splash UI: progress bar + startup console (ported from gecko-wasm's
  * demo/chrome/src/main.ts). ---- */
@@ -574,6 +597,16 @@ const showRestored = (epoch) => {
   n.append(b, k); document.body.appendChild(n);
   window.__RESTORED_AT__ = Number(epoch);
 };
+/* O1c: previous start with the automatic restore crashed → offer the autosave instead of opening it. */
+const showRestoreCrashed = () => {
+  const n = document.createElement("div"); n.id = "restore-crashed-note";
+  n.style.cssText = "position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:99997;background:rgba(110,50,10,.95);color:#fff;font:15px system-ui,sans-serif;padding:8px 14px;border-radius:8px;max-width:92vw";
+  n.append("⚠️ Minule to spadlo — otevřít autosave? ");
+  const b = document.createElement("button"); b.textContent = "Otevřít"; b.style.cssText = "margin-left:8px;font-size:15px";
+  b.onclick = () => { const u = new URL(location.href); u.searchParams.set("restore", "auto"); location.href = u.toString(); };
+  const k = document.createElement("button"); k.textContent = "Ne"; k.style.cssText = "margin-left:6px;font-size:15px"; k.onclick = () => { localStorage.removeItem("restoring"); n.remove(); };
+  n.append(b, k); document.body.appendChild(n);
+};
 const showSaved = (path) => {
   let n = document.getElementById("saved-note");
   if (!n) {
@@ -666,6 +699,8 @@ const scan = (t) => {
   if (sv) showSaved(sv[1] || sv[2]);
   if (/^Blender quit\b/.test(t.trim())) showQuit();
   { const m = /^WEB_RESTORED (\d+)/.exec(t.trim()); if (m) showRestored(m[1]); }
+  if (/^RESTORE_AUTO\b/.test(t.trim())) { localStorage.setItem("restoring", "1"); setTimeout(() => localStorage.removeItem("restoring"), 60000); }
+  if (/^RESTORE_CRASHED_OFFER\b/.test(t.trim()) && window.__RESTORE_CRASHED__ && !document.getElementById("restore-crashed-note")) showRestoreCrashed();
   if (t.includes("WEB_MP_BLOCKED")) showMpBlocked();
   if (t.startsWith("WEB_EXPORT /")) noteExport(t.slice(11).trim());
   if (t.includes("WEB_FILE_IMPORT_END")) hideImportBar();
@@ -1424,6 +1459,8 @@ function startWatchdog() {
 }
 
 async function start() {
+  await window.__swCheck;
+  window.__blenderStarted = true;
   /* WebGPU availability + software-renderer state were already probed and
    * surfaced (probeGpu / the Launch gate); a fatal GPU state keeps the button
    * disabled, so reaching here means we're clear to boot. */
@@ -1445,7 +1482,11 @@ const SHADOW_POOL = (new URLSearchParams(location.search).get("shadowpool") || "
 const AUTOSAVE_S = (new URLSearchParams(location.search).get("autosave") || "30").replace(/[^0-9]/g, "") || "30";
 /* R1a: after a killed tab the autosave of the last session opens by itself (banner "Obnoveno z HH:MM · Zahodit"). ?restore=ask = old popup,
  * ?restore=no = nothing. Automation (?auto=, __BARGS) keeps the popup so tests stay deterministic. */
-const RESTORE_MODE = (() => { const q = new URLSearchParams(location.search).get("restore"); return q === "no" || q === "ask" || q === "auto" ? q : (new URLSearchParams(location.search).get("auto") || window.__BARGS ? "ask" : "auto"); })();
+const _restoreQ = new URLSearchParams(location.search).get("restore");
+/* O1c: the last automatic restore never got through 60 s (crash) → don't open the autosave again by itself, just offer it (banner). */
+const RESTORE_CRASHED = localStorage.getItem("restoring") === "1" && _restoreQ !== "auto" && _restoreQ !== "ask";
+const RESTORE_MODE = (() => { if (RESTORE_CRASHED) return "crashed"; const q = _restoreQ; return q === "no" || q === "ask" || q === "auto" ? q : (new URLSearchParams(location.search).get("auto") || window.__BARGS ? "ask" : "auto"); })();
+if (RESTORE_CRASHED) window.__RESTORE_CRASHED__ = true; /* the flag stays until the user answers the banner */
 const UNDO_MB = (new URLSearchParams(location.search).get("undomem") || "300").replace(/[^0-9]/g, "") || "300"; // ?undomem=N limit paměti undo v MB (0 = bez limitu)
 const RESET_PREFS = new URLSearchParams(location.search).get("resetprefs") === "1" ? "1" : "0"; // ?resetprefs=1 smaže uložené Preferences
 const UI_SCALE = (new URLSearchParams(location.search).get("uiscale") || "").replace(/[^0-9.]/g, ""); // ?uiscale=1.3 → větší UI pro prsty (uloží se do Preferences)
@@ -1710,6 +1751,7 @@ def _offer_restore():
             return 2.0 if _offer['tries'] < 30 else None
         if bpy.data.filepath or not os.path.exists(_PREV) or os.path.getsize(_PREV) < 1000: return None
         if _RESTORE == 'no': return None
+        if _RESTORE == 'crashed': print('RESTORE_CRASHED_OFFER', os.path.getsize(_PREV), flush=True); return None
         if _RESTORE == 'auto':
             mt = int(os.path.getmtime(_PREV)); print('RESTORE_AUTO', os.path.getsize(_PREV), flush=True)
             bpy.ops.wm.open_mainfile(filepath=_PREV)
