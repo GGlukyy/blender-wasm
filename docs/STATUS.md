@@ -1,3 +1,9 @@
+# 22. 11. 08:40 — Lov chyb: cesta `heavymods` (Remesh, Decimate, Ocean, Fluid)
+Výsledek: 🟡 nález F2: Ocean modifier na webu nic negeneruje
+
+- Remesh voxel 1844 = desktop, Decimate 138 = desktop. **Ocean: web 81 vrcholů (jen vstupní mřížka), desktop 2500** — build má `WITH_FFTW3=OFF`. Do BACKLOGu jako F2 (oprava = přeložit FFTW3 do wasm, nedělám bez tebe; potřebuju vědět, jestli Ocean chceš).
+- Test `journey_win.sh heavymods` PASS (Ocean je zapsán jako známé omezení). Úklid: vite zastaven.
+
 # 22. 11. 08:10 — Lov chyb: cesta `packimg` (zabalená textura, uložit, znovu otevřít, unpack)
 Výsledek: ✅ 3/3 PASS Chrome i sim, žádný nález. Úklid: vite zastaven.
 

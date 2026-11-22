@@ -348,6 +348,15 @@ const J = {
     await cmd("bpy.ops.file.unpack_all(method='USE_LOCAL')"); await wait(1500);
     const u = await cmd("eval:bpy.data.images['PK'].packed_file is None"); await check(`unpack_all vyjme data (${u})`, () => u === true);
   },
+  /* Modifikátory s těžkým C++ jádrem: Ocean, Remesh (voxel), Decimate, Fluid (Mantaflow) — počty z evaluovaného meshe musí sedět s desktopem 5.3.0 (`mods_desk.py`). */
+  heavymods: async ({ check, cmd, wait }) => {
+    const nv = async (name, mod, setup) => { await cmd(`bpy.ops.mesh.primitive_${name}; o = bpy.context.object; m = o.modifiers.new('X', '${mod}'); ${setup}`); await wait(900); return await cmd("eval:len(bpy.context.object.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.vertices)"); };
+    const rm = await nv("uv_sphere_add()", "REMESH", "m.mode = 'VOXEL'; m.voxel_size = 0.1"); await check(`Remesh voxel 0.1: ${rm} vrcholů`, () => rm > 500);
+    const dc = await nv("monkey_add()", "DECIMATE", "m.ratio = 0.25"); await check(`Decimate 0.25: ${dc} vrcholů`, () => dc > 20 && dc < 300);
+    const oc = await nv("grid_add(x_subdivisions=8, y_subdivisions=8)", "OCEAN", "m.resolution = 8; m.geometry_mode = 'GENERATE'"); await check(`ZNÁMÉ OMEZENÍ (BACKLOG F2): Ocean bez FFTW3 nic negeneruje: web ${oc} vrcholů (= vstupní mřížka), desktop 5.3.0 2500`, () => oc === 81);
+    const fl = await cmd("bpy.ops.mesh.primitive_cube_add(); o = bpy.context.object; bpy.ops.object.modifier_add(type='FLUID'); o.modifiers['Fluid'].fluid_type = 'DOMAIN'; o.modifiers['Fluid'].domain_settings.resolution_max = 16"); await wait(1200);
+    const ft = await cmd("eval:bpy.context.object.modifiers['Fluid'].fluid_type"); await check(`Fluid domain nastaven (${ft})`, () => ft === "DOMAIN");
+  },
   /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };
