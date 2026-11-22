@@ -1,3 +1,6 @@
+# 22. 11. 19:50 — cesta `gnnodes2` (Geometry Nodes sada 2: Curve to Mesh, Mesh to Volume to Mesh, Merge by Distance, Split Edges, Transform)
+Výsledek: ✅ všech 5 = desktop 5.3.0 (Chrome). Úklid: vite zastaven.
+
 # 22. 11. 19:25 — cesta `gnnodes` (Geometry Nodes: 8 sítí uzlů)
 Výsledek: ✅ všech 8 počtů vrcholů/ploch = desktop 5.3.0 (Subdivision, Distribute+Instance+Realize 38400/28800, Extrude, Dual, Boolean, Convex Hull, Triangulate, Mesh to Points), Chrome i sim. Nový soubor `scripts/gn_nodes.py` (kopíruje ho journey_win.sh). Úklid: vite zastaven.
 
