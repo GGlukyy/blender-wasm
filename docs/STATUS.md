@@ -1,3 +1,6 @@
+# 22. 11. 10:55 — cesta `gnnodes5` (Geometry Nodes: křivky → mesh)
+Výsledek: ✅ Spiral 132/128, Arc 36/32, Quadrilateral 16/16, Fill Curve 4/2 = desktop 5.3.0, Chrome i sim. Pozn.: uzel `GeometryNodeCurvePrimitiveStar` v 5.3.0 neexistuje (ani na desktopu) → vynechán. Úklid: vite zastaven.
+
 # 22. 11. 10:40 — cesta `gnnodes4` (Geometry Nodes: 6 mesh primitiv)
 Výsledek: ✅ Grid 35/24, UV Sphere 62/72, Ico Sphere 42/80, Cone 11/11, Cylinder 20/12, Line 8/0 = desktop 5.3.0, Chrome i sim. Úklid: vite zastaven.
 
