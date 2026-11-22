@@ -466,6 +466,18 @@ const J = {
     }
     await check(`9 procedurálních textur = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
   },
+  /* Cycles Math uzel (dvě UV souřadnice jako vstup, bake Diffuse Color) proti desktopu 5.3.0 (`mathn_desk.py`). */
+  mathnodes: async ({ check, cmd, wait }) => {
+    await cmd("sc = bpy.context.scene; sc.render.engine = 'CYCLES'; sc.cycles.device = 'CPU'; sc.cycles.samples = 1; sc.cycles.use_denoising = False; o = bpy.data.objects['Cube']; bpy.context.view_layer.objects.active = o; bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.uv.smart_project(); bpy.ops.object.mode_set(mode='OBJECT'); img = bpy.data.images.new('B', 32, 32); m = bpy.data.materials.new('M'); m.use_nodes = True; nt = m.node_tree; n = nt.nodes.new('ShaderNodeTexImage'); n.image = img; nt.nodes.active = n; o.data.materials.clear(); o.data.materials.append(m)"); await wait(800);
+    const want = { SINE: 0.388, COSINE: 0.652, TANGENT: 0.407, ARCSINE: 0.4, POWER: 0.518, LOGARITHM: 0.624, SQRT: 0.509, FRACT: 0.394, MODULO: 0.305, SMOOTH_MIN: 0.326, WRAP: 0.486, PINGPONG: 0.315 };
+    const bad = [];
+    for (const [op, w] of Object.entries(want)) {
+      await cmd(`nt = bpy.data.materials['M'].node_tree; b = nt.nodes['Principled BSDF']; uv = nt.nodes.new('ShaderNodeTexCoord'); sep = nt.nodes.new('ShaderNodeSeparateXYZ'); mt = nt.nodes.new('ShaderNodeMath'); mt.operation = '${op}'; nt.links.new(uv.outputs['UV'], sep.inputs[0]); nt.links.new(sep.outputs[0], mt.inputs[0]); nt.links.new(sep.outputs[1], mt.inputs[1]); nt.links.new(mt.outputs[0], b.inputs['Base Color']); img = bpy.data.images['B']; img.pixels = [0.0, 0.0, 0.0, 1.0] * (32 * 32); globals()['_bk'] = list(bpy.ops.object.bake(type='DIFFUSE', pass_filter={'COLOR'}, margin=0)); [nt.nodes.remove(x) for x in (uv, sep, mt)]`); await wait(4000);
+      const r = await cmd("eval:[_bk, round(sum(list(bpy.data.images['B'].pixels)[0::4]) / (32 * 32), 3)]");
+      if (!(r && r[0][0] === "FINISHED" && Math.abs(r[1] - w) < 0.01)) bad.push(`${op}: web ${JSON.stringify(r)} vs ${w}`);
+    }
+    await check(`12 Math operací = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
+  },
   /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };

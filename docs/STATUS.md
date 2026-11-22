@@ -1,3 +1,6 @@
+# 22. 11. 18:40 — cesta `mathnodes` (Cycles Math uzel, 12 operací)
+Výsledek: ✅ všech 12 = desktop 5.3.0 (±0.01), Chrome PC build. Úklid: vite zastaven.
+
 # 22. 11. 18:15 — cesta `proctex` (Cycles procedurální textury: Noise, Voronoi, Wave, Gradient, Checker, Brick, Magic, White Noise, Gabor)
 Výsledek: ✅ všech 9 = desktop 5.3.0 (±0.02), Chrome PC build. Úklid: vite zastaven.
 
