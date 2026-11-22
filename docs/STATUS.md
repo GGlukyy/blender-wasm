@@ -1,3 +1,6 @@
+# 22. 11. 10:55 — cesta `simapi` (simulace po N snímcích)
+Výsledek: ✅ rigid body (40 sn., z 1.0), cloth (15 sn., součet z −115.026), soft body, částice (50, součet z −5.276) a vlasy (20×6 klíčů) = desktop 5.3.0 na 3 desetinná místa, Chrome i sim. Pozn.: soft body součet 0.0 (lokální souřadnice, slabá kontrola). Úklid: vite zastaven.
+
 # 22. 11. 10:55 — cesta `dataapi` (Mesh/Object data API)
 Výsledek: ✅ 11 hodnot = desktop 5.3.0, Chrome i sim: loop triangles, `ray_cast`, `closest_point_on_mesh`, tangenty, plochy polygonů, atributy, Subsurf eval, shape key, vertex group, křivka (Bezier), bmesh objem. Úklid: vite zastaven.
 
