@@ -442,6 +442,18 @@ const J = {
     }
     await check(`6 materiálů bake COMBINED = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
   },
+  /* Cycles bake COMBINED při různých světlech a světě proti desktopu 5.3.0 (`bake4_desk.py`). */
+  bake4: async ({ check, cmd, wait }) => {
+    await cmd("sc = bpy.context.scene; sc.render.engine = 'CYCLES'; sc.cycles.device = 'CPU'; sc.cycles.samples = 32; sc.cycles.use_denoising = False; sc.cycles.seed = 0; o = bpy.data.objects['Cube']; bpy.context.view_layer.objects.active = o; bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.uv.smart_project(); bpy.ops.object.mode_set(mode='OBJECT'); img = bpy.data.images.new('B', 32, 32); m = bpy.data.materials.new('M'); m.use_nodes = True; n = m.node_tree.nodes.new('ShaderNodeTexImage'); n.image = img; m.node_tree.nodes.active = n; o.data.materials.clear(); o.data.materials.append(m); sc.world.node_tree.nodes['Background'].inputs[1].default_value = 0.0"); await wait(800);
+    const steps = [["POINT", 1000, 0, [0.14]], ["SUN", 3, 0, [0.24]], ["SPOT", 1000, 0, [0.14]], ["AREA", 500, 0, [0.18]], ["world", 0, 1, [0.17]]];
+    const bad = [];
+    for (const [t, e, wl, w] of steps) {
+      await cmd(`L = bpy.data.objects['Light']; ${t === "world" ? "" : `L.data.type = '${t}'; `}L.data.energy = ${e}; bpy.context.scene.world.node_tree.nodes['Background'].inputs[1].default_value = ${wl}.0; img = bpy.data.images['B']; img.pixels = [0.0, 0.0, 0.0, 1.0] * (32 * 32); globals()['_bk'] = list(bpy.ops.object.bake(type='COMBINED', margin=2))`); await wait(14000);
+      const r = await cmd("eval:[_bk, (lambda P: round(sum(P[0::4]) / (32 * 32), 2))(list(bpy.data.images['B'].pixels))]");
+      if (!(r && r[0][0] === "FINISHED" && Math.abs(r[1] - w[0]) < 0.03)) bad.push(`${t}: web ${JSON.stringify(r)} vs ${w[0]}`);
+    }
+    await check(`4 světla + svět bake = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
+  },
   /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };

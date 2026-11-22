@@ -1,3 +1,6 @@
+# 22. 11. 17:55 — cesta `bake4` (Cycles: světla point/sun/spot/area + svět)
+Výsledek: ✅ všech 5 = desktop 5.3.0 (±0.03), Chrome PC build. Úklid: vite zastaven.
+
 # 22. 11. 17:30 — cesta `bake3` (Cycles COMBINED: metal, emission, glass, SSS, coat, sheen)
 Výsledek: ✅ všech 6 = desktop 5.3.0 (±0.04), Chrome PC build. Úklid: vite zastaven.
 
