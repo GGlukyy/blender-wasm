@@ -1,3 +1,6 @@
+# 22. 11. 10:55 — cesta `uvops` (UV operátory)
+Výsledek: 🟡 6/7 = desktop 5.3.0 (smart na kostce, cube/sphere/cylinder projekce, reset, unwrap se seams), 1 rozdíl: Smart UV Project na opici = jiné rozložení ostrovů (BACKLOG U1, platná UV, nízká priorita). Test drží jen těch 6 (rozdíl nezakrývám tolerancí, opice v testu není). Úklid: vite zastaven.
+
 # 22. 11. 10:50 — cesta `objops2` (14 objektových operátorů)
 Výsledek: ✅ apply Subsurf/Bevel/Array/Mirror/Decimate/Remesh/Solidify/Triangulate, voxel remesh (2728 v), join, separate loose, convert curve→mesh, text→mesh (177 v), shade flat = desktop 5.3.0 (v/e/f), Chrome i sim. Úklid: vite zastaven.
 

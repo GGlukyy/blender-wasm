@@ -571,6 +571,22 @@ const J = {
     const bad = Object.entries(want).filter(([k, w]) => !r || JSON.stringify(r[k]) !== JSON.stringify(w)).map(([k, w]) => `${k}: web ${JSON.stringify(r && r[k])} vs ${JSON.stringify(w)}`);
     await check(`14 objektových operátorů = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
   },
+  /* UV operátory proti desktopu 5.3.0 (`uv_ops.py`; součty UV ±0.02). */
+  uvops: async ({ check, cmd, wait }) => {
+    const code = (await import("node:fs")).readFileSync(new URL("./uv_ops.py", import.meta.url), "utf8");
+    await cmd(code); await wait(6000);
+    const r = await cmd("eval:_UV");
+    const want = { smart: [24, 8.0, 12.0], cubeproj: [24, 12.0, 12.0], sphereproj: [1984, 992.0, 992.0], cylproj: [192, 112.0, 96.0], reset: [24, 12.0, 12.0], unwrap_seams: [24, 4.93, 13.26] };
+    const bad = Object.entries(want).filter(([k, w]) => !r || !Array.isArray(r[k]) || r[k][0] !== w[0] || Math.abs(r[k][1] - w[1]) > 0.02 * Math.max(1, w[0] / 100) || Math.abs(r[k][2] - w[2]) > 0.02 * Math.max(1, w[0] / 100)).map(([k, w]) => `${k}: web ${JSON.stringify(r && r[k])} vs ${JSON.stringify(w)}`);
+    await check(`6 UV operátorů = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
+  },
+  /* Diagnostika: UV opice (smart_project) do out/jr_mk.json pro porovnání s desktopem. */
+  mkdump: async ({ check, cmd, wait }) => {
+    const fs = await import("node:fs");
+    await cmd(fs.readFileSync(new URL("./mk.py", import.meta.url), "utf8").split("\n").filter((l) => !l.startsWith("import json")).join("\n")); await wait(5000);
+    const r = await cmd("eval:_MK"); fs.writeFileSync("out/jr_mk.json", JSON.stringify(r));
+    await check("mkdump", () => !!r);
+  },
   /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };
