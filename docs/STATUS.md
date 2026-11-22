@@ -1,3 +1,6 @@
+# 22. 11. 10:55 — cesta `mathapi` (mathutils, noise, geometry, KDTree, BVHTree, libm)
+Výsledek: ✅ 15 výpočtů (noise/turbulence/fractal/cell, voronoi, Euler↔Quaternion, slerp, inverze matice, decompose, delaunay_2d_cdt, convex_hull_2d, kd-strom, BVH ray_cast, pow/sin/atan2/exp, barevný převod) = desktop 5.3.0 na 4 desetinná místa, Chrome i sim → žádný rozdíl v matematice/FP mezi webem a desktopem. (Pozn.: položka `isect_tri` je v testu pevně 0 = vynechána.) Úklid: vite zastaven.
+
 # 22. 11. 10:55 — cesta `bmeshops` (15 bmesh.ops)
 Výsledek: ✅ subdivide, bevel, inset_region, extrude, dissolve, triangulate, poke, remove_doubles, convex hull (507 v), delete, spin, solidify, wireframe, mirror, recalc normals = desktop 5.3.0, Chrome i sim. `bridge_loops` vynechán (chyba mého skriptu). Přidán `scripts/mk.py` (diagnostika U1). Úklid: vite zastaven.
 

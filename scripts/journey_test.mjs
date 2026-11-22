@@ -596,6 +596,15 @@ const J = {
     const bad = Object.entries(want).filter(([k, w]) => !r || JSON.stringify(r[k]) !== JSON.stringify(w)).map(([k, w]) => `${k}: web ${JSON.stringify(r && r[k])} vs ${JSON.stringify(w)}`);
     await check(`15 bmesh.ops = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
   },
+  /* mathutils / noise / geometry / kdtree / bvhtree proti desktopu 5.3.0 (`math_api.py`, odhalí rozdíly libm/FP). */
+  mathapi: async ({ check, cmd, wait }) => {
+    const code = (await import("node:fs")).readFileSync(new URL("./math_api.py", import.meta.url), "utf8");
+    await cmd(code); await wait(3000);
+    const r = await cmd("eval:_MA");
+    const want = {"noise": [0.2173, 0.0873, -0.056, 0.9985], "voronoi": [0.3904, 0.8234], "euler": [0.7651, 0.2969, 0.4418, -0.3624], "slerp": [0.9154, -0.3213, 0.1389, 0.1988], "matinv": [-0.0, -0.1111, 0.4444, 0.1111, -0.5, 0.7222, -2.8889, 0.7778, -0.0, 0.1111, 0.5556, -0.1111, 0.5, -0.1667, 0.6667, -0.3333], "decomp": [1.0, 2.0, 3.0, 0.9217, 0.1122, 0.2885, 0.2337, 1.0, 2.0, 3.0], "isect_tri": 0, "area_poly": 6.0, "barycentric": [0.6, 0.6, 0.3], "delaunay": [40, 108, 69, 40], "convex2d": 9, "kd": [[3, 8, 0, 1, 11], 1.0105], "bvh": [0.4444, 0.2222, 0.5556, 1], "pow": [2.718282, -0.349994, 2.498092, 0.036883], "color": [0.9063, 0.5838, 0.3492]};
+    const bad = Object.entries(want).filter(([k, w]) => !r || JSON.stringify(r[k]) !== JSON.stringify(w)).map(([k, w]) => `${k}: web ${JSON.stringify(r && r[k])} vs ${JSON.stringify(w)}`);
+    await check(`${Object.keys(want).length} matematických API = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
+  },
   /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };
