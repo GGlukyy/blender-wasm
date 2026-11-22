@@ -1,3 +1,6 @@
+# 22. 11. 16:35 — cesta `bake` (Cycles bake Diffuse Color)
+Výsledek: ✅ střední 0.695 = desktop 5.3.0 (PC build s Cycles, Chrome). Pozn.: jen PC build, lean (`cycles=0`) Cycles nemá. Úklid: vite zastaven.
+
 # 22. 11. 16:10 — nové cesty v `webkit_sim=1`
 Výsledek: ✅ multires, packimg, heavymods, glare, compnodes, compo, comppass, collinst, physics všechny OK i v sim (Chrome už dřív). Úklid: vite zastaven.
 
