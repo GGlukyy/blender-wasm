@@ -1,3 +1,9 @@
+# 22. 11. 02:30 — B3n měření q_depth (jen PC)
+Výsledek: 🟡 měření hotové, oprava nenavržena
+
+- Prohlídka `?webkit_sim=1&ipad=1&tel=1&pool=4&tourrep=1`: 75 kroků, 0 problémů, 271 s. `q_depth_max` = 23 (většina vzorků), špička 40; soak MP+Volume 13. Backpressure (`bp=1`) hloubku nedrží ≤2, protože se kontroluje jen jednou před snímkem a snímek sám odešle mnoho submitů.
+- Hypotéza „fronta tlačí na paměť na iPadu“ zůstává neověřená (potřeba iPad data). Další krok, jen když Jetsam/telemetrie z iPadu ukáže vysoké `q_depth` před pádem: jeden encoder na snímek.
+
 # 22. 11. 01:55 — H50 krok PC: soak MP + Principled Volume + 4 barevná světla (sim+ipad)
 Výsledek: 🟡 na PC paměť NEROSTE; iPad neověřen
 
