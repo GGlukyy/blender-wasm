@@ -1,3 +1,6 @@
+# 22. 11. 10:45 — cesta `animapi` (animace, drivery, constraints, shape key, armature)
+Výsledek: ✅ 8 hodnot = desktop 5.3.0, Chrome i sim: keyframe interpolace (1.562/8.438, bezier 4.0), Action layers (1), driver `frame*0.5+sqrt(16)` = 9.0, Copy Location + Track To, shape key (max z 1.0), armature pose, NLA/poslední klíč. Nový `scripts/anim_api.py`. Úklid: vite zastaven. Pushnuto: master.
+
 # 22. 11. 10:55 — cesta `simapi` (simulace po N snímcích)
 Výsledek: ✅ rigid body (40 sn., z 1.0), cloth (15 sn., součet z −115.026), soft body, částice (50, součet z −5.276) a vlasy (20×6 klíčů) = desktop 5.3.0 na 3 desetinná místa, Chrome i sim. Pozn.: soft body součet 0.0 (lokální souřadnice, slabá kontrola). Úklid: vite zastaven.
 

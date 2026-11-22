@@ -623,6 +623,15 @@ const J = {
     const bad = Object.entries(want).filter(([k, w]) => !r || JSON.stringify(r[k]) !== JSON.stringify(w)).map(([k, w]) => `${k}: web ${JSON.stringify(r && r[k])} vs ${JSON.stringify(w)}`);
     await check(`${Object.keys(want).length} simulací = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
   },
+  /* Animace, drivery, constraints, shape key, armature proti desktopu 5.3.0 (`anim_api.py`). */
+  animapi: async ({ check, cmd, wait }) => {
+    const code = (await import("node:fs")).readFileSync(new URL("./anim_api.py", import.meta.url), "utf8");
+    await cmd(code); await wait(8000);
+    const r = await cmd("eval:_AN");
+    const want = {"keys": [1.562, 8.438], "layers": 1, "driver": 9.0, "constraints": [5.0, 0.0], "shapekey": 1.0, "armature": [0.0, 1.0], "nla": 4.0, "bezier": 4.0};
+    const bad = Object.entries(want).filter(([k, w]) => !r || JSON.stringify(r[k]) !== JSON.stringify(w)).map(([k, w]) => `${k}: web ${JSON.stringify(r && r[k])} vs ${JSON.stringify(w)}`);
+    await check(`${Object.keys(want).length} animačních API = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
+  },
   /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };
