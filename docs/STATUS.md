@@ -1,3 +1,6 @@
+# 22. 11. 13:00 — cesta `compnodes` (23 uzlů Compositingu vs desktop 5.3.0)
+Výsledek: ✅ všech 23 shodných (±0.01), Chrome i sim. Posterize 0.06 a Tonemap 0.602 (neidentické) sedí taky. Denoise sedí (výchozí nastavení; neověřeno, zda jde o skutečný OIDN). Úklid: vite zastaven.
+
 # 22. 11. 12:20 — cesta `glare` (compositor Glare, 6 typů) po C2
 Výsledek: ✅ 6/6 = desktop 5.3.0 (±0.01), Chrome i sim. Fog Glow funguje i bez FFTW3 (FFTW chybí jen Ocean modifier, F2). Úklid: vite zastaven.
 

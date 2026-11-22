@@ -373,6 +373,20 @@ const J = {
       const m = await render(); await check(`Glare ${mode}: web ${m}, desktop ${w}`, () => typeof m === "number" && Math.abs(m - w) < 0.01);
     }
   },
+  /* Compositor: 25 uzlů s výchozím nastavením proti desktopu 5.3.0 (`nodes_desk.py`): střední RGB musí sedět (Denoise, Defocus, Kuwahara, Tonemap… včetně těch, co potřebují knihovny jako OIDN). */
+  compnodes: async ({ hover, key, check, cmd, page, wait }) => {
+    const render = async () => { await hover(); await page.keyboard.press("F12"); for (let i = 0; i < 60; i++) { await wait(1000); if (await cmd("eval:'Render Result' in bpy.data.images and bpy.data.images['Render Result'].has_data")) break; } await wait(2500);
+      await cmd("bpy.data.images['Render Result'].save_render('/opfs/home/jr_cn.png')"); await wait(1200);
+      const r = await cmd("eval:(lambda im: (lambda P: [round(sum(P[c::4]) / (im.size[0] * im.size[1]), 3) for c in (0, 1, 2)])(list(im.pixels)))(bpy.data.images.load('/opfs/home/jr_cn.png', check_existing=False))"); await cmd("bpy.data.images.remove(bpy.data.images['jr_cn.png'])"); await key("Escape", 900); return r; };
+    await cmd("sc = bpy.context.scene; sc.render.engine = 'BLENDER_WORKBENCH'; sc.render.resolution_x = 160; sc.render.resolution_y = 90"); await wait(400);
+    const want = { BrightContrast: 0.272, HueSat: 0.272, ColorBalance: 0.272, CurveRGB: 0.272, BokehBlur: 0.272, Defocus: 0.273, Lensdist: 0.272, Denoise: 0.272, Kuwahara: 0.272, Pixelate: 0.272, Posterize: 0.06, Despeckle: 0.272, Filter: 0.273, Bilateralblur: 0.272, DBlur: 0.272, Tonemap: 0.602, SetAlpha: 0.272, Transform: 0.272, ColorCorrection: 0.272, AntiAliasing: 0.272, Inpaint: 0.272, ConvertColorSpace: 0.272, MovieDistortion: 0.272 };
+    const bad = [];
+    for (const [nt, w] of Object.entries(want)) {
+      await cmd(`sc = bpy.context.scene; t = bpy.data.node_groups.new('C', 'CompositorNodeTree'); sc.compositing_node_group = t; r = t.nodes.new('CompositorNodeRLayers'); n = t.nodes.new('CompositorNode${nt}'); o = t.nodes.new('NodeGroupOutput'); t.interface.new_socket('Image', in_out='OUTPUT', socket_type='NodeSocketColor'); i = [s for s in n.inputs if s.type == 'RGBA'][0]; u = [s for s in n.outputs if s.type == 'RGBA'][0]; t.links.new(r.outputs['Image'], i); t.links.new(u, o.inputs['Image'])`); await wait(400);
+      const m = await render(); const ok = Array.isArray(m) && Math.abs(m[0] - w) < 0.01; if (!ok) bad.push(`${nt}: web ${JSON.stringify(m)} vs ${w}`);
+    }
+    await check(`23 uzlů = desktop; odchylky: ${bad.join("; ") || "žádné"}`, () => bad.length === 0);
+  },
   /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };
