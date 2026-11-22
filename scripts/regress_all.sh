@@ -39,6 +39,7 @@ run editors scripts/editors_win.sh
 run render_write scripts/render_write_win.sh
 run bake_probe scripts/bake_probe_win.sh
 run render_anim scripts/render_anim_win.sh
+run render_anim_compo scripts/render_anim_compo_win.sh
 run render_features scripts/render_features_win.sh
 run overlay_sweep scripts/overlay_sweep_win.sh
 run node_sweep scripts/node_sweep_win.sh
