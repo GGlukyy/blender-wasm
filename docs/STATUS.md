@@ -1,3 +1,7 @@
+# 22. 11. 22:40 — `regress_sim` po H51 + FFTW + nových cestách
+Výsledek: ✅ 0 FAIL (jen XFAIL `_ctypes`), journey 22. 11. 20:25–22:30 doběhla celá (limit 6000 s stačil), `webkit_sim=1` na PC buildu. Chrome `regress_all` po H51 (před FFTW): 0 FAIL + 14 zbylých cest a nové `vse`, `vse2`, `eevee` zvlášť OK.
+Pozn.: emulace `navigator.hardwareConcurrency=8` v `h50e_win.sh` (env `HC=8`) počet workerů NEzmění (workery vidí skutečných 16 jader) → počet workerů na iPadu zjistí až Lukáš (Mac Safari čtvrtek / iPad `?tel=1`).
+
 # 22. 11. 22:15 — cesta `eevee` (EEVEE F12, 12 variant materiálů/nastavení)
 Výsledek: ✅ všech 12 = desktop 5.3.0 (±0.03), Chrome i lean sim (`cycles=0&webkit_sim=1&ipad=1`)
 

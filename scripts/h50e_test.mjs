@@ -21,6 +21,7 @@ const snap = async (label) => {
 };
 if (process.env.BARGS) await page.addInitScript((a) => { window.__BARGS = a; }, process.env.BARGS.split("|"));
 await page.addInitScript(() => { const c = new BroadcastChannel("blender-perf"); c.onmessage = (e) => { if (e.data && e.data.heap_mb) window.__heap = e.data; }; });
+if (process.env.HC) await page.addInitScript((n) => { Object.defineProperty(navigator, "hardwareConcurrency", { get: () => n }); }, +process.env.HC);
 const q = "?tel=1" + (process.env.Q ? "&" + process.env.Q : "");
 await page.goto("http://localhost:5173/" + q, { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
