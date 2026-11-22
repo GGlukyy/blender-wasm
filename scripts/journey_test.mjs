@@ -286,6 +286,34 @@ const J = {
     const b = await cmd("eval:bpy.context.object.data.body"); await check(`psaní: "${b}"`, (s) => b === "TextAhoj 7" && s.mode === "OBJECT");
     await page.keyboard.press("Control+z"); await wait(800); const b2 = await cmd("eval:bpy.context.object.data.body"); console.log("TEXT po Ctrl+Z " + JSON.stringify(b2));
   },
+  /* Fyzika a animační data: rigid body, cloth, soft body, ovladač (driver), shape key; snímky se krokují přes frame_set jako při přehrávání. */
+  physics: async ({ check, cmd, wait }) => {
+    await cmd("o = bpy.data.objects['Cube']; o.location.z = 5; bpy.context.view_layer.objects.active = o; o.select_set(True); bpy.ops.rigidbody.object_add(); o.rigid_body.type = 'ACTIVE'"); await wait(600);
+    await cmd("bpy.ops.mesh.primitive_plane_add(size=10, location=(0,0,0)); p = bpy.context.object; p.name = 'Floor'; bpy.ops.rigidbody.object_add(); p.rigid_body.type = 'PASSIVE'"); await wait(600);
+    for (let f = 2; f <= 60; f++) await cmd(`bpy.context.scene.frame_set(${f})`);
+    const z = await cmd("eval:round(bpy.data.objects['Cube'].evaluated_get(bpy.context.evaluated_depsgraph_get()).matrix_world.translation.z, 3)");
+    await check(`rigid body: kostka spadla na podlahu (z=${z})`, () => z < 1.5 && z > 0.5);
+    await cmd("bpy.context.scene.frame_set(1)"); await wait(400);
+    const z1 = await cmd("eval:round(bpy.data.objects['Cube'].evaluated_get(bpy.context.evaluated_depsgraph_get()).matrix_world.translation.z, 3)"); await check(`rigid body: snímek 1 vrací výchozí polohu (z=${z1})`, () => Math.abs(z1 - 5) < 1e-3);
+    /* cloth: ico plocha padá na podlahu */
+    await cmd("bpy.ops.mesh.primitive_grid_add(x_subdivisions=12, y_subdivisions=12, size=2, location=(6,0,3)); c = bpy.context.object; c.name = 'Cloth'; bpy.ops.object.modifier_add(type='CLOTH')"); await wait(600);
+    for (let f = 2; f <= 30; f += 2) await cmd(`bpy.context.scene.frame_set(${f})`);
+    const cz = await cmd("eval:round(min(v.co.z for v in bpy.data.objects['Cloth'].evaluated_get(bpy.context.evaluated_depsgraph_get()).data.vertices), 3)");
+    await check(`cloth: tkanina klesá (min z=${cz})`, () => typeof cz === "number" && cz < 2.9);
+    /* soft body */
+    await cmd("bpy.context.scene.frame_set(1); bpy.ops.mesh.primitive_uv_sphere_add(location=(-6,0,3)); sp = bpy.context.object; sp.name = 'Soft'; bpy.ops.object.modifier_add(type='SOFT_BODY')"); await wait(600);
+    for (let f = 2; f <= 20; f += 2) await cmd(`bpy.context.scene.frame_set(${f})`);
+    const sz = await cmd("eval:round(bpy.data.objects['Soft'].evaluated_get(bpy.context.evaluated_depsgraph_get()).data.vertices[0].co.z, 3)");
+    await check(`soft body: vrchol se pohnul (z=${sz})`, () => typeof sz === "number" && Math.abs(sz - 1) > 1e-3);
+    /* ovladač (driver) s Python výrazem + shape key */
+    await cmd("bpy.context.scene.frame_set(1); sp = bpy.data.objects['Soft']; sp.modifiers.clear(); bpy.context.view_layer.objects.active = sp; bpy.ops.object.shape_key_add(from_mix=False); bpy.ops.object.shape_key_add(from_mix=False); k = sp.data.shape_keys.key_blocks[1]; k.data[0].co.z += 1.0"); await wait(400);
+    await cmd("k = bpy.data.objects['Soft'].data.shape_keys.key_blocks[1]; d = k.driver_add('value').driver; d.type = 'SCRIPTED'; d.expression = 'frame / 10'"); await wait(300);
+    await cmd("bpy.context.scene.frame_set(5)"); await wait(400);
+    const kv = await cmd("eval:round(bpy.data.objects['Soft'].data.shape_keys.key_blocks[1].value, 3)"); await check(`driver 'frame / 10' nastaví shape key (hodnota ${kv})`, () => Math.abs(kv - 0.5) < 1e-3);
+    /* částicový systém: vlasy */
+    await cmd("bpy.context.view_layer.objects.active = bpy.data.objects['Floor']; bpy.ops.object.particle_system_add(); ps = bpy.data.objects['Floor'].particle_systems[0]; ps.settings.type = 'HAIR'; ps.settings.count = 200"); await wait(800);
+    const hc = await cmd("eval:len(bpy.data.objects['Floor'].evaluated_get(bpy.context.evaluated_depsgraph_get()).particle_systems[0].particles)"); await check(`hair: 200 částic (${hc})`, () => hc === 200);
+  },
   /* Pie menu: držet Z a táhnout (pořadí enumu v pie: Wireframe vlevo, Solid vpravo, MP dolů, Rendered nahoru; stejné jako desktop), pivot na tečku; klik přímo na volbu. */
   pie: async ({ hover, check, cmd, page, wait, mid }) => {
     const m = mid(), pie = async (k, dx, dy) => { await hover(); await page.keyboard.down(k); await wait(450); await page.mouse.move(m[0] + dx, m[1] + dy, { steps: 6 }); await wait(250); await page.keyboard.up(k); await wait(900); };

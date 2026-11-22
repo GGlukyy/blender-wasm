@@ -1,3 +1,10 @@
+# 22. 11. 06:10 — Lov chyb: nová cesta `physics` (rigid body, cloth, soft body, driver, shape key, hair)
+Výsledek: ✅ web = desktop 5.3.0, žádný nový nález
+
+- `journey_win.sh physics`: 6/6 PASS v Chrome i `webkit_sim=1`. Kostka s rigid body spadne z 5 na z=1 (desktop 1.0), cloth/soft body se hýbou, driver `frame / 10` nastaví shape key na 0,5, hair 200 částic.
+- Poznámka pro testy: simulace se musí krokovat po 1 snímku (po 2 snímcích kostka nespadne — stejně na desktopu) a částice/pozice číst z `evaluated_get`.
+- Úklid: můj vite zastaven, nic nezůstalo na pozadí.
+
 # 22. 11. 05:30 — B3o: `map_mb` 196 MB není držená paměť
 Výsledek: ✅ rozbor, bez změny kódu
 
