@@ -66,3 +66,6 @@ build-5.3/
 demo/.stage53/
 
 demo/public/ask.txt
+
+# stará lokální složka z jiného projektu (Blender Web) — obří soubory, nikdy necommitovat
+/web/
