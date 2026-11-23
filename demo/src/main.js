@@ -629,6 +629,7 @@ const memHud = (d) => {
         w.append(b); document.body.appendChild(w);
       }
       const now = Date.now();
+      try { FS.writeFile("/tmp/mem_red.txt", "1"); } catch (_) {}
       if (now - memHudAsAt > 60000) { memHudAsAt = now; try { FS.writeFile("/tmp/autosave_req.txt", "mem-red"); window.__MEMHUD_AS__ = (window.__MEMHUD_AS__ || 0) + 1; } catch (_) {} }
     } else if (w) w.remove();
   } catch (_) {}
@@ -1870,6 +1871,13 @@ bpy.app.timers.register(_font_probe, first_interval=12.0, persistent=True)
 # M2: JS (ukazatel RAM, červená) napíše /tmp/autosave_req.txt → uložit hned.
 def _autosave_req():
     try:
+        # H53: červený ukazatel RAM zastaví přehrávání (soft body/cloth/částice cache roste ~24 B/vrchol/snímek)
+        if os.path.exists('/tmp/mem_red.txt'):
+            os.remove('/tmp/mem_red.txt')
+            for w in bpy.context.window_manager.windows:
+                if w.screen.is_animation_playing:
+                    with bpy.context.temp_override(window=w, screen=w.screen): bpy.ops.screen.animation_cancel(restore_frame=False)
+                    print('WEB_MEM_STOP playback stopped (RAM red)', flush=True)
         # žádost zůstává, dokud není co uložit (scéna nezměněná = nic nehrozí ztratit)
         if os.path.exists('/tmp/autosave_req.txt') and bpy.data.is_dirty and bpy.context.window_manager.windows:
             os.remove('/tmp/autosave_req.txt')

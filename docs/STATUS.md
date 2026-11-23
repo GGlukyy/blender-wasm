@@ -1,3 +1,11 @@
+# 23. 11. 21:30 — H53: soft body paměť
+Výsledek: 🟡 změřeno + ochrana na PC (sim); iPad neověřen
+
+- Predikce „cache fyziky drží každý snímek v RAM“ **platí** (`scripts/softmem_win.sh`, ico koule soft body padá na plochu, sim ipad=1): 2562 vrcholů → +14 MB / 240 snímků (58 KB/snímek); 40962 vrcholů → +79 MB / 100 snímků (~0,96 MB/snímek). Tedy ≈ **24 B × vrchol × snímek**, lineárně. Hustá scéna 100 tis. vrcholů × 250 snímků ≈ 600 MB navíc → s iPad základem těsně k Jetsam limitu.
+- Ochrana: když ukazatel RAM (M2) zčervená, Python zastaví přehrávání animace (`WEB_MEM_STOP`) a udělá autosave. Test `scripts/memstop_win.sh`: červená (`membase=3500`) přehrávání zastaví, zelená nechá běžet — PASS.
+- Neřešeno: samotná cache se nemaže (Physics ▸ Cache ▸ Delete All Bake). Možné další kroky: nižší výchozí frame_end u fyziky na iPadu — nechávám na tvém rozhodnutí.
+- Co otestovat na iPadu: soft body na hustém meshi, Play. Mělo by se zastavit s červeným štítkem RAM a ne spadnout; napiš číslo na štítku v okamžiku zastavení (kalibrace).
+
 # 23. 11. 21:00 — H52: chybí text po obnově
 Výsledek: 🟡 opraveno, co jde ověřit na PC; příčina na iPadu nepotvrzena
 

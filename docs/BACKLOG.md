@@ -13,7 +13,7 @@ Cíl: uživatel vidí, jak blízko je pádu, a stihne uložit / zjednodušit sc�
 - 17:09: Blender (WebContent) **3995 MB aktivní, i s low-poly scénou**; systému 65 MB volné → iOS zabil **WebKit.GPU (`highwater`, 377 MB)** → „GPU se odpojilo". 07:54: Blender v pozadí 3784 MB (max 4287). → **Základ Blenderu na iPadu je ~4 GB i bez náročné scény**; každá akce navíc = pád. Snížit základ je hlavní cíl (vlákna, wasm paměť, strojový kód), ne jednotlivé funkce.
 - [x] (23. 11. 20:10, tour 75/75 sim ipad, renderer 2397→2145 MB, workery 48→32, PC beze změny; iPad neověřen) SCHVÁLENO (Lukáš 23. 11. 17:25): na iPadu výchozí `threads=4` hned jako experiment (PC beze změny), porovnat četnost pádů + čtvrteční Mac měření.
 
-## H53 — Soft body na iPadu: pád ~každou minutu (Lukáš 23. 11.)
+## H53 — Soft body na iPadu: pád ~každou minutu (Lukáš 23. 11.) — 🟡 23. 11. 21:30: odhad POTVRZEN měřením (24 B/vrchol/snímek), ochrana = červený ukazatel RAM zastaví přehrávání (`memstop_win.sh` PASS); iPad neověřen
 - [ ] Odhad: point cache fyziky drží každý snímek v RAM (soft body/cloth na hustém meshi = desítky MB/snímek) → paměť roste s přehráváním → Jetsam. Změřit v sim: soft body na Lukášově scéně (deformovaná plocha + kostka) 250 snímků, `rt_malloc_mb` po snímcích. Ochrana na iPadu: varování/omezení rozsahu cache, nebo nižší `cache frame_end` výchozí. Desktop má totéž, jen víc RAM.
 
 ## ADR-V3/F3/C2b — „replay render“ (architekt 22. 11. 23:05; NEIMPLEMENTOVÁNO, 12–16 h, zasahuje do fungujícího F12 → rozhodne Lukáš)
