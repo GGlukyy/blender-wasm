@@ -24,6 +24,11 @@ run addon_custom scripts/addon_custom_win.sh
 run addon_persist scripts/addon_persist_win.sh
 run mcp scripts/mcp_win.sh
 run bincache scripts/bincache_win.sh
+run cachecorrupt env Q="webkit_sim=1&cycles=0" scripts/cachecorrupt_win.sh
+run memhud_green env EXPECT=green Q="ipad=1&webkit_sim=1&cycles=0" scripts/memhud_win.sh
+run memhud_red env EXPECT=red Q="ipad=1&webkit_sim=1&cycles=0&membase=3500" scripts/memhud_win.sh
+run memhud_fontbad env FONTBAD=1 EXPECT=green Q="ipad=1&webkit_sim=1&cycles=0" scripts/memhud_win.sh
+run memstop env Q="ipad=1&webkit_sim=1&cycles=0&membase=3500" scripts/memstop_win.sh
 run restore_auto scripts/restore_auto_win.sh
 run wheel_iframe scripts/wheel_iframe_win.sh
 run h42 scripts/h42_win.sh
