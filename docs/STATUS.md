@@ -1,3 +1,10 @@
+# 23. 11. 20:10 — H50f: na iPadu výchozí `threads=4`
+Výsledek: 🟡 hotovo na PC (sim), iPad neověřen
+
+- `demo/src/main.js`: `THREADS_N` = 4 na iPadu (`_isIpadUA` nebo `?ipad=1`), PC beze změny; `?threads=N` přepíše, `?threads=0` = výchozí počet Blenderu.
+- Důkaz (`h50e_win.sh`, Chrome, prázdná scéna): `ipad=1&webkit_sim=1&cycles=0` renderer 2397 → 2145 MB, workerů 48 → 32; PC (`cycles=0`) stále 48 workerů / 2403 MB. Tour (`webkit_sim=1&ipad=1&cycles=0`) 75/75, 0 problémů.
+- Co otestovat na iPadu: po novém nasazení otevři app, zkus Subsurf/pohyb ve viewportu (může být o něco pomalejší) a sleduj četnost pádů; `?threads=0` vrátí staré chování pro srovnání.
+
 # 22. 11. 23:10 — cesta `lines` (Workbench F12, Freestyle, Line Art) + F3
 Výsledek: 🟡 9/10 renderů = desktop 5.3.0 (Chrome, lean sim); Freestyle na webu nejde → BACKLOG F3
 

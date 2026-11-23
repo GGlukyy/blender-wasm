@@ -1879,10 +1879,12 @@ def _web_help(self, context):
         self.layout.operator("wm.url_open", text=t, icon='URL').url = u
 bpy.types.STATUSBAR_HT_header.append(_web_status)
 bpy.types.TOPBAR_MT_help.append(_web_help)`;
+/* H50f (Lukáš 23. 11.): na iPadu výchozí 4 vlákna Blenderu (méně pthread workerů = méně paměti pro Jetsam); PC beze změny. ?threads=N přepíše, ?threads=0 = výchozí počet Blenderu. */
+const THREADS_N = _qp.has("threads") ? (parseInt(_qp.get("threads"), 10) || 0) : (_isIpadUA || _qp.get("ipad") === "1" ? 4 : 0);
 const _mcp = mcpConfig(_qp);
 window.Module = {
   poolSize: POOL_N,
-  arguments: ["--factory-startup", ...(parseInt(_qp.get("threads"), 10) > 0 ? ["-t", String(parseInt(_qp.get("threads"), 10))] : []) /* H50e: ?threads=N omezí vlákna Blenderu (−15 MB/worker) */, "--python-expr", SHADOW_POOL_PY, "--python-expr", OPEN_REQ_PY, "--python-expr", CREDIT_PY, ...autoArgs(), ...mcpPyArgs(_mcp), ...(telEnabled ? ["--python-expr", H30_PROBE_PY] : []), ...(window.__BARGS || [])],
+  arguments: ["--factory-startup", ...(THREADS_N > 0 ? ["-t", String(THREADS_N)] : []) /* H50e: ?threads=N omezí vlákna Blenderu (−15 MB/worker) */, "--python-expr", SHADOW_POOL_PY, "--python-expr", OPEN_REQ_PY, "--python-expr", CREDIT_PY, ...autoArgs(), ...mcpPyArgs(_mcp), ...(telEnabled ? ["--python-expr", H30_PROBE_PY] : []), ...(window.__BARGS || [])],
   canvas,
   print: (t) => { log(t); scan(t); },
   printErr: (t) => { log("[err] " + t); scan(t); },
