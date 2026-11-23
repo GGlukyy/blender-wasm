@@ -2,6 +2,10 @@
 - Screenshot: lišta „Obnoveno z 17:02 (rozdělaná práce)" (= R1 po znovunačtení stránky), ikony a viewport OK, ale **skoro všechny popisky prázdné** (jen pár písmen „m", „h", „N"). Stalo se po odchodu z aplikace a návratu (iOS stránku zahodil → reload → obnova).
 - Hypotézy: (a) **fonty z `assets.tar` nejsou celé** — reload proběhl z cache (R2 Cache API / sw.js), kterou iOS zabil uprostřed zápisu → useknutý tar → chybí `datafiles/fonts` → BLF nemá font. Ověřit: integrita cache (velikost/hash proti manifest), při nesouladu smazat a stáhnout znovu. (b) glyph atlas BLF (GPU textura) se po návratu z pozadí nenahrál / zničil (B3 purge?) — pak by text chyběl i bez reloadu. Pár písmen, která zůstala, spíš svědčí pro (b) (atlas napůl) — rozhodnout testem.
 - Test: PC sim — (1) poškodit cache assets (zkrátit) → start musí poznat a stáhnout znovu; (2) `visibilitychange` hidden/visible + uvolnění GPU (simulace) → text zůstane. Přidat kontrolu do startu: po Launch ověřit, že `bpy.context.preferences` font/BLF funguje, jinak varování „UI fonty se nenačetly — obnov stránku".
+## H50f — Jetsam 23. 11. (Lukáš): stejný vzor jako 19. 11.
+- 17:09: Blender (WebContent) **3995 MB aktivní, i s low-poly scénou**; systému 65 MB volné → iOS zabil **WebKit.GPU (`highwater`, 377 MB)** → „GPU se odpojilo". 07:54: Blender v pozadí 3784 MB (max 4287). → **Základ Blenderu na iPadu je ~4 GB i bez náročné scény**; každá akce navíc = pád. Snížit základ je hlavní cíl (vlákna, wasm paměť, strojový kód), ne jednotlivé funkce.
+- [ ] Návrh (čeká na OK Lukáše): na iPadu výchozí `threads=4` hned jako experiment (PC beze změny), porovnat četnost pádů + čtvrteční Mac měření.
+
 ## H53 — Soft body na iPadu: pád ~každou minutu (Lukáš 23. 11.)
 - [ ] Odhad: point cache fyziky drží každý snímek v RAM (soft body/cloth na hustém meshi = desítky MB/snímek) → paměť roste s přehráváním → Jetsam. Změřit v sim: soft body na Lukášově scéně (deformovaná plocha + kostka) 250 snímků, `rt_malloc_mb` po snímcích. Ochrana na iPadu: varování/omezení rozsahu cache, nebo nižší `cache frame_end` výchozí. Desktop má totéž, jen víc RAM.
 
