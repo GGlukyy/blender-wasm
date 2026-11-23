@@ -168,10 +168,10 @@ async function headToken(url) {
     return h.ok ? binToken(h) : null;
   } catch { return null; }
 }
-async function fetchZst(url, key) {
+async function fetchZst(url, key, skipRead = false) {
   let cache = null;
   try { cache = await caches.open(BIN_CACHE); } catch { /* no Cache API (private mode / blocked storage) */ }
-  if (cache) {
+  if (cache && !skipRead) {
     try {
       const hit = await cache.match(url);
       if (hit) {
@@ -443,15 +443,28 @@ probeGpu().then(applyGpuStatus).catch(() => {});
  * progress bar), then zstd-decompress both. `assetProvider` (the zero-copy tar
  * FsProvider) and `wasmBytes` are consumed when the user clicks Launch. ---- */
 setUiPhase("loading");
+/* H52: kopie v Cache API mohla být useknutá (iOS zabil tab uprostřed zápisu) → rozbalení selže nebo má špatnou velikost:
+ * kopii smazat a stáhnout znovu (jednou) místo startu s poškozenými daty (chybějící fonty apod.). */
+async function loadZst(url, key, msg) {
+  const size = manifest[url];
+  for (let attempt = 0; ; attempt++) {
+    const z = await fetchZst(url, key, attempt > 0);
+    setProgress({ phase: "decompressing", percent: 1, message: msg });
+    try {
+      const out = await zstdDecode(z, size);
+      if (out.length !== size) throw new Error(`size ${out.length} != ${size}`);
+      return out;
+    } catch (e) {
+      console.warn("bin cache corrupt, refetching", url, String(e));
+      try { await (await caches.open(BIN_CACHE)).delete(url); } catch {}
+      dl[key].loaded = 0; dl[key].total = 0;
+      if (attempt >= 1) throw e;
+    }
+  }
+}
 let [assetsTar, wasmBytes] = await Promise.all([
-  fetchZst("assets.tar.zst", "assets").then((z) => {
-    setProgress({ phase: "decompressing", percent: 1, message: "Decompressing assets" });
-    return zstdDecode(z, manifest["assets.tar.zst"]);
-  }),
-  fetchZst(wasmName() + ".wasm.zst", "wasm").then((z) => {
-    setProgress({ phase: "decompressing", percent: 1, message: "Decompressing Blender" });
-    return zstdDecode(z, manifest[wasmName() + ".wasm.zst"]);
-  }),
+  loadZst("assets.tar.zst", "assets", "Decompressing assets"),
+  loadZst(wasmName() + ".wasm.zst", "wasm", "Decompressing Blender"),
 ]);
 zstdWorker.terminate();
 const assetProvider = makeAssetProvider(indexTar(assetsTar));
@@ -739,6 +752,13 @@ const scan = (t) => {
   if (sv) showSaved(sv[1] || sv[2]);
   if (/^Blender quit\b/.test(t.trim())) showQuit();
   { const m = /^WEB_RESTORED (\d+)/.exec(t.trim()); if (m) showRestored(m[1]); }
+  if (/^WEB_FONT (BAD|ERR)\b/.test(t.trim()) && !document.getElementById("font-bad")) {
+    const n = document.createElement("div"); n.id = "font-bad";
+    n.style.cssText = "position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:99998;background:rgba(179,38,30,.96);color:#fff;font:15px system-ui,sans-serif;padding:8px 14px;border-radius:8px;max-width:92vw";
+    n.append("⚠️ UI fonty se nenačetly (chybí text). Obnov stránku — práce je v autosave. ");
+    const b = document.createElement("button"); b.textContent = "Obnovit"; b.style.cssText = "margin-left:8px;font-size:15px"; b.onclick = () => location.reload();
+    n.append(b); document.body.appendChild(n);
+  }
   if (/^RESTORE_AUTO\b/.test(t.trim())) { localStorage.setItem("restoring", "1"); setTimeout(() => localStorage.removeItem("restoring"), 60000); }
   if (/^RESTORE_CRASHED_OFFER\b/.test(t.trim()) && window.__RESTORE_CRASHED__ && !document.getElementById("restore-crashed-note")) showRestoreCrashed();
   if (t.includes("WEB_MP_BLOCKED")) showMpBlocked();
@@ -1838,6 +1858,15 @@ def _as_subscribe(*_):
     bpy.msgbus.clear_by_owner(_as_owner)
     bpy.msgbus.subscribe_rna(key=(bpy.types.View3DShading, 'type'), owner=_as_owner, args=('shading',), notify=_autosave_now)
     bpy.msgbus.subscribe_rna(key=(bpy.types.Window, 'workspace'), owner=_as_owner, args=('workspace',), notify=_autosave_now)
+# H52: kontrola UI fontu po startu (BLF měří text na CPU; nulová šířka = font se nenačetl → JS ukáže lištu).
+def _font_probe():
+    try:
+        import blf
+        w = blf.dimensions(0, 'Hello World')[0]
+        print('WEB_FONT', 'OK' if w > 10 else 'BAD', round(w, 1), flush=True)
+    except Exception as e: print('WEB_FONT ERR', e, flush=True)
+    return None
+bpy.app.timers.register(_font_probe, first_interval=12.0, persistent=True)
 # M2: JS (ukazatel RAM, červená) napíše /tmp/autosave_req.txt → uložit hned.
 def _autosave_req():
     try:

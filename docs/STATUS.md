@@ -1,3 +1,12 @@
+# 23. 11. 21:00 — H52: chybí text po obnově
+Výsledek: 🟡 opraveno, co jde ověřit na PC; příčina na iPadu nepotvrzena
+
+- PC: obnova autosave (`restore_auto_win.sh`) vykreslí text normálně (screenshot) → chyba není v samotné obnově souboru.
+- Hypotéza (a) poškozená cache: `main.js` `loadZst` — když rozbalení cache selže nebo má špatnou velikost, kopii smaže a stáhne znovu. Test `scripts/cachecorrupt_win.sh` (assets useknuté na půlku): zachyceno „size 0 != 76165120“ (dřív by start pokračoval s prázdnými assets), cache obnovena, Blender nastartoval — PASS.
+- Hlídač: 12 s po startu Python změří text (`blf.dimensions`); nulová šířka → červená lišta „UI fonty se nenačetly — Obnovit“. Test `memhud_win.sh` (FONTBAD=1 podle patch blf): lišta se ukáže, bez patche ne — PASS.
+- Nevyřešeno: hypotéza (b) — glyph atlas (GPU textura) po návratu z pozadí/při tlaku paměti; na PC nejde nasimulovat. Hlídač (CPU) ji nezachytí.
+- Co otestovat na iPadu: opakuj postup, který text vzal (odejít z app, vrátit se). Když text zase zmizí, napiš, zda se objevila červená lišta (= fonty nenačteny → (a)) nebo ne (= atlas (b), pak potřebuju `?tel=1` log).
+
 # 23. 11. 20:40 — M2: ukazatel RAM na iPadu
 Výsledek: 🟡 hotovo a otestováno na PC (sim), kalibrace čeká na iPad
 

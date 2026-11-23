@@ -2,6 +2,8 @@
 const { chromium } = await import(process.env.PW || "playwright");
 const expect = process.env.EXPECT || "green";
 const expr = `import bpy, os, sys
+if ${process.env.FONTBAD ? 'True' : 'False'}:
+    import blf; blf.dimensions = lambda *a: (0.0, 0.0)
 st = {'n': 0}
 def _t():
     st['n'] += 1
@@ -16,16 +18,18 @@ def _t():
 bpy.app.timers.register(_t, first_interval=8.0, persistent=True)`;
 const browser = await chromium.launch({ headless: false, executablePath: process.env.CHROME, args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
 const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
-let exists = null; page.on("console", m => { const t = m.text(); const r = /AST autosave_exists (\w+)/.exec(t); if (r) exists = r[1] === "True"; });
+let exists = null, font = null; page.on("console", m => { const t = m.text(); const f = /WEB_FONT (OK|BAD|ERR)/.exec(t); if (f) font = f[1]; const r = /AST autosave_exists (\w+)/.exec(t); if (r) exists = r[1] === "True"; });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
 await page.goto("http://localhost:5173/?autosave=600&" + (process.env.Q || ""), { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
 await page.getByRole("button", { name: /Launch Blender/ }).click();
 for (let i = 0; i < 150 && exists === null; i++) await new Promise(r => setTimeout(r, 1000));
 const h = await page.evaluate(() => ({ m: window.__MEMHUD__ || null, txt: document.getElementById("mem-hud")?.textContent || null, warn: !!document.getElementById("mem-hud-warn"), asreq: window.__MEMHUD_AS__ || 0, uasm: window.__UASM_MB__ || null }));
+const fontBanner = await page.evaluate(() => !!document.getElementById("font-bad"));
+console.log("FONT probe=" + font + " banner=" + fontBanner);
 console.log("MEMHUD " + JSON.stringify(h) + " autosave_exists=" + exists);
 const lv = h.m ? ["green", "yellow", "red"][h.m.level] : "none";
-let ok = lv === expect && (expect === "red" ? (exists === true && h.warn) : (exists === false && !h.warn));
+let ok = font === (process.env.FONTBAD ? "BAD" : "OK") && fontBanner === !!process.env.FONTBAD && lv === expect && (expect === "red" ? (exists === true && h.warn) : (exists === false && !h.warn));
 console.log((ok ? "PASS" : "FAIL") + " memhud expect=" + expect + " got=" + lv);
 await browser.close();
 process.exit(ok ? 0 : 1);
