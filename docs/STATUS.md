@@ -1,3 +1,11 @@
+# 23. 11. 20:40 — M2: ukazatel RAM na iPadu
+Výsledek: 🟡 hotovo a otestováno na PC (sim), kalibrace čeká na iPad
+
+- Štítek vpravo dole „RAM ~2,5 / 4,3 GB“ (zelená < 70 %, žlutá < 85 % s tipem, červená = autosave hned + lišta „Hrozí pád“). Na iPadu zapnuto, jinde `?memhud=1`, vypnout `?memhud=0`. Odhad = základ 2250 MB + malloc wasm + GPU textury; limit 4300 MB (odhad z Jetsam 3,8–4,3 GB). Přepsat jde `?membase=` / `?memlimit=`.
+- Důkaz: `scripts/memhud_win.sh` (EXPECT=green/yellow/red, `ipad=1&webkit_sim=1&cycles=0`): 3× PASS; u červené vznikne `_autosave.blend` i při `?autosave=600` (jen přes novou žádost, ne periodicky).
+- Co otestovat na iPadu: štítek je vidět dole vpravo (prázdná scéna ~2,5 GB). Těsně před pádem napiš, co štítek ukazoval — podle toho upravím základ (`?membase=`).
+- Odhad (neověřeno): základ 2250 po threads=4; štítek může být o stovky MB mimo.
+
 # 23. 11. 20:10 — H50f: na iPadu výchozí `threads=4`
 Výsledek: 🟡 hotovo na PC (sim), iPad neověřen
 

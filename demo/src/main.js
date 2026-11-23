@@ -583,7 +583,47 @@ const checkMem = (mb) => {
   } catch (_) {}
 };
 /* The render pthread reports heap_mb with its perf sample (WGPU_PERF is always on, see preRun). */
-new BroadcastChannel("blender-perf").addEventListener("message", (e) => { if (e.data && e.data.heap_mb) checkMem(e.data.heap_mb); });
+new BroadcastChannel("blender-perf").addEventListener("message", (e) => { if (e.data && e.data.heap_mb) { checkMem(e.data.heap_mb); memHud(e.data); } });
+/* M2: ukazatel RAM (odhad). Safari neřekne skutečnou paměť procesu (Jetsam počítá WebContent), proto
+ * odhad = základ (kalibrace z Jetsam: Blender ~4 GB při malé scéně) + použitá malloc paměť wasm + GPU textury.
+ * Na iPadu zapnuto, jinde ?memhud=1 (vypnout ?memhud=0). ?membase=MB, ?memlimit=MB přepíší kalibraci (testy).
+ * Zelená < 70 %, žlutá < 85 %, červená = autosave hned + lišta „Hrozí pád“. */
+const _mq = new URLSearchParams(location.search);
+const MEMHUD_ON = _mq.get("memhud") === "1" || (_mq.get("memhud") !== "0" && MEM_WARN_ON);
+const MEM_BASE_MB = +(_mq.get("membase") || 2250), MEM_LIMIT_MB = +(_mq.get("memlimit") || 4300);
+let memHudAsAt = 0;
+const memHud = (d) => {
+  try {
+    if (!MEMHUD_ON) return;
+    const est = Math.round(MEM_BASE_MB + (d.heap_used_mb || 0) + (d.tex_mb || 0)), pct = est / MEM_LIMIT_MB;
+    const level = pct >= 0.85 ? 2 : pct >= 0.7 ? 1 : 0;
+    window.__MEMHUD__ = { est, limit: MEM_LIMIT_MB, pct: Math.round(pct * 100), level, used: Math.round(d.heap_used_mb || 0), tex: d.tex_mb || 0 };
+    let h = document.getElementById("mem-hud");
+    if (!h) {
+      h = document.createElement("div"); h.id = "mem-hud";
+      h.style.cssText = "position:fixed;right:6px;bottom:2px;z-index:99990;font:11px system-ui,sans-serif;padding:1px 6px;border-radius:6px;color:#fff;pointer-events:none;opacity:.85";
+      document.body.appendChild(h);
+    }
+    h.style.background = ["rgba(30,110,50,.9)", "rgba(160,100,0,.95)", "rgba(179,38,30,.95)"][level];
+    h.textContent = "RAM ~" + (est / 1000).toFixed(1).replace(".", ",") + " / " + (MEM_LIMIT_MB / 1000).toFixed(1).replace(".", ",") + " GB" + (level === 1 ? " · ulož, vypni Rendered" : "");
+    let w = document.getElementById("mem-hud-warn");
+    if (level === 2) {
+      if (!w) {
+        w = document.createElement("div"); w.id = "mem-hud-warn";
+        w.style.cssText = "position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:99995;background:rgba(179,38,30,.96);color:#fff;font:15px system-ui,sans-serif;padding:8px 14px;border-radius:8px;max-width:92vw";
+        w.append("⚠️ Hrozí pád — ulož práci (autosave právě proběhl) a zjednoduš scénu. ");
+        const b = document.createElement("button"); b.textContent = "OK"; b.style.cssText = "margin-left:8px;font-size:15px"; b.onclick = () => { w.style.display = "none"; };
+        w.append(b); document.body.appendChild(w);
+      }
+      const now = Date.now();
+      if (now - memHudAsAt > 60000) { memHudAsAt = now; try { FS.writeFile("/tmp/autosave_req.txt", "mem-red"); window.__MEMHUD_AS__ = (window.__MEMHUD_AS__ || 0) + 1; } catch (_) {} }
+    } else if (w) w.remove();
+  } catch (_) {}
+};
+/* Kontrola odhadu na PC (Chrome): skutečná paměť stránky; jen s ?memhud=1, čte se z window.__UASM_MB__. */
+if (_mq.get("memhud") === "1" && performance.measureUserAgentSpecificMemory) {
+  setInterval(async () => { try { window.__UASM_MB__ = Math.round((await performance.measureUserAgentSpecificMemory()).bytes / 1048576); } catch (_) {} }, 20000);
+}
 /* "Where did my file go?": when Blender reports a written file, say where and offer the file manager. */
 /* R1a: Python opened the previous session's autosave; tell the user and let them throw it away (reload without restore). */
 const showRestored = (epoch) => {
@@ -1798,6 +1838,17 @@ def _as_subscribe(*_):
     bpy.msgbus.clear_by_owner(_as_owner)
     bpy.msgbus.subscribe_rna(key=(bpy.types.View3DShading, 'type'), owner=_as_owner, args=('shading',), notify=_autosave_now)
     bpy.msgbus.subscribe_rna(key=(bpy.types.Window, 'workspace'), owner=_as_owner, args=('workspace',), notify=_autosave_now)
+# M2: JS (ukazatel RAM, červená) napíše /tmp/autosave_req.txt → uložit hned.
+def _autosave_req():
+    try:
+        # žádost zůstává, dokud není co uložit (scéna nezměněná = nic nehrozí ztratit)
+        if os.path.exists('/tmp/autosave_req.txt') and bpy.data.is_dirty and bpy.context.window_manager.windows:
+            os.remove('/tmp/autosave_req.txt')
+            _as['last'] = 0.0
+            _autosave_now('mem-red')
+    except Exception as e: print('AUTOSAVE REQ ERR', e)
+    return 2.0
+bpy.app.timers.register(_autosave_req, first_interval=5.0, persistent=True)
 _as_subscribe()
 bpy.app.handlers.load_post.append(bpy.app.handlers.persistent(_as_subscribe))`;
 /* H22d: počet pthread workerů se čte při startu (link: PTHREAD_POOL_SIZE=Module.poolSize||32). Každý worker v Safari = vlastní JS VM
