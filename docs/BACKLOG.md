@@ -1,10 +1,17 @@
+## M2 — ukazatel paměti (RAM) na iPadu (Lukáš 23. 11.) — PRIORITA hned po threads=4
+Cíl: uživatel vidí, jak blízko je pádu, a stihne uložit / zjednodušit scénu.
+- Safari NEUMÍ stránce říct skutečnou paměť procesu (Jetsam počítá WebContent; `measureUserAgentSpecificMemory` jen Chrome) → ukazatel = **odhad**: `celkem ≈ základ_iPad + wasm_heap_used + gpu_acct_mb (+ rt_malloc)`. Základ kalibrovat z Jetsam dat (Lukáš: Blender 3,8–4,0 GB při naší telemetrii ~1,5 GB → offset ~2,5 GB; po threads=4 překalibrovat). Na PC Chrome použít skutečné číslo z `measureUserAgentSpecificMemory` (kontrola odhadu).
+- UI: malý nenápadný štítek v rohu (např. vedle verze/stavového řádku) „RAM ~3,6 / 5 GB" se semaforem: zelená < 70 %, žlutá 70–85 % (tip: „Uložit, vypnout Rendered"), červená > 85 % → **automatický autosave** + lišta „Hrozí pád — ulož práci". Postavit na existujícím `checkMem`/`MEM_WARN_ON` (dnes jen hlášky), přidat i statistiku scény (počet ploch, textury MB z Blenderu).
+- Přepínač: na iPadu zapnuto, na PC vypnuto (`?memhud=1` zapne).
+- Test: sim `ipad=1` — štítek se zobrazí, barvy přepínají při umělém růstu (velká subdivision), autosave při červené proběhne. Kalibraci ověří Lukáš (Jetsam vs. štítek těsně před pádem).
+
 ## H52 — po návratu/obnovení chybí v UI všechen text (Lukáš 23. 11. 17:06, iPad, Pages verze z 22. 11. 15:23) — PRIORITA
 - Screenshot: lišta „Obnoveno z 17:02 (rozdělaná práce)" (= R1 po znovunačtení stránky), ikony a viewport OK, ale **skoro všechny popisky prázdné** (jen pár písmen „m", „h", „N"). Stalo se po odchodu z aplikace a návratu (iOS stránku zahodil → reload → obnova).
 - Hypotézy: (a) **fonty z `assets.tar` nejsou celé** — reload proběhl z cache (R2 Cache API / sw.js), kterou iOS zabil uprostřed zápisu → useknutý tar → chybí `datafiles/fonts` → BLF nemá font. Ověřit: integrita cache (velikost/hash proti manifest), při nesouladu smazat a stáhnout znovu. (b) glyph atlas BLF (GPU textura) se po návratu z pozadí nenahrál / zničil (B3 purge?) — pak by text chyběl i bez reloadu. Pár písmen, která zůstala, spíš svědčí pro (b) (atlas napůl) — rozhodnout testem.
 - Test: PC sim — (1) poškodit cache assets (zkrátit) → start musí poznat a stáhnout znovu; (2) `visibilitychange` hidden/visible + uvolnění GPU (simulace) → text zůstane. Přidat kontrolu do startu: po Launch ověřit, že `bpy.context.preferences` font/BLF funguje, jinak varování „UI fonty se nenačetly — obnov stránku".
 ## H50f — Jetsam 23. 11. (Lukáš): stejný vzor jako 19. 11.
 - 17:09: Blender (WebContent) **3995 MB aktivní, i s low-poly scénou**; systému 65 MB volné → iOS zabil **WebKit.GPU (`highwater`, 377 MB)** → „GPU se odpojilo". 07:54: Blender v pozadí 3784 MB (max 4287). → **Základ Blenderu na iPadu je ~4 GB i bez náročné scény**; každá akce navíc = pád. Snížit základ je hlavní cíl (vlákna, wasm paměť, strojový kód), ne jednotlivé funkce.
-- [ ] Návrh (čeká na OK Lukáše): na iPadu výchozí `threads=4` hned jako experiment (PC beze změny), porovnat četnost pádů + čtvrteční Mac měření.
+- [ ] SCHVÁLENO (Lukáš 23. 11. 17:25): na iPadu výchozí `threads=4` hned jako experiment (PC beze změny), porovnat četnost pádů + čtvrteční Mac měření.
 
 ## H53 — Soft body na iPadu: pád ~každou minutu (Lukáš 23. 11.)
 - [ ] Odhad: point cache fyziky drží každý snímek v RAM (soft body/cloth na hustém meshi = desítky MB/snímek) → paměť roste s přehráváním → Jetsam. Změřit v sim: soft body na Lukášově scéně (deformovaná plocha + kostka) 250 snímků, `rt_malloc_mb` po snímcích. Ochrana na iPadu: varování/omezení rozsahu cache, nebo nižší `cache frame_end` výchozí. Desktop má totéž, jen víc RAM.

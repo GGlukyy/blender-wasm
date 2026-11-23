@@ -5,7 +5,7 @@ session: read `CLAUDE.md`, `docs/STATUS.md`, `docs/PLAN.md` and `docs/BACKLOG.md
 Lukáš cannot test on the iPad until he is back — verify everything yourself in Windows
 Chrome on the real GPU (`scripts/p2_win.sh`, `scripts/parity_win.sh`).
 
-## PRIORITA 0 (Lukáš 23. 11.): H52 (chybí text po obnově) → H53 (soft body paměť). Pak:
+## PRIORITA 0 (Lukáš 23. 11. 17:25): H50f threads=4 jen iPad → M2 ukazatel RAM na iPadu → H52 (chybí text po obnově) → H53 (soft body paměť). Po zelené regresi: `bash scripts/package_pages.sh` (publish dělá Lukáš). Pak:
 ## (22. 11. 16:30): H51 (záporné měřítko) → H50e (rozpad 2,4 GB na PC) → F2b (Ocean/FFTW3) → V2 jen odhad. Pak zbytek níže.
 ## (21. 11.): O1c (auto-update aplikace z plochy + ochrana smyčky autosave + verze na splash) → pak publish_pages.sh (Lukáš). Dál:
 ## (19. 11.): H49 (heap corruption, File>New>Sculpting) → pak H50 (náhodné pády iPadu). Podrobnosti v BACKLOG H50. Až pak mise níže.
