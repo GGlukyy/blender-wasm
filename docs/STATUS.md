@@ -1,3 +1,10 @@
+# 23. 11. 23:xx — regrese po H50f/M2/H52/H53 + balík Pages
+Výsledek: ✅ `regress_all` 0 FAIL (jen XFAIL `_ctypes`), včetně nových testů cachecorrupt, memhud×3, memstop; journey doběhla.
+- `bash scripts/package_pages.sh` → `out/pages` (97 MB, 19 souborů, největší 40 MB). **Publish (`publish_pages.sh`) dělá Lukáš.**
+- Pushnuto na master: H50f, M2, H52, H53, regress_all.
+- Úklid: testy nic nezanechaly (`pgrep regress|fuzz|_win.sh|_test` prázdné); vite jsem spustil já, zastavím přes PID.
+- Co otestovat na iPadu po publishi: bloky H50f (pády, rychlost), M2 (štítek RAM, číslo před pádem), H52 (text po návratu z pozadí), H53 (soft body Play).
+
 # 23. 11. 21:30 — H53: soft body paměť
 Výsledek: 🟡 změřeno + ochrana na PC (sim); iPad neověřen
 
