@@ -1,5 +1,5 @@
 # 26. 11. 22:30 — priorita 0: H54, U3, T6b
-Výsledek: 🟡 H54 + U3 hotové na PC (Chrome + sim), regrese běží; iPad neověřen; T6b video čeká (YouTube 429)
+Výsledek: 🟡 H54 + U3 hotové na PC; `regress_all` 0 FAIL (jen XFAIL `_ctypes`); `package_pages.sh` → `out/pages` 97 MB (publish dělá Lukáš); iPad neověřen; T6b video: YouTube 429
 
 *Co jsem udělal*
 - H54: obrázky z `/uploads` (Add ▸ Image ▸ Reference, Image ▸ Open, drop) se automaticky balí do .blend (`_pack_uploads` v `main.js`). Příčina: soubor v `/uploads` po reloadu/obnově autosave zmizí → růžová.
@@ -13,6 +13,8 @@ Výsledek: 🟡 H54 + U3 hotové na PC (Chrome + sim), regrese běží; iPad neo
 *Co nefunguje / odhad*
 - U3: Blenderův prohlížeč se na okamžik ještě ukáže (úplně bez něj = C++ hook, odhad 1 den + rebuild). Append/Link zůstává po starém.
 - Pushnuto na master: H54, U3, T6b.
+- Video T6b: 429 i 27. 11. po půlnoci (yt-dlp stažený z GitHubu do /tmp). Zkus doma z jiné sítě: `yt-dlp --skip-download --write-auto-subs --sub-langs en --sub-format vtt <url>`.
+- Úklid: regrese doběhla, testy nic nezanechaly; vite (spustil jsem já) zastavuji.
 
 *Co otestovat na iPadu (po publishi)*
 1. Add ▸ Image ▸ Reference, vyber fotku z iPadu → není růžová; ulož, reload, obnov → pořád není.
