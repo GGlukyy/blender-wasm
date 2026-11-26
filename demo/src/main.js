@@ -728,7 +728,9 @@ const showImportBar = () => {
         }
         if (first) {
           const i = first.lastIndexOf("/");
-          FS.writeFile("/tmp/web_pick.txt", new TextEncoder().encode(first.slice(0, i + 1) + "\n" + first.slice(i + 1)));
+          /* U3: ze souborů přímo (ne složka) spusť operátor rovnou, bez druhého kliknutí v Blenderově prohlížeči: 3. řádek = jména všech souborů */
+          const direct = btn === b ? [...files].map((f) => f.name).join("\t") : "";
+          FS.writeFile("/tmp/web_pick.txt", new TextEncoder().encode(first.slice(0, i + 1) + "\n" + first.slice(i + 1) + (direct ? "\n" + direct : "")));
           n.style.display = "none";
         }
       } catch (err) { btn.textContent = "Chyba: " + (err && err.message || err); return; }
@@ -1424,6 +1426,41 @@ function pickSingleBlend() {
   });
 }
 
+const OPEN_CHOOSER = new URLSearchParams(location.search).get("openchooser") === "1"; /* starý dialog „složka / jeden soubor“ */
+/* U3: File System Access: showOpenFilePicker → kopie do /uploads → "file:/uploads/<name>". null = zrušeno. Chyba pickeru → <input type=file>. */
+async function pickSingleBlendFS() {
+  try {
+    const [h] = await window.showOpenFilePicker({ multiple: false, types: [{ description: "Blender .blend", accept: { "application/x-blender": [".blend"] } }] });
+    const f = await h.getFile();
+    const FS = window.Module.FS;
+    try { FS.mkdir("/uploads"); } catch (e) { /* exists */ }
+    FS.writeFile("/uploads/" + f.name, new Uint8Array(await f.arrayBuffer()));
+    return "file:/uploads/" + f.name;
+  } catch (e) {
+    if (e && e.name === "AbortError") return null;
+    log("showOpenFilePicker failed, fallback: " + (e && e.message || e));
+    return pickSingleBlend();
+  }
+}
+/* U3: po přímém otevření nabídnout původní cestu (celá složka → textury vedle souboru). */
+function offerOpenFolder() {
+  let n = document.getElementById("open-folder-offer");
+  if (n) n.remove();
+  n = document.createElement("div"); n.id = "open-folder-offer";
+  n.style.cssText = "position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:99997;background:rgba(20,50,90,.95);color:#fff;font:15px system-ui,sans-serif;padding:8px 14px;border-radius:8px;max-width:92vw";
+  n.append("Chybí textury? ");
+  const b = document.createElement("button"); b.id = "open-folder-btn"; b.textContent = "📁 Otevřít celou složku…"; b.style.cssText = "margin-left:8px;font-size:15px";
+  b.onclick = async () => {
+    n.remove();
+    try {
+      const mp = await mountViaFileSystemAccess();
+      if (mp) window.Module.ccall("blender_web_file_open_at", null, ["string"], [mp + "/"]);
+    } catch (e) { if (!(e && e.name === "AbortError")) log("folder pick failed: " + (e && e.message || e)); }
+  };
+  const x = document.createElement("button"); x.textContent = "✕"; x.style.cssText = "margin-left:6px;font-size:15px"; x.onclick = () => n.remove();
+  n.append(b, x); document.body.appendChild(n);
+  setTimeout(() => n.remove(), 20000);
+}
 /* Open a .blend right away (no Blender file browser). Asks first if the current scene has unsaved changes. */
 function openBlendDirect(path) {
   const FS = window.Module.FS;
@@ -1471,7 +1508,11 @@ window.__blenderFileOpenHook = async () => {
     /* Relies on transient user activation of the File ▸ Open click (FS-Access
      * path) / the chooser button click. Cancel (AbortError / null) → do nothing. */
     let mountPoint = null;
-    if (HAS_FSACCESS) {
+    if (HAS_FSACCESS && !OPEN_CHOOSER) {
+      /* U3: rovnou systémový výběr SOUBORU (Stažené povoluje; blokuje jen výběr celé složky). Složka s texturami = nabídka po otevření. */
+      mountPoint = await pickSingleBlendFS();
+      if (mountPoint) offerOpenFolder();
+    } else if (HAS_FSACCESS) {
       const choice = await openChooser();
       if (choice === "folder") {
         mountPoint = await mountViaFileSystemAccess();
@@ -1688,8 +1729,31 @@ def _is_import_op(idn):
     if any(w in idn for w in ('export', 'save', 'render.', 'bake', 'write', 'screenshot', 'directory_browse', 'mixdown')):
         return False
     return True
+_u3 = {'close': None}
+def _u3_cleanup():
+    # po file.execute zůstal Blenderův prohlížeč otevřený → zavřít (cancel), když tentýž areál po chvíli pořád existuje
+    c = _u3['close']
+    if not c: return
+    for win in bpy.context.window_manager.windows:
+        for a in win.screen.areas:
+            if a.type == 'FILE_BROWSER' and a.as_pointer() == c[0]:
+                _u3['close'] = (c[0], c[1] - 1)
+                if c[1] <= 4:
+                    try:
+                        with bpy.context.temp_override(window=win, area=a, region=[r for r in a.regions if r.type == 'WINDOW'][0]):
+                            try: bpy.ops.file.cancel()
+                            except Exception: bpy.ops.screen.back_to_previous()
+                        print('U3_CLOSED', flush=True)
+                    except Exception as e: print('U3_CLOSE failed', e, flush=True)
+                    _u3['close'] = None
+                return
+    _u3['close'] = None
+_DIRECT_OK = ('image.open', 'object.empty_image_add', 'node.add_file', 'wm.obj_import', 'wm.stl_import', 'wm.ply_import', 'wm.usd_import',
+              'wm.alembic_import', 'wm.collada_import', 'import_scene.fbx', 'import_scene.gltf', 'import_scene.obj', 'import_curve.svg', 'import_anim.bvh', 'import_scene.x3d')
+def _direct_ok(idn): return idn.lower().replace('_ot_', '.') in _DIRECT_OK
 def _import_assist():
     try:
+        _u3_cleanup()
         cur = set()
         pick = None
         if _os.path.exists('/tmp/web_pick.txt'):
@@ -1705,6 +1769,20 @@ def _import_assist():
                     if pick and len(pick) > 1:
                         sp.params.directory = pick[0].encode(); sp.params.filename = pick[1]
                         print('WEB_FILE_IMPORT_PICKED ' + pick[0] + ' ' + str(len(pick) - 1), flush=True)
+                        if len(pick) > 2 and pick[2] and _direct_ok(sp.active_operator.bl_idname):
+                            # U3: rovnou spustit (jako tlačítko Import), uživatel nemusí v Blenderově prohlížeči klikat znovu
+                            try:
+                                reg = [r for r in a.regions if r.type == 'WINDOW'][0]
+                                with bpy.context.temp_override(window=win, area=a, region=reg, space_data=sp):
+                                    names = pick[2].split('\t')
+                                    if len(names) > 1 and sp.active_operator.bl_idname.lower().replace('_ot_', '.') == 'image.open':
+                                        op = sp.active_operator
+                                        for n in names: bpy.data.images.load(pick[0] + n, check_existing=True)
+                                        print('U3_DIRECT images ' + str(len(names)), flush=True)
+                                        bpy.ops.file.cancel()
+                                    else:
+                                        r = bpy.ops.file.execute(); print('U3_DIRECT ' + str(r), flush=True); _u3['close'] = (a.as_pointer(), 6)
+                            except Exception as e: print('U3_DIRECT failed', e, flush=True)
         if _imp['seen'] - cur:
             _imp['seen'] &= cur
             if not cur: print('WEB_FILE_IMPORT_END', flush=True)

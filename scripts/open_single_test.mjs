@@ -18,7 +18,7 @@ let fp = "", dlg = "";
 page.on("dialog", async (d) => { dlg = d.message(); await d.accept(); });
 page.on("console", (m) => { const t = m.text(), i = t.indexOf("FILEPATH "); if (i >= 0) fp = t.slice(i + 9).trim(); });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
-await page.goto("http://localhost:5173/", { waitUntil: "load" });
+await page.goto("http://localhost:5173/?openchooser=1", { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
 await page.getByRole("button", { name: /Launch Blender/ }).click();
 for (let i = 0; i < 300; i++) { if ((await page.evaluate(() => window.__BGUI__ || {})).window) break; await new Promise(r => setTimeout(r, 1000)); }
