@@ -1,7 +1,7 @@
 // U3: File ▸ Open na Chromu = rovnou systémový výběr souboru (showOpenFilePicker, mock), žádný dialog „složka / soubor“. node u3_open_test.mjs <file.blend>
 import { readFileSync } from "node:fs";
 const { chromium } = await import(process.env.PW || "playwright");
-const file = process.argv[2];
+const file = process.env.BLEND || process.argv[2];
 const expr = `import bpy, sys
 def t():
     print('FILEPATH ' + bpy.data.filepath); sys.stdout.flush(); return 1.0

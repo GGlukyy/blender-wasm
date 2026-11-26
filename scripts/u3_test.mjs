@@ -68,11 +68,11 @@ await py(CTX + `print('H54 U3 invoke', _v3d(lambda: bpy.ops.image.open('INVOKE_D
 await wait(4000);
 check("lišta po Image Open", await bar());
 const p1 = png(32, 32), p2 = png(48, 48);
-await page.setInputFiles("#import-input", [{ name: "a.png", mimeType: "image/png", buffer: p1 }, { name: "b.png", mimeType: "image/png", buffer: p2 }]);
+await page.setInputFiles("#import-input", [{ name: "a.png", mimeType: "image/png", buffer: p1 }, { name: "b.png", mimeType: "image/png", buffer: p2 }, { name: "kůň č.png", mimeType: "image/png", buffer: p1 }]);
 await wait(6000);
 const im = await objs();
 console.log("images:", im);
-check("oba obrázky načtené a zabalené", /\['(a|b)\.png', '(a|b)\.png'/.test(im) && /\[True, True, False, False\]/.test(im));
+check("tři obrázky (vč. české diakritiky a mezery) načtené a zabalené", /a\.png/.test(im) && /b\.png/.test(im) && /kůň č\.png/.test(im) && /\[True, True, True, False, False\]/.test(im));
 check("lišta zmizela (obrázky)", !(await bar()));
 await page.screenshot({ path: "out/u3_img.png" });
 console.log((fails ? "FAIL" : "PASS") + " u3 direct import fails=" + fails);

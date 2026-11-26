@@ -1202,3 +1202,6 @@ Běžící Blender (paměť wasm) po zavření Safari / uspání karty iOS NEJDE
 ## J-VSE — cesta Video Sequencer klávesnicí (22. 11., NEDOKONČENO)
 - Pokus: area → SEQUENCE_EDITOR, barevný pásek 1–60, snímek 30, A + K (řez). Na webu K pásek neřízne a `bpy.ops.sequencer.split(...)` s `temp_override` hlásí „poll() failed, context is incorrect“ — **stejně i v desktop 5.3.0 s UI** (3b: ne chyba portu, ale chybný můj test: poll chce asi jiný kontext/kanálový region). Další krok: zjistit správný kontext (`sequencer_edit_poll`) nebo kliknout na pásek skutečnou myší a řezat přes menu Strip ▸ Split; až pak přidat cestu `vse` do `journey_test.mjs`.
 - (22. 11. později) Screenshot desktop 5.3.0 s UI vypadá po přepnutí oblasti na Sequencer přes Python stejně jako web: prázdná plocha, pásek není vidět (pohled v2d se bez uživatelského kroku nenastaví) → web = desktop, chyba je v mém nastavení testu. Správná cesta: File ▸ New ▸ Video Editing (workspace s připraveným pohledem), pásek přidat přes Add menu myší.
+
+## 27. 11. noc — lov chyb (záložní fronta bod 6)
+- [x] U3/H54 s českými názvy: `kůň č.png` (Image Open, 3 soubory) i `škola čtyři.blend` (File ▸ Open) fungují (`u3_win.sh`, `u3_open_win.sh` s `BLEND=…` PASS).
