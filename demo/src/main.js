@@ -1918,8 +1918,22 @@ def _drop_one(fp):
             r = 'jen nahráno do /uploads'
         print('DROP_REQ', fp, r)
     except Exception as e: print('DROP_REQ failed', fp, e)
+_packed_try = set()
+def _pack_uploads():
+    # H54: obrázek ze zařízení leží v /uploads (MEMFS, po reloadu/obnově autosave pryč) → zabalit do .blend, jinak je růžový
+    for im in bpy.data.images:
+        if im.source != 'FILE' or im.packed_file is not None or not im.filepath or im.library: continue
+        k = (im.name, im.filepath)
+        if k in _packed_try: continue
+        try: ap = bpy.path.abspath(im.filepath)
+        except Exception: continue
+        if not ap.startswith('/uploads/') or not os.path.isfile(ap): continue
+        _packed_try.add(k)
+        try: im.pack(); print('H54 packed', im.name)
+        except Exception as e: print('H54 pack failed', im.name, e)
 def _open_tick():
     try:
+        _pack_uploads()
         d = '1' if bpy.data.is_dirty else '0'
         if d != _dirty[0]:
             _dirty[0] = d
