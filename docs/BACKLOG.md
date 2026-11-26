@@ -1205,3 +1205,4 @@ Běžící Blender (paměť wasm) po zavření Safari / uspání karty iOS NEJDE
 
 ## 27. 11. noc — lov chyb (záložní fronta bod 6)
 - [x] U3/H54 s českými názvy: `kůň č.png` (Image Open, 3 soubory) i `škola čtyři.blend` (File ▸ Open) fungují (`u3_win.sh`, `u3_open_win.sh` s `BLEND=…` PASS).
+- [x] Nalezeno lovem: po Image Open s víc soubory zůstal Blenderův prohlížeč otevřený přes celou obrazovku (další import pak selhal). Opraveno (`_u3['close']` i v té větvi); test `u3_win.sh` teď pokrývá i glTF (.glb) import — PASS Chrome + sim.

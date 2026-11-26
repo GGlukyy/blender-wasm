@@ -75,6 +75,21 @@ console.log("images:", im);
 check("tři obrázky (vč. české diakritiky a mezery) načtené a zabalené", /a\.png/.test(im) && /b\.png/.test(im) && /kůň č\.png/.test(im) && /\[True, True, True, False, False\]/.test(im));
 check("lišta zmizela (obrázky)", !(await bar()));
 await page.screenshot({ path: "out/u3_img.png" });
+// 3) glTF: Blender sám vyexportuje .glb, test ho pošle přes lištu jako soubor ze zařízení
+await py(`bpy.ops.export_scene.gltf(filepath='/tmp/q3.glb', export_format='GLB'); print('H54 U3 glb exported', os.path.getsize('/tmp/q3.glb')); sys.stdout.flush()`);
+await wait(5000);
+const glb = await page.evaluate(() => Array.from(Module.FS.readFile("/tmp/q3.glb")));
+await py(CTX + `print('H54 U3 invoke', _v3d(lambda: bpy.ops.import_scene.gltf('INVOKE_DEFAULT')))`);
+await wait(4000);
+check("lišta po glTF importu", await bar());
+const g0 = await objs();
+await page.setInputFiles("#import-input", { name: "q3.glb", mimeType: "model/gltf-binary", buffer: Buffer.from(glb) });
+await wait(6000);
+const g1 = await objs();
+console.log("glb:", g0, "->", g1);
+check("glb naimportován rovnou (víc objektů)", +/OBJS (\d+)/.exec(g1)[1] > +/OBJS (\d+)/.exec(g0)[1]);
+check("lišta zmizela (glb)", !(await bar()));
+
 console.log((fails ? "FAIL" : "PASS") + " u3 direct import fails=" + fails);
 await browser.close();
 process.exit(fails ? 1 : 0);

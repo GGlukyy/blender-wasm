@@ -1779,7 +1779,7 @@ def _import_assist():
                                         op = sp.active_operator
                                         for n in names: bpy.data.images.load(pick[0] + n, check_existing=True)
                                         print('U3_DIRECT images ' + str(len(names)), flush=True)
-                                        bpy.ops.file.cancel()
+                                        bpy.ops.file.cancel(); _u3['close'] = (a.as_pointer(), 6)
                                     else:
                                         r = bpy.ops.file.execute(); print('U3_DIRECT ' + str(r), flush=True); _u3['close'] = (a.as_pointer(), 6)
                             except Exception as e: print('U3_DIRECT failed', e, flush=True)
