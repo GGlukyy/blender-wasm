@@ -1,3 +1,24 @@
+# 26. 11. 22:30 — priorita 0: H54, U3, T6b
+Výsledek: 🟡 H54 + U3 hotové na PC (Chrome + sim), regrese běží; iPad neověřen; T6b video čeká (YouTube 429)
+
+*Co jsem udělal*
+- H54: obrázky z `/uploads` (Add ▸ Image ▸ Reference, Image ▸ Open, drop) se automaticky balí do .blend (`_pack_uploads` v `main.js`). Příčina: soubor v `/uploads` po reloadu/obnově autosave zmizí → růžová.
+- U3: File ▸ Open na Chrome = rovnou systémový výběr souboru (`showOpenFilePicker`), po otevření nabídka „Otevřít celou složku…“ (textury). Starý dialog: `?openchooser=1`. Import/Image Open: po výběru souboru v liště se operátor spustí rovnou a Blenderův prohlížeč se zavře.
+- T6b: `docs/T6_TABLET_UI.md` (fórum + screeny `docs/t6/`). Video: titulky YouTube → HTTP 429, zkusím znovu.
+
+*Důkaz*
+- `scripts/h54_win.sh`: PASS Chrome + sim (0 růžových pixelů po uložení+otevření; před opravou 34 245).
+- `scripts/u3_win.sh` (OBJ + 2 obrázky): PASS Chrome + sim. `scripts/u3_open_win.sh`: PASS. `open_single_win.sh` PASS (se starým dialogem).
+
+*Co nefunguje / odhad*
+- U3: Blenderův prohlížeč se na okamžik ještě ukáže (úplně bez něj = C++ hook, odhad 1 den + rebuild). Append/Link zůstává po starém.
+- Pushnuto na master: H54, U3, T6b.
+
+*Co otestovat na iPadu (po publishi)*
+1. Add ▸ Image ▸ Reference, vyber fotku z iPadu → není růžová; ulož, reload, obnov → pořád není.
+2. File ▸ Import ▸ OBJ/glTF → vyber soubor v liště → naimportuje se bez dalšího kliknutí.
+3. File ▸ Open → vyber .blend → otevře se.
+
 # 23. 11. 23:xx — regrese po H50f/M2/H52/H53 + balík Pages
 Výsledek: ✅ `regress_all` 0 FAIL (jen XFAIL `_ctypes`), včetně nových testů cachecorrupt, memhud×3, memstop; journey doběhla.
 - `bash scripts/package_pages.sh` → `out/pages` (97 MB, 19 souborů, největší 40 MB). **Publish (`publish_pages.sh`) dělá Lukáš.**
