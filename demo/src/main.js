@@ -766,7 +766,7 @@ const scan = (t) => {
     document.getElementById("movie-bad")?.remove();
     const n = document.createElement("div"); n.id = "movie-bad";
     n.style.cssText = "position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:99998;background:rgba(179,38,30,.96);color:#fff;font:15px system-ui,sans-serif;padding:8px 14px;border-radius:8px;max-width:90vw";
-    n.textContent = "⚠️ Tento formát/kodek videa na webu nejde zapsat (soubor nevznikl). Zkus MP4 nebo Matroska s H.264.";
+    n.textContent = "⚠️ Video se nepodařilo zapsat (soubor nevznikl). Liché rozlišení u H.264 (i v desktopu) nebo kodek, který web nemá (WebM, AV1…)? Zkus sudé rozlišení a MP4/Matroska s H.264.";
     document.body.appendChild(n); setTimeout(() => n.remove(), 15000);
   }
   if (/^RESTORE_AUTO\b/.test(t.trim())) { localStorage.setItem("restoring", "1"); setTimeout(() => localStorage.removeItem("restoring"), 60000); }

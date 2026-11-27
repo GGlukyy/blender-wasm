@@ -19,6 +19,8 @@ Výsledek: ✅ na PC: `regress_all` 0 FAIL (jen XFAIL `_ctypes`, journey OK); iP
 
 *Po videu zpět na obrázky (27. 11. 13:00)*: `scripts/v2_after_video_win.sh` — po renderu MP4 přepnout na PNG → F12 jeden snímek (64×48, ne černý) + animace do 3 PNG: PASS Chrome i `Q=webkit_sim=1`. Pozn.: v6 skriptech `v2_*_win.sh` chybělo předání `Q` do Windows (`WSLENV`), takže `Q=…` dřív sim nespustil; doplněno (sim přes `regress_sim.sh` fungoval vždy přes NODE_OPTIONS hook). `v2_codecs_win.sh` ve sim = stejné jako Chrome (7 PASS, 8 nepodporovaných).
 
+*Liché rozlišení (27. 11. 13:20, `scripts/v2_odd_win.sh`)*: 129×73 + H.264 se nezapíše, MPEG4 kodek a MKV s 50 % (→ 64×36) ano. **Desktop 5.3.0 dává totéž** (`width not divisible by 2 (129x73)`) = chyba původního Blenderu, ne naše (3b). Web ale chybu ukazoval jen na stderr → lišta `#movie-bad` teď říká „liché rozlišení / kodek, který web nemá“ (`v2_movie_bad_win.sh` PASS Chrome + sim).
+
 *Regrese 27. 11. 12:51*: `regress_all` po změně `main.js` (lišta video kodeku) 0 FAIL (jen XFAIL `_ctypes`), včetně journey a ui_fuzz. Úklid: nic nezůstalo, vite (Lukášův) nechán.
 
 *Co nefunguje / odhad*
