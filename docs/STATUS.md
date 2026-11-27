@@ -51,6 +51,8 @@ Výsledek: ✅ na PC: `regress_all` 0 FAIL (jen XFAIL `_ctypes`, journey OK); iP
 
 *Průhledné pozadí (27. 11. 13:47, `scripts/v2_alpha_win.sh`)*: Workbench F12 s `film_transparent` + PNG RGBA: alfa v rohu 0, ve středu 1, 64×48: PASS Chrome + sim. Žádný nález.
 
+*Formáty obrázků (27. 11. 13:52)*: pokus o test F12 → JPEG/BMP/TIFF/EXR/EXR multilayer/WEBP/HDR/TARGA (jeden skript) se zasekl bez výstupu (2× timeout, příčina nezjištěna — chyba skriptu nebo nějaký formát visí). Skript jsem nezařadil; příští běh: zkoušet formáty po jednom a zjistit, který visí. Neověřeno.
+
 *Prohlídka po dnešních změnách (27. 11. 13:25)*: `Q='webkit_sim=1&ipad=1&cycles=0' scripts/tour_win.sh` → 75/75 kroků, 0 problémů, 0 chyb, 269 s (včetně všech `_MATERIAL`). Výkon (fps) z toho nejde vyčíst — `tour_result.txt` má jen dobu kroku a std jasu; skutečné fps MP na iPadu čeká na Lukášovo měření (BACKLOG D9a).
 
 *Regrese 27. 11. 12:51*: `regress_all` po změně `main.js` (lišta video kodeku) 0 FAIL (jen XFAIL `_ctypes`), včetně journey a ui_fuzz. Úklid: nic nezůstalo, vite (Lukášův) nechán.
