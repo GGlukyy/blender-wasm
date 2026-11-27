@@ -21,6 +21,8 @@ Výsledek: ✅ na PC: `regress_all` 0 FAIL (jen XFAIL `_ctypes`, journey OK); iP
 
 *Liché rozlišení (27. 11. 13:20, `scripts/v2_odd_win.sh`)*: 129×73 + H.264 se nezapíše, MPEG4 kodek a MKV s 50 % (→ 64×36) ano. **Desktop 5.3.0 dává totéž** (`width not divisible by 2 (129x73)`) = chyba původního Blenderu, ne naše (3b). Web ale chybu ukazoval jen na stderr → lišta `#movie-bad` teď říká „liché rozlišení / kodek, který web nemá“ (`v2_movie_bad_win.sh` PASS Chrome + sim).
 
+*Cycles → video (27. 11. 13:45)*: `scripts/v2_cyclesvid_win.sh` (Cycles CPU 4 samples, 2 snímky, MP4 H.264): PASS, movieclip zpět 64×48 ×2 snímky.
+
 *Regrese 27. 11. 12:51*: `regress_all` po změně `main.js` (lišta video kodeku) 0 FAIL (jen XFAIL `_ctypes`), včetně journey a ui_fuzz. Úklid: nic nezůstalo, vite (Lukášův) nechán.
 
 *Co nefunguje / odhad*
