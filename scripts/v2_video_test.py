@@ -48,6 +48,24 @@ def tick():
             out('OPS v2 vse_strip', 'PASS' if st.frame_final_duration == 24 else 'FAIL', 'dur=%d' % st.frame_final_duration)
         except Exception as e:
             out('OPS v2 vse_strip FAIL', e)
-        state['step'] = 3; return 0.5
+        # druhý render za sebou: EEVEE, Matroska, 5 snímků, jiné rozlišení (stav po prvním videu)
+        for f in glob.glob('/tmp/v2/*.mkv'): os.remove(f)
+        sc.render.engine = 'BLENDER_EEVEE'; sc.render.resolution_x = 96; sc.render.resolution_y = 64
+        sc.frame_end = 5; sc.render.ffmpeg.format = 'MKV'; sc.render.filepath = '/tmp/v2/second'
+        bpy.ops.render.render(animation=True)
+        state['step'] = 3; state['waited'] = 0; return 2.0
+    if s == 3:
+        g = glob.glob('/tmp/v2/second*.mkv'); P2 = g[0] if g else ''
+        sz = os.path.getsize(P2) if P2 else 0
+        if sz < 500 and state['waited'] < 120:
+            state['waited'] += 1; return 1.0
+        ok = False
+        if sz:
+            try:
+                clip = bpy.data.movieclips.load(P2); ok = clip.frame_duration == 5 and tuple(clip.size) == (96, 64)
+            except Exception as e:
+                out('OPS v2 second_load', e)
+        out('OPS v2 second_mkv_eevee', 'PASS' if ok else 'FAIL', 'size=%d' % sz)
+        state['step'] = 4; return 0.5
     out('OPS_DONE'); return None
 bpy.app.timers.register(tick, first_interval=1.0)
