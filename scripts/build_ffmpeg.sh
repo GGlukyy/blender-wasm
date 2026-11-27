@@ -10,7 +10,7 @@ if [ ! -d "$x264src" ]; then
     || git clone --depth 1 https://github.com/mirror/x264.git "$x264src"
 fi
 b="$BLD/x264"; rm -rf "$b"; mkdir -p "$b"; cd "$b"
-emconfigure "$x264src/configure" --host=i686-gnu --prefix="$SYSROOT" --enable-static --disable-cli \
+emconfigure "$x264src/configure" --host=i686-gnu --prefix="$SYSROOT" --enable-static --disable-cli --disable-thread \
   --disable-asm --disable-opencl --disable-avs --disable-swscale --disable-lavf --disable-ffms --disable-gpac --disable-lsmash \
   --extra-cflags="$WASM_CFLAGS" --extra-ldflags="-pthread"
 emmake make -j"$NPROC"
