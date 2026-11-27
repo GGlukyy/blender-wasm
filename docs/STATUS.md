@@ -1,3 +1,23 @@
+# 27. 11. 08:00 — V2: export videa (FFmpeg) na PC buildu
+Výsledek: 🟡 funguje na PC (Chrome i sim), regrese běží; iPad/lean beze změny (bez FFmpeg)
+
+*Co jsem udělal*
+- `scripts/build_ffmpeg.sh`: x264 + FFmpeg 7.1 (GPL, bez asm, jen vybrané kodeky/muxery) → `wasm-sysroot`. Přidáno do THIRD_PARTY.
+- `build-5.3` je teď **PC strom** (Cycles + `WITH_CODEC_FFMPEG=ON`, příznaky v `scripts/cycles_pc_build.sh`). Pro lean/iPad build: `cmake -DWITH_CYCLES=OFF -DWITH_CODEC_FFMPEG=OFF build-5.3` a znovu ninja + `.link53.sh`.
+- Fork `ipad-5.3` 7ac21101e494: animační stepper (render po snímku, GPU readback je asynchronní) umí movie formáty — `RE_web_movie_begin/end` v `pipeline.cc`. Dřív movie render na webu nezapsal nic.
+- Pozn.: v 5.3 se video volí `image_settings.media_type='VIDEO'` + `file_format='FFMPEG'`; soubor se jmenuje `out0001-0024.mp4`.
+
+*Důkaz*
+- `scripts/v2_video_win.sh` PASS Chrome + `Q=webkit_sim=1`: 24 snímků → MP4 H.264 (3985 B), `movieclips.load` = 24 snímků 128×72, VSE strip = 24.
+- Velikost: `blender-pc.wasm.zst` 166 MB nekomprimovaně (před tím ~151 MB zst-meta, viz manifest) — přesné číslo ke stažení doplním.
+
+*Co nefunguje / odhad*
+- `BLENDER_REF` v Makefile zatím NEZMĚNĚN (čeká na zelenou `regress_all`). Zvuk (audaspace vypnutý) se do videa nezapisuje.
+- Neověřeno, že MP4 přehraje běžný přehrávač (jen zpětné načtení Blenderem).
+
+*Co otestovat*
+- PC: Output Properties ▸ Output ▸ Media Type = Video ▸ FFmpeg Video ▸ MP4/H.264 ▸ Render ▸ Render Animation; soubor stáhnout z File ▸ … (odhad: stejně jako ostatní výstupy), přehrát.
+
 # 26. 11. 22:30 — priorita 0: H54, U3, T6b
 Výsledek: 🟡 H54 + U3 hotové na PC; `regress_all` 0 FAIL (jen XFAIL `_ctypes`); `package_pages.sh` → `out/pages` 97 MB (publish dělá Lukáš); iPad neověřen; T6b video: YouTube 429
 
