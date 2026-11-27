@@ -47,6 +47,8 @@ Výsledek: ✅ na PC: `regress_all` 0 FAIL (jen XFAIL `_ctypes`, journey OK); iP
 
 *Border + Cycles (27. 11. 13:45)*: `scripts/v2_bordercycles_win.sh` PASS Chrome + sim (PNG 64×48) → chyba V2e je jen v GPU-film cestě (Workbench/EEVEE), ne v Cycles.
 
+*Time Remapping (27. 11. 13:42, `scripts/v2_remap_win.sh`)*: `frame_map_old=10, new=5`, snímky 1..6 do MP4 = 6 snímků, PASS Chrome + sim (jen počet snímků; že se vyhodnocují jiné snímky scény, test nekontroluje). První verze čekala 3 snímky = chyba mého očekávání, ne webu.
+
 *Prohlídka po dnešních změnách (27. 11. 13:25)*: `Q='webkit_sim=1&ipad=1&cycles=0' scripts/tour_win.sh` → 75/75 kroků, 0 problémů, 0 chyb, 269 s (včetně všech `_MATERIAL`). Výkon (fps) z toho nejde vyčíst — `tour_result.txt` má jen dobu kroku a std jasu; skutečné fps MP na iPadu čeká na Lukášovo měření (BACKLOG D9a).
 
 *Regrese 27. 11. 12:51*: `regress_all` po změně `main.js` (lišta video kodeku) 0 FAIL (jen XFAIL `_ctypes`), včetně journey a ui_fuzz. Úklid: nic nezůstalo, vite (Lukášův) nechán.
