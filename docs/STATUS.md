@@ -45,7 +45,7 @@ Výsledek: ✅ na PC: `regress_all` 0 FAIL (jen XFAIL `_ctypes`, journey OK); iP
 
 *Overwrite vypnutý (27. 11. 13:45, `scripts/v2_overwrite_win.sh`)*: 2× render 3 PNG snímků do stejné cesty s `use_overwrite=False`+placeholder: 3 soubory, stejná velikost: PASS Chrome + sim. Slabý test (neprokazuje, že se druhý průchod soubory nepřepsal), žádný nález.
 
-*Border + Cycles (27. 11. 14:05)*: `scripts/v2_bordercycles_win.sh` PASS Chrome + sim (PNG 64×48) → chyba V2e je jen v GPU-film cestě (Workbench/EEVEE), ne v Cycles.
+*Border + Cycles (27. 11. 13:45)*: `scripts/v2_bordercycles_win.sh` PASS Chrome + sim (PNG 64×48) → chyba V2e je jen v GPU-film cestě (Workbench/EEVEE), ne v Cycles.
 
 *Prohlídka po dnešních změnách (27. 11. 13:25)*: `Q='webkit_sim=1&ipad=1&cycles=0' scripts/tour_win.sh` → 75/75 kroků, 0 problémů, 0 chyb, 269 s (včetně všech `_MATERIAL`). Výkon (fps) z toho nejde vyčíst — `tour_result.txt` má jen dobu kroku a std jasu; skutečné fps MP na iPadu čeká na Lukášovo měření (BACKLOG D9a).
 
