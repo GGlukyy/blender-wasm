@@ -23,6 +23,8 @@ Výsledek: ✅ na PC: `regress_all` 0 FAIL (jen XFAIL `_ctypes`, journey OK); iP
 
 *Cycles → video (27. 11. 13:45)*: `scripts/v2_cyclesvid_win.sh` (Cycles CPU 4 samples, 2 snímky, MP4 H.264): PASS, movieclip zpět 64×48 ×2 snímky.
 
+*Rozsah snímků ve videu (27. 11. 13:10)*: `scripts/v2_range_win.sh` — 5..10 krok 2 → 3 snímky a jediný snímek 7..7 do MP4: PASS Chrome + sim.
+
 *Regrese 27. 11. 12:51*: `regress_all` po změně `main.js` (lišta video kodeku) 0 FAIL (jen XFAIL `_ctypes`), včetně journey a ui_fuzz. Úklid: nic nezůstalo, vite (Lukášův) nechán.
 
 *Co nefunguje / odhad*
