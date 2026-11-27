@@ -31,6 +31,8 @@ Výsledek: ✅ na PC: `regress_all` 0 FAIL (jen XFAIL `_ctypes`, journey OK); iP
 
 *Video ze sekvenceru (27. 11. 13:20, `scripts/v2_vse_win.sh`)*: scéna bez kamery + barevný pás + `use_sequencer` → MP4 4 snímky: PASS Chrome + sim.
 
+*View Animation (Ctrl+F11, 27. 11. 13:25, `scripts/v2_play_win.sh`)*: po renderu videa nespadne ani nezamrzne, ale hlásí „Couldn't run external animation player with command ['/this.program', '-a', …]“ (Blender spouští vlastní proces `-a`, na webu není). PASS = nespadl; uživatelsky je to mezera → BACKLOG V2d. Obejít: otevřít video v Movie Clip / Video Sequencer, nebo stáhnout soubor.
+
 *Regrese 27. 11. 12:51*: `regress_all` po změně `main.js` (lišta video kodeku) 0 FAIL (jen XFAIL `_ctypes`), včetně journey a ui_fuzz. Úklid: nic nezůstalo, vite (Lukášův) nechán.
 
 *Co nefunguje / odhad*
