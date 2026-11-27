@@ -24,7 +24,7 @@ printf '#!/bin/sh\nPKG_CONFIG_LIBDIR="%s/lib/pkgconfig" exec pkg-config "$@"\n' 
 emconfigure "$src/configure" --prefix="$SYSROOT" --enable-cross-compile --pkg-config="$b/pkgcfg.sh" --target-os=none --arch=x86_32 \
   --cc=emcc --cxx=em++ --ar=emar --ranlib=emranlib --nm=emnm --enable-gpl --enable-libx264 \
   --disable-asm --disable-x86asm --disable-inline-asm --disable-programs --disable-doc --disable-debug \
-  --disable-network --disable-autodetect --disable-everything --disable-avdevice --disable-avfilter \
+  --disable-network --disable-autodetect --disable-everything \
   --disable-postproc --enable-pthreads --enable-static --disable-shared \
   --enable-protocol=file --enable-swscale --enable-swresample \
   --enable-muxer=mp4,matroska,webm,mov,avi,image2,ogg,mpeg1system,mpeg2video,dv,flv \
