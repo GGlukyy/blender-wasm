@@ -35,6 +35,8 @@ Výsledek: ✅ na PC: `regress_all` 0 FAIL (jen XFAIL `_ctypes`, journey OK); iP
 
 *Kvalita videa (27. 11. 13:30, `scripts/v2_quality_win.sh`)*: CRF lossless, nejnižší kvalita + preset realtime, CBR 500 kb/s s gop 1, B-snímky + gop 12, fps 24/12/29,97/25 (3 snímky každé): 4/4 PASS Chrome i `Q=webkit_sim=1` (movieclip zpět 3 snímky 64×48). Žádný nález.
 
+*EEVEE → video (27. 11. 13:35, `scripts/v2_eevee_win.sh`)*: EEVEE animace 3 a 2 snímky do MP4 H.264 (výchozí a CRF HIGH): PASS Chrome i sim. Žádný nález.
+
 *Prohlídka po dnešních změnách (27. 11. 13:25)*: `Q='webkit_sim=1&ipad=1&cycles=0' scripts/tour_win.sh` → 75/75 kroků, 0 problémů, 0 chyb, 269 s (včetně všech `_MATERIAL`). Výkon (fps) z toho nejde vyčíst — `tour_result.txt` má jen dobu kroku a std jasu; skutečné fps MP na iPadu čeká na Lukášovo měření (BACKLOG D9a).
 
 *Regrese 27. 11. 12:51*: `regress_all` po změně `main.js` (lišta video kodeku) 0 FAIL (jen XFAIL `_ctypes`), včetně journey a ui_fuzz. Úklid: nic nezůstalo, vite (Lukášův) nechán.
