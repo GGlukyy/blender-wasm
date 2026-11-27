@@ -66,6 +66,23 @@ def tick():
             except Exception as e:
                 out('OPS v2 second_load', e)
         out('OPS v2 second_mkv_eevee', 'PASS' if ok else 'FAIL', 'size=%d' % sz)
-        state['step'] = 4; return 0.5
+        # třetí: INVOKE (jako Ctrl+F12 z menu), MP4 mpeg4 kodek
+        for f in glob.glob('/tmp/v2/third*'): os.remove(f)
+        sc.render.ffmpeg.format = 'MPEG4'; sc.render.ffmpeg.codec = 'MPEG4'; sc.render.filepath = '/tmp/v2/third'
+        bpy.ops.render.render('INVOKE_DEFAULT', animation=True)
+        state['step'] = 4; state['waited'] = 0; return 2.0
+    if s == 4:
+        g = glob.glob('/tmp/v2/third*.mp4'); P3 = g[0] if g else ''
+        sz = os.path.getsize(P3) if P3 else 0
+        if sz < 500 and state['waited'] < 120:
+            state['waited'] += 1; return 1.0
+        ok = False
+        if sz:
+            try:
+                clip = bpy.data.movieclips.load(P3); ok = clip.frame_duration == 5
+            except Exception as e:
+                out('OPS v2 third_load', e)
+        out('OPS v2 third_invoke_mpeg4', 'PASS' if ok else 'FAIL', 'size=%d' % sz)
+        state['step'] = 5; return 0.5
     out('OPS_DONE'); return None
 bpy.app.timers.register(tick, first_interval=1.0)
