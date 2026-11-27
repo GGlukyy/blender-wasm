@@ -1790,7 +1790,12 @@ def _import_assist():
     return 0.4
 bpy.app.timers.register(_import_assist, first_interval=2.0, persistent=True)
 # H20: export watcher — WASMFS obchází JS FS, proto Python hlídá adresáře a hlásí nové/změněné soubory (WEB_EXPORT <cesta>).
-_ew = {'snap': None, 'pend': {}}
+_ew = {'snap': None, 'pend': {}, 'render_t': 0.0}
+import time as _time
+@bpy.app.handlers.persistent
+def _ew_render_evt(*a): _ew['render_t'] = _time.time()
+for _h in (bpy.app.handlers.render_init, bpy.app.handlers.render_post, bpy.app.handlers.render_complete, bpy.app.handlers.render_cancel): _h.append(_ew_render_evt)
+_EW_VIDEO = ('.mp4', '.avi', '.mkv', '.mov')
 _EW_EXT = ('.obj', '.mtl', '.fbx', '.glb', '.gltf', '.bin', '.stl', '.ply', '.usd', '.usda', '.usdc', '.usdz', '.abc', '.dae', '.svg', '.x3d', '.wrl', '.png', '.jpg', '.jpeg', '.exr', '.tif', '.tiff', '.bmp', '.tga', '.hdr', '.webp', '.dds', '.mp4', '.avi', '.mkv', '.mov', '.wav', '.mp3', '.flac', '.ogg', '.pdf', '.json', '.csv', '.zip', '.vdb', '.bvh', '.blend')
 def _ew_scan():
     out = {}
@@ -1812,8 +1817,10 @@ def _export_watch():
     try:
         cur = _ew_scan()
         if _ew['snap'] is None: _ew['snap'] = cur; return 0.5
+        rendering = _time.time() - _ew['render_t'] < 5.0   # V2: video se zapisuje po snímcích → nenabízet rozepsaný soubor
         for p, v in cur.items():
             if _ew['snap'].get(p) == v: continue
+            if rendering and p.lower().endswith(_EW_VIDEO): _ew['pend'].pop(p, None); continue
             if _ew['pend'].get(p) == v:
                 _ew['snap'][p] = v; del _ew['pend'][p]
                 if v[1] > 0: print('WEB_EXPORT ' + p, flush=True)

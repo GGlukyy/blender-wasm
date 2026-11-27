@@ -11,6 +11,8 @@ Výsledek: ✅ na PC: `regress_all` 0 FAIL (jen XFAIL `_ctypes`, journey OK); iP
 - `scripts/v2_video_win.sh` PASS Chrome + `Q=webkit_sim=1`: 24 snímků → MP4 H.264 (3985 B), `movieclips.load` = 24 snímků 128×72, VSE strip = 24.
 - Velikost: `blender-pc.wasm.zst` 27,3 MB (+~1,5 MB zst oproti předtím, FFmpeg+x264). `package_pages.sh` znovu → `out/pages` 98 MB, největší soubor 40 MB (publish dělá Lukáš). Úklid: po regresi nic nezůstalo; vite (Lukášův) nechán.
 
+*Nález při lovu chyb (opraveno)*: nabídka „Stáhnout“ (`_export_watch` v `main.js`) vyskočila u MP4 už po 2. snímku s rozepsaným souborem. Teď se video (.mp4/.avi/.mkv/.mov) nenabízí 5 s po posledním render eventu. Test `scripts/v2_export_watch_win.sh` PASS Chrome + sim (40 snímků → 1 nabídka až po 40. snímku; před opravou nabídka po snímku 2). Pozn.: `export_ui_win.sh` (File ▸ Export ▸ glTF přes pixely) padá i bez mé změny, není v `regress_all` — odhad: staré souřadnice menu.
+
 *Co nefunguje / odhad*
 - `BLENDER_REF` v Makefile = 7ac21101e494 (po zelené regresi). `v2_video_win.sh` NENÍ v `regress_all` (lean build FFmpeg nemá). Zvuk (audaspace vypnutý) se do videa nezapisuje.
 - Neověřeno, že MP4 přehraje běžný přehrávač (jen zpětné načtení Blenderem).
