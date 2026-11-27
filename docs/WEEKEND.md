@@ -5,7 +5,16 @@ session: read `CLAUDE.md`, `docs/STATUS.md`, `docs/PLAN.md` and `docs/BACKLOG.md
 Lukáš cannot test on the iPad until he is back — verify everything yourself in Windows
 Chrome on the real GPU (`scripts/p2_win.sh`, `scripts/parity_win.sh`).
 
-## PRIORITA 0 (Lukáš 26. 11.): H54 (růžový referenční obrázek na iPadu) → U3 (Open/Import napřímo přes systémový výběr souboru) → T6b (přečíst design workshop) → po zelené regresi `bash scripts/package_pages.sh` (publish dělá Lukáš). Pak:
+## PRIORITA 0 (28. 11., běh na Opus) — snížit ZÁKLADNÍ paměť iPad (lean) buildu. Cíl −500 MB proti dnešku, měřeno.
+Proč: Jetsam ukazuje Blender na iPadu ~4 GB i s prázdnou scénou (strop ~5 GB) → každá akce navíc = pád. Jednotlivé funkce neřešit, snížit základ.
+Měř vše v `?cycles=0&webkit_sim=1&ipad=1` přes `scripts/h50e_win.sh` (renderer commit + WS) PŘED a PO každé změně, tabulka do STATUS. Po každém kroku tour 75/75 sim.
+1. **JS heap ~240 MB** hlavního vlákna: drží se po startu `assets.tar` (ArrayBuffer/Uint8Array) nebo rozbalené kopie? Po zápisu do MEMFS uvolnit (null + nic dalšího neodkazuje), totéž zst buffery, wasm bajty po `instantiate` (Safari drží původní bajty kvůli tieringu — `WebAssembly.compileStreaming` z Response místo bajtů v paměti).
+2. **Pthready na iPadu**: kolik workerů reálně vznikne s `threads=4` (32 na PC sim) — `PTHREAD_POOL_SIZE` / předvytvořené workery, TBB/task pool; každý worker = vlastní JS realm + kopie glue. Snížit na nutné minimum bez rozbití (audio, fyzika, shader kompilace).
+3. **Velikost lean wasm** (strojový kód v Safari škáluje s velikostí): co je v lean buildu zbytečné pro iPad (FFmpeg ne, Cycles ne — ověř; dál např. OpenVDB, Alembic/USD stuby, OSL, nepotřebné importéry, Python moduly v assets) → `twiggy`/`wasm-objdump` top položky, návrh co vypnout (CMake volby) + změřit. Funkčnost: regress_sim 0 FAIL.
+4. **MEMFS**: kolik MB leží v MEMFS (assets rozbalené: Python stdlib, datafiles, fonty, ikony) — každý soubor v MEMFS je v RAM. Líné načítání velkých/zřídka užívaných částí (např. stdlib zip místo rozbaleného, `.pyc` jen to potřebné).
+5. Po zelené regresi: `bash scripts/package_pages.sh` (publish = Lukáš) a do STATUS „co otestovat na iPadu" + nová kalibrace M2 (`membase`).
+Dál: V2e (Render Border na webu), pak zbytek níže. T6 gesta NEDĚLAT, dokud Lukáš neřekne.
+## (26. 11.) (Lukáš 26. 11.): H54 (růžový referenční obrázek na iPadu) → U3 (Open/Import napřímo přes systémový výběr souboru) → T6b (přečíst design workshop) → po zelené regresi `bash scripts/package_pages.sh` (publish dělá Lukáš). Pak:
 ## (23. 11.) (Lukáš 23. 11. 17:25): H50f threads=4 jen iPad → M2 ukazatel RAM na iPadu → H52 (chybí text po obnově) → H53 (soft body paměť). Po zelené regresi: `bash scripts/package_pages.sh` (publish dělá Lukáš). Pak:
 ## (22. 11. 16:30): H51 (záporné měřítko) → H50e (rozpad 2,4 GB na PC) → F2b (Ocean/FFTW3) → V2 jen odhad. Pak zbytek níže.
 ## (21. 11.): O1c (auto-update aplikace z plochy + ochrana smyčky autosave + verze na splash) → pak publish_pages.sh (Lukáš). Dál:
