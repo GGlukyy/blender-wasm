@@ -26,3 +26,6 @@ Base: HeyPuter/blender-wasm + HeyPuter/blender (GPL-2.0).
 
 ## FFTW 3.3.10 (GPL-2.0-or-later, static, wasm) — `scripts/build_fftw3.sh`
 Ocean modifier a FFT ve Glare/Convolve compositoru (`WITH_FFTW3=ON`, F2b). Zdroj https://www.fftw.org/fftw-3.3.10.tar.gz, beze změn; libfftw3, libfftw3f, libfftw3f_threads. Blender je GPL, takže kompatibilní.
+
+## FFmpeg 7.1 + x264 (GPL-2.0-or-later, static, wasm) — `scripts/build_ffmpeg.sh`
+Export/import videa (`WITH_CODEC_FFMPEG=ON`, V2, jen PC build). FFmpeg https://ffmpeg.org/releases/ffmpeg-7.1.tar.xz, x264 https://code.videolan.org/videolan/x264 (stable), beze změn, bez asm, jen vybrané kodeky/muxery. Blender je GPL, takže kompatibilní; H.264 má patentová omezení → jen PC build.
