@@ -29,6 +29,8 @@ Výsledek: ✅ na PC: `regress_all` 0 FAIL (jen XFAIL `_ctypes`, journey OK); iP
 
 *Výstupní cesty videa (27. 11. 13:10, `scripts/v2_path_win.sh`)*: neexistující složka (`/tmp/…/newdir/sub/`) se vytvoří a video se zapíše; relativní `//relvid_` v neuloženém souboru jde do `/` (kořen MEMFS). PASS Chrome + sim. Pozn. (odhad): `_export_watch` sleduje jen `/uploads`, `/tmp`, `/opfs/home` → video v `/` se ke stažení nenabídne; výchozí cesta Blenderu je `/tmp/`, takže se to běžně nestane.
 
+*Video ze sekvenceru (27. 11. 13:20, `scripts/v2_vse_win.sh`)*: scéna bez kamery + barevný pás + `use_sequencer` → MP4 4 snímky: PASS Chrome + sim.
+
 *Regrese 27. 11. 12:51*: `regress_all` po změně `main.js` (lišta video kodeku) 0 FAIL (jen XFAIL `_ctypes`), včetně journey a ui_fuzz. Úklid: nic nezůstalo, vite (Lukášův) nechán.
 
 *Co nefunguje / odhad*
