@@ -43,6 +43,8 @@ Výsledek: ✅ na PC: `regress_all` 0 FAIL (jen XFAIL `_ctypes`, journey OK); iP
 
 *Nález č. 6 (27. 11. 13:55)*: **F12 s Render Border (bez Crop) nezapíše obrázek** — log `WGPU_FILM inject: dims 32x24 vs rr 64x48` → `write dropped`. Stejná příčina jako V2e (video). `scripts/v2_borderstill_win.sh` FAIL = skutečný rozdíl (desktop border umí). Neopraveno (C++ + rebuild), do BACKLOG V2e jako vyšší priorita.
 
+*Overwrite vypnutý (27. 11. 13:45, `scripts/v2_overwrite_win.sh`)*: 2× render 3 PNG snímků do stejné cesty s `use_overwrite=False`+placeholder: 3 soubory, stejná velikost: PASS Chrome + sim. Slabý test (neprokazuje, že se druhý průchod soubory nepřepsal), žádný nález.
+
 *Prohlídka po dnešních změnách (27. 11. 13:25)*: `Q='webkit_sim=1&ipad=1&cycles=0' scripts/tour_win.sh` → 75/75 kroků, 0 problémů, 0 chyb, 269 s (včetně všech `_MATERIAL`). Výkon (fps) z toho nejde vyčíst — `tour_result.txt` má jen dobu kroku a std jasu; skutečné fps MP na iPadu čeká na Lukášovo měření (BACKLOG D9a).
 
 *Regrese 27. 11. 12:51*: `regress_all` po změně `main.js` (lišta video kodeku) 0 FAIL (jen XFAIL `_ctypes`), včetně journey a ui_fuzz. Úklid: nic nezůstalo, vite (Lukášův) nechán.
