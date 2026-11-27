@@ -9,7 +9,7 @@ Výsledek: ✅ na PC: `regress_all` 0 FAIL (jen XFAIL `_ctypes`, journey OK); iP
 
 *Důkaz*
 - `scripts/v2_video_win.sh` PASS Chrome + `Q=webkit_sim=1`: 24 snímků → MP4 H.264 (3985 B), `movieclips.load` = 24 snímků 128×72, VSE strip = 24.
-- Velikost: `blender-pc.wasm.zst` 166 MB nekomprimovaně (před tím ~151 MB zst-meta, viz manifest) — přesné číslo ke stažení doplním.
+- Velikost: `blender-pc.wasm.zst` 27,3 MB (+~1,5 MB zst oproti předtím, FFmpeg+x264). `package_pages.sh` znovu → `out/pages` 98 MB, největší soubor 40 MB (publish dělá Lukáš). Úklid: po regresi nic nezůstalo; vite (Lukášův) nechán.
 
 *Co nefunguje / odhad*
 - `BLENDER_REF` v Makefile = 7ac21101e494 (po zelené regresi). `v2_video_win.sh` NENÍ v `regress_all` (lean build FFmpeg nemá). Zvuk (audaspace vypnutý) se do videa nezapisuje.
