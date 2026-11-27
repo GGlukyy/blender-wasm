@@ -1,5 +1,5 @@
 # 27. 11. 08:00 — V2: export videa (FFmpeg) na PC buildu
-Výsledek: 🟡 funguje na PC (Chrome i sim), regrese běží; iPad/lean beze změny (bez FFmpeg)
+Výsledek: ✅ na PC: `regress_all` 0 FAIL (jen XFAIL `_ctypes`, journey OK); iPad/lean beze změny (bez FFmpeg)
 
 *Co jsem udělal*
 - `scripts/build_ffmpeg.sh`: x264 + FFmpeg 7.1 (GPL, bez asm, jen vybrané kodeky/muxery) → `wasm-sysroot`. Přidáno do THIRD_PARTY.
@@ -12,7 +12,7 @@ Výsledek: 🟡 funguje na PC (Chrome i sim), regrese běží; iPad/lean beze zm
 - Velikost: `blender-pc.wasm.zst` 166 MB nekomprimovaně (před tím ~151 MB zst-meta, viz manifest) — přesné číslo ke stažení doplním.
 
 *Co nefunguje / odhad*
-- `BLENDER_REF` v Makefile zatím NEZMĚNĚN (čeká na zelenou `regress_all`). Zvuk (audaspace vypnutý) se do videa nezapisuje.
+- `BLENDER_REF` v Makefile = 7ac21101e494 (po zelené regresi). `v2_video_win.sh` NENÍ v `regress_all` (lean build FFmpeg nemá). Zvuk (audaspace vypnutý) se do videa nezapisuje.
 - Neověřeno, že MP4 přehraje běžný přehrávač (jen zpětné načtení Blenderem).
 
 *Co otestovat*
