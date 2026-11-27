@@ -41,6 +41,8 @@ Výsledek: ✅ na PC: `regress_all` 0 FAIL (jen XFAIL `_ctypes`, journey OK); iP
 
 *Nález č. 5 (27. 11. 13:50)*: video s Render Border bez Crop → web zapíše jen hlavičku MP4 (0 snímků), desktop 5.3.0 zapíše snímky; s Crop PASS. → BACKLOG V2e, `scripts/v2_border_win.sh` (řádek `v2b 0` FAIL = skutečný rozdíl). Neopraveno (C++ + rebuild, nezbyl čas). Také `v2_color_win.sh` PASS.
 
+*Nález č. 6 (27. 11. 13:55)*: **F12 s Render Border (bez Crop) nezapíše obrázek** — log `WGPU_FILM inject: dims 32x24 vs rr 64x48` → `write dropped`. Stejná příčina jako V2e (video). `scripts/v2_borderstill_win.sh` FAIL = skutečný rozdíl (desktop border umí). Neopraveno (C++ + rebuild), do BACKLOG V2e jako vyšší priorita.
+
 *Prohlídka po dnešních změnách (27. 11. 13:25)*: `Q='webkit_sim=1&ipad=1&cycles=0' scripts/tour_win.sh` → 75/75 kroků, 0 problémů, 0 chyb, 269 s (včetně všech `_MATERIAL`). Výkon (fps) z toho nejde vyčíst — `tour_result.txt` má jen dobu kroku a std jasu; skutečné fps MP na iPadu čeká na Lukášovo měření (BACKLOG D9a).
 
 *Regrese 27. 11. 12:51*: `regress_all` po změně `main.js` (lišta video kodeku) 0 FAIL (jen XFAIL `_ctypes`), včetně journey a ui_fuzz. Úklid: nic nezůstalo, vite (Lukášův) nechán.
