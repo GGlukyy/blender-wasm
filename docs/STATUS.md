@@ -25,7 +25,7 @@ Výsledek: ✅ na PC: `regress_all` 0 FAIL (jen XFAIL `_ctypes`, journey OK); iP
 
 *Rozsah snímků ve videu (27. 11. 13:10)*: `scripts/v2_range_win.sh` — 5..10 krok 2 → 3 snímky a jediný snímek 7..7 do MP4: PASS Chrome + sim.
 
-*Nález č. 4 (27. 11. 13:30)*: render animace bez kamery na webu mlčí (desktop hlásí „Cannot render, no camera“) → BACKLOG V2c, `scripts/v2_nocam_win.sh` (řádek `nocam_reports_error` je FAIL = skutečný rozdíl; není v `regress_all`). Další render po této chybě funguje. Neopraveno (C++ + rebuild, na konec víkendu už ne).
+*Nález č. 4 (27. 11. 13:30)*: render animace bez kamery na webu mlčí (desktop hlásí „Cannot render, no camera“) → BACKLOG V2c, `scripts/v2_nocam_win.sh` (řádek `nocam_reports_error` je FAIL = skutečný rozdíl; není v `regress_all`). Další render po této chybě funguje. F12 jeden snímek bez kamery hlásí chybu správně (`v2_nocam_still_win.sh` PASS) → vadí jen animační stepper. Neopraveno (C++ + rebuild).
 
 *Regrese 27. 11. 12:51*: `regress_all` po změně `main.js` (lišta video kodeku) 0 FAIL (jen XFAIL `_ctypes`), včetně journey a ui_fuzz. Úklid: nic nezůstalo, vite (Lukášův) nechán.
 
