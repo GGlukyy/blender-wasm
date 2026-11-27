@@ -27,6 +27,10 @@ Výsledek: ✅ na PC: `regress_all` 0 FAIL (jen XFAIL `_ctypes`, journey OK); iP
 - `BLENDER_REF` v Makefile = 7ac21101e494 (po zelené regresi). `v2_video_win.sh` NENÍ v `regress_all` (lean build FFmpeg nemá). Zvuk (audaspace vypnutý) se do videa nezapisuje.
 - Neověřeno, že MP4 přehraje běžný přehrávač (jen zpětné načtení Blenderem).
 
+*Co otestovat (doplněno 27. 11. 13:30)*
+- PC: Output ▸ Media Type = Video ▸ WebM (nebo MP4 H.264 se sudým/lichým rozlišením) ▸ Render Animation → červená lišta s vysvětlením, žádný soubor ke stažení.
+- PC: po renderu MP4 přepnout na PNG → F12 a animace fungují (v2_after_video_win.sh PASS).
+
 *Co otestovat*
 - PC: Output Properties ▸ Output ▸ Media Type = Video ▸ FFmpeg Video ▸ MP4/H.264 ▸ Render ▸ Render Animation; soubor stáhnout z File ▸ … (odhad: stejně jako ostatní výstupy), přehrát.
 
