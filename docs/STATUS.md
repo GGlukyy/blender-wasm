@@ -17,6 +17,8 @@ Výsledek: ✅ na PC: `regress_all` 0 FAIL (jen XFAIL `_ctypes`, journey OK); iP
 
 *Nález č. 3 (27. 11. 11:00, `scripts/v2_codecs_win.sh`)*: z nabídky kontejner×kodek se zapíše H.264/MPEG4 v MP4, AVI, QuickTime, MKV (8/8, movieclip zpět = 2 snímky). **Nejde: WebM (VP9), AV1, PNG/QTRLE v AVI/MOV, Theora (OGG), Flash** — v buildu je jen vybraný set kodeků; render dřív skončil potichu bez souboru. Oprava (JS, bez rebuildu): `main.js` při „cannot open movie writer“ ukáže červenou lištu „Tento formát/kodek videa na webu nejde zapsat… Zkus MP4 nebo Matroska s H.264“. Test `scripts/v2_movie_bad_win.sh` PASS Chrome + sim. Pozn.: WebM/VP9 chtějí libvpx (odhad: +~1 MB zst, nepřidáno bez Lukášova rozhodnutí). Pushnuto: master.
 
+*Po videu zpět na obrázky (27. 11. 13:00)*: `scripts/v2_after_video_win.sh` — po renderu MP4 přepnout na PNG → F12 jeden snímek (64×48, ne černý) + animace do 3 PNG: PASS Chrome i `Q=webkit_sim=1`. Pozn.: v6 skriptech `v2_*_win.sh` chybělo předání `Q` do Windows (`WSLENV`), takže `Q=…` dřív sim nespustil; doplněno (sim přes `regress_sim.sh` fungoval vždy přes NODE_OPTIONS hook). `v2_codecs_win.sh` ve sim = stejné jako Chrome (7 PASS, 8 nepodporovaných).
+
 *Regrese 27. 11. 12:51*: `regress_all` po změně `main.js` (lišta video kodeku) 0 FAIL (jen XFAIL `_ctypes`), včetně journey a ui_fuzz. Úklid: nic nezůstalo, vite (Lukášův) nechán.
 
 *Co nefunguje / odhad*
