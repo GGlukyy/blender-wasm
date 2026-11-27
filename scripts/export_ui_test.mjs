@@ -15,7 +15,7 @@ let last = null; let errs = 0;
 page.on('pageerror', (e) => { errs++; console.log('PAGEERROR', String(e).slice(0, 200)); });
 page.on("console", (m) => { const t = m.text(); const i = t.indexOf("EX "); if (i >= 0) last = t.slice(i + 3).trim().split(/\s+/); });
 await page.addInitScript((e) => { window.__BARGS = ["--python-expr", e]; }, expr);
-await page.goto("http://localhost:5173/", { waitUntil: "load" });
+await page.goto("http://localhost:5173/" + (process.env.Q ? "?" + process.env.Q : ""), { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
 await page.getByRole("button", { name: /Launch Blender/ }).click();
 for (let i = 0; i < 300; i++) { if ((await page.evaluate(() => window.__BGUI__ || {})).window) break; await new Promise(r => setTimeout(r, 1000)); }
@@ -23,11 +23,11 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
 await wait(8000); await page.keyboard.press("Escape"); await wait(800);
 await page.mouse.move(600, 450); await wait(300);
 await page.mouse.click(40, 13); await wait(700);
-await page.mouse.click(73, 317); await wait(900);      // Export
+await page.mouse.click(73, 344); await wait(900);      // Export
 await page.locator("#canvas").screenshot({ path: "out/exportui_1_menu.png" });
-await page.mouse.move(250, 317); await wait(500);
+await page.mouse.move(250, 344); await wait(500);
 await page.locator("#canvas").screenshot({ path: "out/exportui_2_sub.png" });
-await page.mouse.move(330, 396, { steps: 4 }); await wait(500); await page.mouse.click(330, 396); await wait(15000);
+await page.mouse.move(330, 490, { steps: 4 }); await wait(500); await page.mouse.click(330, 490); await wait(15000);
 await page.locator("#canvas").screenshot({ path: "out/exportui_3_dialog.png" });
 await page.mouse.click(1327, 808); await wait(8000);
 await page.locator("#canvas").screenshot({ path: "out/exportui_4_after.png" });

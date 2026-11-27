@@ -1,5 +1,6 @@
 #!/bin/bash
-# Checklist 21: Smart UV Project přes UI. Výstup: MATCOLOR + PASS/FAIL
+# File ▸ Export ▸ glTF přes UI (skutečné klepnutí). Výstup: PASS/FAIL; Q=webkit_sim=1 pro sim
+export Q WSLENV="Q${WSLENV:+:$WSLENV}"
 U=${WINUSER:-$(ls /mnt/c/Users | grep -v -i -E 'public|default|all users|desktop.ini' | head -1)}
 W=/mnt/c/Users/$U/p2win; ROOT=$(cd "$(dirname "$0")/.." && pwd)
 cp "$ROOT/scripts/export_ui_test.mjs" "$W/"; mkdir -p "$W/out"
