@@ -39,6 +39,8 @@ Výsledek: ✅ na PC: `regress_all` 0 FAIL (jen XFAIL `_ctypes`, journey OK); iP
 
 *Barevné režimy videa (27. 11. 13:40, `scripts/v2_color_win.sh`)*: BW a RGB do MP4 PASS Chrome + sim; RGBA pro H.264 Blender sám nenabídne (enum odmítnut, stejně jako desktop — odhad z API, ne porovnáno), zůstává RGB. Žádný nález.
 
+*Nález č. 5 (27. 11. 13:50)*: video s Render Border bez Crop → web zapíše jen hlavičku MP4 (0 snímků), desktop 5.3.0 zapíše snímky; s Crop PASS. → BACKLOG V2e, `scripts/v2_border_win.sh` (řádek `v2b 0` FAIL = skutečný rozdíl). Neopraveno (C++ + rebuild, nezbyl čas). Také `v2_color_win.sh` PASS.
+
 *Prohlídka po dnešních změnách (27. 11. 13:25)*: `Q='webkit_sim=1&ipad=1&cycles=0' scripts/tour_win.sh` → 75/75 kroků, 0 problémů, 0 chyb, 269 s (včetně všech `_MATERIAL`). Výkon (fps) z toho nejde vyčíst — `tour_result.txt` má jen dobu kroku a std jasu; skutečné fps MP na iPadu čeká na Lukášovo měření (BACKLOG D9a).
 
 *Regrese 27. 11. 12:51*: `regress_all` po změně `main.js` (lišta video kodeku) 0 FAIL (jen XFAIL `_ctypes`), včetně journey a ui_fuzz. Úklid: nic nezůstalo, vite (Lukášův) nechán.
