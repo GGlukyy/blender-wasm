@@ -83,6 +83,21 @@ def tick():
             except Exception as e:
                 out('OPS v2 third_load', e)
         out('OPS v2 third_invoke_mpeg4', 'PASS' if ok else 'FAIL', 'size=%d' % sz)
-        state['step'] = 5; return 0.5
+        # čtvrtý: s audio kodekem AAC (audaspace vypnutý) — nesmí spadnout, video se musí zapsat
+        for f in glob.glob('/tmp/v2/fourth*'): os.remove(f)
+        sc.render.ffmpeg.format = 'MPEG4'; sc.render.ffmpeg.codec = 'H264'; sc.render.filepath = '/tmp/v2/fourth'
+        try:
+            sc.render.ffmpeg.audio_codec = 'AAC'
+        except Exception as e:
+            out('OPS v2 audio_codec_set', e)
+        bpy.ops.render.render(animation=True)
+        state['step'] = 5; state['waited'] = 0; return 2.0
+    if s == 5:
+        g = glob.glob('/tmp/v2/fourth*.mp4'); P4 = g[0] if g else ''
+        sz = os.path.getsize(P4) if P4 else 0
+        if sz < 500 and state['waited'] < 120:
+            state['waited'] += 1; return 1.0
+        out('OPS v2 fourth_audio_aac', 'PASS' if sz > 500 else 'FAIL', 'size=%d' % sz)
+        state['step'] = 6; return 0.5
     out('OPS_DONE'); return None
 bpy.app.timers.register(tick, first_interval=1.0)
