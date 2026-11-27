@@ -17,6 +17,8 @@ Výsledek: ✅ na PC: `regress_all` 0 FAIL (jen XFAIL `_ctypes`, journey OK); iP
 
 *Nález č. 3 (27. 11. 11:00, `scripts/v2_codecs_win.sh`)*: z nabídky kontejner×kodek se zapíše H.264/MPEG4 v MP4, AVI, QuickTime, MKV (8/8, movieclip zpět = 2 snímky). **Nejde: WebM (VP9), AV1, PNG/QTRLE v AVI/MOV, Theora (OGG), Flash** — v buildu je jen vybraný set kodeků; render dřív skončil potichu bez souboru. Oprava (JS, bez rebuildu): `main.js` při „cannot open movie writer“ ukáže červenou lištu „Tento formát/kodek videa na webu nejde zapsat… Zkus MP4 nebo Matroska s H.264“. Test `scripts/v2_movie_bad_win.sh` PASS Chrome + sim. Pozn.: WebM/VP9 chtějí libvpx (odhad: +~1 MB zst, nepřidáno bez Lukášova rozhodnutí). Pushnuto: master.
 
+*Regrese 27. 11. 12:51*: `regress_all` po změně `main.js` (lišta video kodeku) 0 FAIL (jen XFAIL `_ctypes`), včetně journey a ui_fuzz. Úklid: nic nezůstalo, vite (Lukášův) nechán.
+
 *Co nefunguje / odhad*
 - `BLENDER_REF` v Makefile = 7ac21101e494 (po zelené regresi). `v2_video_win.sh` NENÍ v `regress_all` (lean build FFmpeg nemá). Zvuk (audaspace vypnutý) se do videa nezapisuje.
 - Neověřeno, že MP4 přehraje běžný přehrávač (jen zpětné načtení Blenderem).
