@@ -1208,3 +1208,5 @@ Běžící Blender (paměť wasm) po zavření Safari / uspání karty iOS NEJDE
 - [x] U3/H54 s českými názvy: `kůň č.png` (Image Open, 3 soubory) i `škola čtyři.blend` (File ▸ Open) fungují (`u3_win.sh`, `u3_open_win.sh` s `BLEND=…` PASS).
 - [x] Nalezeno lovem: po Image Open s víc soubory zůstal Blenderův prohlížeč otevřený přes celou obrazovku (další import pak selhal). Opraveno (`_u3['close']` i v té větvi); test `u3_win.sh` teď pokrývá i glTF (.glb) import — PASS Chrome + sim.
 - [x] „Image as Plane": v 5.3 už není v jádru (rozšíření ze serveru Extensions, offline nejde) → netestováno, mimo H54. Zbývá-li chuť: Add ▸ Image ▸ Reference/Background pokrývá `h54_win.sh`.
+
+- [ ] V2b (27. 11.) Video: WebM/VP9, AV1, Theora, PNG-v-MOV na webu nejde (chybí kodeky v build_ffmpeg.sh); teď jen lišta s varováním (`v2_movie_bad_win.sh`). Rozhodnout s Lukášem, jestli přidat libvpx (WebM je běžný formát pro web/Discord).

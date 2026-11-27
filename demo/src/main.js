@@ -762,6 +762,13 @@ const scan = (t) => {
     const b = document.createElement("button"); b.textContent = "Obnovit"; b.style.cssText = "margin-left:8px;font-size:15px"; b.onclick = () => location.reload();
     n.append(b); document.body.appendChild(n);
   }
+  if (t.includes("anim stepper: cannot open movie writer")) {
+    document.getElementById("movie-bad")?.remove();
+    const n = document.createElement("div"); n.id = "movie-bad";
+    n.style.cssText = "position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:99998;background:rgba(179,38,30,.96);color:#fff;font:15px system-ui,sans-serif;padding:8px 14px;border-radius:8px;max-width:90vw";
+    n.textContent = "⚠️ Tento formát/kodek videa na webu nejde zapsat (soubor nevznikl). Zkus MP4 nebo Matroska s H.264.";
+    document.body.appendChild(n); setTimeout(() => n.remove(), 15000);
+  }
   if (/^RESTORE_AUTO\b/.test(t.trim())) { localStorage.setItem("restoring", "1"); setTimeout(() => localStorage.removeItem("restoring"), 60000); }
   if (/^RESTORE_CRASHED_OFFER\b/.test(t.trim()) && window.__RESTORE_CRASHED__ && !document.getElementById("restore-crashed-note")) showRestoreCrashed();
   if (t.includes("WEB_MP_BLOCKED")) showMpBlocked();
