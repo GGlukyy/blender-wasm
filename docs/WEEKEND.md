@@ -14,7 +14,7 @@ Měř vše v `?cycles=0&webkit_sim=1&ipad=1` přes `scripts/h50e_win.sh` (render
 4. **MEMFS**: kolik MB leží v MEMFS (assets rozbalené: Python stdlib, datafiles, fonty, ikony) — každý soubor v MEMFS je v RAM. Líné načítání velkých/zřídka užívaných částí (např. stdlib zip místo rozbaleného, `.pyc` jen to potřebné).
 5. **Undo paměť (Lukáš 28. 11.)**: Blender má výchozí `Undo Memory Limit = 0` (neomezeně) a 32 kroků → každý Ctrl+Z krok drží kopii scény (u sculptu/hustých meshů stovky MB). Změř v sim: kostka → subdivision 5 + 20 operací, `rt_malloc_mb` vs počet undo kroků. Na iPadu při startu nastavit `preferences.edit.undo_memory_limit` (návrh 256 MB) + `undo_steps` 16 (PC beze změny), ověřit že Ctrl+Z dál funguje (tour + journey undo).
 6. Po zelené regresi: `bash scripts/package_pages.sh` (publish = Lukáš) a do STATUS „co otestovat na iPadu" + nová kalibrace M2 (`membase`).
-Dál: V2e (Render Border na webu), pak zbytek níže. T6 gesta NEDĚLAT, dokud Lukáš neřekne.
+Dál: **O1d (aktualizace bez klikání)**, V2e (Render Border na webu), pak zbytek níže. T6 gesta NEDĚLAT, dokud Lukáš neřekne.
 ## (26. 11.) (Lukáš 26. 11.): H54 (růžový referenční obrázek na iPadu) → U3 (Open/Import napřímo přes systémový výběr souboru) → T6b (přečíst design workshop) → po zelené regresi `bash scripts/package_pages.sh` (publish dělá Lukáš). Pak:
 ## (23. 11.) (Lukáš 23. 11. 17:25): H50f threads=4 jen iPad → M2 ukazatel RAM na iPadu → H52 (chybí text po obnově) → H53 (soft body paměť). Po zelené regresi: `bash scripts/package_pages.sh` (publish dělá Lukáš). Pak:
 ## (22. 11. 16:30): H51 (záporné měřítko) → H50e (rozpad 2,4 GB na PC) → F2b (Ocean/FFTW3) → V2 jen odhad. Pak zbytek níže.
