@@ -1,3 +1,44 @@
+# 28. 11. 02:30 — PRIORITA 0: snížit základní paměť iPad (lean) buildu
+Výsledek: 🟡 −243 MB rendereru v sim (2151 → 1908), s iPad poolem 8: 1762 → 1568 (−194); cíl −500 MB nesplněn; regrese běží; iPad neověřen
+
+*Měření* (`scripts/h50e_win.sh`, Chrome, `?cycles=0&webkit_sim=1&ipad=1`, prázdná scéna, 20 s po startu UI; renderer privátní / working set MB):
+| krok | renderer | WS | JS heap | workery |
+|---|---|---|---|---|
+| před (28. 11. 01:00) | 2151 | 1324 | 235 | 32 |
+| 1. uvolnit wasm bajty | 1981 | 1162 | 88 | 32 |
+| (s `&pool=8` jako iPad) | 1762 | 974 | 89 | 17 |
+| 2. OIIO pool = `-t N` | 1708 | 930 | 89 | 12 |
+| 3a. `wasm-opt -O2` | 1629 | 851 | 88 | 12 |
+| 3b. OpenEXR pool předem ne | 1568 | 802 | 88 | 8 |
+| po (bez `pool=8`) | 1908 | 1085 | 88 | 32 |
+Pozn.: na PC sim se předvytvoří 32 workerů (iPad má `pool=8` jen podle UA), proto čísla s `&pool=8` líp odpovídají iPadu. PC build (Chrome, výchozí): 2403 → 2179 MB.
+
+*Co jsem udělal*
+- **JS heap 232 → 88 MB**: pole z `await Promise.all([...])` drží generátor modulu (top-level await) napořád → 144 MB rozbaleného wasm zůstalo, i když se `wasmBytes = null` (zjištěno heap snapshotem, `scripts/p0_heap_win.sh` + `SNAP=1`). Oprava `main.js`: hodnoty se přiřadí uvnitř `.then`. Zbylých 73 MB = `assets.tar` (ten musí zůstat, čte se z něj /assets).
+- **Pthready**: nový `scripts/p0_threads_win.sh` + `scripts/wasm_func_names.py` ukáže, kdo vlákno spustil. V sim: OpenImageIO pool 15× (podle jader, až pak ho Blender zmenší, ale workery emscriptenu zůstanou), OpenEXR pool 4×, TBB 3×, main, proxy, recents. Opravy: `ENV.OPENIMAGEIO_THREADS = -t N` (JS) a OpenEXR pool se s `-t N` na webu nespouští předem (fork `ipad-5.3` 6d13982b4a82, `openexr_api.cpp`). EXR čtení/zápis dál funguje (`scripts/p0_exr_win.sh` PASS). Na iPadu odhad: 17 → 8 workerů (iPad má 8 jader, OIIO 7→3).
+- **Velikost wasm**: link běžel s `-O1` = bez optimalizací binaryenu. `wasm-opt -O2` na hotovém wasm (v `.link53.sh`, 45 s, `WASM_OPT=0` vypne): lean 151 → 125 MB, PC 166 → 138 MB (ke stažení skoro stejně, 25,4 MB zst). `-Os` jen o 2,8 MB menší → nechávám `-O2`. Rozpad kódu (`scripts/wasm_size_by.py`, PC wasm se jmény): OpenVDB 13,8 MB, Mantaflow 6 MB, OpenColorIO 4 MB, tint/spirv/glslang 5 MB (překlad shaderů, nutné), Cycles 4,6, FFmpeg 2,2 (lean je nemá).
+- **Undo (bod 5)**: iPad výchozí `undo_memory_limit` 256 MB (dřív 300) + `undo_steps` 16 (dřív 32); PC beze změny (300 / 32). `?undomem=`, `?undosteps=` přepíše. Měření `scripts/p0_undo_win.sh` (kostka subdiv, 20 editací v Edit Mode, `OP=topo` = mění topologii, LV=8 → 393k vrcholů): bez limitu 1263 MB po 20 krocích, iPad výchozí 1216, s 2 kroky 697. Posun vrcholů stojí jen ~0,3 MB/krok (24k vrcholů), změna topologie ~2,3 MB/krok (24k) / ~37 MB/krok (393k). Ctrl+Z dál funguje (4× zpět = správná pozice).
+- **Nález (chyba původního Blenderu, ne naše)**: v Edit Mode se **limit paměti undo vůbec nepočítá** — `editmesh_undo.cc` nikdy nenastaví `undo_size` (je tak i ve v5.3.0), takže krok má velikost 0. V Edit Mode chrání jen počet kroků (16). Sculpt a Object Mode velikost počítají. Z kódu; na desktopu jsem to nezkoušel (odhad: stejné). Lukáš to může nahlásit Blenderu.
+- **MEMFS / assets (bod 4)**: `/assets` je jeden tar 72,6 MB v JS (soubory se čtou z něj, při otevření se kopírují do wasm). Největší: fonty 14,7 MB (z toho CJK font 10,9 MB), assety štětců/uzlů 11,3 MB, colormanagement LUTy 8,6 MB. Strop úspory ~70 MB → zatím jen návrh (viz Co dál).
+
+*Důkaz*
+- h50e tabulka výše (logy `out/win/h50e_p0_*.log`). Tour `Q='webkit_sim=1&ipad=1&cycles=0'` 75/75, 0 problémů po každém kroku (1, 2, wasm-opt, finální build). `p0_exr_win.sh` PASS.
+- `regress_all` + `regress_sim` na finálních buildech: BĚŽÍ (výsledek doplním).
+
+*Pushnuto*: master 3f96d49, e1432b0, 5b18f68; fork `ipad-5.3` 6d13982b4a82 (= `BLENDER_REF`). `demo/public`: nový lean i PC build (zálohy `out/bak_p0/`). **`build-5.3` je teď LEAN strom** (Cycles OFF, FFmpeg OFF). Pro PC build: `scripts/cycles_pc_build.sh`.
+
+*Co nefunguje / odhad*
+- Cíl −500 MB: v Chrome sim −243 (resp. −194 s pool 8). Na iPadu bude zisk z workerů nejspíš větší (worker v Safari je dražší než ~11 MB v Chrome) — odhad, neověřeno.
+
+*Co otestovat na iPadu* (po publish)
+1. Otevři app, prázdná scéna, 1 min nic nedělej → pošli Jetsam/štítek RAM (dřív ~4 GB). Hlavní otázka: kolik ubylo.
+2. Edit Mode: 20× něco udělej, pak 16× Ctrl+Z → funguje (víc než 16 kroků zpět už nejde, to je záměr).
+3. Otevři .blend s EXR texturou / HDRI ve World → obrázek se načte.
+
+*Co dál (návrhy, rozhodne Lukáš)*
+- Vypnout v iPad buildu **Mantaflow (fluid sim)**: −6 MB kódu. **OpenVDB** −13,8 MB kódu, ale bere i Voxel Remesh (sculpt!) a Volume objekty → spíš ne.
+- CJK font (10,9 MB) z assets vynechat → čínština/japonština v názvech jako čtverečky.
+
 # 27. 11. 08:00 — V2: export videa (FFmpeg) na PC buildu
 Výsledek: ✅ na PC: `regress_all` 0 FAIL (jen XFAIL `_ctypes`, journey OK); iPad/lean beze změny (bez FFmpeg)
 
