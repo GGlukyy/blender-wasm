@@ -5,6 +5,14 @@ session: read `CLAUDE.md`, `docs/STATUS.md`, `docs/PLAN.md` and `docs/BACKLOG.md
 Lukáš cannot test on the iPad until he is back — verify everything yourself in Windows
 Chrome on the real GPU (`scripts/p2_win.sh`, `scripts/parity_win.sh`).
 
+## PRIORITA 0 (Lukáš 28. 11. 14:00) — iPad úspory s volbou „experimentální"
+Rozhodnutí Lukáše: OpenVDB NECHAT (Voxel Remesh). Mantaflow a CJK font na iPadu ve výchozím stavu VYPNOUT, ale dát uživateli možnost je zapnout jako experimentální.
+1. **CJK font** (−10,9 MB RAM): v lean/iPad buildu ho nenačítat při startu (vyjmout z `assets.tar` do samostatného souboru), dotáhnout líně, když (a) se UI jazyk přepne na čínštinu/japonštinu/korejštinu, nebo (b) uživatel zapne volbu „Fonty pro CJK (experimentální)". PC beze změny. Test: přepnutí jazyka na ja_JP → text se zobrazí (ne čtverečky).
+2. **Mantaflow** (−6 MB kódu): vypnout v lean buildu (`WITH_MOD_FLUID=OFF`). Místo zvláštního buildu: volba **„Plná verze (experimentální)"** na iPadu = načíst PC build (`blender-pc.wasm`: Cycles, Mantaflow, video, CJK) s varováním „víc paměti, častější pády". Přepínač na úvodní obrazovce/Launch (pamatovat v localStorage, `?full=1`), štítek RAM to musí vědět (jiný základ).
+3. Fluid modifier v lean buildu: srozumitelná hláška „Simulace kapalin je jen v plné verzi (experimentální)" místo tichého selhání.
+4. Měření: `h50e_win.sh` lean sim před/po, tour 75/75 sim (lean) + 1× s `full=1`, regress_sim. Pak `package_pages.sh`.
+Dál pokračovat podle bloku níže (T6 gesta stále NEDĚLAT bez souhlasu).
+
 ## PRIORITA 0 (28. 11., běh na Opus) — snížit ZÁKLADNÍ paměť iPad (lean) buildu. Cíl −500 MB proti dnešku, měřeno.
 Proč: Jetsam ukazuje Blender na iPadu ~4 GB i s prázdnou scénou (strop ~5 GB) → každá akce navíc = pád. Jednotlivé funkce neřešit, snížit základ.
 Měř vše v `?cycles=0&webkit_sim=1&ipad=1` přes `scripts/h50e_win.sh` (renderer commit + WS) PŘED a PO každé změně, tabulka do STATUS. Po každém kroku tour 75/75 sim.
