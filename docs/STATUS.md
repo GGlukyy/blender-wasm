@@ -1,3 +1,7 @@
+# 28. 11. 18:20 — lov chyb: Fluid (Mantaflow) bake
+Výsledek: ✅ bez nálezu
+- `scripts/v2_fluid_win.sh` (v `regress_all`): doména 24, kapalina + kouř, Bake All 12 snímků → počet souborů cache (36 / 24) a mesh kapaliny (1248 vrcholů) = desktop 5.3.0, Chrome i lean sim. Čas: web 1,4 s / desktop 0,2 s (kapalina, malá doména).
+
 # 28. 11. 17:50 — lov chyb: export → import 3D formátů
 Výsledek: ✅ bez nálezu
 - `scripts/v2_io_win.sh` (v `regress_all`): opice se Subsurf + materiál + natočená kostka → OBJ, FBX, GLB, glTF separate, STL (bin/ASCII), PLY (bin/ASCII) → import: počty objektů/vrcholů/ploch, UV, materiály, rozměry = desktop 5.3.0 v Chrome i lean sim.

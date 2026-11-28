@@ -89,6 +89,7 @@ run v2_nocam scripts/v2_nocam_win.sh # V2c
 run v2g scripts/v2g_win.sh # V2g: lišta při nezapsaném obrázku
 run v2_read scripts/v2_read_win.sh # V2h: čtení PNG paleta/16bit/tRNS, PSD, BMP32 = desktop
 run v2_io scripts/v2_io_win.sh # V2i: export→import OBJ/FBX/glTF/STL/PLY = desktop
+run v2_fluid scripts/v2_fluid_win.sh # F4: Mantaflow bake kapalina+kouř = desktop
 TAILN=20 RUN_TIMEOUT=6000 run journey scripts/journey_win.sh # >30 cest, 900 s nestačí (7. 11.); 22. 11.: 3600 s nestačilo (150 cest) → 6000
 run fuzz scripts/fuzz_win.sh
 run ui_fuzz scripts/ui_fuzz_win.sh
