@@ -4,7 +4,7 @@ const { chromium } = await import(process.env.PW || "playwright");
 const { execSync } = await import("node:child_process");
 const secs = +(process.argv[2] || 30);
 const browser = await chromium.launch({ headless: false, executablePath: process.env.CHROME,
-  args: ["--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
+  args: ["--js-flags=--expose-gc", "--enable-unsafe-webgpu", "--ignore-gpu-blocklist", "--window-size=1500,950"] });
 const page = await (await browser.newContext({ viewport: { width: 1400, height: 850 } })).newPage();
 const cdp = await browser.newBrowserCDPSession();
 page.on("console", (m) => { if (/H50E_T/.test(m.text())) console.log("BENCH " + m.text()); });
@@ -26,10 +26,12 @@ const q = "?tel=1" + (process.env.Q ? "&" + process.env.Q : "");
 await page.goto("http://localhost:5173/" + q, { waitUntil: "load" });
 await page.locator("#gpu-ack").check({ timeout: 2000 }).catch(() => {});
 await snap("page_loaded");
+const jsh = async (l) => console.log("ST jsheap_" + l + " " + JSON.stringify(await page.evaluate(async () => { if (window.gc) window.gc(); await new Promise(r => setTimeout(r, 500)); return { used: Math.round(performance.memory.usedJSHeapSize / 1048576), total: Math.round(performance.memory.totalJSHeapSize / 1048576) }; })));
+for (let i = 0; i < 120 && !(await page.getByRole("button", { name: /Launch Blender/ }).isEnabled().catch(() => false)); i++) await wait(1000); await wait(1500); await jsh("before_launch");
 await page.getByRole("button", { name: /Launch Blender/ }).click();
 let up = false;
 for (let i = 0; i < 200 && !up; i++) { await wait(3000); await snap("t+" + (i + 1) * 3 + "s"); up = !!(await page.evaluate(() => window.__BGUI__ || {})).window; }
-await wait(secs * 1000); await snap("ui_up+" + secs + "s");
+await wait(secs * 1000); await snap("ui_up+" + secs + "s"); await jsh("ui_up");
 const targets = (await cdp.send("Target.getTargets")).targetInfos; const tc = {}; for (const t of targets) tc[t.type] = (tc[t.type] || 0) + 1;
 const r = await page.evaluate(async () => {
   const M = window.Module || {}; const o = { perf: window.__heap || null, jsheap_mb: performance.memory ? performance.memory.usedJSHeapSize / 1048576 : null, coi: crossOriginIsolated };

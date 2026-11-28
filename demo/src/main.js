@@ -462,9 +462,12 @@ async function loadZst(url, key, msg) {
     }
   }
 }
-let [assetsTar, wasmBytes] = await Promise.all([
-  loadZst("assets.tar.zst", "assets", "Decompressing assets"),
-  loadZst(wasmName() + ".wasm.zst", "wasm", "Decompressing Blender"),
+/* P0 (28. 11.): výsledné pole z `await Promise.all` drží generátor modulu (top-level await) navždy → 144 MB wasm bajtů
+ * zůstalo v paměti i po `wasmBytes = null` (heap snapshot). Proto se hodnoty přiřadí uvnitř a await vrátí jen undefined. */
+let assetsTar, wasmBytes;
+await Promise.all([
+  loadZst("assets.tar.zst", "assets", "Decompressing assets").then((b) => { assetsTar = b; }),
+  loadZst(wasmName() + ".wasm.zst", "wasm", "Decompressing Blender").then((b) => { wasmBytes = b; }),
 ]);
 zstdWorker.terminate();
 const assetProvider = makeAssetProvider(indexTar(assetsTar));
