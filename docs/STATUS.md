@@ -1,3 +1,7 @@
+# 28. 11. 18:40 — lov chyb: Geometry Nodes simulace + bake na disk
+Výsledek: ✅ bez nálezu
+- `scripts/v2_gnbake_win.sh` (v `regress_all`): simulation zone (+0,1 Z/snímek), bake na disk 10 snímků → 20 souborů, z na snímku 10 = 1,0 a na 5 = 0,5 = desktop 5.3.0, Chrome i lean sim.
+
 # 28. 11. 18:20 — lov chyb: Fluid (Mantaflow) bake
 Výsledek: ✅ bez nálezu
 - `scripts/v2_fluid_win.sh` (v `regress_all`): doména 24, kapalina + kouř, Bake All 12 snímků → počet souborů cache (36 / 24) a mesh kapaliny (1248 vrcholů) = desktop 5.3.0, Chrome i lean sim. Čas: web 1,4 s / desktop 0,2 s (kapalina, malá doména).
