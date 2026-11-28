@@ -2103,6 +2103,9 @@ window.Module = {
       ENV.WGSL_SEED_URL = new URL("wgsl-cache.json", location.href).href; /* H22f: worker si relativní URL neumí složit */
       if (window.__CAPENV) for (const k in window.__CAPENV) ENV[k] = window.__CAPENV[k];
       ENV.WGPU_PERF = "1"; /* cheap; also feeds the memory guard */
+      /* P0: OIIO si výchozí thread pool vytvoří podle počtu jader (16 → 15 workerů) a až pak ho Blender zmenší na -t N;
+       * workery emscriptenu ale zůstanou (každý = JS realm). S env je pool hned malý. */
+      if (THREADS_N > 0) ENV.OPENIMAGEIO_THREADS = String(THREADS_N);
       { const _q = new URLSearchParams(location.search); /* T3: max 2 snímky v GPU frontě; iPad default zapnuto, ?bp=0 vypne, ?bp=1 zapne na PC */
         if (_q.get("bgpurge") === "0") ENV.WGPU_BG_PURGE = "0"; /* B3: A/B, bind groupy zničených textur zůstanou v cache */
         const _bp = _q.get("bp"); if (_bp === "1" || (_bp !== "0" && (_q.get("ipad") === "1" || _isIpadUA))) ENV.WGPU_BP = "1"; }
