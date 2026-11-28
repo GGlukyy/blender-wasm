@@ -1,3 +1,10 @@
+# 28. 11. 07:45 — V2e: Render Border bez Crop na webu
+Výsledek: ✅ na PC (Chrome) i lean sim; iPad neověřen
+
+*Co jsem udělal*: fork `ipad-5.3` ce61ae89d01f (= `BLENDER_REF`), `wm.cc` `wm_step_apply_film_result`: film z GPU má jen oblast borderu, RenderResult už je plný rám → film se vloží na pozici borderu (stejné zaokrouhlení jako pipeline), okolo nuly (jako desktop `render_result_uncrop`). Platí pro F12 i animaci/video.
+*Důkaz*: predikce „log `dims 32x24 vs rr 64x48` + FAIL“ před opravou potvrzena; po opravě `scripts/v2_borderstill_win.sh` PASS Chrome i `Q='cycles=0&webkit_sim=1&ipad=1'` a pixely = desktop 5.3.0 (vlevo dole 0.383, alfa 1; vpravo nahoře alfa 0). `v2_border_win.sh` (MP4) PASS 1633 B (desktop 1634 B). `v2_bordercycles`, `v2_video`, `v2_after_video` PASS. Tour lean sim 75/75. `regress_all`: běží.
+*Co otestovat na iPadu*: Output ▸ Format ▸ Render Region zapnout, v kameře Ctrl+B nakreslit oblast, F12 → obraz jen v oblasti, okolo průhledné (dřív se nic neuložilo/nezobrazilo).
+
 # 28. 11. 05:00 — O1d: aktualizace bez klikání
 Výsledek: ✅ na PC (Chrome + sim lean iPad); iPad neověřen
 
@@ -39,7 +46,7 @@ Pozn.: na PC sim se předvytvoří 32 workerů (iPad má `pool=8` jen podle UA),
 - `regress_all` (Chrome, PC build, 28. 11. 04:30): **0 FAIL** (jen XFAIL `_ctypes`), journey celá OK.
 - `regress_sim` s `webkit_sim=1&ipad=1&cycles=0` (lean build, 28. 11. 07:03): FAIL jen očekávané rozdíly lean buildu (`h42`: chybí `cycles.*` operátory; journey `bake*`, `proctex`, `mathnodes`, `mixblend` = Cycles bake, jen PC) + `u3_open`. `u3_open` padal v sim už 27. 11. (test mockoval jen Chrome picker; v Safari je okno „Choose file(s)…“) → test doplněn o Safari cestu, PASS Chrome i sim.
 
-*Pushnuto*: master 3f96d49, e1432b0, 5b18f68; fork `ipad-5.3` 6d13982b4a82 (= `BLENDER_REF`). `demo/public`: nový lean i PC build (zálohy `out/bak_p0/`). **`build-5.3` je teď LEAN strom** (Cycles OFF, FFmpeg OFF). Pro PC build: `scripts/cycles_pc_build.sh`.
+*Pushnuto*: master 3f96d49, e1432b0, 5b18f68; fork `ipad-5.3` 6d13982b4a82 (= `BLENDER_REF`). `demo/public`: nový lean i PC build (zálohy `out/bak_p0/`). `build-5.3` je (po V2e, 28. 11. 07:30) zase **PC strom** (Cycles + FFmpeg). Lean: `cmake -DWITH_CYCLES=OFF -DWITH_CODEC_FFMPEG=OFF build-5.3` + ninja + `.link53.sh` (~7 min, jen dotčené soubory).
 
 *Co nefunguje / odhad*
 - Cíl −500 MB: v Chrome sim −243 (resp. −194 s pool 8). Na iPadu bude zisk z workerů nejspíš větší (worker v Safari je dražší než ~11 MB v Chrome) — odhad, neověřeno.
