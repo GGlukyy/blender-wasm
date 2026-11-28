@@ -1,3 +1,10 @@
+# 28. 11. 12:30 — V2f: WEBP na webu
+Výsledek: ✅ PC + lean sim; iPad neověřen; plná regrese běží
+- .webp jde otevřít (textury z webu) i uložit (F12, Save As). Nový `scripts/build_libwebp.sh`, OIIO přeloženo s WebP (`build_oiio.sh`), `WITH_IMAGE_WEBP` + `WEBP_ROOT_DIR` v `cmake/blender-wasm-cache.cmake`, THIRD_PARTY doplněno.
+- Důkaz: `scripts/webp_probe_win.sh` = desktop 5.3.0 (stejné velikosti 574/544 B a pixely), `v2_formats_win.sh` 13 formátů PASS Chrome i lean sim, tour 75/75, paměť po startu 1588 MB (dřív 1568, v šumu). Lean +0,5 MB wasm.
+- Co otestovat na iPadu: Image ▸ Open → vyber .webp obrázek (např. stažený z webu) → zobrazí se.
+- `build-5.3` je teď **LEAN** strom.
+
 # 28. 11. 12:00 — V2f: formáty obrázků (lov chyb)
 Výsledek: ✅ DPX opraveno (PC + lean sim); iPad neověřen
 - Nový `scripts/v2_formats_win.sh` (F12 do 14 formátů po jednom; v `regress_all`). Zaseknutí z 27. 11. = **DPX**: zápis OK, pak pád vlákna při čtení (`std::length_error` v OpenImageIO). Příčina: 32bit `size_t` ve wasm (libdpx `pixels * -3 * bytes`). Oprava: patch v `build_oiio.sh`, OIIO + oba buildy přeloženy a nasazeny. Desktop 5.3.0 DPX umí (ověřeno `blender.exe -b`).

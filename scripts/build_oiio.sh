@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# OpenImageIO v3.1.13.1 → wasm-sysroot. Minimal: only PNG/JPEG/OpenEXR readers,
+# OpenImageIO v3.1.13.1 → wasm-sysroot. Minimal: PNG/JPEG/OpenEXR/TIFF/WebP (WebP: build_libwebp.sh první),
 # no tools/tests/python/GL, no optional format libs we didn't cross-compile.
 set -euo pipefail
 source "$(dirname "$0")/dep_common.sh"
@@ -60,8 +60,13 @@ em_cmake "$src" oiio \
   -DENABLE_JPEG=ON \
   -DENABLE_OpenEXR=ON \
   -DENABLE_TIFF=ON -DTIFF_ROOT="$SYSROOT" -DTIFF_INCLUDE_DIR="$SYSROOT/include" -DTIFF_LIBRARY="$SYSROOT/lib/libtiff.a" -DENABLE_GIF=OFF -DENABLE_FFMPEG=OFF -DENABLE_HEIF=OFF \
-  -DENABLE_Raw=OFF -DENABLE_WebP=OFF -DENABLE_OpenJPEG=OFF -DENABLE_Ptex=OFF \
+  -DENABLE_Raw=OFF -DENABLE_WebP=ON -DWebP_ROOT="$SYSROOT" -DWebP_DIR="$SYSROOT/share/WebP/cmake" -DENABLE_OpenJPEG=OFF -DENABLE_Ptex=OFF \
   -DENABLE_DICOM=OFF -DENABLE_Field3D=OFF -DENABLE_OpenVDB=OFF -DENABLE_DDS=OFF \
   -DENABLE_R3DSDK=OFF -DENABLE_Nuke=OFF -DENABLE_LIBHEIF=OFF \
   -DENABLE_BZip2=OFF -DENABLE_Libsquish=ON
+# OIIO's installed config links OpenImageIO::OpenImageIO to WebP::webp but never find_dependency(WebP) → Blender's
+# cmake fails ("target WebP::webp not found"). Add it (WebP config from build_libwebp.sh). Idempotent.
+cfg="$SYSROOT/lib/cmake/OpenImageIO/OpenImageIOConfig.cmake"
+grep -q 'find_dependency(WebP' "$cfg" || sed -i 's|^\(\s*\)find_dependency(TIFF)|\1find_dependency(TIFF)\n\1find_dependency(WebP CONFIG PATHS "${CMAKE_CURRENT_LIST_DIR}/../../../share/WebP/cmake")|' "$cfg"
+grep -q 'find_dependency(WebP' "$cfg"
 log "done"
