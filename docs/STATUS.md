@@ -1,3 +1,16 @@
+# 28. 11. 05:00 — O1d: aktualizace bez klikání
+Výsledek: ✅ na PC (Chrome + sim lean iPad); iPad neověřen
+
+*Co jsem udělal* (`demo/src/main.js`, `demo/public/sw.js`)
+- Za běhu Blenderu se nová verze hledá každých 5 min a po návratu do aplikace. Když ji najde: počká na klid (2 s bez dotyku/klávesy, žádný modal operátor, render ani přehrávání), neuloženou scénu uloží do autosave, smaže cache, stránka se obnoví a **Blender se spustí sám** (bez Launch) a autosave otevře (R1). Nahoře na 4 s lišta „✅ Aktualizováno na build … · práce se obnoví“.
+- Před startem: čekání na kontrolu verze 4 → 10 s; ochrana smyčky teď podle verze (`auto_upd` = klíč verze), takže projde i druhá nová verze téhož dne.
+- Omezení (odhad): když máš otevřený vlastní .blend, po aktualizaci se otevře jako `_autosave_prev.blend` (původní jméno se ztratí; uložit znovu přes Save As). Původní soubor zůstává nedotčený.
+
+*Důkaz*
+- Nový `scripts/o1d_win.sh` (Pages server bez COOP/COEP, verze A běží se změněnou scénou + přehrávání → server dostane verzi B): během přehrávání žádný reload; po zastavení autosave → reload → autostart → obnovená scéna má opici → lišta: **PASS Chrome i `Q='webkit_sim=1&ipad=1&cycles=0'`**. `pwa_update_win.sh` (O1c, před startem) PASS.
+
+*Co otestovat na iPadu*: až publikuješ novou verzi, nech appku otevřenou s rozdělanou prací (nic nedělej) → do ~5 min se sama obnoví a práce tam bude.
+
 # 28. 11. 02:30 — PRIORITA 0: snížit základní paměť iPad (lean) buildu
 Výsledek: 🟡 −243 MB rendereru v sim (2151 → 1908), s iPad poolem 8: 1762 → 1568 (−194); cíl −500 MB nesplněn; regrese běží; iPad neověřen
 
