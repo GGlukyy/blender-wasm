@@ -1,3 +1,7 @@
+# 28. 11. 16:30 — lov chyb: varianty formátů obrázků
+Výsledek: ✅ bez nálezu
+- `scripts/v2_variants_win.sh` (v `regress_all`): 24 variant — EXR kodeky (None, Pxr24, ZIP, PIZ, RLE, ZIPS, B44A, DWAA, DWAB, half), PNG 16bit / BW / bez komprese, TIFF 16bit / None / LZW / PackBits, JPEG q10 / BW, WEBP RGBA, BMP BW, TGA RGBA, DPX RGBA → F12, uložit, načíst: střed + alfa rohu = desktop 5.3.0 (`scripts/v2_variants_desk.txt`) v Chrome i lean sim.
+
 # 28. 11. 12:30 — V2f: WEBP na webu
 Výsledek: ✅ PC + lean sim; iPad neověřen; `regress_all` 0 FAIL (28. 11. 13:55), `regress_sim` lean jen očekávané rozdíly lean (16:00); `package_pages.sh` znovu → `out/pages` (publish = ty), `pages_win.sh` PASS
 - .webp jde otevřít (textury z webu) i uložit (F12, Save As). Nový `scripts/build_libwebp.sh`, OIIO přeloženo s WebP (`build_oiio.sh`), `WITH_IMAGE_WEBP` + `WEBP_ROOT_DIR` v `cmake/blender-wasm-cache.cmake`, THIRD_PARTY doplněno.

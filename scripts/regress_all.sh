@@ -84,6 +84,7 @@ run paint_ops_sweep scripts/paint_ops_sweep_win.sh
 run lattice_ops_sweep scripts/lattice_ops_sweep_win.sh
 TAILN=16 OPS_MAXS=600 run v2_formats scripts/v2_formats_win.sh # 28. 11.: F12 do 14 formátů (DPX dřív shodil vlákno)
 run v2_borderstill scripts/v2_borderstill_win.sh # V2e
+OPS_MAXS=600 run v2_variants scripts/v2_variants_win.sh # 28. 11.: EXR kodeky, 16bit PNG/TIFF, BW/RGBA = desktop
 run v2_nocam scripts/v2_nocam_win.sh # V2c
 TAILN=20 RUN_TIMEOUT=6000 run journey scripts/journey_win.sh # >30 cest, 900 s nestačí (7. 11.); 22. 11.: 3600 s nestačilo (150 cest) → 6000
 run fuzz scripts/fuzz_win.sh
