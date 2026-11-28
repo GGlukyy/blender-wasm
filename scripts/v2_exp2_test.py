@@ -25,7 +25,9 @@ def run():
     bpy.ops.object.grease_pencil_add(type='MONKEY'); g = bpy.context.object
     p = D + '/g.svg'; ok('gp_svg', lambda: bpy.ops.wm.grease_pencil_export_svg(filepath=p), p)
     p2 = D + '/g.pdf'
-    if hasattr(bpy.ops.wm, 'grease_pencil_export_pdf'): ok('gp_pdf', lambda: bpy.ops.wm.grease_pencil_export_pdf(filepath=p2), p2)
+    if hasattr(bpy.ops.wm, 'grease_pencil_export_pdf'):
+        ok('gp_pdf', lambda: bpy.ops.wm.grease_pencil_export_pdf(filepath=p2), p2)
+        if os.path.exists(p2): b = open(p2, 'rb').read(); out('OPS v2e2 pdf_valid', b[:5] == b'%PDF-' and b.rstrip().endswith(b'%%EOF'))
     else: out('OPS v2e2 gp_pdf NOOP')
     ok('svg_import', lambda: bpy.ops.import_curve.svg(filepath=p), p)
     out('OPS v2e2 curves', len([x for x in bpy.data.objects if x.type == 'CURVE']))

@@ -69,7 +69,8 @@ set(WEBP_ROOT_DIR            "${CMAKE_SOURCE_DIR}/../wasm-sysroot" CACHE PATH ""
 set(WITH_IMAGE_OPENJPEG      OFF CACHE BOOL "")
 set(WITH_GMP                 ON  CACHE BOOL "") # H35: Exact boolean, scripts/build_gmp.sh
 set(WITH_POTRACE             OFF CACHE BOOL "")
-set(WITH_HARU                OFF CACHE BOOL "")
+set(WITH_HARU                ON  CACHE BOOL "")   # F6: GP PDF export, scripts/build_libharu.sh
+set(HARU_ROOT_DIR            "${CMAKE_SOURCE_DIR}/../wasm-sysroot" CACHE PATH "")
 set(WITH_MANIFOLD            ON  CACHE BOOL "") # H35, scripts/build_manifold.sh
 set(WITH_QUADRIFLOW          ON  CACHE BOOL "")   # bundled extern/quadriflow (kolo 66): Quad Remesh
 set(WITH_INPUT_NDOF          OFF CACHE BOOL "")

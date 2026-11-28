@@ -24,6 +24,9 @@ Base: HeyPuter/blender-wasm + HeyPuter/blender (GPL-2.0).
 ## coi-serviceworker (vzor pro `demo/public/sw.js`)
 - Autor: Guido Zuidhof, MIT, https://github.com/gzuidhof/coi-serviceworker. Převzat jen princip (service worker přidá COOP/COEP/CORP hlavičky, stránka se po registraci jednou znovu načte); kód `sw.js` je vlastní (+ offline cache). Použito v `demo/public/sw.js`, `demo/src/main.js` (O1a/O1b, 15.–17. 11. 2026).
 
+## libharu 2.4.5 (zlib/libpng licence, static, wasm) — `scripts/build_libharu.sh`
+Grease Pencil ▸ Export ▸ PDF (`WITH_HARU`, F6 28. 11.). Zdroj https://github.com/libharu/libharu/archive/refs/tags/v2.4.5.tar.gz (verze jako Blender 5.3 `versions.cmake`), beze změn; jen `-DMATH_LIB=m -DM_LIB=m` (emscripten má libm v libc). Licence je s GPL kompatibilní.
+
 ## libwebp 1.6.0 (BSD-3-Clause, static, wasm) — `scripts/build_libwebp.sh`
 Čtení/zápis .webp (`WITH_IMAGE_WEBP`, V2f 28. 11.). Zdroj https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz (verze jako Blender 5.3 `versions.cmake`), beze změn; libwebp, libsharpyuv, libwebpdemux, libwebpmux, bez SIMD a vláken. BSD je s GPL kompatibilní.
 
