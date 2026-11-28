@@ -166,6 +166,12 @@ if [ "${WASM_KEEP_NAMES:-0}" != 1 ]; then
   ls -t "$ROOT"/out/wasm_full/*.zst | tail -n +3 | xargs -r rm -f
   python3 -I "$ROOT/scripts/wasm_strip_names.py" "$OUT/blender.wasm" "$OUT/blender.wasm.stripped" && mv -f "$OUT/blender.wasm.stripped" "$OUT/blender.wasm"
 fi
+# P0 (28. 11.): link běží s -O1 (bez binaryen optimalizací). wasm-opt -O2 na hotovém wasm: lean 151 → 125 MB (−17 %),
+# ~45 s, ~5 GB RAM; Chrome renderer −79 MB (strojový kód škáluje s velikostí). -Os dá jen o 2,8 MB víc. WASM_OPT=0 = vypnout.
+if [ "${WASM_OPT:-O2}" != 0 ]; then
+  echo ">> wasm-opt -${WASM_OPT:-O2}"
+  "$ROOT/emsdk/upstream/bin/wasm-opt" -${WASM_OPT:-O2} --detect-features "$OUT/blender.wasm" -o "$OUT/blender.wasm.opt" && mv -f "$OUT/blender.wasm.opt" "$OUT/blender.wasm"
+fi
 echo ">> blender.wasm.zst (zstd --ultra -21 -T0)"
 zstd -f --ultra -21 -T0 "$OUT/blender.wasm" -o "$OUT/blender.wasm.zst"
 rm -f "$OUT/blender.wasm"

@@ -1599,7 +1599,10 @@ const _restoreQ = new URLSearchParams(location.search).get("restore");
 const RESTORE_CRASHED = localStorage.getItem("restoring") === "1" && _restoreQ !== "auto" && _restoreQ !== "ask";
 const RESTORE_MODE = (() => { if (RESTORE_CRASHED) return "crashed"; const q = _restoreQ; return q === "no" || q === "ask" || q === "auto" ? q : (new URLSearchParams(location.search).get("auto") || window.__BARGS ? "ask" : "auto"); })();
 if (RESTORE_CRASHED) window.__RESTORE_CRASHED__ = true; /* the flag stays until the user answers the banner */
-const UNDO_MB = (new URLSearchParams(location.search).get("undomem") || "300").replace(/[^0-9]/g, "") || "300"; // ?undomem=N limit paměti undo v MB (0 = bez limitu)
+/* P0.5 (Lukáš 28. 11.): iPad 256 MB + 16 undo kroků (PC beze změny 300 MB / 32). ?undomem=N, ?undosteps=N přepíše. */
+const _undoIpad = (navigator.maxTouchPoints > 1 && /Macintosh|iPad/.test(navigator.userAgent)) || new URLSearchParams(location.search).get("ipad") === "1";
+const UNDO_MB = (new URLSearchParams(location.search).get("undomem") || (_undoIpad ? "256" : "300")).replace(/[^0-9]/g, "") || "300"; // ?undomem=N limit paměti undo v MB (0 = bez limitu)
+const UNDO_STEPS = (new URLSearchParams(location.search).get("undosteps") || (_undoIpad ? "16" : "")).replace(/[^0-9]/g, "");
 const RESET_PREFS = new URLSearchParams(location.search).get("resetprefs") === "1" ? "1" : "0"; // ?resetprefs=1 smaže uložené Preferences
 const UI_SCALE = (new URLSearchParams(location.search).get("uiscale") || "").replace(/[^0-9.]/g, ""); // ?uiscale=1.3 → větší UI pro prsty (uloží se do Preferences)
 /* H7: Material Preview/Rendered crashes the iPad GPU process (790 MB textures, H6). iPad = touch + Macintosh/iPad UA
@@ -1643,7 +1646,11 @@ except Exception as e: print('UISCALE ERR', e)
 # Undo paměť: každý undo krok s velkou změnou meshe drží plnou kopii (fuzz: halda 1→3,7 GB za 40 těžkých kroků).
 # iPad to nepřežije → výchozí limit ${UNDO_MB} MB (Preferences ▸ System ▸ Undo Memory Limit; ?undomem=0 = bez limitu).
 try:
-    if float('${UNDO_MB}') > 0 and bpy.context.preferences.edit.undo_memory_limit == 0: bpy.context.preferences.edit.undo_memory_limit = int(float('${UNDO_MB}'))
+    # 300 = náš dřívější výchozí (uložený v Preferences) → na iPadu ho přepsat na nový výchozí
+    _ul = bpy.context.preferences.edit.undo_memory_limit
+    if float('${UNDO_MB}') > 0 and (_ul == 0 or (_ul == 300 and int('${UNDO_MB}') != 300)): bpy.context.preferences.edit.undo_memory_limit = int(float('${UNDO_MB}'))
+    # výchozí 32 kroků → na iPadu 16 (jen když uživatel počet nezměnil)
+    if '${UNDO_STEPS}' and bpy.context.preferences.edit.undo_steps == 32: bpy.context.preferences.edit.undo_steps = int('${UNDO_STEPS}')
 except Exception as e: print('UNDOMEM ERR', e)
 # H7: na iPadu zatím Material Preview/Rendered shazuje GPU → místo toho Solid „MP Lite“ (H22a) + hláška (JS ji zachytí z WEB_MP_BLOCKED).
 def _mp_lite_colors(*a):
