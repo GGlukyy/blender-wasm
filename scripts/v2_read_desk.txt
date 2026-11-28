@@ -1,0 +1,10 @@
+OPS v2r bmp32.bmp 4x3 ch=4 [0.392, 0.314, 0.235, 0.804]
+OPS v2r gray1.png 4x3 ch=4 [0.0, 0.0, 0.0, 1.0]
+OPS v2r gray16.png 4x3 ch=4 [0.084, 0.084, 0.084, 1.0]
+OPS v2r graya.png 4x3 ch=4 [0.235, 0.235, 0.235, 0.608]
+OPS v2r pal.png 4x3 ch=4 [0.0, 0.0, 1.0, 1.0]
+OPS v2r pal_trns.png 4x3 ch=4 [0.0, 0.0, 1.0, 0.0]
+OPS v2r ppm.ppm 0x0 ch=0 nopix
+OPS v2r psd_rgb.psd 4x3 ch=4 [0.275, 0.549, 0.824, 1.0]
+OPS v2r psd_rgba.psd 4x3 ch=4 [0.275, 0.549, 0.824, 1.0]
+OPS v2r rgb_trns.png 4x3 ch=4 [0.039, 0.078, 0.118, 0.0]

@@ -1,3 +1,7 @@
+# 28. 11. 17:30 — lov chyb: čtení „cizích" obrázků
+Výsledek: ✅ bez nálezu
+- `scripts/v2_read_win.sh` (v `regress_all`): PNG paleta (+tRNS), šedá 16bit, šedá 1bit, šedá+alfa, RGB+tRNS, PSD RGB/RGBA, BMP 32bit, PPM — soubory vyrobí čistý Python (stejné bajty) → načtení = desktop 5.3.0 v Chrome i lean sim (PPM neumí ani desktop).
+
 # 28. 11. 17:00 — V2g: AVIF (lov chyb)
 Výsledek: 🟡 AVIF dál nejde zapsat, ale web to teď řekne
 - AVIF je v nabídce formátů, web ho nezapíše (OIIO bez libheif); dřív se nestalo nic. `main.js`: červená lišta při neúspěšném zápisu (platí pro každý formát). `scripts/v2g_win.sh` PASS Chrome + lean sim. Skutečné AVIF = BACKLOG V2g (rozhodneš ty).
