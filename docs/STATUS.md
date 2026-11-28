@@ -1,3 +1,9 @@
+# 28. 11. 11:30 — V2c: render animace bez kamery
+Výsledek: ✅ PC + lean sim; iPad neověřen
+- Web dřív vrátil FINISHED a nic se nestalo; teď stejně jako desktop chyba „Cannot render, no camera“ (fork e35dd8747e3e = `BLENDER_REF`). Kamera na markeru nebo render sekvenceru bez kamery dál fungují.
+- Důkaz: `v2_nocam_win.sh` (před: FAIL `{'FINISHED'}`, po: PASS) Chrome i `Q='cycles=0&webkit_sim=1&ipad=1'`; `v2_vse`, `v2_video`, `v2_after_video`, `v2_range`, `v2_nocam_still`, `v2_borderstill` PASS; tour lean sim 75/75. Oba buildy nasazeny v `demo/public` (záloha `out/bak_pre_v2c/`). **`build-5.3` je teď LEAN strom.**
+- Co otestovat na iPadu: smaž kameru, Render ▸ Render Animation → červená hláška „Cannot render, no camera“.
+
 # Víkend 28. 11. (běh 01:00–10:15, Opus) — souhrn
 Výsledek: 🟡 paměť iPad buildu −194 až −243 MB (cíl −500 nesplněn), O1d + V2e hotové; vše na PC zelené, iPad neověřen
 

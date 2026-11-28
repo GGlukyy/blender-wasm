@@ -8,8 +8,12 @@ sc.camera = None
 sc.render.engine = 'BLENDER_WORKBENCH'; sc.render.resolution_x = 64; sc.render.resolution_y = 48; sc.render.resolution_percentage = 100
 sc.frame_start, sc.frame_end = 1, 3
 shutil.rmtree('/tmp/v2n', ignore_errors=True); os.makedirs('/tmp/v2n')
-sc.render.image_settings.media_type = 'VIDEO'; sc.render.image_settings.file_format = 'FFMPEG'
-sc.render.ffmpeg.format = 'MPEG4'; sc.render.ffmpeg.codec = 'H264'; sc.render.filepath = '/tmp/v2n/v'
+try:
+    sc.render.image_settings.media_type = 'VIDEO'; sc.render.image_settings.file_format = 'FFMPEG'
+    sc.render.ffmpeg.format = 'MPEG4'; sc.render.ffmpeg.codec = 'H264'; EXT = 'mp4'
+except (AttributeError, TypeError):  # lean/iPad build bez FFmpeg → PNG sekvence
+    sc.render.image_settings.media_type = 'IMAGE'; sc.render.image_settings.file_format = 'PNG'; EXT = 'png'
+sc.render.filepath = '/tmp/v2n/v'
 st = {'s': 0, 'w': 0}
 def tick():
     s = st['s']
@@ -24,7 +28,7 @@ def tick():
         bpy.ops.object.camera_add(location=(4, -4, 3), rotation=(1.1, 0, 0.78)); sc.camera = bpy.context.object
         bpy.ops.render.render(animation=True); st['s'] = 2; return 2.0
     if s == 2:
-        g = [p for p in glob.glob('/tmp/v2n/v*.mp4') if os.path.getsize(p) > 100]
+        g = [p for p in glob.glob('/tmp/v2n/v*.' + EXT) if os.path.getsize(p) > 100]
         if not g and st['w'] < 60:
             st['w'] += 1; return 1.0
         out('OPS v2n video_after_error', 'PASS' if g else 'FAIL')
