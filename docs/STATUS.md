@@ -1,5 +1,5 @@
 # 28. 11. 12:30 — V2f: WEBP na webu
-Výsledek: ✅ PC + lean sim; iPad neověřen; plná regrese běží
+Výsledek: ✅ PC + lean sim; iPad neověřen; `regress_all` 0 FAIL (28. 11. 13:55), `regress_sim` lean běží
 - .webp jde otevřít (textury z webu) i uložit (F12, Save As). Nový `scripts/build_libwebp.sh`, OIIO přeloženo s WebP (`build_oiio.sh`), `WITH_IMAGE_WEBP` + `WEBP_ROOT_DIR` v `cmake/blender-wasm-cache.cmake`, THIRD_PARTY doplněno.
 - Důkaz: `scripts/webp_probe_win.sh` = desktop 5.3.0 (stejné velikosti 574/544 B a pixely), `v2_formats_win.sh` 13 formátů PASS Chrome i lean sim, tour 75/75, paměť po startu 1588 MB (dřív 1568, v šumu). Lean +0,5 MB wasm.
 - Co otestovat na iPadu: Image ▸ Open → vyber .webp obrázek (např. stažený z webu) → zobrazí se.
