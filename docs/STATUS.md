@@ -1,3 +1,8 @@
+# 28. 11. 17:00 — V2g: AVIF (lov chyb)
+Výsledek: 🟡 AVIF dál nejde zapsat, ale web to teď řekne
+- AVIF je v nabídce formátů, web ho nezapíše (OIIO bez libheif); dřív se nestalo nic. `main.js`: červená lišta při neúspěšném zápisu (platí pro každý formát). `scripts/v2g_win.sh` PASS Chrome + lean sim. Skutečné AVIF = BACKLOG V2g (rozhodneš ty).
+- Co otestovat na iPadu: Output ▸ File Format = AVIF ▸ F12 → červená lišta nahoře.
+
 # 28. 11. 16:30 — lov chyb: varianty formátů obrázků
 Výsledek: ✅ bez nálezu
 - `scripts/v2_variants_win.sh` (v `regress_all`): 24 variant — EXR kodeky (None, Pxr24, ZIP, PIZ, RLE, ZIPS, B44A, DWAA, DWAB, half), PNG 16bit / BW / bez komprese, TIFF 16bit / None / LZW / PackBits, JPEG q10 / BW, WEBP RGBA, BMP BW, TGA RGBA, DPX RGBA → F12, uložit, načíst: střed + alfa rohu = desktop 5.3.0 (`scripts/v2_variants_desk.txt`) v Chrome i lean sim.

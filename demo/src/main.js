@@ -805,6 +805,15 @@ const scan = (t) => {
     n.textContent = "⚠️ Video se nepodařilo zapsat (soubor nevznikl). Liché rozlišení u H.264 (i v desktopu) nebo kodek, který web nemá (WebM, AV1…)? Zkus sudé rozlišení a MP4/Matroska s H.264.";
     document.body.appendChild(n); setTimeout(() => n.remove(), 15000);
   }
+  /* V2g: odložený zápis F12/animace selhal (např. AVIF: web nemá libheif) — Blender to na webu nikde neukáže. */
+  { const m = /WGPU_FILM deferred write (\S+) ok=0/.exec(t);
+    if (m && !document.getElementById("write-bad")) {
+      const n = document.createElement("div"); n.id = "write-bad";
+      n.style.cssText = "position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:99998;background:rgba(179,38,30,.96);color:#fff;font:15px system-ui,sans-serif;padding:8px 14px;border-radius:8px;max-width:90vw";
+      const ext = (m[1].split(".").pop() || "").toUpperCase();
+      n.textContent = "⚠️ Obrázek se nepodařilo uložit (" + m[1] + ")." + (ext === "AVIF" ? " AVIF web neumí zapsat." : "") + " Zkus PNG, JPEG, WebP nebo OpenEXR.";
+      document.body.appendChild(n); setTimeout(() => n.remove(), 15000);
+    } }
   if (/^RESTORE_AUTO\b/.test(t.trim())) { localStorage.setItem("restoring", "1"); setTimeout(() => localStorage.removeItem("restoring"), 60000); }
   if (/^RESTORE_CRASHED_OFFER\b/.test(t.trim()) && window.__RESTORE_CRASHED__ && !document.getElementById("restore-crashed-note")) showRestoreCrashed();
   if (t.includes("WEB_MP_BLOCKED")) showMpBlocked();

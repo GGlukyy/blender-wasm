@@ -17,7 +17,7 @@ V += [('exr_half', 'OPEN_EXR', dict(color_depth='16', exr_codec='ZIP')),
       ('png_c0', 'PNG', dict(compression=0, color_mode='RGB')), ('tif16', 'TIFF', dict(color_depth='16', color_mode='RGBA')),
       ('tif_none', 'TIFF', dict(tiff_codec='NONE')), ('tif_lzw', 'TIFF', dict(tiff_codec='LZW')), ('tif_pack', 'TIFF', dict(tiff_codec='PACKBITS')),
       ('jpg_q10', 'JPEG', dict(quality=10)), ('jpg_bw', 'JPEG', dict(color_mode='BW')), ('webp_rgba', 'WEBP', dict(color_mode='RGBA', quality=100)),
-      ('bmp_bw', 'BMP', dict(color_mode='BW')), ('tga_rgba', 'TARGA', dict(color_mode='RGBA')), ('dpx_rgba', 'DPX', dict(color_mode='RGBA'))]
+      ('bmp_bw', 'BMP', dict(color_mode='BW')), ('tga_rgba', 'TARGA', dict(color_mode='RGBA')), ('dpx_rgba', 'DPX', dict(color_mode='RGBA')), ('avif', 'AVIF', dict())]
 st = {'i': 0, 'go': True, 'w': 0}
 def report(i, vid):
     g = [p for p in glob.glob('%s/%s*' % (D, vid)) if os.path.getsize(p) > 50]

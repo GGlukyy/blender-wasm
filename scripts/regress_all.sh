@@ -86,6 +86,7 @@ TAILN=16 OPS_MAXS=600 run v2_formats scripts/v2_formats_win.sh # 28. 11.: F12 do
 run v2_borderstill scripts/v2_borderstill_win.sh # V2e
 OPS_MAXS=600 run v2_variants scripts/v2_variants_win.sh # 28. 11.: EXR kodeky, 16bit PNG/TIFF, BW/RGBA = desktop
 run v2_nocam scripts/v2_nocam_win.sh # V2c
+run v2g scripts/v2g_win.sh # V2g: lišta při nezapsaném obrázku
 TAILN=20 RUN_TIMEOUT=6000 run journey scripts/journey_win.sh # >30 cest, 900 s nestačí (7. 11.); 22. 11.: 3600 s nestačilo (150 cest) → 6000
 run fuzz scripts/fuzz_win.sh
 run ui_fuzz scripts/ui_fuzz_win.sh

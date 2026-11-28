@@ -23,3 +23,4 @@ OPS v2v webp_rgba 64x48 [0.31, 0.3, 0.3, 1.0] corner_a=0.00
 OPS v2v bmp_bw 64x48 [0.3, 0.3, 0.3, 1.0] corner_a=1.00
 OPS v2v tga_rgba 64x48 [0.31, 0.3, 0.3, 1.0] corner_a=0.00
 OPS v2v dpx_rgba 64x48 [0.08, 0.08, 0.08, 1.0] corner_a=0.00
+OPS v2v avif 64x48 [0.31, 0.3, 0.3, 1.0] corner_a=0.00
