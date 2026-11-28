@@ -1,8 +1,8 @@
 ## O1d — aktualizace úplně bez klikání (Lukáš 28. 11.: „nápis o nové verzi jsem si všiml až po chvíli, myslel jsem, že Open nefunguje")
 Dnes: auto-update jen PŘED startem Blenderu a jen když SW odpoví do 4 s a jen 1× za session (sessionStorage `auto_upd`); jinak oranžová lišta „klepni pro aktualizaci (neuložená práce se ztratí)".
-- [ ] Když se nová verze najde za běhu Blenderu: (a) `bpy.data.is_dirty == False` → rovnou aktualizovat (reload); (b) jinak uložit autosave (existující `_autosave.blend` cesta), pak aktualizovat a po startu ho R1 obnoví (lišta „Aktualizováno na verzi X, práce obnovena"). Neprovádět uprostřed modal operace / renderu / přehrávání → počkat, až Blender bude v klidu (žádný modal operátor, 2 s bez vstupu).
-- [ ] Timeout kontroly před startem 4 s → 10 s (pomalá wifi), a `auto_upd` počítat podle verze (ne 1× za session), aby druhá nová verze v témž dni taky prošla sama.
-- [ ] Lišta jen jako informace „Aktualizováno na 27. 11. 13:05" po startu (3 s, pak zmizí).
+- [x] 28. 11. (`scripts/o1d_win.sh` PASS Chrome + `Q=webkit_sim=1&ipad=1&cycles=0`; kontrola za běhu každých 5 min + po návratu do aplikace; po reloadu se Blender spustí sám) Když se nová verze najde za běhu Blenderu: (a) `bpy.data.is_dirty == False` → rovnou aktualizovat (reload); (b) jinak uložit autosave (existující `_autosave.blend` cesta), pak aktualizovat a po startu ho R1 obnoví (lišta „Aktualizováno na verzi X, práce obnovena"). Neprovádět uprostřed modal operace / renderu / přehrávání → počkat, až Blender bude v klidu (žádný modal operátor, 2 s bez vstupu).
+- [x] 28. 11. (`pwa_update_win.sh` PASS; `auto_upd` = klíč verze) Timeout kontroly před startem 4 s → 10 s (pomalá wifi), a `auto_upd` počítat podle verze (ne 1× za session), aby druhá nová verze v témž dni taky prošla sama.
+- [x] 28. 11. (4 s, + „práce se obnoví“) Lišta jen jako informace „Aktualizováno na 27. 11. 13:05" po startu (3 s, pak zmizí).
 - Test: pages_win.sh — verze A běží s neuloženou změnou → publikovat B → do ~1 min reload na B, scéna obnovena; s modal operací čeká.
 
 ## H54 — referenční obrázek na iPadu je růžový (chybí textura) (Lukáš 26. 11., výuka ve škole) — PRIORITA

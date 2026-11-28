@@ -33,7 +33,7 @@ async function checkVersion() {
     const fresh = await net.clone().text();
     const old = await cache.match("version.json");
     if (!old) { await cache.put("version.json", net); return "same"; }
-    if ((await old.text()) !== fresh) { await notify({ type: "update-available" }); return "update"; }
+    if ((await old.text()) !== fresh) { let v = null; try { v = JSON.parse(fresh).v; } catch { /* ne JSON */ } await notify({ type: "update-available", v }); return "update"; }
     return "same";
   } catch { return "unknown"; /* offline: nothing to check */ }
 }

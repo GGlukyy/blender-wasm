@@ -21,15 +21,41 @@ const _swWanted = new URLSearchParams(location.search).get("sw") ? new URLSearch
 /* O1c: start() waits for this (max 4 s): the SW compares version.json with the cached one and, if they differ, wipes the cache and reloads
  * BEFORE Blender runs (old build can't trap the user in a crash loop). Offline / no SW = resolves at once. Loop guard: one auto-update per session. */
 window.__swCheck = Promise.resolve();
+const _updKey = (d) => "v" + ((d && d.v) || "1");
+const _updQ = new URLSearchParams(location.search);
+/* O1d (Lukáš 28. 11.): nová verze nalezená za běhu Blenderu = aktualizovat bez klikání. Počká na klid (2 s bez vstupu, Python:
+ * žádný modal operátor, render ani přehrávání), neuloženou scénu uloží do autosave (po reloadu ji R1 sám otevře), pak reload. */
+let _updBusy = false, _lastInput = performance.now();
+for (const ev of ["pointerdown", "pointermove", "keydown", "wheel", "touchstart"]) addEventListener(ev, () => { _lastInput = performance.now(); }, { capture: true, passive: true });
+function runningUpdate(d) {
+  if (_updBusy) return; _updBusy = true;
+  const FS = window.Module && window.Module.FS;
+  const tick = () => {
+    let st = ""; try { st = new TextDecoder().decode(FS.readFile("/tmp/upd_state.txt")).trim(); } catch (_) { /* nic */ }
+    if (st === "saved" || st === "clean") {
+      sessionStorage.setItem("auto_upd", _updKey(d)); sessionStorage.setItem("upd_note", st); sessionStorage.setItem("upd_autostart", "1");
+      console.log("O1D updating", st);
+      navigator.serviceWorker.controller && navigator.serviceWorker.controller.postMessage({ type: "update" });
+      return;
+    }
+    /* Python odpoví jen když JS vidí klid; jinak žádost znovu za 1 s */
+    if (performance.now() - _lastInput > 2000 && st !== "asked") { try { FS.writeFile("/tmp/upd_req.txt", "1"); FS.writeFile("/tmp/upd_state.txt", "asked"); } catch (_) {} }
+    else if (performance.now() - _lastInput <= 2000 && st === "asked") { try { FS.unlink("/tmp/upd_req.txt"); FS.writeFile("/tmp/upd_state.txt", ""); } catch (_) {} }
+    setTimeout(tick, 1000);
+  };
+  console.log("O1D update found while running, waiting for idle");
+  tick();
+}
 if (_swWanted && "serviceWorker" in navigator && window.self === window.top) {
   window.__swCheck = new Promise((res) => {
     const done = () => res();
-    setTimeout(done, 4000);
+    setTimeout(done, 10000); /* O1d: 4 → 10 s (pomalá wifi) */
     navigator.serviceWorker.addEventListener("message", (e) => {
       const t = e.data && e.data.type;
       if (t === "version-ok") done();
-      else if (t === "update-available" && !window.__blenderStarted && !sessionStorage.getItem("auto_upd")) {
-        sessionStorage.setItem("auto_upd", "1");
+      else if (t === "update-available" && !window.__blenderStarted && sessionStorage.getItem("auto_upd") !== _updKey(e.data)) {
+        /* O1d: ochrana smyčky podle verze (dřív 1× za session → druhá nová verze téhož dne už sama neprošla) */
+        sessionStorage.setItem("auto_upd", _updKey(e.data)); sessionStorage.setItem("upd_note", "1");
         const s = document.getElementById("splash-status"); if (s) s.textContent = "Aktualizuji na novou verzi…";
         navigator.serviceWorker.controller && navigator.serviceWorker.controller.postMessage({ type: "update" });
       }
@@ -45,8 +71,9 @@ if (_swWanted && "serviceWorker" in navigator && window.self === window.top) {
     navigator.storage && navigator.storage.persist && navigator.storage.persist().catch(() => {});
   }).catch((e) => console.warn("sw register failed", e));
   navigator.serviceWorker.addEventListener("message", (e) => {
-    if (e.data && e.data.type === "update-available" && !window.__blenderStarted && !sessionStorage.getItem("auto_upd")) return; /* O1c: handled above */
-    if (e.data && e.data.type === "update-available" && !document.getElementById("sw-update")) {
+    if (e.data && e.data.type === "update-available" && !window.__blenderStarted && sessionStorage.getItem("auto_upd") !== _updKey(e.data)) return; /* O1c: handled above */
+    if (e.data && e.data.type === "update-available" && window.__blenderStarted && sessionStorage.getItem("auto_upd") !== _updKey(e.data)) runningUpdate(e.data);
+    else if (e.data && e.data.type === "update-available" && !document.getElementById("sw-update")) {
       const b = document.createElement("div");
       b.id = "sw-update";
       b.style.cssText = "position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:2000;padding:8px 14px;border-radius:8px;background:#e87d0d;color:#111;font:600 14px system-ui;cursor:pointer";
@@ -55,6 +82,10 @@ if (_swWanted && "serviceWorker" in navigator && window.self === window.top) {
       document.body.appendChild(b);
     } else if (e.data && e.data.type === "updated") location.reload();
   });
+  /* O1d: za běhu se nová verze hledá každých 5 min a po návratu do aplikace (dřív jen při načtení stránky). */
+  const _swPing = () => { if (_updQ.has("updevery")) console.log("O1D ping", !!navigator.serviceWorker.controller, !!window.__blenderStarted); navigator.serviceWorker.controller && window.__blenderStarted && navigator.serviceWorker.controller.postMessage({ type: "check" }); };
+  setInterval(_swPing, +(_updQ.get("updevery") || 300) * 1000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) _swPing(); });
 }
 
 installTelemetry();
@@ -476,6 +507,8 @@ setProgress({ phase: "ready", percent: 1, message: "Ready to launch" });
 setUiPhase("ready");
 assetsReady = true;
 refreshStartGate();
+/* O1d: reload kvůli aktualizaci za běhu → Blender spustit sám (uživatel nic neklikal, práce se obnoví z autosave) */
+if (sessionStorage.getItem("upd_autostart")) { sessionStorage.removeItem("upd_autostart"); if (!startBtn.disabled) void start(); }
 
 /* H50: ?memstage=1 — ruční měření paměti po krocích (Mac Safari: Monitor aktivity → „Safari Web Content“ / WebContent této karty).
  * Kroky: A po stažení a rozbalení (assets + wasm bajty), B po WebAssembly.compile (strojový kód JSC), C po zahození bajtů + gc. */
@@ -1573,6 +1606,12 @@ function startWatchdog() {
 async function start() {
   await window.__swCheck;
   window.__blenderStarted = true;
+  /* O1d: po automatické aktualizaci jen informace (bez klikání), 4 s */
+  { const un = sessionStorage.getItem("upd_note"); if (un) { sessionStorage.removeItem("upd_note");
+    const n = document.createElement("div"); n.id = "upd-note";
+    n.style.cssText = "position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:99996;background:rgba(20,60,20,.94);color:#fff;font:15px system-ui,sans-serif;padding:8px 14px;border-radius:8px;max-width:92vw";
+    n.textContent = "✅ Aktualizováno" + ((document.getElementById("build-version") || {}).textContent ? " na " + document.getElementById("build-version").textContent : "") + (un === "saved" ? " · práce se obnoví" : "");
+    document.body.appendChild(n); setTimeout(() => n.remove(), 4000); } }
   /* WebGPU availability + software-renderer state were already probed and
    * surfaced (probeGpu / the Launch gate); a fatal GPU state keeps the button
    * disabled, so reaching here means we're clear to boot. */
@@ -1988,6 +2027,24 @@ def _autosave_req():
     except Exception as e: print('AUTOSAVE REQ ERR', e)
     return 2.0
 bpy.app.timers.register(_autosave_req, first_interval=5.0, persistent=True)
+# O1d: JS našel novou verzi a uživatel 2 s nic nedělá → když neběží modal operátor / render / přehrávání: uložit (je-li co) a říct JS.
+def _upd_tick():
+    try:
+        if not os.path.exists('/tmp/upd_req.txt'): return 1.0
+        wm = bpy.context.window_manager
+        busy = (bpy.app.is_job_running('RENDER') or bpy.app.is_job_running('OBJECT_BAKE') or
+                any(len(w.modal_operators) for w in wm.windows) or any(w.screen.is_animation_playing for w in wm.windows))
+        if busy: return 1.0
+        os.remove('/tmp/upd_req.txt')
+        st = 'clean'
+        if bpy.data.is_dirty:
+            bpy.ops.wm.save_as_mainfile(filepath=_AS, copy=True, compress=True); _as['last'] = time.time(); st = 'saved'
+            print('AUTOSAVE update', os.path.getsize(_AS), flush=True)
+        with open('/tmp/upd_state.txt', 'w') as f: f.write(st)
+        print('O1D state', st, flush=True)
+    except Exception as e: print('O1D ERR', e, flush=True)
+    return 1.0
+bpy.app.timers.register(_upd_tick, first_interval=5.0, persistent=True)
 _as_subscribe()
 bpy.app.handlers.load_post.append(bpy.app.handlers.persistent(_as_subscribe))`;
 /* H22d: počet pthread workerů se čte při startu (link: PTHREAD_POOL_SIZE=Module.poolSize||32). Každý worker v Safari = vlastní JS VM
