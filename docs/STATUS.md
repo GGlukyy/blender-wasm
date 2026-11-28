@@ -1,3 +1,27 @@
+# Víkend 28. 11. (běh 01:00–10:15, Opus) — souhrn
+Výsledek: 🟡 paměť iPad buildu −194 až −243 MB (cíl −500 nesplněn), O1d + V2e hotové; vše na PC zelené, iPad neověřen
+
+*Co je nového* (podrobnosti v sekcích níže)
+- P0 paměť: uvolněno 144 MB wasm bajtů v JS, méně pthread workerů (OIIO + OpenEXR pool), `wasm-opt -O2` (wasm 151 → 125 MB), undo na iPadu 256 MB / 16 kroků.
+- O1d: nová verze se nainstaluje sama za běhu (počká na klid, uloží práci, obnoví ji).
+- V2e: Render Border bez Crop funguje (F12 i video), pixely = desktop.
+- Nález pro Blender (ne naše chyba): v Edit Mode se Undo Memory Limit nepočítá (`editmesh_undo.cc` nenastaví velikost kroku).
+
+*Důkaz*: `regress_all` Chrome 0 FAIL (2× — po P0 a po V2e), `regress_sim` lean iPad jen očekávané rozdíly lean buildu, tour lean sim 75/75 po každém kroku, `pages_win.sh` PASS online+offline, `o1d_win.sh` PASS.
+
+*Pushnuto*: master až po STATUS (poslední commity P0.1–P0.5, O1d, V2e), fork `ipad-5.3` ce61ae89d01f = `BLENDER_REF`. `demo/public` = nové buildy (zálohy `out/bak_p0/`, `out/bak_pre_v2e/`). **`bash scripts/package_pages.sh` hotovo 28. 11. 10:10 → `out/pages` 98 MB, publish = ty.**
+
+*Co otestovat na iPadu* (podle důležitosti)
+1. Po publish otevři appku, prázdná scéna, 1 min nic → Jetsam / štítek RAM (dřív ~4 GB). Kolik ubylo? Podle toho přenastavím `membase` (štítek RAM zatím počítá se starým základem 2250 MB = raději dřív varuje; odhad nového základu ~2050, neověřeno).
+2. Nech appku otevřenou s rozdělanou prací, pak publikuj další verzi → do ~5 min se sama obnoví, práce zůstane (O1d).
+3. Edit Mode: 20 úprav, pak Ctrl+Z → jde 16 kroků zpět (záměr).
+4. Render Region (Ctrl+B v kameře) + F12 → obraz jen v oblasti.
+5. HDRI/EXR textura se načte (OpenEXR teď na iPadu bez vlastních vláken).
+
+*Blocked / čeká na Lukáše*: návrh vypnout v iPad buildu Mantaflow (−6 MB kódu) a/nebo OpenVDB (−13,8 MB, ale bere Voxel Remesh), vynechat CJK font (−10,9 MB RAM). Rozhodni ty.
+
+*Úklid*: testy doběhly, nic na pozadí nezůstalo (ověřeno `ps`); vite z 27. 11. (spustil předchozí běh) nechán běžet.
+
 # 28. 11. 07:45 — V2e: Render Border bez Crop na webu
 Výsledek: ✅ na PC (Chrome) i lean sim; iPad neověřen
 
