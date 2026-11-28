@@ -1,3 +1,6 @@
+## F6 — Grease Pencil ▸ Export ▸ PDF na webu chybí (nález 28. 11., `scripts/v2_exp2_win.sh`)
+- [ ] Operátor `wm.grease_pencil_export_pdf` ve web buildu není (`WITH_HARU=OFF`, libharu nepřeložena); desktop 5.3.0 ho má. SVG export funguje. Oprava: přeložit libharu (C, závisí na zlib/png, které máme) → `WITH_HARU=ON`. Odhad +0,3 MB, ~1 h. Nízká priorita (rozhodne Lukáš, zda PDF z GP potřebuje).
+
 ## V2g — AVIF: v nabídce, ale web ho nezapíše (nález 28. 11., `v2_variants_win.sh`)
 - [x] 28. 11. JS: když odložený zápis F12/animace selže (`WGPU_FILM deferred write … ok=0`), červená lišta „Obrázek se nepodařilo uložit… Zkus PNG, JPEG, WebP nebo OpenEXR“ (dřív ticho). `scripts/v2g_win.sh` PASS Chrome + lean sim (AVIF → lišta, PNG potom bez lišty).
 - [ ] AVIF opravdu zapisovat: OIIO potřebuje libheif + kodér AV1 (libaom ~ několik MB kódu, nebo jen dekodér dav1d pro čtení). Odhad: +2–4 MB zst, 0,5–1 den. Rozhodne Lukáš (na iPadu spíš ne kvůli paměti).

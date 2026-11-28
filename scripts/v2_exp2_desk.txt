@@ -1,0 +1,12 @@
+OPS v2e2 uv_PNG ERR Location: C:\Users\lukil\p2win\v2_exp2_test.py:18
+OPS v2e2 uv_SVG ['FINISHED'] file=True
+OPS v2e2 uv_EPS ['FINISHED'] file=True
+OPS v2e2 obj_mtl ['FINISHED'] file=True
+OPS v2e2 mtl_exists True
+OPS v2e2 bvh ['FINISHED'] file=True
+OPS v2e2 bvh_import ['FINISHED'] file=True
+OPS v2e2 gp_svg ['FINISHED'] file=True
+OPS v2e2 gp_pdf ['FINISHED'] file=False
+OPS v2e2 svg_import ['FINISHED'] file=True
+OPS v2e2 curves 28
+OPS v2e2 gp_svg_import ['FINISHED'] file=True

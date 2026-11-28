@@ -1,3 +1,7 @@
+# 28. 11. 19:00 — lov chyb: další exportéry
+Výsledek: ✅ / 1 mezera
+- `scripts/v2_exp2_win.sh` (v `regress_all`): UV Export Layout PNG/SVG/EPS, OBJ + MTL, BVH export + import, Grease Pencil SVG export + import, SVG import do křivek (28 = desktop) — vše OK v Chrome i lean sim. **GP PDF export na webu chybí** (desktop ho má) → BACKLOG F6.
+
 # 28. 11. 18:40 — lov chyb: Geometry Nodes simulace + bake na disk
 Výsledek: ✅ bez nálezu
 - `scripts/v2_gnbake_win.sh` (v `regress_all`): simulation zone (+0,1 Z/snímek), bake na disk 10 snímků → 20 souborů, z na snímku 10 = 1,0 a na 5 = 0,5 = desktop 5.3.0, Chrome i lean sim.
