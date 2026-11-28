@@ -29,6 +29,15 @@ if [ ! -f "$src/.wasm_ustring_patched" ]; then
   touch "$src/.wasm_ustring_patched"
 fi
 
+# libdpx: `pixels * -3 * bytes` with size_t pixels — on wasm32 (32-bit size_t) this is a huge POSITIVE
+# number instead of a negative "convert in place" marker → vector::resize throws length_error and reading
+# any RGB/RGBA DPX kills the thread (28. 11., scripts/v2_formats_win.sh). Do the math in int64. Idempotent.
+if [ ! -f "$src/.wasm_dpx_patched" ]; then
+  sed -i 's/return pixels \* \(-\?[0-9]\) \* bytes;/return int64_t(pixels) * \1 * int64_t(bytes);/' "$src/src/dpx.imageio/libdpx/DPXColorConverter.cpp"
+  grep -q 'int64_t(pixels) \* -3 \* int64_t(bytes)' "$src/src/dpx.imageio/libdpx/DPXColorConverter.cpp"
+  touch "$src/.wasm_dpx_patched"
+fi
+
 em_cmake "$src" oiio \
   -DCMAKE_CXX_STANDARD=17 \
   -DLINKSTATIC=ON \
