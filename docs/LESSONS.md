@@ -65,3 +65,5 @@
 - 27. 11.: `pkill -f vite` v Bash nástroji zabije i vlastní shell (viz memory pkill-self-kill) → zabíjet přes `pgrep -x node` + kontrola `/proc/<pid>/cmdline`.
 - 28. 11.: `let [a, b] = await Promise.all(...)` na top-levelu ES modulu: výsledné pole drží generátor modulu navždy → `b = null` nic neuvolní (144 MB wasm bajtů). Přiřazovat uvnitř `.then`. CDP `Runtime.queryObjects` vracel 0 objektů; spolehlivé je `HeapProfiler.takeHeapSnapshot` + cesta od kořene (`scripts/p0_heap_win.sh SNAP=1`).
 - 28. 11.: emscripten workery se po skončení vlákna nikdy neuvolní (vrátí se do poolu) → počet workerů = maximum souběžných vláken kdykoli. Knihovny, co si pool vytvoří podle jader a pak zmenší (OIIO), stojí workery navždy.
+- 28. 11.: shell hlídá výstup testu (`grep … soubor`) přes `| tr -d '\r' | tee` → `tr` v rouře bufferuje a řádek přijde až na konci; použít `stdbuf -oL tr`. A: operátor spuštěný z `bpy.app.timers` nenastaví `bpy.data.is_dirty` — v testech zavolat `bpy.ops.ed.undo_push()`.
+- 28. 11.: lean build nemá `RenderSettings.ffmpeg.format` (AttributeError) → testy psané pro PC build v lean tiše „timeoutují“; spustit s `OPS_ALL=1` a hledat Traceback.
