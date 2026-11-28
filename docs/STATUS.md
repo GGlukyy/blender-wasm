@@ -1,3 +1,7 @@
+# 28. 11. 17:50 — lov chyb: export → import 3D formátů
+Výsledek: ✅ bez nálezu
+- `scripts/v2_io_win.sh` (v `regress_all`): opice se Subsurf + materiál + natočená kostka → OBJ, FBX, GLB, glTF separate, STL (bin/ASCII), PLY (bin/ASCII) → import: počty objektů/vrcholů/ploch, UV, materiály, rozměry = desktop 5.3.0 v Chrome i lean sim.
+
 # 28. 11. 17:30 — lov chyb: čtení „cizích" obrázků
 Výsledek: ✅ bez nálezu
 - `scripts/v2_read_win.sh` (v `regress_all`): PNG paleta (+tRNS), šedá 16bit, šedá 1bit, šedá+alfa, RGB+tRNS, PSD RGB/RGBA, BMP 32bit, PPM — soubory vyrobí čistý Python (stejné bajty) → načtení = desktop 5.3.0 v Chrome i lean sim (PPM neumí ani desktop).
