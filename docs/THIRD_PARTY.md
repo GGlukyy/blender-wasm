@@ -24,6 +24,9 @@ Base: HeyPuter/blender-wasm + HeyPuter/blender (GPL-2.0).
 ## coi-serviceworker (vzor pro `demo/public/sw.js`)
 - Autor: Guido Zuidhof, MIT, https://github.com/gzuidhof/coi-serviceworker. Převzat jen princip (service worker přidá COOP/COEP/CORP hlavičky, stránka se po registraci jednou znovu načte); kód `sw.js` je vlastní (+ offline cache). Použito v `demo/public/sw.js`, `demo/src/main.js` (O1a/O1b, 15.–17. 11. 2026).
 
+## libwebp 1.6.0 (BSD-3-Clause, static, wasm) — `scripts/build_libwebp.sh`
+Čtení/zápis .webp (`WITH_IMAGE_WEBP`, V2f 28. 11.). Zdroj https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz (verze jako Blender 5.3 `versions.cmake`), beze změn; libwebp, libsharpyuv, libwebpdemux, libwebpmux, bez SIMD a vláken. BSD je s GPL kompatibilní.
+
 ## FFTW 3.3.10 (GPL-2.0-or-later, static, wasm) — `scripts/build_fftw3.sh`
 Ocean modifier a FFT ve Glare/Convolve compositoru (`WITH_FFTW3=ON`, F2b). Zdroj https://www.fftw.org/fftw-3.3.10.tar.gz, beze změn; libfftw3, libfftw3f, libfftw3f_threads. Blender je GPL, takže kompatibilní.
 
