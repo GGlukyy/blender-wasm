@@ -1,3 +1,9 @@
+# 28. 11. 12:00 — V2f: formáty obrázků (lov chyb)
+Výsledek: ✅ DPX opraveno (PC + lean sim); iPad neověřen
+- Nový `scripts/v2_formats_win.sh` (F12 do 14 formátů po jednom; v `regress_all`). Zaseknutí z 27. 11. = **DPX**: zápis OK, pak pád vlákna při čtení (`std::length_error` v OpenImageIO). Příčina: 32bit `size_t` ve wasm (libdpx `pixels * -3 * bytes`). Oprava: patch v `build_oiio.sh`, OIIO + oba buildy přeloženy a nasazeny. Desktop 5.3.0 DPX umí (ověřeno `blender.exe -b`).
+- Chybí na webu (desktop má): **WEBP** a JPEG2000 → BACKLOG V2f (WEBP stojí za to: textury z webu).
+- Důkaz: `v2_formats_win.sh` PASS Chrome + `Q='cycles=0&webkit_sim=1&ipad=1'` (12 formátů PASS, 2 známé omezení). **`build-5.3` je zase PC strom.**
+
 # 28. 11. 11:30 — V2c: render animace bez kamery
 Výsledek: ✅ PC + lean sim; iPad neověřen
 - Web dřív vrátil FINISHED a nic se nestalo; teď stejně jako desktop chyba „Cannot render, no camera“ (fork e35dd8747e3e = `BLENDER_REF`). Kamera na markeru nebo render sekvenceru bez kamery dál fungují.
