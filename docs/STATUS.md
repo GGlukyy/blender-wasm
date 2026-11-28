@@ -36,7 +36,8 @@ Pozn.: na PC sim se předvytvoří 32 workerů (iPad má `pool=8` jen podle UA),
 
 *Důkaz*
 - h50e tabulka výše (logy `out/win/h50e_p0_*.log`). Tour `Q='webkit_sim=1&ipad=1&cycles=0'` 75/75, 0 problémů po každém kroku (1, 2, wasm-opt, finální build). `p0_exr_win.sh` PASS.
-- `regress_all` + `regress_sim` na finálních buildech: BĚŽÍ (výsledek doplním).
+- `regress_all` (Chrome, PC build, 28. 11. 04:30): **0 FAIL** (jen XFAIL `_ctypes`), journey celá OK.
+- `regress_sim` s `webkit_sim=1&ipad=1&cycles=0` (lean build, 28. 11. 07:03): FAIL jen očekávané rozdíly lean buildu (`h42`: chybí `cycles.*` operátory; journey `bake*`, `proctex`, `mathnodes`, `mixblend` = Cycles bake, jen PC) + `u3_open`. `u3_open` padal v sim už 27. 11. (test mockoval jen Chrome picker; v Safari je okno „Choose file(s)…“) → test doplněn o Safari cestu, PASS Chrome i sim.
 
 *Pushnuto*: master 3f96d49, e1432b0, 5b18f68; fork `ipad-5.3` 6d13982b4a82 (= `BLENDER_REF`). `demo/public`: nový lean i PC build (zálohy `out/bak_p0/`). **`build-5.3` je teď LEAN strom** (Cycles OFF, FFmpeg OFF). Pro PC build: `scripts/cycles_pc_build.sh`.
 

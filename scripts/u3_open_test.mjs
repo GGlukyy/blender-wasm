@@ -20,12 +20,19 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
 await wait(8000); await page.keyboard.press("Escape"); await wait(800);
 const bytes = [...readFileSync(file)], name = file.split(/[\\/]/).pop();
 await page.evaluate(([n, b]) => { window.__PICK_CALLS = 0; window.showOpenFilePicker = async (o) => { window.__PICK_OPTS = JSON.stringify(o); window.__PICK_CALLS++;
-  return [{ getFile: async () => new File([new Uint8Array(b)], n) }]; }; }, [name, bytes]);
+  return [{ getFile: async () => new File([new Uint8Array(b)], n) }]; };
+  /* Safari/sim nemá File System Access → <input type=file>: klik nahradit vložením souboru */
+  const ck = HTMLInputElement.prototype.click;
+  HTMLInputElement.prototype.click = function () { if (this.type !== "file") return ck.call(this); window.__PICK_CALLS++; window.__PICK_INPUT = true;
+    const dt = new DataTransfer(); dt.items.add(new File([new Uint8Array(b)], n)); this.files = dt.files; this.dispatchEvent(new Event("change")); }; }, [name, bytes]);
 await page.evaluate(() => { window.__blenderFileOpenHook(); });
+/* Safari/sim: okno „Choose file(s)…“ (iPad potřebuje vlastní klepnutí pro výběr souboru) */
+await wait(1500); if (await page.locator("#dz-files").isVisible().catch(() => false)) await page.locator("#dz-files").click();
 await wait(9000);
-const st = await page.evaluate(() => ({ calls: window.__PICK_CALLS, chooser: !!document.getElementById("open-chooser"), offer: !!document.getElementById("open-folder-btn"), opts: window.__PICK_OPTS }));
+const st = await page.evaluate(() => ({ calls: window.__PICK_CALLS, chooser: !!document.getElementById("open-chooser"), offer: !!document.getElementById("open-folder-btn"), opts: window.__PICK_OPTS, input: !!window.__PICK_INPUT, fsa: typeof window.showDirectoryPicker === "function" }));
 await page.screenshot({ path: "out/u3_open.png" });
 console.log(JSON.stringify(st), "filepath=" + fp);
-const ok = st.calls === 1 && !st.chooser && st.offer && fp.endsWith("/" + name);
+/* Chrome: picker + nabídka složky; Safari/sim (bez File System Access): jeden <input type=file>, nabídka složky tam není */
+const ok = st.calls === 1 && !st.chooser && (st.input ? !st.offer : st.offer) && fp.endsWith("/" + name);
 console.log(ok ? "PASS u3_open" : "FAIL u3_open");
 await browser.close(); process.exit(ok ? 0 : 1);
